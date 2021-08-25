@@ -60,8 +60,9 @@ export const opacityHex = {
 
 export type TypeOfTheme = keyof typeof themes;
 
-export type ToggleStyle = {
+export type styleMode = {
   toggleStyle: (mode: TypeOfTheme) => void;
+  theme: TypeOfTheme;
 };
 
 export const GlobalStyles = createGlobalStyle`
@@ -78,7 +79,7 @@ export const GlobalStyles = createGlobalStyle`
         user-select: none;
         background: ${({ theme }) => theme.body};
         color: ${({ theme }) => theme.text};
-        transition: background 0.2s ease-in, color 0.2s ease-in;
+        /* transition: background 0.2s ease-in, color 0.2s ease-in; */
     }
     /* 모든 폰트가 'Noto Sans KR'에서 영문과 숫자만 'Roboto'로 적용 */
     /* @font-face {

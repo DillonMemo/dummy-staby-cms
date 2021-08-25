@@ -1,10 +1,10 @@
 const lightTheme = {
-  body: '#3F51B5',
-  text: '#fff',
+  body: '#f1f1f1',
+  text: '#121620',
 };
 const darkTheme = {
-  body: '#FFCD1C',
-  text: '#222',
+  body: '#121620',
+  text: '#f1f1f1',
 };
 
 const themes = {

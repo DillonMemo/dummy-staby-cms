@@ -1,11 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
-import { ToggleStyle } from '../styles/styles';
+import { styleMode } from '../styles/styles';
 
-interface Props extends React.HTMLAttributes<HTMLInputElement>, ToggleStyle {}
+interface StyleProps {
+  width?: string | number;
+  height?: string | number;
+}
+type Element = React.HTMLAttributes<HTMLInputElement>;
+interface Props extends Element, styleMode, StyleProps {}
 
 const DarkModeToggle: React.FC<Props> = (props) => {
-  const { toggleStyle } = props;
+  const { toggleStyle, theme, width, height } = props;
   const onChangeToggle = ({ target: { checked } }: React.ChangeEvent<HTMLInputElement>) => {
     if (checked) {
       toggleStyle('dark');
@@ -13,21 +18,31 @@ const DarkModeToggle: React.FC<Props> = (props) => {
       toggleStyle('light');
     }
   };
-  return <Toggle type="checkbox" {...props} onChange={onChangeToggle} />;
+
+  return (
+    <Toggle
+      type="checkbox"
+      width={width}
+      height={height}
+      onChange={onChangeToggle}
+      checked={theme === 'dark'}
+    />
+  );
 };
 
-const Toggle = styled.input<Props>`
+const Toggle = styled.input<StyleProps>`
+  cursor: pointer;
   position: relative;
   width: ${({ width }) => (width ? width : '4rem')};
   height: ${({ height }) => (height ? height : '2rem')};
   outline: none;
   appearance: none;
-  background-color: #ebebeb;
+  background-color: rgba(0, 154, 239, 1);
   transition: all 0.5s;
   border-radius: 1.25rem;
 
   &:checked {
-    background-color: #000000;
+    background-color: rgba(0 154 239, 1);
     transition: all 0.5s;
   }
 
@@ -46,7 +61,7 @@ const Toggle = styled.input<Props>`
     border-radius: 2rem;
 
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    transition: all 0.5s;
+    transition: all 0.25s;
   }
 
   &:checked::before {

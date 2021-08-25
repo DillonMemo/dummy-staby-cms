@@ -1,38 +1,83 @@
 import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { gql, useMutation } from '@apollo/client';
 import styled from 'styled-components';
 import Layout from '../components/Layout';
-import { ToggleStyle } from '../styles/styles';
+import { styleMode } from '../styles/styles';
+import { authTokenVar, isLoggedInVar } from '../lib/apolloClient';
+import { LOCALSTORAGE_TOKEN } from '../lib/constants';
 
-type Props = ToggleStyle;
+export const LOGIN_MUTATION = gql`
+  mutation loginMutation($loginInput: LoginInput!) {
+    login(input: $loginInput) {
+      ok
+      error
+      token
+    }
+  }
+`;
 
-const Home: NextPage<Props> = ({ toggleStyle }) => {
+type Props = styleMode;
+
+const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
+  const router = useRouter();
+  const onCompleted = (data: any) => {
+    const {
+      login: { ok, token },
+    } = data;
+
+    if (ok && token) {
+      localStorage.setItem(LOCALSTORAGE_TOKEN, token);
+      authTokenVar(token);
+      isLoggedInVar(true);
+      router.push('/test');
+    }
+  };
+  const [loginMutation, { data: loginMutationResult, loading }] = useMutation(LOGIN_MUTATION, {
+    onCompleted,
+  });
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    loginMutation({
+      variables: {
+        loginInput: {
+          email: 'dillon@staby.co.kr',
+          password: '123123',
+        },
+      },
+    });
+  };
+
   return (
-    <Layout toggleStyle={toggleStyle}>
+    <Layout toggleStyle={toggleStyle} theme={theme}>
       <DivWrapper>
         <main className="main">
-          <div className="grid">
-            <a className="card" href="https://nextjs.org/docs">
-              <h2>Documentation &rarr;</h2>
-              <p>Find in-depth information about Next.js features and API.</p>
-            </a>
-
-            <a className="card" href="https://nextjs.org/learn">
-              <h2>Learn &rarr;</h2>
-              <p>Learn about Next.js in an interactive course with quizzes!</p>
-            </a>
-
-            <a className="card" href="https://github.com/vercel/next.js/tree/master/examples">
-              <h2>Examples &rarr;</h2>
-              <p>Discover and deploy boilerplate example Next.js projects.</p>
-            </a>
-
-            <a
-              className="card"
-              href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app">
-              <h2>Deploy &rarr;</h2>
-              <p>Instantly deploy your Next.js site to a public URL with Vercel.</p>
-            </a>
+          <div>
+            {loading ? (
+              <span>로딩중...</span>
+            ) : (
+              <>
+                <p>{loginMutationResult?.login?.token}</p>
+              </>
+            )}
           </div>
+          <form onSubmit={onSubmit}>
+            <div
+              style={{
+                display: 'flex',
+                flexFlow: 'column nowrap',
+                alignItems: 'center',
+                gap: '1rem',
+              }}>
+              <h2>HOME</h2>
+              <input type="text" name="id" id="id" />
+              <input type="password" name="password" id="password" />
+              <button style={{ width: '100%', height: '2rem' }}>로그인</button>
+            </div>
+          </form>
         </main>
       </DivWrapper>
     </Layout>
@@ -72,7 +117,7 @@ const DivWrapper = styled.div`
     text-align: left;
     color: inherit;
     text-decoration: none;
-    border: 1px solid #eaeaea;
+    border: ${({ theme }) => `1px solid ${theme.text}`};
     border-radius: 10px;
     transition: color 0.15s ease, border-color 0.15s ease;
     width: 45%;

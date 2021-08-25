@@ -2,9 +2,9 @@ import React, { ReactNode } from 'react';
 import Head from 'next/head';
 import Header from './Header';
 import Footer from './Footer';
-import { ToggleStyle } from '../styles/styles';
+import { styleMode } from '../styles/styles';
 
-interface Props extends ToggleStyle {
+interface Props extends styleMode {
   children?: ReactNode;
   title?: string;
   description?: string;
@@ -17,6 +17,7 @@ const Layout = ({
   description = '',
   imageUrl = '',
   toggleStyle,
+  theme,
 }: Props) => {
   return (
     <>
@@ -36,7 +37,7 @@ const Layout = ({
         {/* 선호 URL */}
         <link rel="canonical" href="http://localhost:3000"></link>
       </Head>
-      <Header toggleStyle={toggleStyle} />
+      <Header toggleStyle={toggleStyle} theme={theme} />
       {children}
       <Footer />
     </>

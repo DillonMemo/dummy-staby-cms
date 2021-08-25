@@ -1,28 +1,18 @@
 import styled from 'styled-components';
-import { ToggleStyle } from '../styles/styles';
+import { styleMode } from '../styles/styles';
 /** components */
 import DarkModeToggle from './DarkModeToggle';
 
-type Props = ToggleStyle;
+type Props = styleMode;
 
-const Header: React.FC<Props> = ({ toggleStyle }) => {
+const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   return (
     <HeaderWrapper>
-      <h1 className="title">
-        Welcome to <a href="https://nextjs.org">Next.js!</a>
-      </h1>
-      <p className="description">
-        Get started by editing <code>pages/index.js</code>
-      </p>
-      {/* <div>
-        {(Object.keys(themes) as TypeOfTheme[]).map((theme: TypeOfTheme) => (
-          <button key={theme} onClick={toggleStyle(theme)}>
-            {theme}
-          </button>
-        ))}
-      </div> */}
-      <div>
-        <DarkModeToggle toggleStyle={toggleStyle} />
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{ margin: '1rem', minHeight: '2rem', display: 'flex', alignItems: 'center' }}>
+          Darkmode component :
+        </span>
+        <DarkModeToggle toggleStyle={toggleStyle} theme={theme} />
       </div>
     </HeaderWrapper>
   );
