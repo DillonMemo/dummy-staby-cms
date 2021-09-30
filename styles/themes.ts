@@ -1,15 +1,19 @@
 const lightTheme = {
-  body: '#f1f1f1',
-  text: '#121620',
-};
+  mode: 'light',
+  body: '#f8f8f8',
+  card: '#ffffff',
+  text: '#6e6b7b',
+}
 const darkTheme = {
-  body: '#121620',
-  text: '#f1f1f1',
-};
+  mode: 'dark',
+  body: '#161d31',
+  card: '#283046',
+  text: '#b4b7bd',
+}
 
 const themes = {
   light: lightTheme,
   dark: darkTheme,
-};
+}
 
-export default themes;
+export default themes

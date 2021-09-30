@@ -1,8 +1,10 @@
-import 'styled-components';
+import 'styled-components'
 
 declare module 'styled-components' {
   export interface DefaultTheme {
-    body: string;
-    text: string;
+    mode: string
+    body: string
+    card: string
+    text: string
   }
 }

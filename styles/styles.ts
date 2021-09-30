@@ -1,17 +1,18 @@
-import { createGlobalStyle } from 'styled-components';
-import themes from './themes';
+import { createGlobalStyle } from 'styled-components'
+import themes from './themes'
 
-export const { xxxs, xxs, xs, sm, md, lg, xl, xxl, _4xl } = {
+export const { xxxs, xxs, xs, sm, md, _2md, lg, xl, xxl, _4xl } = {
   xxxs: '@media (max-width: 20rem)', // 320px
   xxs: '@media (max-width: 32rem)', // 512px
   xs: '@media (max-width: 38rem)', // 608px
   sm: '@media (max-width: 48rem)', // 768px
-  md: '@media (max-width: 64rem)', // 1024px
+  md: '@media (max-width: 62rem)', // 992px
+  _2md: '@media (max-width: 64rem)', // 1024px
   lg: '@media (max-width: 80rem)', // 1280px
   xl: '@media (max-width: 90rem)', // 1440px
   xxl: '@media (max-width: 120rem)', // 1920px
   _4xl: '@media (max-width: 160rem)', // 2560px
-};
+}
 
 type LightnessName =
   | 'background'
@@ -24,7 +25,7 @@ type LightnessName =
   | 'default'
   | 'accent8'
   | 'foreground'
-  | 'grey';
+  | 'grey'
 
 export const defaultPalette: Record<LightnessName, string> = {
   /** Default */
@@ -39,7 +40,7 @@ export const defaultPalette: Record<LightnessName, string> = {
   accent8: '#242424',
   foreground: '#000000',
   grey: '#888888',
-};
+}
 
 /**
  * key: _xx(%) percent
@@ -56,14 +57,14 @@ export const opacityHex = {
   _70: 'aa',
   _80: 'cc',
   _90: 'ee',
-};
+}
 
-export type TypeOfTheme = keyof typeof themes;
+export type TypeOfTheme = keyof typeof themes
 
 export type styleMode = {
-  toggleStyle: (mode: TypeOfTheme) => void;
-  theme: TypeOfTheme;
-};
+  toggleStyle: (mode: TypeOfTheme) => void
+  theme: TypeOfTheme
+}
 
 export const GlobalStyles = createGlobalStyle`
     *, *::after, *::before {
@@ -75,22 +76,13 @@ export const GlobalStyles = createGlobalStyle`
       color: #C5C5C5 !important;
     }
     body {
+        font-family: 'Roboto', 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         overscroll-behavior: auto;
         user-select: none;
         background: ${({ theme }) => theme.body};
         color: ${({ theme }) => theme.text};
         /* transition: background 0.2s ease-in, color 0.2s ease-in; */
     }
-    /* 모든 폰트가 'Noto Sans KR'에서 영문과 숫자만 'Roboto'로 적용 */
-    /* @font-face {
-      font-family: 'Roboto';
-      font-style: normal;
-      src: local('*'),
-      url('/static/font/Roboto-Regular.ttf') format('truetype'),
-      url('/static/font/Roboto-Bold.ttf') format('truetype'),
-      url('/static/font/Roboto-Thin.ttf') format('truetype');
-      unicode-range: U+0041-005A, U+0061-007A, U+0030-0039;
-    } */
     a {
       text-decoration: none;
     }
@@ -115,4 +107,4 @@ export const GlobalStyles = createGlobalStyle`
     ::-webkit-scrollbar-thumb:hover {
         background: rgba(34, 45, 50, 1);
     }
-`;
+`

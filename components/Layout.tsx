@@ -1,14 +1,14 @@
-import React, { ReactNode } from 'react';
-import Head from 'next/head';
-import Header from './Header';
-import Footer from './Footer';
-import { styleMode } from '../styles/styles';
+import React, { ReactNode } from 'react'
+import Head from 'next/head'
+import Header from './Header'
+import Footer from './Footer'
+import { styleMode } from '../styles/styles'
 
 interface Props extends styleMode {
-  children?: ReactNode;
-  title?: string;
-  description?: string;
-  imageUrl?: string;
+  children?: ReactNode
+  title?: string
+  description?: string
+  imageUrl?: string
 }
 
 const Layout = ({
@@ -41,7 +41,7 @@ const Layout = ({
       {children}
       <Footer />
     </>
-  );
-};
+  )
+}
 
-export default Layout;
+export default Layout
