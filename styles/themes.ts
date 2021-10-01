@@ -1,13 +1,13 @@
 const lightTheme = {
   mode: 'light',
-  body: '#f8f8f8',
+  body: '#e8e8e8',
   card: '#ffffff',
   text: '#6e6b7b',
 }
 const darkTheme = {
   mode: 'dark',
-  body: '#161d31',
-  card: '#283046',
+  body: '#283046',
+  card: '#161d31',
   text: '#b4b7bd',
 }
 

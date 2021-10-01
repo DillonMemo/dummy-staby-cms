@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "npm run codegen",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -12,6 +11,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.4.8",
+    "antd": "^4.16.13",
     "cross-env": "^7.0.3",
     "deepmerge": "^4.2.2",
     "graphql": "^15.5.1",

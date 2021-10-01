@@ -42,7 +42,8 @@
       {
         "allow": ["warn", "error"]
       }
-    ]
+    ],
+    "no-useless-escape": "off"
   },
   "overrides": [
     {
