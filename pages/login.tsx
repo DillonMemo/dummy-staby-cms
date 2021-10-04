@@ -13,7 +13,7 @@ import { authTokenVar, isLoggedInVar } from '../lib/apolloClient'
 /** graphql */
 import { useMutation } from '@apollo/client'
 import { LOGIN_MUTATION } from '../graphql/mutations'
-// import { LoginMutation, LoginMutationVariables } from '../generated'
+import { LoginMutation, LoginMutationVariables } from '../generated'
 
 export interface ILoginForm {
   email: string
@@ -44,7 +44,10 @@ const Login: NextPage = () => {
     }
   }
 
-  const [loginMutation, { data: loginMutationResult, loading }] = useMutation(LOGIN_MUTATION, {
+  const [loginMutation, { data: loginMutationResult, loading }] = useMutation<
+    LoginMutation,
+    LoginMutationVariables
+  >(LOGIN_MUTATION, {
     onCompleted,
   })
 
