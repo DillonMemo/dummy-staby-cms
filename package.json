@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "npm run codegen",
-    "dev": "next dev",
+    "dev": "npm run codegen && next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "npm run codegen && next start",
     "lint": "next lint",
     "codegen": "rimraf generated && graphql-codegen --config codegen.yml"
   },
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@apollo/client": "^3.4.8",
     "antd": "^4.16.13",
     "cross-env": "^7.0.3",

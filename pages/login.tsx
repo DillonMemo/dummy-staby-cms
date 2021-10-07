@@ -1,13 +1,16 @@
-// import { useEffect, useState } from 'react'
 import { NextPage } from 'next'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import styled from 'styled-components'
 import { Button, Input } from 'antd'
 
-import { md, sm, xxs } from '../styles/styles'
-import { LOCALSTORAGE_TOKEN } from '../lib/constants'
+/** styles */
+import { md, sm, xxl, xxs } from '../styles/styles'
+
+/** lib */
+import { LOCALSTORAGE_TOKEN, TITLE } from '../lib/constants'
 import { authTokenVar, isLoggedInVar } from '../lib/apolloClient'
 
 /** graphql */
@@ -65,79 +68,87 @@ const Login: NextPage = () => {
     }
   }
   return (
-    <Wrapper>
-      <Link href="/login">
-        <a className="logo"></a>
-      </Link>
-      <div className="content">
-        <div className="content-item">
-          <img src="/static/svgs/pixeltrue-data-analyse-1.svg" alt="pixeltrue-data-analyse-1" />
+    <>
+      <Head>
+        <meta charSet="utf-8" />
+        <title>{TITLE}</title>
+      </Head>
+      <Wrapper>
+        <Link href="/login">
+          <a className="logo"></a>
+        </Link>
+        <div className="content">
+          <div className="content-item">
+            <img src="/static/svgs/pixeltrue-data-analyse-1.svg" alt="pixeltrue-data-analyse-1" />
+          </div>
         </div>
-      </div>
-      <div className="wrapper">
-        <div className="container">
-          <h2>Welcom to Staby CMS 👋</h2>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="form-item">
-              <div className="form-group">
-                <Controller
-                  render={({ field }) => <Input {...field} className="input" placeholder="Email" />}
-                  control={control}
-                  name="email"
-                  rules={{
-                    required: '이메일 입력은 필수입니다',
-                    pattern: {
-                      value:
-                        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                      message: '이메일 형식이 아닙니다',
-                    },
-                  }}
-                />
+        <div className="wrapper">
+          <div className="container">
+            <h2>Welcom to Staby CMS 👋</h2>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="form-item">
+                <div className="form-group">
+                  <Controller
+                    render={({ field }) => (
+                      <Input {...field} className="input" placeholder="Email" />
+                    )}
+                    control={control}
+                    name="email"
+                    rules={{
+                      required: '이메일 입력은 필수입니다',
+                      pattern: {
+                        value:
+                          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                        message: '이메일 형식이 아닙니다',
+                      },
+                    }}
+                  />
+                </div>
+                {errors.email?.message && (
+                  <div className="form-message">
+                    <span>{errors.email.message}</span>
+                  </div>
+                )}
               </div>
-              {errors.email?.message && (
-                <div className="form-message">
-                  <span>{errors.email.message}</span>
+              <div className="form-item">
+                <div className="form-group">
+                  <Controller
+                    render={({ field }) => (
+                      <Input.Password {...field} className="input" placeholder="Password" />
+                    )}
+                    control={control}
+                    name="password"
+                    rules={{
+                      required: '비밀번호 입력은 필수입니다',
+                    }}
+                  />
                 </div>
-              )}
-            </div>
-            <div className="form-item">
-              <div className="form-group">
-                <Controller
-                  render={({ field }) => (
-                    <Input.Password {...field} className="input" placeholder="Password" />
-                  )}
-                  control={control}
-                  name="password"
-                  rules={{
-                    required: '비밀번호 입력은 필수입니다',
-                  }}
-                />
+                {errors.password?.message && (
+                  <div className="form-message">
+                    <span>{errors.password.message}</span>
+                  </div>
+                )}
               </div>
-              {errors.password?.message && (
-                <div className="form-message">
-                  <span>{errors.password.message}</span>
-                </div>
-              )}
-            </div>
-            <div className="form-item">
-              <Button
-                type="primary"
-                role="button"
-                htmlType="submit"
-                className="submit-button"
-                disabled={!isValid}>
-                Sign In
-              </Button>
-              {loginMutationResult?.login.error && (
-                <div className="form-message">
-                  <span>{loginMutationResult.login.error}</span>
-                </div>
-              )}
-            </div>
-          </form>
+              <div className="form-item">
+                <Button
+                  type="primary"
+                  role="button"
+                  htmlType="submit"
+                  className="submit-button"
+                  disabled={!isValid}>
+                  Sign In
+                </Button>
+                {loginMutationResult?.login.error && (
+                  <div className="form-message">
+                    <span>{loginMutationResult.login.error}</span>
+                  </div>
+                )}
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </Wrapper>
+      </Wrapper>
+    </>
   )
 }
 
@@ -215,10 +226,15 @@ const Wrapper = styled.div`
     }
 
     .container {
-      flex: 0 0 100%;
-      max-width: 100%;
+      flex: 0 0 70%;
+      max-width: 70%;
       padding: 0 1.5rem;
       margin: 0 auto;
+
+      ${xxl} {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
 
       ${md} {
         flex: 0 0 50%;
@@ -266,6 +282,7 @@ const Wrapper = styled.div`
 
           .form-message {
             color: red;
+            font-size: 0.75rem;
           }
         }
       }

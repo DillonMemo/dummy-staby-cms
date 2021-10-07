@@ -1,8 +1,20 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect } from 'react'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
+import { Modal } from 'antd'
+
+/** components */
 import Header from './Header'
 import Footer from './Footer'
+
+/** styles */
 import { styleMode } from '../styles/styles'
+
+/** lib */
+import { TITLE } from '../lib/constants'
+import { isLoggedInVar } from '../lib/apolloClient'
+
+/** utils */
 
 interface Props extends styleMode {
   children?: ReactNode
@@ -13,12 +25,23 @@ interface Props extends styleMode {
 
 const Layout = ({
   children,
-  title = 'Staby CMS',
+  title = TITLE,
   description = '',
   imageUrl = '',
   toggleStyle,
   theme,
 }: Props) => {
+  const { locale, push } = useRouter()
+
+  useEffect(() => {
+    if (!isLoggedInVar()) {
+      Modal.info({
+        title: locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login',
+        okText: locale === 'ko' ? '로그인' : 'Login',
+        onOk: () => push('/login', 'login', { locale }),
+      })
+    }
+  }, [])
   return (
     <>
       <Head>
@@ -37,9 +60,11 @@ const Layout = ({
         {/* 선호 URL */}
         <link rel="canonical" href="http://localhost:3000"></link>
       </Head>
-      <Header toggleStyle={toggleStyle} theme={theme} />
-      {children}
-      <Footer />
+      <>
+        <Header toggleStyle={toggleStyle} theme={theme} />
+        {children}
+        <Footer />
+      </>
     </>
   )
 }

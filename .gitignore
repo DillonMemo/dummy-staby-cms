@@ -36,3 +36,7 @@ yarn-error.log*
 # graphql
 .graphqlrc.yml
 /generated
+
+# env
+.env.development
+.env.production

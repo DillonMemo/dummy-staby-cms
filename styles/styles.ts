@@ -85,6 +85,11 @@ export const GlobalStyles = createGlobalStyle`
     }
     a {
       text-decoration: none;
+      color: ${({ theme }) => theme.text};
+
+      &:hover {
+        color: ${({ theme }) => theme.text_hover};
+      }
     }
     ul {
       list-style: none;

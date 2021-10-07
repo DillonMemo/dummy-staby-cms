@@ -1,88 +1,22 @@
-import type { NextPage } from 'next';
-import { useRouter } from 'next/router';
-import React from 'react';
-import { gql, useMutation } from '@apollo/client';
-import styled from 'styled-components';
-import Layout from '../components/Layout';
-import { styleMode } from '../styles/styles';
-import { authTokenVar, isLoggedInVar } from '../lib/apolloClient';
-import { LOCALSTORAGE_TOKEN } from '../lib/constants';
+import type { NextPage } from 'next'
+import React from 'react'
+import styled from 'styled-components'
+import Layout from '../components/Layout'
+import { styleMode } from '../styles/styles'
 
-export const LOGIN_MUTATION = gql`
-  mutation loginMutation($loginInput: LoginInput!) {
-    login(input: $loginInput) {
-      ok
-      error
-      token
-    }
-  }
-`;
-
-type Props = styleMode;
+type Props = styleMode
 
 const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const router = useRouter();
-  const onCompleted = (data: any) => {
-    const {
-      login: { ok, token },
-    } = data;
-
-    if (ok && token) {
-      localStorage.setItem(LOCALSTORAGE_TOKEN, token);
-      authTokenVar(token);
-      isLoggedInVar(true);
-      router.push('/test');
-    }
-  };
-  const [loginMutation, { data: loginMutationResult, loading }] = useMutation(LOGIN_MUTATION, {
-    onCompleted,
-  });
-
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    loginMutation({
-      variables: {
-        loginInput: {
-          email: 'dillon@staby.co.kr',
-          password: '123123',
-        },
-      },
-    });
-  };
-
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
       <DivWrapper>
         <main className="main">
-          <div>
-            {loading ? (
-              <span>로딩중...</span>
-            ) : (
-              <>
-                <p>{loginMutationResult?.login?.token}</p>
-              </>
-            )}
-          </div>
-          <form onSubmit={onSubmit}>
-            <div
-              style={{
-                display: 'flex',
-                flexFlow: 'column nowrap',
-                alignItems: 'center',
-                gap: '1rem',
-              }}>
-              <h2>HOME</h2>
-              <input type="text" name="id" id="id" />
-              <input type="password" name="password" id="password" />
-              <button style={{ width: '100%', height: '2rem' }}>로그인</button>
-            </div>
-          </form>
+          <h2>Hello World</h2>
         </main>
       </DivWrapper>
     </Layout>
-  );
-};
+  )
+}
 
 const DivWrapper = styled.div`
   min-height: 100vh;
@@ -152,5 +86,5 @@ const DivWrapper = styled.div`
       flex-direction: column;
     }
   }
-`;
-export default Home;
+`
+export default Home

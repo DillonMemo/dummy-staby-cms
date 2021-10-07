@@ -5,6 +5,8 @@ declare module 'styled-components' {
     mode: string
     body: string
     card: string
+    card_radius: string
     text: string
+    text_hover: string
   }
 }
