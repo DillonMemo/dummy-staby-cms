@@ -19,7 +19,7 @@ const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
 }
 
 const DivWrapper = styled.div`
-  min-height: 100vh;
+  min-height: 200vh;
   padding: 0 0.5rem;
   display: flex;
   flex-direction: column;

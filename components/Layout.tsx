@@ -5,6 +5,7 @@ import { Modal } from 'antd'
 
 /** components */
 import Header from './Header'
+import Shadow from './Shadow'
 import Footer from './Footer'
 
 /** styles */
@@ -62,6 +63,7 @@ const Layout = ({
       </Head>
       <>
         <Header toggleStyle={toggleStyle} theme={theme} />
+        <Shadow />
         {children}
         <Footer />
       </>

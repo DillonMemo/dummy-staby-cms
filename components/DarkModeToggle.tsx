@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { styleMode } from '../styles/styles'
+import { md, styleMode } from '../styles/styles'
 
 interface StyleProps {
   width?: string | number
@@ -41,6 +41,12 @@ const Toggle = styled.input<StyleProps>`
   transition: all 0.5s;
   border: 1.5px solid rgba(40, 40, 40, 1);
   border-radius: 1.25rem;
+
+  ${md} {
+    width: ${({ width }) => (width ? width : '3rem')};
+    height: ${({ height }) => (height ? height : '1.5rem')};
+    border-width: 1px;
+  }
   &:checked {
     background-color: rgba(40, 40, 40, 1);
     border-color: rgba(224, 224, 224, 1);
@@ -61,6 +67,11 @@ const Toggle = styled.input<StyleProps>`
     border-radius: 2rem;
     /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); */
     transition: all 0.25s;
+
+    ${md} {
+      width: ${({ height }) => (height ? height : '1rem')};
+      height: ${({ height }) => (height ? height : '1rem')};
+    }
   }
   &:checked::before {
     content: '';
@@ -70,6 +81,10 @@ const Toggle = styled.input<StyleProps>`
     justify-content: center;
     align-items: center;
     background-color: transparent;
+
+    ${md} {
+      left: ${({ height }) => (height ? height : '1.75rem')};
+    }
   }
 `
 

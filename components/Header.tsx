@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Badge } from 'antd'
-import { EllipsisOutlined, FileTextOutlined } from '@ant-design/icons'
+import { Badge, Select } from 'antd'
+import { EllipsisOutlined, FileTextOutlined, NumberOutlined } from '@ant-design/icons'
 
 /** components */
 import DarkModeToggle from './DarkModeToggle'
@@ -18,17 +18,10 @@ import { md, styleMode } from '../styles/styles'
 type Props = styleMode
 
 const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
-  const { locale } = useRouter()
+  const { locale, push, pathname } = useRouter()
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false)
   const hamburgerRef = React.useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (document) {
-      document.addEventListener('mousedown', handleClickOutside as any)
-
-      return () => document.removeEventListener('mousedown', handleClickOutside as any)
-    }
-  }, [isNavOpen])
   /**
    * `side navigator` 마우스 이벤트 핸들러 입니다.
    */
@@ -52,6 +45,47 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
       }
     }
   }
+
+  const handleClickItem = async ({
+    currentTarget,
+  }: React.MouseEvent<HTMLAnchorElement>): Promise<void> => {
+    const nodes = document.querySelectorAll('.has-sub')
+    const parentNode = currentTarget.parentNode as HTMLLIElement
+
+    await nodes.forEach((node) => {
+      if (!node.contains(parentNode)) {
+        if (node.classList.contains('open')) {
+          node.classList.remove('open')
+
+          const subNode = node.querySelector('.menu-content > .collapse')
+          if (subNode?.classList.contains('show')) {
+            subNode?.classList.remove('show')
+          }
+        }
+      }
+    })
+
+    const subNode: HTMLDivElement | null | undefined = currentTarget.parentNode?.querySelector(
+      '.menu-content > .collapse'
+    )
+    if (subNode) {
+      if (subNode.classList.contains('show')) {
+        parentNode.classList.remove('open')
+        subNode.classList.remove('show')
+      } else {
+        parentNode.classList.add('open')
+        subNode.classList.add('show')
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (document) {
+      document.addEventListener('mousedown', handleClickOutside as any)
+
+      return () => document.removeEventListener('mousedown', handleClickOutside as any)
+    }
+  }, [isNavOpen])
   return (
     <>
       <NavigatorWrapper
@@ -87,13 +121,49 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </a>
               </Link>
             </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
+            <li className="nav-item has-sub">
+              <Link href="">
+                <a onClick={handleClickItem}>
                   <FileTextOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '바로가기2' : 'undefined'}</span>
                 </a>
               </Link>
+              <ul className="menu-content">
+                <div className="collapse">
+                  <li className="nav-item">
+                    <Link href="">
+                      <a>
+                        <NumberOutlined className="icon" />
+                        <span>TEXT</span>
+                      </a>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link href="#">
+                      <a>
+                        <NumberOutlined className="icon" />
+                        <span>TEXT</span>
+                      </a>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link href="#">
+                      <a>
+                        <NumberOutlined className="icon" />
+                        <span>TEXT</span>
+                      </a>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link href="#">
+                      <a>
+                        <NumberOutlined className="icon" />
+                        <span>TEXT</span>
+                      </a>
+                    </Link>
+                  </li>
+                </div>
+              </ul>
             </li>
             <li className="nav-item">
               <Link href="#">
@@ -103,13 +173,49 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </a>
               </Link>
             </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
+            <li className="nav-item has-sub">
+              <Link href="">
+                <a onClick={handleClickItem}>
                   <FileTextOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '바로가기4' : 'undefined'}</span>
                 </a>
               </Link>
+              <ul className="menu-content">
+                <div className="collapse">
+                  <li className="nav-item">
+                    <Link href="#">
+                      <a>
+                        <NumberOutlined className="icon" />
+                        <span>TEXT</span>
+                      </a>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link href="#">
+                      <a>
+                        <NumberOutlined className="icon" />
+                        <span>TEXT</span>
+                      </a>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link href="#">
+                      <a>
+                        <NumberOutlined className="icon" />
+                        <span>TEXT</span>
+                      </a>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link href="#">
+                      <a>
+                        <NumberOutlined className="icon" />
+                        <span>TEXT</span>
+                      </a>
+                    </Link>
+                  </li>
+                </div>
+              </ul>
             </li>
             <li className="nav-item">
               <Link href="#">
@@ -329,8 +435,35 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
           </div>
         </div>
         <div className="header-group-end">
-          <div className="header-item country">
-            <span>🇰🇷&nbsp;&nbsp;Korea</span>
+          <div className="header-item">
+            <div className="country">
+              <CountrySelect
+                defaultValue={locale}
+                placeholder={'Select a country'}
+                onChange={(value) => push(pathname, pathname, { locale: value as string })}
+                bordered={false}
+                showArrow={false}>
+                <Select.Option value="ko">
+                  <CountryOption>
+                    <img
+                      src="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/flags/4x3/kr.svg"
+                      alt="KR"
+                    />
+                    <span>Korea</span>
+                  </CountryOption>
+                </Select.Option>
+                <Select.Option value="en">
+                  <CountryOption>
+                    <img
+                      src="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/flags/4x3/us.svg"
+                      alt="US"
+                    />
+                    <span>English</span>
+                  </CountryOption>
+                </Select.Option>
+              </CountrySelect>
+            </div>
+            <span></span>
           </div>
           <div className="header-item">
             <DarkModeToggle toggleStyle={toggleStyle} theme={theme} />
@@ -532,6 +665,8 @@ const NavigatorWrapper = styled.div`
 
       .nav-item {
         color: ${({ theme }) => theme.text};
+        background-color: ${({ theme }) => theme.card};
+        margin: 0 !important;
 
         a {
           outline: none;
@@ -557,7 +692,7 @@ const NavigatorWrapper = styled.div`
             }
           }
           .icon {
-            margin-right: 1.1rem;
+            margin-right: 1.25rem;
 
             width: 1.25rem;
             height: 1.25rem;
@@ -566,9 +701,12 @@ const NavigatorWrapper = styled.div`
             top: 1px;
             left: 2px;
 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
             ${md} {
               margin-right: 0.875rem;
-              float: left;
               left: 0;
             }
           }
@@ -578,7 +716,10 @@ const NavigatorWrapper = styled.div`
             text-overflow: ellipsis;
             white-space: nowrap;
 
-            line-height: 1.45;
+            line-height: 1.75;
+
+            display: inline-flex;
+            align-items: center;
           }
 
           &:hover {
@@ -586,6 +727,23 @@ const NavigatorWrapper = styled.div`
             > * {
               transform: translate(5px);
               transition: transform 0.25s ease;
+            }
+          }
+        }
+
+        .menu-content {
+          > .collapse {
+            transition: max-height 0.5s;
+          }
+          > .collapse.show {
+            max-height: 100vh;
+          }
+          > .collapse:not(.show) {
+            max-height: 0;
+            li:not(.has-sub) {
+              margin: 0.4375rem 0.9375rem 0;
+              background: transparent;
+              color: ${({ theme }) => theme.text};
             }
           }
         }
@@ -627,6 +785,41 @@ const NavigatorWrapper = styled.div`
             display: none;
           }
         }
+
+        .nav-item {
+          &.has-sub {
+            > a:after {
+              content: '';
+              height: 1rem;
+              width: 1rem;
+              display: inline-block;
+              position: absolute;
+              top: 0.875rem;
+              right: 1.25rem;
+              transition: 0.2s ease-out;
+
+              background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6b7b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-right'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E");
+              background-repeat: no-repeat;
+              background-position: 50%;
+              background-size: 1rem;
+              transform: rotate(0deg);
+            }
+
+            &.open {
+              > a {
+                background-color: ${({ theme }) => theme.body};
+                border-radius: 0.375rem;
+
+                &:after {
+                  transform: rotate(90deg);
+                }
+              }
+              .menu-content {
+                background-color: ${({ theme }) => theme.card};
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -661,13 +854,13 @@ const HeaderWrapper = styled.header`
   .header-group-end {
     display: flex;
     justify-content: center;
-    > * + * {
+    /* > * + * {
       margin-left: 1rem;
 
       ${md} {
         margin-left: 0.5rem;
       }
-    }
+    } */
   }
 
   .header-group-start {
@@ -685,15 +878,18 @@ const HeaderWrapper = styled.header`
     display: inline-flex;
     align-items: center;
 
-    &.country {
-      font-size: 1rem;
+    font-size: 0.875rem;
 
-      ${md} {
-        font-size: 0.875rem;
-      }
+    ${md} {
+      font-size: 0.75rem;
     }
 
     &.profile {
+      margin-left: 1rem;
+
+      ${md} {
+        margin-left: 0.5rem;
+      }
       .info {
         margin-right: 0.425rem;
 
@@ -710,7 +906,6 @@ const HeaderWrapper = styled.header`
         }
         .user-name {
           font-weight: 500;
-          font-size: 0.875rem;
           margin-bottom: 0.435rem;
           letter-spacing: 1px;
         }
@@ -727,6 +922,39 @@ const HeaderWrapper = styled.header`
           border-radius: 5rem;
         }
       }
+    }
+  }
+`
+const CountrySelect = styled(Select)`
+  width: auto;
+  color: ${({ theme }) => theme.text};
+  text-align: center;
+`
+const CountryOption = styled.div`
+  display: block;
+  align-items: center;
+  width: auto;
+  padding: 0;
+
+  font-size: 0.875rem;
+  min-width: 5rem;
+
+  ${md} {
+    font-size: 0.75rem;
+    min-width: auto;
+  }
+
+  img {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+
+    margin-right: 0.4rem;
+  }
+
+  span {
+    ${md} {
+      display: none;
     }
   }
 `
