@@ -61,7 +61,7 @@ const Toggle = styled.input<StyleProps>`
     position: absolute;
     width: ${({ height }) => (height ? height : '1.5rem')};
     height: ${({ height }) => (height ? height : '1.5rem')};
-    top: 2px;
+    top: 3px;
     left: 4px;
     background-color: transparent;
     border-radius: 2rem;

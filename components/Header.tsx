@@ -2,8 +2,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Badge, Select } from 'antd'
-import { EllipsisOutlined, FileTextOutlined, NumberOutlined } from '@ant-design/icons'
+import { Badge, Select, Skeleton, Space } from 'antd'
+import {
+  ArrowRightOutlined,
+  EllipsisOutlined,
+  FileTextOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 
 /** components */
 import DarkModeToggle from './DarkModeToggle'
@@ -15,12 +20,18 @@ import { EXPANDED_WIDTH, WIDTH } from '../lib/constants'
 /** styles */
 import { md, styleMode } from '../styles/styles'
 
+/** graphql */
+import { useQuery } from '@apollo/client'
+import { ME_QUERY } from '../graphql/queries'
+import { MeQuery, MeQueryVariables } from '../generated'
+
 type Props = styleMode
 
 const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   const { locale, push, pathname } = useRouter()
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false)
   const hamburgerRef = React.useRef<HTMLDivElement>(null)
+  const { loading, data } = useQuery<MeQuery, MeQueryVariables>(ME_QUERY)
 
   /**
    * `side navigator` 마우스 이벤트 핸들러 입니다.
@@ -36,15 +47,18 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
     setIsNavOpen(!isNavOpen)
   }, [isNavOpen])
 
-  const handleClickOutside = ({ target }: React.MouseEvent<HTMLElement>) => {
-    const { current } = hamburgerRef
-    const nav = document.querySelector('.navigator')
-    if (current) {
-      if (!nav?.contains(target as HTMLElement)) {
-        setIsNavOpen(false)
+  const handleClickOutside = useCallback(
+    ({ target }: React.MouseEvent<HTMLElement>) => {
+      const { current } = hamburgerRef
+      const nav = document.querySelector('.navigator')
+      if (current) {
+        if (!nav?.contains(target as HTMLElement)) {
+          setIsNavOpen(false)
+        }
       }
-    }
-  }
+    },
+    [isNavOpen]
+  )
 
   const handleClickItem = async ({
     currentTarget,
@@ -86,6 +100,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
       return () => document.removeEventListener('mousedown', handleClickOutside as any)
     }
   }, [isNavOpen])
+
   return (
     <>
       <NavigatorWrapper
@@ -109,6 +124,34 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
         <div className="shadow-bottom"></div>
         <div className="navbar-container">
           <ul className="nav">
+            <li
+              className={[
+                'nav-item',
+                'has-sub',
+                pathname.includes('/mypage') ? 'open' : undefined,
+              ].join(' ')}>
+              <Link href="">
+                <a onClick={handleClickItem}>
+                  <UserOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '마이페이지' : 'My Page'}</span>
+                </a>
+              </Link>
+              <ul className="menu-content">
+                <div
+                  className={['collapse', pathname.includes('/mypage') ? 'show' : undefined].join(
+                    ' '
+                  )}>
+                  <li className="nav-item">
+                    <Link href={{ pathname: '/mypage/edit' }}>
+                      <a>
+                        <ArrowRightOutlined className="icon" />
+                        <span>내 정보 관리</span>
+                      </a>
+                    </Link>
+                  </li>
+                </div>
+              </ul>
+            </li>
             <li className="nav-item-header">
               <EllipsisOutlined className="icon" />
               <span className="text">GOING</span>
@@ -133,7 +176,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   <li className="nav-item">
                     <Link href="">
                       <a>
-                        <NumberOutlined className="icon" />
+                        <ArrowRightOutlined className="icon" />
                         <span>TEXT</span>
                       </a>
                     </Link>
@@ -141,7 +184,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   <li className="nav-item">
                     <Link href="#">
                       <a>
-                        <NumberOutlined className="icon" />
+                        <ArrowRightOutlined className="icon" />
                         <span>TEXT</span>
                       </a>
                     </Link>
@@ -149,7 +192,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   <li className="nav-item">
                     <Link href="#">
                       <a>
-                        <NumberOutlined className="icon" />
+                        <ArrowRightOutlined className="icon" />
                         <span>TEXT</span>
                       </a>
                     </Link>
@@ -157,7 +200,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   <li className="nav-item">
                     <Link href="#">
                       <a>
-                        <NumberOutlined className="icon" />
+                        <ArrowRightOutlined className="icon" />
                         <span>TEXT</span>
                       </a>
                     </Link>
@@ -173,258 +216,6 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </a>
               </Link>
             </li>
-            <li className="nav-item has-sub">
-              <Link href="">
-                <a onClick={handleClickItem}>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기4' : 'undefined'}</span>
-                </a>
-              </Link>
-              <ul className="menu-content">
-                <div className="collapse">
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <NumberOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <NumberOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <NumberOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <NumberOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                </div>
-              </ul>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기5' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기6' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기7' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기8' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기9' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기10' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기11' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기12' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기13' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기14' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기15' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기16' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기17' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기18' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기19' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기20' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기21' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기22' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기23' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기24' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기25' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기26' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기27' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기28' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기29' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기30' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
           </ul>
         </div>
       </NavigatorWrapper>
@@ -434,50 +225,64 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
             <Hamburger />
           </div>
         </div>
-        <div className="header-group-end">
-          <div className="header-item">
-            <div className="country">
-              <CountrySelect
-                defaultValue={locale}
-                placeholder={'Select a country'}
-                onChange={(value) => push(pathname, pathname, { locale: value as string })}
-                bordered={false}
-                showArrow={false}>
-                <Select.Option value="ko">
-                  <CountryOption>
-                    <img
-                      src="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/flags/4x3/kr.svg"
-                      alt="KR"
-                    />
-                    <span>Korea</span>
-                  </CountryOption>
-                </Select.Option>
-                <Select.Option value="en">
-                  <CountryOption>
-                    <img
-                      src="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/flags/4x3/us.svg"
-                      alt="US"
-                    />
-                    <span>English</span>
-                  </CountryOption>
-                </Select.Option>
-              </CountrySelect>
+        {loading ? (
+          <Space className="header-group-end">
+            <div className="header-item">
+              <Skeleton.Button active size={'default'} shape="square" />
             </div>
-            <span></span>
-          </div>
-          <div className="header-item">
-            <DarkModeToggle toggleStyle={toggleStyle} theme={theme} />
-          </div>
-          <div className="header-item profile">
-            <div className="info">
-              <span className="user-name">Dillon</span>
-              <span className="user-role">Admin</span>
+            <div className="header-item">
+              <Skeleton.Button active size={'default'} shape="round" />
             </div>
-            <div className="img">
-              <img src="/static/img/none-profile.png" alt="profile" />
+            <div className="header-item">
+              <Skeleton.Button active size={'default'} shape="square" />
+            </div>
+          </Space>
+        ) : (
+          <div className="header-group-end">
+            <div className="header-item">
+              <div className="country">
+                <CountrySelect
+                  defaultValue={locale}
+                  placeholder={'Select a country'}
+                  onChange={(value) => push(pathname, pathname, { locale: value as string })}
+                  bordered={false}
+                  showArrow={false}>
+                  <Select.Option value="ko">
+                    <CountryOption>
+                      <img
+                        src="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/flags/4x3/kr.svg"
+                        alt="KR"
+                      />
+                      <span>Korea</span>
+                    </CountryOption>
+                  </Select.Option>
+                  <Select.Option value="en">
+                    <CountryOption>
+                      <img
+                        src="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/flags/4x3/us.svg"
+                        alt="US"
+                      />
+                      <span>English</span>
+                    </CountryOption>
+                  </Select.Option>
+                </CountrySelect>
+              </div>
+              <span></span>
+            </div>
+            <div className="header-item">
+              <DarkModeToggle toggleStyle={toggleStyle} theme={theme} />
+            </div>
+            <div className="header-item profile">
+              <div className="info">
+                <span className="user-name">{data?.me.username}</span>
+                <span className="user-role">{data?.me.role}</span>
+              </div>
+              <div className="img">
+                <img src="/static/img/none-profile.png" alt="profile" />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </HeaderWrapper>
     </>
   )
@@ -635,9 +440,10 @@ const NavigatorWrapper = styled.div`
       }
 
       .nav-item-header {
-        margin: 2.286rem 1rem 0.8rem;
-        padding: 0;
+        margin: 0 1rem;
+        padding: 2.286rem 1rem 0.8rem;
         color: ${({ theme }) => theme.text_hover};
+        background-color: ${({ theme }) => theme.card};
         line-height: 1.5;
         letter-spacing: 0.1rem;
         text-transform: uppercase;
@@ -733,17 +539,35 @@ const NavigatorWrapper = styled.div`
 
         .menu-content {
           > .collapse {
-            transition: max-height 0.5s;
+            transition: max-height 0.5s, visibility 0.3s;
           }
           > .collapse.show {
             max-height: 100vh;
+            visibility: visible;
           }
           > .collapse:not(.show) {
             max-height: 0;
+            visibility: hidden;
             li:not(.has-sub) {
               margin: 0.4375rem 0.9375rem 0;
               background: transparent;
               color: ${({ theme }) => theme.text};
+            }
+          }
+        }
+
+        &.has-sub {
+          &.open {
+            > a {
+              background-color: ${({ theme }) => theme.body};
+              border-radius: 0.375rem;
+
+              &:after {
+                transform: rotate(90deg) !important;
+              }
+            }
+            .menu-content {
+              background-color: ${({ theme }) => theme.card};
             }
           }
         }
@@ -776,7 +600,7 @@ const NavigatorWrapper = styled.div`
       .nav {
         .nav-item-header {
           justify-content: flex-start;
-          padding: 0 1rem;
+
           .text {
             display: block;
           }
@@ -803,20 +627,6 @@ const NavigatorWrapper = styled.div`
               background-position: 50%;
               background-size: 1rem;
               transform: rotate(0deg);
-            }
-
-            &.open {
-              > a {
-                background-color: ${({ theme }) => theme.body};
-                border-radius: 0.375rem;
-
-                &:after {
-                  transform: rotate(90deg);
-                }
-              }
-              .menu-content {
-                background-color: ${({ theme }) => theme.card};
-              }
             }
           }
         }
@@ -846,7 +656,7 @@ const HeaderWrapper = styled.header`
   border-radius: ${({ theme }) => theme.card_radius};
 
   ${md} {
-    margin: 1.3rem 1rem 0;
+    margin: 1.3rem auto 0;
     width: calc(100% - 2.4rem);
   }
 

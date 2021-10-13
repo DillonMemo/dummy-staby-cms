@@ -1,4 +1,4 @@
-import { createGlobalStyle } from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 import themes from './themes'
 
 export const { xxxs, xxs, xs, sm, md, _2md, lg, xl, xxl, _4xl } = {
@@ -112,4 +112,8 @@ export const GlobalStyles = createGlobalStyle`
     ::-webkit-scrollbar-thumb:hover {
         background: rgba(34, 45, 50, 1);
     }
+`
+
+export const MainWrapper = styled.main`
+  display: block;
 `
