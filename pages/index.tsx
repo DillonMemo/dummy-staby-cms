@@ -1,90 +1,88 @@
 import type { NextPage } from 'next'
+import { useRouter } from 'next/router'
 import React from 'react'
 import styled from 'styled-components'
+
+/** components */
 import Layout from '../components/Layout'
-import { styleMode } from '../styles/styles'
+
+/** styles */
+import { MainWrapper, md, styleMode } from '../styles/styles'
 
 type Props = styleMode
 
 const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
+  const { locale } = useRouter()
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
-      <DivWrapper>
-        <main className="main">
-          <h2>Hello World</h2>
-        </main>
-      </DivWrapper>
+      <MainWrapper>
+        <ContentWrapper className="main-content">
+          <div className="dashboard-section-1 gap">
+            <div className="card" style={{ minHeight: '12.5rem' }}>
+              {locale === 'ko' ? '준비중 입니다' : 'Comming soon'}
+            </div>
+            <div className="card" style={{ minHeight: '12.5rem' }}>
+              {locale === 'ko' ? '준비중 입니다' : 'Comming soon'}
+            </div>
+          </div>
+          <div className="dashboard-section-2 gap">
+            <div className="grid grid-col-2 gap">
+              <div className="card" style={{ minHeight: '10rem' }}>
+                {locale === 'ko' ? '준비중 입니다' : 'Comming soon'}
+              </div>
+              <div className="card" style={{ minHeight: '10rem' }}>
+                {locale === 'ko' ? '준비중 입니다' : 'Comming soon'}
+              </div>
+              <div className="card" style={{ gridColumn: '1/3', minHeight: '10rem' }}>
+                {locale === 'ko' ? '준비중 입니다' : 'Comming soon'}
+              </div>
+            </div>
+            <div className="card">{locale === 'ko' ? '준비중 입니다' : 'Comming soon'}</div>
+          </div>
+        </ContentWrapper>
+      </MainWrapper>
     </Layout>
   )
 }
 
-const DivWrapper = styled.div`
-  min-height: 200vh;
-  padding: 0 0.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+const ContentWrapper = styled.div`
+  display: grid;
+  gap: 1.5rem;
 
-  main {
-    padding: 5rem 0;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  > div {
+    display: grid;
+    ${md} {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  .dashboard-section-1 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dashboard-section-2 {
+    grid-template-columns: 1fr 1fr;
   }
 
   .grid {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    max-width: 800px;
-    margin-top: 3rem;
+    display: grid;
   }
 
-  .card {
-    margin: 1rem;
-    padding: 1.5rem;
-    text-align: left;
-    color: inherit;
-    text-decoration: none;
-    border: ${({ theme }) => `1px solid ${theme.text}`};
-    border-radius: 10px;
-    transition: color 0.15s ease, border-color 0.15s ease;
-    width: 45%;
-  }
+  .responsive-grid-col-2 {
+    grid-template-columns: 1fr 1fr;
 
-  .card:hover,
-  .card:focus,
-  .card:active {
-    color: #0070f3;
-    border-color: #0070f3;
-  }
-
-  .card h2 {
-    margin: 0 0 1rem 0;
-    font-size: 1.5rem;
-  }
-
-  .card p {
-    margin: 0;
-    font-size: 1.25rem;
-    line-height: 1.5;
-  }
-
-  .logo {
-    height: 1em;
-    margin-left: 0.5rem;
-  }
-
-  @media (max-width: 600px) {
-    .grid {
-      width: 100%;
-      flex-direction: column;
+    ${md} {
+      grid-template-columns: 1fr;
     }
   }
+
+  .grid-col-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gap {
+    gap: 1.5rem;
+  }
 `
+
 export default Home

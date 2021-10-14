@@ -85,6 +85,10 @@ const Login: NextPage = () => {
         <div className="wrapper">
           <div className="container">
             <h2>Welcom to Staby CMS 👋</h2>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <p>ID : admin@staby.co.kr</p>
+              <p>PW : 123123</p>
+            </div>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="form-item">
                 <div className="form-group">

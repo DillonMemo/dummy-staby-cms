@@ -145,7 +145,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                     <Link href={{ pathname: '/mypage/edit' }}>
                       <a>
                         <ArrowRightOutlined className="icon" />
-                        <span>내 정보 관리</span>
+                        <span>{locale === 'ko' ? '내 정보 관리' : 'Account Settings'}</span>
                       </a>
                     </Link>
                   </li>
@@ -658,6 +658,7 @@ const HeaderWrapper = styled.header`
   ${md} {
     margin: 1.3rem auto 0;
     width: calc(100% - 2.4rem);
+    left: 0;
   }
 
   .header-group-start,
