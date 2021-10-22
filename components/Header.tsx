@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Badge, Select, Skeleton, Space } from 'antd'
+import { Badge, Modal, Select, Skeleton, Space } from 'antd'
 import {
   ArrowRightOutlined,
   EllipsisOutlined,
@@ -15,7 +15,8 @@ import DarkModeToggle from './DarkModeToggle'
 import Hamburger from './Hamburger'
 
 /** utils */
-import { EXPANDED_WIDTH, WIDTH } from '../lib/constants'
+import { EXPANDED_WIDTH, LOCALSTORAGE_TOKEN, WIDTH } from '../lib/constants'
+import { authTokenVar } from '../lib/apolloClient'
 
 /** styles */
 import { md, styleMode } from '../styles/styles'
@@ -100,6 +101,22 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
       return () => document.removeEventListener('mousedown', handleClickOutside as any)
     }
   }, [isNavOpen])
+
+  useEffect(() => {
+    if (!loading) {
+      if (!data) {
+        if (authTokenVar()) {
+          localStorage.removeItem(LOCALSTORAGE_TOKEN)
+        }
+
+        Modal.info({
+          title: locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login',
+          okText: locale === 'ko' ? '로그인' : 'Login',
+          onOk: () => push('/login', 'login', { locale }),
+        })
+      }
+    }
+  }, [data, loading])
 
   return (
     <>
