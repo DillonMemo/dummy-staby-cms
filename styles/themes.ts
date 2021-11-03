@@ -5,6 +5,7 @@ const lightTheme = {
   card_radius: '0.428rem',
   text: '#6e6b7b',
   text_hover: '#a6a4b0',
+  border: '#c8c8c8',
 }
 const darkTheme = {
   mode: 'dark',
@@ -13,6 +14,7 @@ const darkTheme = {
   card_radius: '0.428rem',
   text: '#b4b7bd',
   text_hover: '#676d7d',
+  border: '#404656',
 }
 
 const themes = {

@@ -1,12 +1,16 @@
 import gql from 'graphql-tag'
 
-export const ME_QUERY = gql`
-  query Me {
-    me {
+export const MY_QUERY = gql`
+  query My {
+    my {
       email
-      role
-      username
       password
+      nickname
+      profileImageName
+      memberStatus
+      memberType
+      refreshToken
+      lastLoginDate
     }
   }
 `

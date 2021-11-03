@@ -116,6 +116,33 @@ export const GlobalStyles = createGlobalStyle`
     ::-webkit-scrollbar-thumb:hover {
         background: rgba(34, 45, 50, 1);
     }
+
+    /** antd custom */
+    .ant-btn {
+      background: ${({ theme }) => theme.body};
+      color: ${({ theme }) => theme.text};
+
+      border: none;
+      outline: none;
+
+      &:hover, &:focus  {
+        background: ${({ theme }) => `${theme.body}`};
+        color: ${({ theme }) => theme.text_hover};
+      }
+    }
+    .ant-popover {
+      .ant-popover-arrow {
+        .ant-popover-arrow-content {
+          background-color: ${({ theme }) => theme.body};
+        }
+      }
+      .ant-popover-inner {
+        background-color: ${({ theme }) => theme.body};
+        .ant-popover-inner-content {
+          padding: 0;
+        }
+      }
+    }
 `
 
 const FadeIn = keyframes`
@@ -223,7 +250,7 @@ export const Form = styled.form`
       align-items: center;
       background-color: ${({ theme }) => theme.card};
       color: ${({ theme }) => theme.text};
-      border: 1px solid ${({ theme }) => (theme.mode === 'dark' ? '#404656' : `#c8c8c8`)};
+      border: 1px solid ${({ theme }) => theme.border};
       border-radius: ${({ theme }) => theme.card_radius};
     }
 
@@ -239,7 +266,7 @@ export const Form = styled.form`
     .ant-input[disabled],
     .ant-select-disabled .ant-select-selector {
       height: 2.714rem;
-      border: 1px solid ${({ theme }) => (theme.mode === 'dark' ? '#404656' : `#c8c8c8`)};
+      border: 1px solid ${({ theme }) => theme.border};
       border-radius: ${({ theme }) => theme.card_radius};
       background-color: ${({ theme }) => theme.body};
       color: ${({ theme }) => theme.text};

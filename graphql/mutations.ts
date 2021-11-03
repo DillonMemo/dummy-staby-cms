@@ -5,17 +5,23 @@ export const LOGIN_MUTATION = gql`
   mutation Login($loginInput: LoginInput!) {
     login(input: $loginInput) {
       ok
-      error
+      error {
+        ko
+        en
+      }
       token
     }
   }
 `
 
 export const EDIT_ACCOUNT_MUTATION = gql`
-  mutation EditAccount($editUserInput: EditUserInput!) {
-    editAccount(input: $editUserInput) {
+  mutation EditAccount($editMemberInput: EditMemberInput!) {
+    editAccount(input: $editMemberInput) {
       ok
-      error
+      error {
+        ko
+        en
+      }
     }
   }
 `

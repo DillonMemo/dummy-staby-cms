@@ -2,33 +2,37 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
-import { Button, Input, Select, Skeleton } from 'antd'
+import { Button, Input, Popover, Select, Skeleton, Upload } from 'antd'
 import styled from 'styled-components'
 import { useMutation, useQuery } from '@apollo/client'
+import { FormOutlined } from '@ant-design/icons'
+import ImgCrop from 'antd-img-crop'
+import { UploadChangeParam } from 'antd/lib/upload'
 
 /** components */
 import Layout from '../../components/Layout'
 
 /** styles */
-import { Form, MainWrapper, md, styleMode } from '../../styles/styles'
+import { defaultPalette, Form, MainWrapper, md, styleMode } from '../../styles/styles'
 
 /** graphql */
 import {
   EditAccountMutation,
   EditAccountMutationVariables,
-  MeQuery,
-  UserRole,
+  MemberType,
+  MyQuery,
 } from '../../generated'
-import { ME_QUERY } from '../../graphql/queries'
+import { MY_QUERY } from '../../graphql/queries'
 import { EDIT_ACCOUNT_MUTATION } from '../../graphql/mutations'
 
 type Props = styleMode
 
 export interface IEditForm {
+  profileImageName: File | string
   email: string
-  username: string
-  role: UserRole
   password: string
+  nickname: string
+  memberType: MemberType
 }
 
 const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
@@ -36,14 +40,14 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { getValues, handleSubmit, control } = useForm<IEditForm>({
     mode: 'onChange',
   })
-  const { loading, data: meData, refetch: refreshMe } = useQuery<MeQuery>(ME_QUERY)
+  const { loading, data: myData, refetch: refreshMe } = useQuery<MyQuery>(MY_QUERY)
 
   const onCompleted = async (data: EditAccountMutation) => {
     const {
       editAccount: { ok },
     } = data
 
-    if (ok && meData) {
+    if (ok && myData) {
       await refreshMe()
     }
   }
@@ -55,17 +59,87 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
   })
 
   const onSubmit = () => {
-    const { email, role, username, password } = getValues()
-    editAccount({
-      variables: {
-        editUserInput: {
-          email,
-          role,
-          ...(username !== '' && { username }),
-          ...(password !== '' && { password }),
-        },
-      },
-    })
+    const { email, password, nickname, memberType, profileImageName } = getValues()
+    debugger
+    // editAccount({
+    //   variables: {
+    //     editUserInput: {
+    //       email,
+    //       role,
+    //       ...(username !== '' && { username }),
+    //       ...(password !== '' && { password }),
+    //     },
+    //   },
+    // })
+  }
+
+  const renderPopoverContent = () => {
+    const Wrapper = styled.div`
+      display: inline-flex;
+      flex-flow: column nowrap;
+      button {
+        border: 1px solid ${({ theme }) => theme.border};
+      }
+    `
+
+    const onProfileChange = async ({ file }: UploadChangeParam) => {
+      try {
+        let src = file.url
+
+        if (!src) {
+          src = await new Promise((resolve) => {
+            const reader = new FileReader()
+            reader.readAsDataURL(file.originFileObj as any)
+            reader.onload = () => resolve(reader.result as any)
+          })
+          const profileNode: HTMLImageElement | null = document.querySelector('#profile')
+
+          if (profileNode && src) {
+            profileNode.src = src
+          }
+        }
+
+        // const resultFile: File = file.originFileObj
+        // setValue('profileImageName', resultFile)
+        // = async () => {
+        //   const profileNode: HTMLImageElement | null = document.querySelector('.profile')
+        //   console.log(reader.result)
+        //   debugger
+
+        //   // if (profileNode) {
+        //   // }
+        // }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    // const onProfilePreview = async (file: UploadFile<any>) => {
+    //   console.log(file)
+    //   debugger
+    //   const src = file.url
+    // }
+
+    return (
+      <Wrapper>
+        <ImgCrop
+          shape="round"
+          modalTitle={locale === 'ko' ? '이미지 편집' : 'Edit image'}
+          modalOk={locale === 'ko' ? '확인' : 'OK'}
+          modalCancel={locale === 'ko' ? '취소' : 'Cancel'}>
+          <Upload
+            accept="image/*"
+            multiple={false}
+            onChange={onProfileChange}
+            showUploadList={false}>
+            <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
+          </Upload>
+        </ImgCrop>
+        <Button onClick={() => console.log('click 2')}>
+          {locale === 'ko' ? '사진 삭제' : 'Remove photo'}
+        </Button>
+      </Wrapper>
+    )
   }
 
   return (
@@ -87,7 +161,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
           <Edit className="card">
             {loading ? (
               <Form>
-                {Array(4)
+                {Array(5)
                   .fill(null)
                   .map((_, index) => (
                     <div className="form-item" key={`form-${index}`}>
@@ -106,11 +180,40 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
               <Form onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-item">
                   <div className="form-group">
+                    <div className="profile-img-container">
+                      <div className="profile-img">
+                        <img
+                          id="profile"
+                          src={myData?.my?.profileImageName || '/static/img/profile-img.png'}
+                          alt="profile"
+                        />
+                        {/* {myData?.my.profileImageName ? (
+                        ) : (
+                          <div className="none-profile-img"></div>
+                        )} */}
+                        <div className="profile-edit">
+                          <Popover
+                            className="profile-edit-popover"
+                            content={renderPopoverContent}
+                            trigger="click"
+                            placement="bottomRight">
+                            <Button size="small">
+                              <FormOutlined size={10} />
+                              {locale === 'ko' ? '편집' : 'Edit'}
+                            </Button>
+                          </Popover>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="form-item">
+                  <div className="form-group">
                     <span>Email</span>
                     <Controller
                       control={control}
                       name="email"
-                      defaultValue={meData?.me.email}
+                      defaultValue={myData?.my.email}
                       render={({ field: { onChange, value } }) => (
                         <Input
                           className="input"
@@ -118,46 +221,6 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                           value={value}
                           onChange={onChange}
                           disabled
-                        />
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>Role</span>
-                    <Controller
-                      control={control}
-                      name="role"
-                      defaultValue={meData?.me.role}
-                      render={({ field: { value, onChange } }) => (
-                        <Select
-                          value={value}
-                          onChange={onChange}
-                          disabled={meData?.me.role !== UserRole.Admin}>
-                          {Object.keys(UserRole).map((role, index) => (
-                            <Select.Option value={role} key={`role-${index}`}>
-                              {role}
-                            </Select.Option>
-                          ))}
-                        </Select>
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>UserName</span>
-                    <Controller
-                      control={control}
-                      name="username"
-                      defaultValue={meData?.me.username}
-                      render={({ field: { value, onChange } }) => (
-                        <Input
-                          className="input"
-                          placeholder="User Name"
-                          value={value}
-                          onChange={onChange}
                         />
                       )}
                     />
@@ -180,6 +243,52 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                     />
                   </div>
                 </div>
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>Member Type</span>
+                    <Controller
+                      control={control}
+                      name="memberType"
+                      defaultValue={myData?.my.memberType}
+                      render={({ field: { value, onChange } }) => (
+                        <Select
+                          value={value}
+                          onChange={onChange}
+                          disabled={
+                            !(
+                              myData?.my.memberType === MemberType.Admin ||
+                              myData?.my.memberType === MemberType.System
+                            )
+                          }>
+                          {Object.keys(MemberType).map((type, index) => (
+                            <Select.Option value={type} key={`type-${index}`}>
+                              {type}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>Nickname</span>
+                    <Controller
+                      control={control}
+                      name="nickname"
+                      defaultValue={myData?.my.nickname}
+                      render={({ field: { value, onChange } }) => (
+                        <Input
+                          className="input"
+                          placeholder="Nickname"
+                          value={value}
+                          onChange={onChange}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+
                 <div className="form-item">
                   <div className="button-group">
                     <Button
@@ -206,6 +315,52 @@ const Edit = styled.div`
 
   ${md} {
     width: 100%;
+  }
+
+  .profile-img-container {
+    cursor: pointer;
+
+    display: inline-flex;
+    justify-content: center;
+
+    .none-profile-img {
+      width: 7.5rem;
+      height: 7.5rem;
+      border-radius: 50%;
+
+      background-color: ${defaultPalette.accent1};
+    }
+
+    .profile-img {
+      width: 7.5rem;
+      height: 7.5rem;
+
+      position: relative;
+      > img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: contain;
+      }
+
+      .profile-edit {
+        position: absolute;
+        bottom: 2.5px;
+        left: -5px;
+
+        height: 1.5rem;
+
+        > button {
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+
+          padding: 0.5rem;
+
+          font-size: 0.75rem;
+        }
+      }
+    }
   }
 `
 

@@ -23,8 +23,8 @@ import { md, styleMode } from '../styles/styles'
 
 /** graphql */
 import { useQuery } from '@apollo/client'
-import { ME_QUERY } from '../graphql/queries'
-import { MeQuery, MeQueryVariables } from '../generated'
+import { MY_QUERY } from '../graphql/queries'
+import { MyQuery, MyQueryVariables } from '../generated'
 
 type Props = styleMode
 
@@ -32,7 +32,9 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   const { locale, push, pathname } = useRouter()
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false)
   const hamburgerRef = React.useRef<HTMLDivElement>(null)
-  const { loading, data } = useQuery<MeQuery, MeQueryVariables>(ME_QUERY)
+  const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
+    fetchPolicy: 'network-only',
+  })
 
   /**
    * `side navigator` 마우스 이벤트 핸들러 입니다.
@@ -104,16 +106,16 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
 
   useEffect(() => {
     if (!loading) {
-      if (!data) {
-        if (authTokenVar()) {
+      if (data) {
+        const localToken = authTokenVar() || localStorage.getItem(LOCALSTORAGE_TOKEN)
+        if (data.my.refreshToken !== localToken) {
           localStorage.removeItem(LOCALSTORAGE_TOKEN)
+          Modal.info({
+            title: locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login',
+            okText: locale === 'ko' ? '로그인' : 'Login',
+            onOk: () => push('/login', 'login', { locale }),
+          })
         }
-
-        Modal.info({
-          title: locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login',
-          okText: locale === 'ko' ? '로그인' : 'Login',
-          onOk: () => push('/login', 'login', { locale }),
-        })
       }
     }
   }, [data, loading])
@@ -291,8 +293,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
             </div>
             <div className="header-item profile">
               <div className="info">
-                <span className="user-name">{data?.me.username}</span>
-                <span className="user-role">{data?.me.role}</span>
+                <span className="user-name">{data?.my.nickname}</span>
+                <span className="user-role">{data?.my.memberType}</span>
               </div>
               <div className="img">
                 <img src="/static/img/none-profile.png" alt="profile" />
@@ -736,6 +738,11 @@ const HeaderWrapper = styled.header`
           font-weight: 500;
           margin-bottom: 0.435rem;
           letter-spacing: 1px;
+
+          max-width: 7.5rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .user-role {
