@@ -131,6 +131,7 @@ export const GlobalStyles = createGlobalStyle`
       }
     }
     .ant-popover {
+      z-index: 999;
       .ant-popover-arrow {
         .ant-popover-arrow-content {
           background-color: ${({ theme }) => theme.body};
