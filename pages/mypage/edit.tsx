@@ -114,7 +114,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
         } else {
           throw new Error('not found file')
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(error)
         onError && onError(error)
       }
@@ -126,6 +126,18 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
      */
     const onProfileChange = ({ file }: UploadChangeParam) => {
       if (file.originFileObj) setValue('profileImageName', file.originFileObj)
+    }
+
+    /**
+     * profile을 비우는 클릭 이벤트 핸들러 입니다.
+     */
+    const onRemoveProfileClick = () => {
+      const profileNode: HTMLImageElement | null = document.querySelector('#profile')
+
+      if (profileNode) {
+        setValue('profileImageName', '')
+        profileNode.src = noneProfileImg
+      }
     }
 
     return (
@@ -144,7 +156,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
             <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
           </Upload>
         </ImgCrop>
-        <Button onClick={() => console.log('click 2')}>
+        <Button onClick={onRemoveProfileClick}>
           {locale === 'ko' ? '사진 삭제' : 'Remove photo'}
         </Button>
       </Wrapper>
