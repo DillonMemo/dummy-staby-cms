@@ -144,6 +144,48 @@ export const GlobalStyles = createGlobalStyle`
         }
       }
     }
+
+    .ant-notification {
+      .ant-notification-notice {
+        background: ${({ theme }) => theme.body};
+
+        .ant-notification-notice-message {
+          color: ${({ theme }) => theme.text};
+        }
+        .ant-notification-notice-close {
+          color: ${({ theme }) => theme.text};
+        }
+      }
+    }
+    .ant-modal {
+      color: ${({ theme }) => theme.text};
+      .ant-modal-content {
+        .ant-modal-close {
+          color: ${({ theme }) => theme.text};
+        }
+        .ant-modal-header {
+          background: ${({ theme }) => theme.body};
+          border-bottom: 1px solid ${({ theme }) => theme.text_hover};
+
+          .ant-modal-title {
+            color: ${({ theme }) => theme.text};
+          }
+        }
+
+        .ant-modal-body {
+          background: ${({ theme }) => theme.body};
+
+          .ant-modal-confirm-title {
+            color: ${({ theme }) => theme.text};
+          }
+        }
+
+        .ant-modal-footer {
+          border-top: 1px solid ${({ theme }) => theme.text_hover};
+          background: ${({ theme }) => theme.body};
+        }
+      }
+    }
 `
 
 const FadeIn = keyframes`

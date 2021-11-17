@@ -2,13 +2,16 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Badge, Modal, Select, Skeleton, Space } from 'antd'
+import { Badge, Modal, notification, Select, Skeleton, Space } from 'antd'
 import {
   ArrowRightOutlined,
   EllipsisOutlined,
   FileTextOutlined,
+  LogoutOutlined,
+  SettingOutlined,
   UserOutlined,
 } from '@ant-design/icons'
+import moment from 'moment'
 
 /** components */
 import DarkModeToggle from './DarkModeToggle'
@@ -22,9 +25,10 @@ import { authTokenVar } from '../lib/apolloClient'
 import { md, styleMode } from '../styles/styles'
 
 /** graphql */
-import { useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { MY_QUERY } from '../graphql/queries'
-import { MyQuery, MyQueryVariables } from '../generated'
+import { LogoutMutation, LogoutMutationVariables, MyQuery, MyQueryVariables } from '../generated'
+import { LOGOUT_MUTATION } from '../graphql/mutations'
 
 type Props = styleMode
 
@@ -35,6 +39,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
     fetchPolicy: 'network-only',
   })
+  const [logout] = useMutation<LogoutMutation, LogoutMutationVariables>(LOGOUT_MUTATION)
 
   /**
    * `side navigator` 마우스 이벤트 핸들러 입니다.
@@ -96,6 +101,25 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
     }
   }
 
+  /**
+   * logout 클릭 이벤트 핸들러 입니다.
+   */
+  const handleClickLogout = async () => {
+    try {
+      const { data } = await logout()
+
+      if (data?.logout.ok) {
+        localStorage.removeItem(LOCALSTORAGE_TOKEN)
+        push('/login', 'login', { locale })
+      }
+    } catch (error) {
+      notification.error({
+        message: error.message,
+      })
+      console.error(error)
+    }
+  }
+
   useEffect(() => {
     if (document) {
       document.addEventListener('mousedown', handleClickOutside as any)
@@ -128,7 +152,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
         onMouseLeave={useCallback(() => setIsNavOpen(false), [isNavOpen])}>
         <div className="navbar-header">
           <ul className="nav">
-            <li className="nav-item">
+            <li className="nav-item logo">
               <Link href="/">
                 <a>
                   <div className="status">
@@ -143,6 +167,12 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
         <div className="shadow-bottom"></div>
         <div className="navbar-container">
           <ul className="nav">
+            <li className="nav-item">
+              <button className="logout" onClick={handleClickLogout}>
+                <LogoutOutlined className="icon" />
+                <span className="text">{locale === 'ko' ? '로그아웃' : 'Logout'}</span>
+              </button>
+            </li>
             <li
               className={[
                 'nav-item',
@@ -170,6 +200,18 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   </li>
                 </div>
               </ul>
+            </li>
+            <li className="nav-item-header">
+              <EllipsisOutlined className="icon" />
+              <span className="text">MEMBER</span>
+            </li>
+            <li className="nav-item">
+              <Link href="/member/members">
+                <a>
+                  <SettingOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '관리' : 'Management'}</span>
+                </a>
+              </Link>
             </li>
             <li className="nav-item-header">
               <EllipsisOutlined className="icon" />
@@ -297,7 +339,16 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <span className="user-role">{data?.my.memberType}</span>
               </div>
               <div className="img">
-                <img src="/static/img/none-profile.png" alt="profile" />
+                <img
+                  src={
+                    data?.my.profileImageName
+                      ? `https://image.staby.co.kr/${
+                          data.my.profileImageName
+                        }?date=${moment().format('YYYYMMDDHHmmss')}`
+                      : '/static/img/none-profile.png'
+                  }
+                  alt="profile"
+                />
               </div>
             </div>
           </div>
@@ -352,12 +403,17 @@ const NavigatorWrapper = styled.div`
       border-radius: 0.25rem;
 
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
 
       height: 100%;
 
       .nav-item {
         width: 100%;
+
+        &.logo {
+          flex: 1;
+        }
+
         a {
           outline: none;
           display: flex;
@@ -477,7 +533,7 @@ const NavigatorWrapper = styled.div`
         }
 
         .text {
-          display: none;
+          display: none !important;
         }
 
         .icon {
@@ -493,12 +549,16 @@ const NavigatorWrapper = styled.div`
         background-color: ${({ theme }) => theme.card};
         margin: 0 !important;
 
-        a {
+        a,
+        button {
+          cursor: pointer;
           outline: none;
+          border: 0;
           text-overflow: inherit;
           margin: 0 0.9375rem;
           padding: 0.625rem 0.9375rem;
 
+          background-color: ${({ theme }) => theme.card};
           color: ${({ theme }) => theme.text};
           line-height: 1.45;
 
@@ -553,6 +613,12 @@ const NavigatorWrapper = styled.div`
               transform: translate(5px);
               transition: transform 0.25s ease;
             }
+          }
+        }
+
+        button.logout {
+          .text {
+            display: none;
           }
         }
 
@@ -621,7 +687,7 @@ const NavigatorWrapper = styled.div`
           justify-content: flex-start;
 
           .text {
-            display: block;
+            display: block !important;
           }
 
           .icon {
@@ -630,6 +696,13 @@ const NavigatorWrapper = styled.div`
         }
 
         .nav-item {
+          button.logout {
+            margin: 0 auto;
+            padding-right: 2rem;
+            .text {
+              display: flex;
+            }
+          }
           &.has-sub {
             > a:after {
               content: '';

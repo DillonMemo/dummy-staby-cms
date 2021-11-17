@@ -1,15 +1,15 @@
-import { useState } from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
-import { Button, Input, Popover, Select, Skeleton, Upload } from 'antd'
+import { Button, Input, notification, Popover, Select, Skeleton, Upload } from 'antd'
 import styled from 'styled-components'
 import { useMutation, useQuery } from '@apollo/client'
 import { FormOutlined } from '@ant-design/icons'
 import ImgCrop from 'antd-img-crop'
 import { UploadChangeParam } from 'antd/lib/upload'
 import { UploadRequestOption } from 'rc-upload/lib/interface'
+import moment from 'moment'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -26,6 +26,9 @@ import {
 } from '../../generated'
 import { MY_QUERY } from '../../graphql/queries'
 import { EDIT_ACCOUNT_MUTATION } from '../../graphql/mutations'
+
+/** utils */
+import { S3 } from '../../lib/awsClient'
 
 const noneProfileImg = '/static/img/profile-img.png'
 
@@ -62,20 +65,52 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
     onCompleted,
   })
 
-  const onSubmit = () => {
-    const { email, password, nickname, memberType, profileImageName } = getValues()
-    console.log(profileImageName)
-    debugger
-    // editAccount({
-    //   variables: {
-    //     editUserInput: {
-    //       email,
-    //       role,
-    //       ...(username !== '' && { username }),
-    //       ...(password !== '' && { password }),
-    //     },
-    //   },
-    // })
+  const onSubmit = async () => {
+    try {
+      const { password, nickname, memberType, profileImageName } = getValues()
+      let saveFileName = ''
+
+      if (profileImageName instanceof File) {
+        const lastIndexOf: number = profileImageName.name.lastIndexOf('.')
+        saveFileName =
+          process.env.NODE_ENV === 'development'
+            ? `dev/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
+            : `prod/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
+
+        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+          (await S3.upload({
+            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+            Key: saveFileName,
+            Body: profileImageName,
+            ACL: 'public-read',
+          }).promise())
+      }
+
+      const { data } = await editAccount({
+        variables: {
+          editMemberInput: {
+            profileImageName: myData?.my.profileImageName || saveFileName,
+            ...(password !== '' && { password }),
+            memberType,
+            ...(nickname !== '' && { nickname }),
+          },
+        },
+      })
+
+      if (!data?.editAccount.ok) {
+        const message = locale === 'ko' ? data?.editAccount.error?.ko : data?.editAccount.error?.en
+        notification.error({
+          message,
+        })
+        throw new Error(message)
+      } else {
+        notification.success({
+          message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   /**
@@ -205,7 +240,13 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <div className="profile-img">
                         <img
                           id="profile"
-                          src={myData?.my?.profileImageName || noneProfileImg}
+                          src={
+                            myData?.my?.profileImageName
+                              ? `https://image.staby.co.kr/${
+                                  myData?.my?.profileImageName
+                                }?date=${moment().format('YYYYMMDDHHmmss')}`
+                              : noneProfileImg
+                          }
                           alt="profile"
                         />
                         {/* {myData?.my.profileImageName ? (
