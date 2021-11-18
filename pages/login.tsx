@@ -57,6 +57,7 @@ const Login: NextPage = () => {
   const onSubmit = () => {
     if (!loading) {
       const { email, password } = getValues()
+      debugger
       loginMutation({
         variables: {
           loginInput: {
