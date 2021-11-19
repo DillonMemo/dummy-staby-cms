@@ -23,6 +23,8 @@ const FooterWrapper = styled.footer`
   position: relative;
   right: 0;
 
+  background-color: ${({ theme }) => theme.body};
+
   p {
     color: ${({ theme }) => theme.text};
     margin: 0;

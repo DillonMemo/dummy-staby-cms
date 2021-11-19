@@ -49,6 +49,7 @@ export const MEMBERS_MUTATION = gql`
       totalResults
       totalPages
       members {
+        _id
         email
         nickname
         memberStatus

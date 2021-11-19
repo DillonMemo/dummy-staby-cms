@@ -186,6 +186,89 @@ export const GlobalStyles = createGlobalStyle`
         }
       }
     }
+
+    .ant-table {
+      background: ${({ theme }) => theme.card} !important;
+      color: ${({ theme }) => theme.text} !important;
+
+      .ant-table-thead {
+        > tr {
+          > th {
+            color: ${({ theme }) => theme.text} !important;
+            background: ${({ theme }) => theme.body} !important;
+            border-bottom: 1px solid ${({ theme }) => theme.text_hover} !important;
+
+            &:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before {
+              background-color: ${({ theme }) =>
+                theme.mode === 'dark' ? `rgba(255,255,255, 0.25)` : `rgba(0,0,0,0.25)`} !important;
+            }
+          }
+        }
+      }
+
+      .ant-table-tbody {
+        >tr {
+
+          &.ant-table-row {
+            &:hover {
+              > td {
+                background: ${({ theme }) => theme.body} !important;
+              }
+            }
+          }
+          >td {
+            border-bottom: 1px solid ${({ theme }) => theme.text_hover} !important;
+          }
+        }
+
+        .ant-table-cell-fix-left, .ant-table-cell-fix-right {
+          background: ${({ theme }) => theme.card} !important; 
+        }
+      }
+    }
+
+    .ant-pagination {
+      color: ${({ theme }) => theme.text} !important;
+      .ant-pagination-prev, .ant-pagination-next, .ant-pagination-jump-prev, .ant-pagination-jump-next {
+        color: ${({ theme }) => theme.text} !important;
+      }
+
+      .ant-pagination-prev, .ant-pagination-next {
+        .ant-pagination-item-link {
+          background-color: ${({ theme }) => theme.body} !important;
+          border-color: ${({ theme }) => theme.text_hover} !important;
+          color: ${({ theme }) =>
+            theme.mode === 'dark' ? 'rgba(255,255,255, 0.25)' : 'rgba(0,0,0,0.25)'} !important;
+        }
+      }
+
+      .ant-pagination-item {
+        background-color: ${({ theme }) => theme.body} !important;
+        border: 1px solid ${({ theme }) =>
+          theme.mode === 'dark' ? 'rgba(255,255,255, 0.25)' : 'rgba(0,0,0,0.25)'} !important;
+        
+        a {
+          color: ${({ theme }) => theme.text} !important;
+        }
+
+        &:focus-visible, &:hover {
+          border-color: #1890ff !important;
+
+          a {
+            color: #1890ff !important;
+          }
+        }
+      }
+
+      .ant-pagination-item-active {
+        background: ${({ theme }) => theme.body} !important;
+        border-color: #1890ff !important;
+
+        a {
+          color: #1890ff !important;
+        }
+      }
+    }
 `
 
 const FadeIn = keyframes`
@@ -202,6 +285,7 @@ export const MainWrapper = styled.main`
   min-height: 100vh;
   margin-left: 5rem;
   padding: 7.75rem 2rem 0;
+  background-color: ${({ theme }) => theme.body};
 
   ${md} {
     margin-left: 0;
