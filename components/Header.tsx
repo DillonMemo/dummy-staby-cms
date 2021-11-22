@@ -201,18 +201,23 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </div>
               </ul>
             </li>
-            <li className="nav-item-header">
-              <EllipsisOutlined className="icon" />
-              <span className="text">MEMBER</span>
-            </li>
-            <li className="nav-item">
-              <Link href="/member/members">
-                <a>
-                  <SettingOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '관리' : 'Management'}</span>
-                </a>
-              </Link>
-            </li>
+            {(data?.my.memberType === 'ADMIN' || data?.my.memberType === 'SYSTEM') && (
+              <>
+                <li className="nav-item-header">
+                  <EllipsisOutlined className="icon" />
+                  <span className="text">MEMBER</span>
+                </li>
+                <li className="nav-item">
+                  <Link href="/member/members">
+                    <a>
+                      <SettingOutlined className="icon" />
+                      <span className="text">{locale === 'ko' ? '관리' : 'Management'}</span>
+                    </a>
+                  </Link>
+                </li>
+              </>
+            )}
+
             <li className="nav-item-header">
               <EllipsisOutlined className="icon" />
               <span className="text">GOING</span>

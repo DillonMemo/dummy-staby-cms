@@ -15,3 +15,26 @@ export const MY_QUERY = gql`
     }
   }
 `
+
+export const MEMBER_QUERY = gql`
+  query FindMemberById($input: MemberInput!) {
+    findMemberById(input: $input) {
+      ok
+      error {
+        ko
+        en
+      }
+      member {
+        email
+        nickname
+        memberStatus
+        memberType
+        point {
+          totalPoint
+          paidPoint
+          freePoint
+        }
+      }
+    }
+  }
+`
