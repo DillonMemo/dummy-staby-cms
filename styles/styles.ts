@@ -118,6 +118,20 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     /** antd custom */
+    .ant-input-search {
+      .ant-input-group {
+        .ant-input-group-addon {
+          &:last-child {
+            background-color: ${({ theme }) => theme.body};
+            color: ${({ theme }) => theme.text};
+
+            .ant-input-search-button:not(.ant-btn-primary) {
+              color: ${({ theme }) => theme.text};
+            }
+          }
+        }
+      }
+    }
     .ant-btn {
       background: ${({ theme }) => theme.body};
       color: ${({ theme }) => theme.text};
@@ -208,7 +222,6 @@ export const GlobalStyles = createGlobalStyle`
 
       .ant-table-tbody {
         >tr {
-
           &.ant-table-row {
             &:hover {
               > td {
@@ -219,12 +232,23 @@ export const GlobalStyles = createGlobalStyle`
           >td {
             border-bottom: 1px solid ${({ theme }) => theme.text_hover} !important;
           }
+          &.ant-table-placeholder {
+            &:hover {
+              > td {
+                background: ${({ theme }) => theme.body} !important;
+              }
+            }
+          }
         }
 
         .ant-table-cell-fix-left, .ant-table-cell-fix-right {
           background: ${({ theme }) => theme.card} !important; 
         }
       }
+    }
+
+    .ant-empty-normal {
+      color: ${({ theme }) => theme.text};
     }
 
     .ant-pagination {
@@ -266,6 +290,25 @@ export const GlobalStyles = createGlobalStyle`
 
         a {
           color: #1890ff !important;
+        }
+      }
+    }
+
+    .ant-dropdown {
+      color: ${({ theme }) => theme.text};
+      .ant-dropdown-menu {
+        background-color: ${({ theme }) => theme.body};
+        .ant-dropdown-menu-item {
+          color: ${({ theme }) => theme.text};
+
+          &:hover {
+            background-color: ${({ theme }) => theme.card};
+          }
+        }
+        .ant-dropdown-menu-submenu-title {
+          &:hover {
+            background-color: ${({ theme }) => theme.card};
+          }
         }
       }
     }

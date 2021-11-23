@@ -17,8 +17,8 @@ export const MY_QUERY = gql`
 `
 
 export const MEMBER_QUERY = gql`
-  query FindMemberById($input: MemberInput!) {
-    findMemberById(input: $input) {
+  query FindMemberById($memberInput: MemberInput!) {
+    findMemberById(input: $memberInput) {
       ok
       error {
         ko
