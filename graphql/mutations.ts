@@ -66,3 +66,16 @@ export const MEMBERS_MUTATION = gql`
     }
   }
 `
+
+/** Edit Member by (_id) */
+export const EDIT_MEMBER_BY_ID_MUTATION = gql`
+  mutation EditMemberById($editMemberInput: EditMemberInput!) {
+    editMemberById(input: $editMemberInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
