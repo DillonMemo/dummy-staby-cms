@@ -179,7 +179,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 'has-sub',
                 pathname.includes('/mypage') ? 'open' : undefined,
               ].join(' ')}>
-              <Link href="">
+              <Link href="#">
                 <a onClick={handleClickItem}>
                   <UserOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '마이페이지' : 'My Page'}</span>
@@ -231,7 +231,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               </Link>
             </li>
             <li className="nav-item has-sub">
-              <Link href="">
+              <Link href="#">
                 <a onClick={handleClickItem}>
                   <FileTextOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '바로가기2' : 'undefined'}</span>
@@ -240,7 +240,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               <ul className="menu-content">
                 <div className="collapse">
                   <li className="nav-item">
-                    <Link href="">
+                    <Link href="#">
                       <a>
                         <ArrowRightOutlined className="icon" />
                         <span>TEXT</span>

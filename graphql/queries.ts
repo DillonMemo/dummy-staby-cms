@@ -35,6 +35,7 @@ export const MEMBER_QUERY = gql`
           freePoint
         }
       }
+      createdAt
     }
   }
 `
