@@ -43,7 +43,8 @@
         "allow": ["warn", "error"]
       }
     ],
-    "no-useless-escape": "off"
+    "no-useless-escape": "off",
+    "@typescript-eslint/ban-ts-comment": "off"
   },
   "overrides": [
     {

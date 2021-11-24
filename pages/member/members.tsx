@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import router, { useRouter } from 'next/router'
 import { MainWrapper, md, styleMode } from '../../styles/styles'
 import styled from 'styled-components'
 import { Button, Dropdown, Input, Menu, Pagination, Skeleton, Space, Table } from 'antd'
@@ -22,6 +22,7 @@ import {
   MemberType,
 } from '../../generated'
 import { MEMBERS_MUTATION } from '../../graphql/mutations'
+import { Maybe } from 'graphql/jsutils/Maybe'
 
 type Props = styleMode
 
@@ -123,15 +124,16 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
           variables: {
             membersInput: {
               page,
-              memberType: key !== 'All' ? key : undefined,
+              memberType: key !== 'All' ? (key as Maybe<MemberType>) : undefined,
               memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
               nickName,
             },
           },
         })
 
-        if (data.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, memberType: key }))
+        if (data?.members.ok) {
+          //@ts-expect-error
+          setFilterOptions((prev) => ({ ...prev, memberType: key as Maybe<MemberType> }))
         }
       }
     } catch (error) {
@@ -151,13 +153,13 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
             membersInput: {
               page,
               memberType: memberType !== 'All' ? memberType : undefined,
-              memberStatus: key !== 'All' ? key : undefined,
+              memberStatus: key !== 'All' ? (key as Maybe<MemberStatus>) : undefined,
               nickName,
             },
           },
         })
-        if (data.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, memberStatus: key }))
+        if (data?.members.ok) {
+          setFilterOptions((prev) => ({ ...prev, memberStatus: key as any }))
         }
       }
     } catch (error) {
@@ -182,7 +184,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         })
 
-        if (data.members.ok) {
+        if (data?.members.ok) {
           setFilterOptions((prev) => ({ ...prev, nickName: value }))
         }
       } catch (error) {
@@ -233,6 +235,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Menu onClick={onMemberTypeMenuClick}>
                         <Menu.Item key="All">All</Menu.Item>
                         {Object.keys(MemberType).map((type) => (
+                          //@ts-expect-error
                           <Menu.Item key={MemberType[type]}>{type}</Menu.Item>
                         ))}
                       </Menu>
@@ -254,6 +257,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Menu onClick={onMemberStatusMenuClick}>
                         <Menu.Item key="All">All</Menu.Item>
                         {Object.keys(MemberStatus).map((status) => (
+                          //@ts-expect-error
                           <Menu.Item key={MemberStatus[status]}>{status}</Menu.Item>
                         ))}
                       </Menu>
@@ -292,6 +296,18 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <Table
                       style={{ width: '100%' }}
                       columns={columns}
+                      onRow={(column) => {
+                        return {
+                          onClick: () => {
+                            router.push({
+                              pathname: '/member/[id]',
+                              query: {
+                                id: column && column._id ? column._id : '',
+                              },
+                            })
+                          },
+                        }
+                      }}
                       dataSource={
                         membersData
                           ? membersData.members.members?.map((member: any, index: number) => ({
