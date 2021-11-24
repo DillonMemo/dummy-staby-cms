@@ -340,7 +340,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
             </div>
             <div className="header-item profile">
               <div className="info">
-                <span className="user-name">{data?.my.nickname}</span>
+                <span className="user-name">{data?.my.nickName}</span>
                 <span className="user-role">{data?.my.memberType}</span>
               </div>
               <div className="img">

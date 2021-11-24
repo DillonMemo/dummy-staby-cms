@@ -33,7 +33,7 @@ interface Filters {
 /** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
 interface Options extends Filters {
   page: number
-  nickname: string
+  nickName: string
 }
 /** 필터 드롭다운 Visible 옵션 */
 type Visible = Record<keyof Filters, boolean>
@@ -49,9 +49,9 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       responsive: ['md'],
     },
     {
-      title: locale === 'ko' ? '닉네임' : 'nickname',
-      dataIndex: 'nickname',
-      key: 'nickname',
+      title: locale === 'ko' ? '닉네임' : 'nickName',
+      dataIndex: 'nickName',
+      key: 'nickName',
     },
     {
       title: locale === 'ko' ? '활동정보' : 'status',
@@ -78,11 +78,11 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       render: () => <Button onClick={() => alert('comming soon')}>history</Button>,
     },
   ]
-  const [{ page, memberType, memberStatus, nickname }, setFilterOptions] = useState<Options>({
+  const [{ page, memberType, memberStatus, nickName }, setFilterOptions] = useState<Options>({
     page: 1,
     memberType: 'All',
     memberStatus: 'All',
-    nickname: '',
+    nickName: '',
   })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
     memberType: false,
@@ -125,7 +125,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               page,
               memberType: key !== 'All' ? key : undefined,
               memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
-              nickname,
+              nickName,
             },
           },
         })
@@ -152,7 +152,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               page,
               memberType: memberType !== 'All' ? memberType : undefined,
               memberStatus: key !== 'All' ? key : undefined,
-              nickname,
+              nickName,
             },
           },
         })
@@ -168,7 +168,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
   /**
    * 닉네임 변경 이벤트 핸들러 입니다.
    */
-  const onNicknameChange = useCallback(
+  const onNickNameChange = useCallback(
     debounce(async ({ target: { value } }) => {
       try {
         const { data } = await members({
@@ -177,19 +177,19 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               page,
               memberType: memberType !== 'All' ? memberType : undefined,
               memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
-              nickname: value,
+              nickName: value,
             },
           },
         })
 
         if (data.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, nickname: value }))
+          setFilterOptions((prev) => ({ ...prev, nickName: value }))
         }
       } catch (error) {
         console.error(error)
       }
     }, 1000),
-    [page, memberType, memberStatus, nickname]
+    [page, memberType, memberStatus, nickName]
   )
 
   useEffect(() => {
@@ -275,7 +275,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Input.Search
                     placeholder={locale === 'ko' ? '닉네임' : 'Nickname'}
                     loading={membersLoading}
-                    onChange={onNicknameChange}
+                    onChange={onNickNameChange}
                   />
                 </Space>
               </div>
@@ -298,7 +298,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                               key: index,
                               _id: member._id,
                               email: member.email,
-                              nickname: member.nickname,
+                              nickName: member.nickName,
                               memberStatus: member.memberStatus,
                               memberType: member.memberType,
                               totalPoint: member.point.totalPoint,

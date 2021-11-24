@@ -6,7 +6,7 @@ export const MY_QUERY = gql`
       _id
       email
       password
-      nickname
+      nickName
       profileImageName
       memberStatus
       memberType
@@ -26,7 +26,7 @@ export const MEMBER_QUERY = gql`
       }
       member {
         email
-        nickname
+        nickName
         memberStatus
         memberType
         point {

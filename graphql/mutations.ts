@@ -14,6 +14,7 @@ export const LOGIN_MUTATION = gql`
   }
 `
 
+/** 마이페이지 > 수정 Mutation */
 export const EDIT_ACCOUNT_MUTATION = gql`
   mutation EditAccount($editMemberInput: EditMemberInput!) {
     editAccount(input: $editMemberInput) {
@@ -26,6 +27,7 @@ export const EDIT_ACCOUNT_MUTATION = gql`
   }
 `
 
+/** 로그아웃 Mutation */
 export const LOGOUT_MUTATION = gql`
   mutation Logout {
     logout {
@@ -38,6 +40,7 @@ export const LOGOUT_MUTATION = gql`
   }
 `
 
+/** Member List Mutation */
 export const MEMBERS_MUTATION = gql`
   mutation Members($membersInput: MembersInput!) {
     members(input: $membersInput) {
@@ -51,7 +54,7 @@ export const MEMBERS_MUTATION = gql`
       members {
         _id
         email
-        nickname
+        nickName
         memberStatus
         memberType
         point {

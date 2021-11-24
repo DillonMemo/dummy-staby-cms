@@ -38,7 +38,7 @@ export interface IEditForm {
   profileImageName: File | string
   email: string
   password: string
-  nickname: string
+  nickName: string
   memberType: MemberType
 }
 
@@ -67,7 +67,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const onSubmit = async () => {
     try {
-      const { password, nickname, memberType, profileImageName } = getValues()
+      const { password, nickName, memberType, profileImageName } = getValues()
       let saveFileName = ''
 
       if (profileImageName instanceof File) {
@@ -92,7 +92,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
             profileImageName: myData?.my.profileImageName || saveFileName,
             ...(password !== '' && { password }),
             memberType,
-            ...(nickname !== '' && { nickname }),
+            ...(nickName !== '' && { nickName }),
           },
         },
       })
@@ -337,8 +337,8 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <span>Nickname</span>
                     <Controller
                       control={control}
-                      name="nickname"
-                      defaultValue={myData?.my.nickname}
+                      name="nickName"
+                      defaultValue={myData?.my.nickName}
                       render={({ field: { value, onChange } }) => (
                         <Input
                           className="input"
