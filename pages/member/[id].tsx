@@ -1,18 +1,16 @@
-import { useLazyQuery } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import {
-  EditAccountMutation,
-  EditAccountMutationVariables,
+  EditMemberByIdMutation,
+  EditMemberByIdMutationVariables,
   FindMemberByIdQuery,
   FindMemberByIdQueryVariables,
-  MembersMutation,
-  MembersMutationVariables,
   MemberType,
 } from '../../generated'
 import { MEMBER_QUERY } from '../../graphql/queries'
 import { defaultPalette, Form, MainWrapper, md, styleMode } from '../../styles/styles'
-import { Button, Input, Select } from 'antd'
+import { Button, Input, notification, Select } from 'antd'
 
 import Link from 'next/link'
 import styled from 'styled-components'
@@ -21,6 +19,7 @@ import styled from 'styled-components'
 import Layout from '../../components/Layout'
 import { useEffect, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { EDIT_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
 
 type Props = styleMode
 
@@ -28,10 +27,11 @@ export interface MemberEditForm {
   email: string
   password: string
   nickName: string
-  joinType: string
   memberType: MemberType
   activities: string
-  point: number
+  totalPoint: number
+  paidPoint: number
+  freePoint: number
   memberStatus: string
   createdAt: string
 }
@@ -39,6 +39,9 @@ export interface MemberEditForm {
 const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const router = useRouter()
   const { locale } = useRouter()
+  const { getValues, handleSubmit, control } = useForm<MemberEditForm>({
+    mode: 'onChange',
+  })
   const memberId = router.query.id ? router.query.id?.toString() : ''
 
   const [getMember, { data: memberData, refetch: refreshMe }] = useLazyQuery<
@@ -46,9 +49,53 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     FindMemberByIdQueryVariables
   >(MEMBER_QUERY)
 
-  const { control } = useForm<MemberEditForm>({
-    mode: 'onChange',
-  })
+  const onCompleted = async (data: EditMemberByIdMutation) => {
+    const {
+      editMemberById: { ok },
+    } = data
+
+    if (ok && memberData && refreshMe) {
+      await refreshMe()
+    }
+  }
+
+  const [editMember, { loading: editLoading }] = useMutation<
+    EditMemberByIdMutation,
+    EditMemberByIdMutationVariables
+  >(EDIT_MEMBER_BY_ID_MUTATION, { onCompleted })
+
+  const onSubmit = async () => {
+    try {
+      const { password, nickName, memberType, point } = getValues()
+
+      const { data } = await editMember({
+        variables: {
+          editMemberInput: {
+            _id: memberId,
+            ...(password !== '' && { password }),
+            ...(nickName !== '' && { nickName }),
+            memberType: memberType,
+            //...(point !== 0 && { point }),
+          },
+        },
+      })
+
+      if (!data?.editMemberById.ok) {
+        const message =
+          locale === 'ko' ? data?.editMemberById.error?.ko : data?.editMemberById.error?.en
+        notification.error({
+          message,
+        })
+        throw new Error(message)
+      } else {
+        notification.success({
+          message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
+        })
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
 
   useEffect(() => {
     getMember({
@@ -78,7 +125,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           </div>
           <div className="main-content">
             <Edit className="card">
-              <Form>
+              <Form onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-item">
                   <div className="form-group">
                     <span>Email</span>
@@ -141,6 +188,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <Controller
                       key={memberData?.findMemberById.member?.memberType}
                       control={control}
+                      defaultValue={memberData?.findMemberById.member?.memberType}
                       name="memberType"
                       render={({ field: { value, onChange } }) => (
                         <Select
@@ -148,7 +196,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                           value={value}
                           onChange={onChange}>
                           {Object.keys(MemberType).map((data, index) => (
-                            <Select.Option value={data} key={index}>
+                            <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
                               {data}
                             </Select.Option>
                           ))}
@@ -180,16 +228,55 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Point</span>
+                    <span>Total Point</span>
                     <Controller
                       key={memberData?.findMemberById.member?.point.totalPoint}
                       control={control}
-                      name="point"
+                      name="totalPoint"
                       defaultValue={memberData?.findMemberById.member?.point.totalPoint}
                       render={({ field: { value, onChange } }) => (
                         <Input
                           className="input"
-                          placeholder="MemberStatus"
+                          placeholder="point"
+                          value={value}
+                          onChange={onChange}
+                          disabled
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>Paid Point</span>
+                    <Controller
+                      key={memberData?.findMemberById.member?.point.paidPoint}
+                      control={control}
+                      name="paidPoint"
+                      defaultValue={memberData?.findMemberById.member?.point.paidPoint}
+                      render={({ field: { value, onChange } }) => (
+                        <Input
+                          className="input"
+                          placeholder="paidPoint"
+                          value={value}
+                          onChange={onChange}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>Free Point</span>
+                    <Controller
+                      key={memberData?.findMemberById.member?.point.freePoint}
+                      control={control}
+                      name="freePoint"
+                      defaultValue={memberData?.findMemberById.member?.point.freePoint}
+                      render={({ field: { value, onChange } }) => (
+                        <Input
+                          className="input"
+                          placeholder="freePoint"
                           value={value}
                           onChange={onChange}
                         />
@@ -225,8 +312,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       role="button"
                       htmlType="submit"
                       className="submit-button"
-                      //loading={editLoading}
-                    >
+                      loading={editLoading}>
                       {locale === 'ko' ? '저장' : 'save'}
                     </Button>
                   </div>
