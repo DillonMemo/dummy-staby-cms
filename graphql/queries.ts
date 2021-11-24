@@ -34,8 +34,8 @@ export const MEMBER_QUERY = gql`
           paidPoint
           freePoint
         }
+        createdAt
       }
-      createdAt
     }
   }
 `
