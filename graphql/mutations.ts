@@ -17,10 +17,12 @@ export const LOGIN_MUTATION = gql`
 /** 회원 생성 */
 export const CREATE_ACCOUNT_MUTATION = gql`
   mutation CreateAccount($createMemberInput: CreateMemberInput!) {
-    ok
-    error {
-      ko
-      en
+    createAccount(input: $createMemberInput) {
+      ok
+      error {
+        ko
+        en
+      }
     }
   }
 `
