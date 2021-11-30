@@ -92,3 +92,16 @@ export const EDIT_MEMBER_BY_ID_MUTATION = gql`
     }
   }
 `
+
+/** Create Live */
+export const CREATE_LIVE_MUTATION = gql`
+  mutation CreateLive($createLiveInput: CreateLiveInput!) {
+    createLive(input: $createLiveInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
