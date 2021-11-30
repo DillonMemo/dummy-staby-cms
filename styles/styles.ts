@@ -404,6 +404,10 @@ export const MainWrapper = styled.main`
       border-radius: ${({ theme }) => theme.card_radius};
       padding: 1rem;
     }
+
+    .form-message {
+      color: red;
+    }
   }
 `
 export const Form = styled.form`
@@ -476,5 +480,63 @@ export const Form = styled.form`
     min-width: 7.5rem;
     color: ${({ theme }) => theme.text};
     background-color: ${({ theme }) => theme.body};
+  }
+`
+
+export const Edit = styled.div`
+  width: 50%;
+
+  ${md} {
+    width: 100%;
+  }
+
+  .thumbnailAddBtn {
+    margin-top: 7px;
+  }
+
+  .profile-img-container {
+    cursor: pointer;
+
+    display: inline-flex;
+    justify-content: center;
+
+    .none-profile-img {
+      width: 7.5rem;
+      height: 7.5rem;
+      border-radius: 50%;
+
+      background-color: ${defaultPalette.accent1};
+    }
+
+    .profile-img {
+      width: 7.5rem;
+      height: 7.5rem;
+
+      position: relative;
+      > img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: contain;
+      }
+
+      .profile-edit {
+        position: absolute;
+        bottom: 2.5px;
+        left: -5px;
+
+        height: 1.5rem;
+
+        > button {
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+
+          padding: 0.5rem;
+
+          font-size: 0.75rem;
+        }
+      }
+    }
   }
 `

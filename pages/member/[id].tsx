@@ -197,8 +197,8 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                           defaultValue={memberData?.findMemberById.member?.memberType}
                           value={value}
                           onChange={onChange}>
-                          {Object.keys(MemberType).map((data, index) => (
-                            <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
+                          {(Object.values(MemberType) as string[]).map((data, index) => (
+                            <Select.Option value={data} key={`type-${index}`}>
                               {data}
                             </Select.Option>
                           ))}

@@ -8,6 +8,7 @@ import {
   EllipsisOutlined,
   FileTextOutlined,
   LogoutOutlined,
+  PlusOutlined,
   SettingOutlined,
   UserOutlined,
 } from '@ant-design/icons'
@@ -215,18 +216,55 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                     </a>
                   </Link>
                 </li>
+                <li className="nav-item">
+                  <Link href="/member/createMember">
+                    <a>
+                      <PlusOutlined className="icon" />
+                      <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                    </a>
+                  </Link>
+                </li>
               </>
             )}
 
             <li className="nav-item-header">
               <EllipsisOutlined className="icon" />
-              <span className="text">GOING</span>
+              <span className="text">VOD</span>
             </li>
             <li className="nav-item">
               <Link href="#">
                 <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기1' : 'undefined'}</span>
+                  <SettingOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '관리' : 'Create'}</span>
+                </a>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link href="#">
+                <a>
+                  <PlusOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                </a>
+              </Link>
+            </li>
+
+            <li className="nav-item-header">
+              <EllipsisOutlined className="icon" />
+              <span className="text">LIVE</span>
+            </li>
+            <li className="nav-item">
+              <Link href="#">
+                <a>
+                  <SettingOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '관리' : 'Create'}</span>
+                </a>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link href="#">
+                <a>
+                  <PlusOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
                 </a>
               </Link>
             </li>
@@ -234,7 +272,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               <Link href="#">
                 <a onClick={handleClickItem}>
                   <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기2' : 'undefined'}</span>
+                  <span className="text">{locale === 'ko' ? 'test' : 'Edit'}</span>
                 </a>
               </Link>
               <ul className="menu-content">
