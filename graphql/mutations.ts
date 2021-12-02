@@ -105,3 +105,46 @@ export const CREATE_LIVE_MUTATION = gql`
     }
   }
 `
+/** get live list mutation */
+export const LIVES_MUTATION = gql`
+  mutation Lives($livesInput: LivesInput!) {
+    lives(input: $livesInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      lives {
+        _id # ID
+        title # 제목
+        content # 설명 및 내용
+        hostName # 진행자명
+        paymentAmount # 결제금액
+        previewDate # 라이브예고일자
+        liveStartDate # 라이브시작일자
+        liveEndDate # 라이브종료일자
+        mainImageName # 라이브메인이미지
+        liveLinkInfo {
+          # 라이브영상링크정보
+          linkPath # 채널 링크 Path + 파일명
+          playingImageName # 플레이중 이미지 파일명
+          listingOrder # 노출 순서
+        }
+        liveShareInfo {
+          # 지분정보
+          memberId # 회원 ID
+          priorityShare # 우선환수 지분률
+          directShare # 직분배 지분률
+          shareApplyDate # 지분시작일자 (=== 라이브시작일자)
+        }
+        viewCount # 조회수
+        delayedEntryTime # 진행후결제가능시간
+        likeCount # 좋아요 수
+        liveStatus # 라이브상태
+        vodId # VOD 고유식별 ID (종료 후 등록된 VOD)
+      }
+    }
+  }
+`
