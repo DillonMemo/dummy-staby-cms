@@ -1,26 +1,75 @@
-import type { NextPage } from 'next';
-import { useReactiveVar } from '@apollo/client';
-import styled from 'styled-components';
-import Layout from '../components/Layout';
-import { styleMode } from '../styles/styles';
-import React from 'react';
-import { authTokenVar } from '../lib/apolloClient';
+import type { NextPage } from 'next'
+import { useMutation, useReactiveVar } from '@apollo/client'
+import styled from 'styled-components'
+import Layout from '../components/Layout'
+import { styleMode } from '../styles/styles'
+import React, { useEffect, useState } from 'react'
+import { authTokenVar } from '../lib/apolloClient'
+import { Button, Space, Upload } from 'antd'
+import { TestUploadMutation, TestUploadMutationVariables } from '../generated'
+import { TEST_UPLOAD_MUTATION } from '../graphql/mutations'
 
-type Props = styleMode;
+type Props = styleMode
 
 const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const getData = useReactiveVar(authTokenVar);
+  const [file, setFile] = useState<any>()
+  const getData = useReactiveVar(authTokenVar)
+  const [mutate, { loading }] = useMutation<TestUploadMutation, TestUploadMutationVariables>(
+    TEST_UPLOAD_MUTATION
+  )
+
+  const onSubmit = async () => {
+    try {
+      console.log(file)
+      const formBody = new FormData()
+      formBody.append('file', file)
+      const request = await (
+        await fetch('http://localhost:4000/uploads/', {
+          method: 'POST',
+          body: formBody,
+        })
+      ).json()
+      console.log(request)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  // useEffect(() => {
+  //   if (file) {
+  //     debugger
+  //     console.log(file)
+  //     mutate({
+  //       variables: {
+  //         upload: file.originFileObj,
+  //       },
+  //     })
+  //     debugger
+  //   }
+  // }, [file])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
       <DivWrapper>
         <main className="main">
           <p>{getData || '토큰이 존재 하지 않습니다.'}</p>
+          <Space direction="vertical" style={{ width: '100%' }} size="large">
+            <Upload
+              accept="image/*"
+              multiple={false}
+              onChange={(data) => setFile(data.file.originFileObj)}
+              showUploadList={false}>
+              <Button>Upload</Button>
+            </Upload>
+          </Space>
+          <Button type="primary" onClick={onSubmit}>
+            Submit
+          </Button>
+          <p>{file ? 'true' : 'false'}</p>
         </main>
       </DivWrapper>
     </Layout>
-  );
-};
+  )
+}
 
 const DivWrapper = styled.div`
   min-height: 100vh;
@@ -90,5 +139,5 @@ const DivWrapper = styled.div`
       flex-direction: column;
     }
   }
-`;
-export default Test;
+`
+export default Test
