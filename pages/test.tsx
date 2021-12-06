@@ -15,16 +15,30 @@ const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const onSubmit = async () => {
     try {
-      console.log(file)
-      const formBody = new FormData()
-      formBody.append('file', file)
-      const request = await (
-        await fetch('http://localhost:4000/uploads/', {
+      const formData = new FormData()
+      const params = {
+        id: 'testID', // string > Live ID
+        paths: ['1', '2'], // string[] > 채널 링크
+      }
+      formData.append('json', JSON.stringify(params))
+      // 이미지 파일이 여러개면 formData를 여러번 선언 해야 합니다.
+      /**
+       * example:
+       * for (const file of files) {
+       *  console.log(file)
+       *  // do something...
+       * }
+       */
+      formData.append('files', file)
+      formData.append('files', file)
+      // const request =
+      await (
+        await fetch('http://localhost:4000/uploads/live', {
           method: 'POST',
-          body: formBody,
+          body: formData,
         })
       ).json()
-      console.log(request)
+      // console.log(request)
     } catch (error) {
       console.error(error)
     }
