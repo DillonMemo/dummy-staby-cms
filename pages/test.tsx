@@ -1,22 +1,17 @@
 import type { NextPage } from 'next'
-import { useMutation, useReactiveVar } from '@apollo/client'
+import { useReactiveVar } from '@apollo/client'
 import styled from 'styled-components'
 import Layout from '../components/Layout'
 import { styleMode } from '../styles/styles'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { authTokenVar } from '../lib/apolloClient'
 import { Button, Space, Upload } from 'antd'
-import { TestUploadMutation, TestUploadMutationVariables } from '../generated'
-import { TEST_UPLOAD_MUTATION } from '../graphql/mutations'
 
 type Props = styleMode
 
 const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [file, setFile] = useState<any>()
   const getData = useReactiveVar(authTokenVar)
-  const [mutate, { loading }] = useMutation<TestUploadMutation, TestUploadMutationVariables>(
-    TEST_UPLOAD_MUTATION
-  )
 
   const onSubmit = async () => {
     try {
@@ -34,18 +29,6 @@ const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
       console.error(error)
     }
   }
-  // useEffect(() => {
-  //   if (file) {
-  //     debugger
-  //     console.log(file)
-  //     mutate({
-  //       variables: {
-  //         upload: file.originFileObj,
-  //       },
-  //     })
-  //     debugger
-  //   }
-  // }, [file])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>

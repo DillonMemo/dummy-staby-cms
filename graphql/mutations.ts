@@ -148,15 +148,3 @@ export const LIVES_MUTATION = gql`
     }
   }
 `
-
-export const TEST_UPLOAD_MUTATION = gql`
-  mutation TestUpload($upload: Upload!) {
-    testUpload(file: $upload) {
-      ok
-      error {
-        ko
-        en
-      }
-    }
-  }
-`
