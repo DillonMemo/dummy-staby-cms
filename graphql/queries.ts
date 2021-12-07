@@ -39,3 +39,21 @@ export const MEMBER_QUERY = gql`
     }
   }
 `
+
+export const FIND_MEMBERS_BY_TYPE_QUERY = gql`
+  query FindMembersByType($membersByTypeInput: MembersByTypeInput!) {
+    findMembersByType(input: $membersByTypeInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      members {
+        _id
+        nickName
+        memberStatus
+        memberType
+      }
+    }
+  }
+`

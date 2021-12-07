@@ -31,9 +31,10 @@ const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
        */
       formData.append('files', file)
       formData.append('files', file)
+      formData.append('files', file)
       // const request =
       await (
-        await fetch('http://localhost:4000/uploads/live', {
+        await fetch(`${process.env.NEXT_PUBLIC_FETCH_URL}/uploads/live`, {
           method: 'POST',
           body: formData,
         })
