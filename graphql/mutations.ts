@@ -102,6 +102,7 @@ export const CREATE_LIVE_MUTATION = gql`
         ko
         en
       }
+      liveId
     }
   }
 `
