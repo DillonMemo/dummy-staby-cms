@@ -57,3 +57,43 @@ export const FIND_MEMBERS_BY_TYPE_QUERY = gql`
     }
   }
 `
+export const LIVE_QUERY = gql`
+  query FindLiveById($liveInput: LiveInput!) {
+    findLiveById(input: $liveInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      live {
+        _id
+        title
+        content
+        hostName
+        paymentAmount
+        previewDate
+        liveStartDate
+        liveEndDate
+        mainImageName
+        liveLinkInfo {
+          linkPath
+          playingImageName
+          listingOrder
+        }
+        liveShareInfo {
+          memberId
+          priorityShare
+          directShare
+          shareApplyDate
+        }
+        viewCount
+        delayedEntryTime
+        likeCount
+        liveStatus
+        vodId
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`
