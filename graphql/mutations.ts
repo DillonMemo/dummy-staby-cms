@@ -123,7 +123,7 @@ export const LIVES_MUTATION = gql`
         content # 설명 및 내용
         hostName # 진행자명
         paymentAmount # 결제금액
-        previewDate # 라이브예고일자
+        livePreviewDate # 라이브예고일자
         liveStartDate # 라이브시작일자
         liveEndDate # 라이브종료일자
         mainImageName # 라이브메인이미지
@@ -146,6 +146,20 @@ export const LIVES_MUTATION = gql`
         liveStatus # 라이브상태
         vodId # VOD 고유식별 ID (종료 후 등록된 VOD)
       }
+    }
+  }
+`
+
+/** Edit Live */
+export const EDIT_LIVE_MUTATION = gql`
+  mutation EditLive($editLiveInput: EditLiveInput!) {
+    editLive(input: $editLiveInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      liveId
     }
   }
 `

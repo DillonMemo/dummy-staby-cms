@@ -71,7 +71,7 @@ export const LIVE_QUERY = gql`
         content
         hostName
         paymentAmount
-        previewDate
+        livePreviewDate
         liveStartDate
         liveEndDate
         mainImageName
