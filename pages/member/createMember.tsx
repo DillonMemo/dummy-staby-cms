@@ -1,11 +1,10 @@
 import { useRouter } from 'next/router'
 import { CreateAccountMutation, CreateAccountMutationVariables, MemberType } from '../../generated'
 
-import { defaultPalette, Edit, Form, MainWrapper, md, styleMode } from '../../styles/styles'
+import { Edit, Form, MainWrapper, md, styleMode } from '../../styles/styles'
 import { Button, Input, notification, Select } from 'antd'
 
 import Link from 'next/link'
-import styled from 'styled-components'
 
 /** components */
 import Layout from '../../components/Layout'
