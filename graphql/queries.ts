@@ -81,10 +81,13 @@ export const LIVE_QUERY = gql`
           listingOrder
         }
         liveShareInfo {
-          memberId
-          priorityShare
-          directShare
-          shareApplyDate
+          # 지분정보
+          shareApplyDate # 지분시작일자 (=== 라이브시작일자)
+          memberShareInfo {
+            memberId # 회원 ID
+            priorityShare # 우선환수 지분률
+            directShare # 직분배 지분률
+          }
         }
         viewCount
         delayedEntryTime
