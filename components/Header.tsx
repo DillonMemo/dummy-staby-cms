@@ -235,12 +235,12 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               <Link href="#">
                 <a>
                   <SettingOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '관리' : 'Create'}</span>
+                  <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
                 </a>
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="#">
+              <Link href="/vod/createVod">
                 <a>
                   <PlusOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
@@ -256,12 +256,12 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               <Link href="#">
                 <a>
                   <SettingOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '관리' : 'Create'}</span>
+                  <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
                 </a>
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="#">
+              <Link href="/live/createLive">
                 <a>
                   <PlusOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>

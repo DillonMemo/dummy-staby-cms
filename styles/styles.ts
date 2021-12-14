@@ -312,6 +312,28 @@ export const GlobalStyles = createGlobalStyle`
         }
       }
     }
+
+    .mrT5{
+      margin-top:5px;
+    }
+
+    .fontSize12{
+      font-size:12px;
+    }
+
+    .delectBtn{
+      width:fit-content;
+      height:auto;
+      margin:5px 5px;
+      padding: 0px 5px;
+      font-size: 12px;
+      text-align:center;
+      background: #e8e8e8;
+      color: #6e6b7b;
+      border: none;
+      outline: none;
+
+    }
 `
 
 const FadeIn = keyframes`
