@@ -3,9 +3,10 @@ import { useReactiveVar } from '@apollo/client'
 import styled from 'styled-components'
 import Layout from '../components/Layout'
 import { styleMode } from '../styles/styles'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { authTokenVar } from '../lib/apolloClient'
 import { Button, Space, Upload } from 'antd'
+import * as mongoose from 'mongoose'
 
 type Props = styleMode
 
@@ -20,6 +21,7 @@ const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
         id: 'testID', // string > Live ID
         paths: ['1', '2'], // string[] > 채널 링크
       }
+
       formData.append('json', JSON.stringify(params))
       // 이미지 파일이 여러개면 formData를 여러번 선언 해야 합니다.
       /**
@@ -44,6 +46,11 @@ const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
       console.error(error)
     }
   }
+
+  useEffect(() => {
+    const id = new mongoose.Types.ObjectId().toHexString()
+    console.log('id', id)
+  }, [])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
