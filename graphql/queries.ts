@@ -34,7 +34,7 @@ export const MEMBER_QUERY = gql`
           paidPoint
           freePoint
         }
-        createdAt
+        createDate
       }
     }
   }
@@ -83,6 +83,7 @@ export const LIVE_QUERY = gql`
         liveShareInfo {
           # 지분정보
           shareApplyDate # 지분시작일자 (=== 라이브시작일자)
+          liveId # 라이브 고유식별 ID
           memberShareInfo {
             memberId # 회원 ID
             priorityShare # 우선환수 지분률
@@ -94,8 +95,8 @@ export const LIVE_QUERY = gql`
         likeCount
         liveStatus
         vodId
-        createdAt
-        updatedAt
+        createDate
+        updateDate
       }
     }
   }
