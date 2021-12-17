@@ -132,16 +132,6 @@ export const LIVES_MUTATION = gql`
           playingImageName # 플레이중 이미지 파일명
           listingOrder # 노출 순서
         }
-        liveShareInfo {
-          # 지분정보
-          shareApplyDate # 지분시작일자 (=== 라이브시작일자)
-          liveId # 라이브 고유식별 ID
-          memberShareInfo {
-            memberId # 회원 ID
-            priorityShare # 우선환수 지분률
-            directShare # 직분배 지분률
-          }
-        }
         viewCount # 조회수
         delayedEntryTime # 진행후결제가능시간
         likeCount # 좋아요 수
