@@ -171,7 +171,6 @@ export const CREATE_VOD_MUTATION = gql`
     createVod(input: $createVodInput) {
       ok
       error {
-        liveShareInfo
         ko
         en
       }
