@@ -102,7 +102,6 @@ export const CREATE_LIVE_MUTATION = gql`
         ko
         en
       }
-      liveId
     }
   }
 `
@@ -162,7 +161,48 @@ export const EDIT_LIVE_MUTATION = gql`
         ko
         en
       }
-      liveId
     }
   }
 `
+
+/** Create VOD */
+export const CREATE_VOD_MUTATION = gql`
+  mutation CreateVod($createVodInput: CreateVodInput!) {
+    createVod(input: $createVodInput) {
+      ok
+      error {
+        liveShareInfo
+        ko
+        en
+      }
+    }
+  }
+`
+
+/** get VOD list mutation */
+// export const VODS_MUTATION = gql`
+//   mutation Vods($vodsInput: VodsInput!) {
+//     vods(input: $vodsInput) {
+//       ok
+//       error {
+//         ko
+//         en
+//       }
+//       totalPages
+//       totalResults
+//       vods {
+//         _id # VOD 고유식별 ID
+//         title # 제목
+//         content # 설명 및 내용
+//         paymentAmount # 결제금액
+//         viewCount # 조회수
+//         storageTotalCount # 찜 총건수
+//         mainImageName # VOD메인이미지
+//         # VOD 영상링크정보
+//         # VOD 지분정보
+//         # LIVE 고유식별 ID (선택한 LIVE)
+//         # VOD 상태
+//       }
+//     }
+//   }
+// `;
