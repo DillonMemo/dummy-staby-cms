@@ -1,5 +1,5 @@
 overwrite: true
-schema: 'http://172.30.1.21:4000/graphql'
+schema: 'http://cms-api-dev.staby.co.kr/graphql'
 documents: 'graphql/*.ts'
 
 generates:
