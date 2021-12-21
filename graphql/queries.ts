@@ -86,6 +86,7 @@ export const LIVE_QUERY = gql`
           liveId # 라이브 고유식별 ID
           memberShareInfo {
             memberId # 회원 ID
+            nickName # 닉네임
             priorityShare # 우선환수 지분률
             directShare # 직분배 지분률
           }
