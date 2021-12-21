@@ -155,6 +155,19 @@ export const EDIT_LIVE_MUTATION = gql`
   }
 `
 
+/** Delete Live */
+export const DELETE_LIVE_MUTATION = gql`
+  mutation DeleteLive($deleteLiveInput: DeleteLiveInput!) {
+    deleteLive(input: $deleteLiveInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
 /** Create VOD */
 export const CREATE_VOD_MUTATION = gql`
   mutation CreateVod($createVodInput: CreateVodInput!) {
@@ -189,6 +202,32 @@ export const VODS_MUTATION = gql`
         mainImageName # VOD메인이미지
         liveId # LIVE 고유식별 ID (선택한 LIVE)
         vodStatus # VOD 상태
+      }
+    }
+  }
+`
+
+/** Edit Vod */
+export const EDIT_VOD_MUTATION = gql`
+  mutation EditVod($editVodInput: EditVodInput!) {
+    editVod(input: $editVodInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/** Delete Vod */
+export const DELETE_VOD_MUTATION = gql`
+  mutation DeleteVod($deleteVodInput: DeleteVodInput!) {
+    deleteVod(input: $deleteVodInput) {
+      ok
+      error {
+        ko
+        en
       }
     }
   }
