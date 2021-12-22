@@ -253,7 +253,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               <span className="text">LIVE</span>
             </li>
             <li className="nav-item">
-              <Link href="#">
+              <Link href="/live/lives">
                 <a>
                   <SettingOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>

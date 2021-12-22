@@ -33,7 +33,7 @@ export interface MemberEditForm {
   paidPoint: number
   freePoint: number
   memberStatus: string
-  createdAt: string
+  createDate: string
 }
 
 const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
@@ -292,10 +292,10 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <div className="form-group">
                     <span>RegistrationDate</span>
                     <Controller
-                      key={memberData?.findMemberById.member?.createdAt.split('T')[0]}
+                      key={memberData?.findMemberById.member?.createDate.split('T')[0]}
                       control={control}
-                      name="createdAt"
-                      defaultValue={memberData?.findMemberById.member?.createdAt.split('T')[0]}
+                      name="createDate"
+                      defaultValue={memberData?.findMemberById.member?.createDate.split('T')[0]}
                       render={({ field: { value, onChange } }) => (
                         <Input
                           className="input"

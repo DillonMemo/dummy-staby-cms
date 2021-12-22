@@ -18,20 +18,24 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import ImgCrop from 'antd-img-crop'
 import { useLazyQuery, useMutation } from '@apollo/client'
-import { CREATE_LIVE_MUTATION } from '../../graphql/mutations'
+import { DELETE_LIVE_MUTATION, EDIT_LIVE_MUTATION } from '../../graphql/mutations'
 import {
-  CreateLiveMutation,
-  CreateLiveMutationVariables,
+  DeleteLiveMutation,
+  DeleteLiveMutationVariables,
+  EditLiveMutation,
+  EditLiveMutationVariables,
+  FindLiveByIdQuery,
+  FindLiveByIdQueryVariables,
   FindMembersByTypeQuery,
   FindMembersByTypeQueryVariables,
+  LiveStatus,
   MemberType,
 } from '../../generated'
-import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
+import { FIND_MEMBERS_BY_TYPE_QUERY, LIVE_QUERY } from '../../graphql/queries'
 
-/** utils */
 import { S3 } from '../../lib/awsClient'
-import * as mongoose from 'mongoose'
 import { delayedEntryTimeArr, nowDateStr, onDeleteBtn } from '../../Common/comminFn'
+import { omit } from 'lodash'
 
 type Props = styleMode
 
@@ -42,25 +46,25 @@ export interface LiveCreateForm {
   livePreviewDate: Date | any
   liveThumbnail: string
   delayedEntryTime: number
-  content: string
+  content?: string
   share: ShareInfo
 }
 
 export type ShareInfo = {
   memberId: string
+  nickName: string
   priorityShare: number
   directShare: number
-  nickName: string
 }
 
 export type MainImgInfo = {
   fileInfo: Blob | string
-  mainImg?: string
+  mainImg?: string | any
 }
 
 export type LiveInfoArr = {
-  listingOrder: number
-  linkPath: string
+  listingOrder?: number
+  linkPath?: string | null
 }
 
 const ShareWrap = styled.div`
@@ -82,7 +86,8 @@ const ImgUploadBtnWrap = styled.div`
   }
 `
 
-const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
+const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
+  const router = useRouter()
   const { locale } = useRouter()
   const [liveInfoArr, setLiveInfoArr] = useState<Array<LiveInfoArr>>([
     { listingOrder: 0, linkPath: '' },
@@ -93,23 +98,82 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
   ]) //지분 관리
   const [isAuto, setIsAuto] = useState('Auto') //라이브 링크 자동생성 수동생성
 
-  const [createLive] = useMutation<CreateLiveMutation, CreateLiveMutationVariables>(
-    CREATE_LIVE_MUTATION
-  )
-
-  const [getMember, { data: memberData }] = useLazyQuery<
-    FindMembersByTypeQuery,
-    FindMembersByTypeQueryVariables
-  >(FIND_MEMBERS_BY_TYPE_QUERY)
-
   const {
     getValues,
-    handleSubmit,
     formState: { errors },
     control,
   } = useForm<LiveCreateForm>({
     mode: 'onChange',
   })
+
+  const liveStatus = ['Hide', 'Display', 'Active', 'Finish']
+
+  //받아온 라이브 아이디
+  const liveId = router.query.id ? router.query.id?.toString() : ''
+
+  //지분 설정을 위한 멤버 쿼리
+  const [getMember, { data: memberData }] = useLazyQuery<
+    FindMembersByTypeQuery,
+    FindMembersByTypeQueryVariables
+  >(FIND_MEMBERS_BY_TYPE_QUERY)
+
+  //라이브 쿼리
+  const [getLive, { data: liveData, refetch: refreshMe }] = useLazyQuery<
+    FindLiveByIdQuery,
+    FindLiveByIdQueryVariables
+  >(LIVE_QUERY)
+
+  const [statusRadio, setStatusRadio] = useState(
+    liveData?.findLiveById.live ? liveData?.findLiveById.live.liveStatus : 'Hide'
+  ) //라이브 상태
+
+  const [isInputDisabled, setIsInputDisabled] = useState(false)
+
+  const onCompleted = async (data: EditLiveMutation) => {
+    const {
+      editLive: { ok },
+    } = data
+
+    if (ok && liveData && refreshMe) {
+      await refreshMe()
+    }
+  }
+
+  const [editLive, { loading: editLoading }] = useMutation<
+    EditLiveMutation,
+    EditLiveMutationVariables
+  >(EDIT_LIVE_MUTATION, { onCompleted })
+
+  const [deleteLive] = useMutation<DeleteLiveMutation, DeleteLiveMutationVariables>(
+    DELETE_LIVE_MUTATION
+  )
+
+  //라이브 삭제
+  const liveDelete = async () => {
+    const { data } = await deleteLive({
+      variables: {
+        deleteLiveInput: {
+          liveId,
+        },
+      },
+    })
+
+    if (!data?.deleteLive.ok) {
+      const message = locale === 'ko' ? data?.deleteLive.error?.ko : data?.deleteLive.error?.en
+      notification.error({
+        message,
+      })
+      throw new Error(message)
+    } else {
+      notification.success({
+        message: locale === 'ko' ? '삭제가 완료 되었습니다.' : 'Has been completed',
+      })
+
+      setTimeout(() => {
+        window.location.href = '/live/lives'
+      }, 500)
+    }
+  }
 
   //라이브 채널 추가 버튼
   const onAddLive = (type: string) => {
@@ -158,18 +222,16 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
         return
       }
-
       //메인 이미지 s3 업로드
-      //아이디 생성
-      const id = new mongoose.Types.ObjectId() as any
-
+      const id = liveData?.findLiveById.live ? liveData?.findLiveById.live?._id : ''
       let mainImgFileName = '' //메인 썸네일
+
+      mainImgFileName = `${
+        process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+      }/going/live/${id.toString()}/main/${id.toString()}_main_${nowDateStr}.png`
 
       //MainThumbnail upload
       if (mainImgInfo.fileInfo instanceof File) {
-        mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/live/${id.toString()}/main/${id.toString()}_main_${nowDateStr}.png`
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({
             Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
@@ -177,8 +239,6 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
             Body: mainImgInfo.fileInfo,
             ACL: 'public-read',
           }).promise())
-
-        mainImgFileName = `${id.toString()}_main_${nowDateStr}.png`
       }
 
       //라이브 채널 링크 배열
@@ -197,11 +257,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         }
       }
 
-      const { data } = await createLive({
+      const { data } = await editLive({
         variables: {
-          createLiveInput: {
+          editLiveInput: {
             _id: id,
             mainImageName: mainImgFileName,
+            liveStatus: LiveStatus[statusRadio],
             delayedEntryTime,
             hostName,
             liveLinkInfo: liveLinkArr,
@@ -209,26 +270,27 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               liveId: id,
               memberShareInfo,
             },
-            livePreviewDate: new Date(livePreviewDate._d),
+            livePreviewDate: livePreviewDate
+              ? new Date(livePreviewDate._d)
+              : liveData?.findLiveById.live?.livePreviewDate,
             content,
             paymentAmount: parseFloat(paymentAmount.toString()),
             title,
           },
         },
       })
-      if (!data?.createLive.ok) {
-        const message = locale === 'ko' ? data?.createLive.error?.ko : data?.createLive.error?.en
+      if (!data?.editLive.ok) {
+        const message = locale === 'ko' ? data?.editLive.error?.ko : data?.editLive.error?.en
         notification.error({
           message,
         })
         throw new Error(message)
       } else {
         notification.success({
-          message: locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed',
+          message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
         })
-
         setTimeout(() => {
-          window.location.href = '/live/lives'
+          location.reload()
         }, 500)
       }
     } catch (error) {
@@ -334,11 +396,42 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
     })
   }, [memberData])
 
+  useEffect(() => {
+    getLive({
+      variables: {
+        liveInput: {
+          liveId,
+        },
+      },
+    })
+
+    if (
+      liveData?.findLiveById.ok &&
+      liveData?.findLiveById.live?.liveLinkInfo &&
+      liveData?.findLiveById.live?.liveShareInfo.memberShareInfo
+    ) {
+      const infoResult = liveData?.findLiveById.live?.liveLinkInfo.map((data) => {
+        return omit(data, ['playingImageName', '__typename'])
+      }) //liveInfoArr result
+      const result = liveData?.findLiveById.live?.liveShareInfo.memberShareInfo.map((data) => {
+        return omit(data, ['__typename'])
+      }) //memberShareInfo result
+
+      setMainImgInfo({
+        ...mainImgInfo,
+        mainImg: liveData?.findLiveById.live?.mainImageName,
+      })
+      setLiveInfoArr(infoResult)
+      setMemberShareInfo(result)
+      setIsInputDisabled(liveData?.findLiveById.live?.liveStatus !== 'HIDE' ? true : false)
+    }
+  }, [liveData])
+
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
       <MainWrapper>
         <div className="main-header">
-          <h2>{locale === 'ko' ? 'Live 추가' : 'Live Create'}</h2>
+          <h2>{locale === 'ko' ? 'Live 관리' : 'Live Edit'}</h2>
           <ol>
             <li>
               <Link href="/">
@@ -346,16 +439,36 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               </Link>
             </li>
             <li>{locale === 'ko' ? 'Live' : 'Live'}</li>
-            <li>{locale === 'ko' ? 'Live 추가' : 'Live Create'}</li>
+            <li>{locale === 'ko' ? 'Live 관리' : 'Live Edit'}</li>
           </ol>
         </div>
         <div className="main-content">
           <Edit className="card">
-            <Form name="createLiveForm" onSubmit={handleSubmit(onSubmit)}>
+            <Form name="createLiveForm">
+              <Radio.Group
+                defaultValue={liveData?.findLiveById.live?.liveStatus
+                  .toLowerCase()
+                  .replace(/^./, liveData?.findLiveById.live?.liveStatus[0].toUpperCase())}
+                key={liveData?.findLiveById.live?.liveStatus}
+                buttonStyle="solid">
+                {liveStatus.map((data, i) => {
+                  return (
+                    <Radio.Button
+                      key={i}
+                      value={data}
+                      onChange={() => setStatusRadio(data)}
+                      disabled={data === 'Hide' && isInputDisabled}>
+                      {data}
+                    </Radio.Button>
+                  )
+                })}
+              </Radio.Group>
               <div className="form-item">
                 <div className="form-group">
                   <span>Title</span>
                   <Controller
+                    key={liveData?.findLiveById.live?.title}
+                    defaultValue={liveData?.findLiveById.live?.title}
                     control={control}
                     name="title"
                     rules={{
@@ -367,6 +480,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         placeholder="Please enter the title."
                         value={value}
                         onChange={onChange}
+                        disabled={isInputDisabled}
                         maxLength={100}
                       />
                     )}
@@ -382,6 +496,8 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <div className="form-group">
                   <span>HostName</span>
                   <Controller
+                    key={liveData?.findLiveById.live?.hostName}
+                    defaultValue={liveData?.findLiveById.live?.hostName}
                     control={control}
                     name="hostName"
                     rules={{
@@ -393,6 +509,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         placeholder="Please enter the hostName."
                         value={value}
                         onChange={onChange}
+                        disabled={isInputDisabled}
                         maxLength={20}
                       />
                     )}
@@ -409,6 +526,8 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <div className="form-group">
                   <span>Price</span>
                   <Controller
+                    key={liveData?.findLiveById.live?.paymentAmount}
+                    defaultValue={liveData?.findLiveById.live?.paymentAmount}
                     control={control}
                     name="paymentAmount"
                     rules={{
@@ -421,6 +540,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         placeholder="Please enter the paymentAmount."
                         value={value}
                         onChange={onChange}
+                        disabled={isInputDisabled}
                       />
                     )}
                   />
@@ -439,15 +559,27 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Controller
                     control={control}
                     name="livePreviewDate"
+                    key={liveData?.findLiveById.live?.livePreviewDate}
                     rules={{
                       required: '위 항목은 필수 항목입니다.',
                     }}
                     render={({ field: { value, onChange } }) => (
                       <DatePicker
-                        //disabledDate={(current) => current && current <= moment().endOf('day')}
-                        showTime={{ defaultValue: moment('00:00', 'HH:mm'), format: 'HH:mm' }}
+                        key={liveData?.findLiveById.live?.livePreviewDate}
+                        defaultValue={moment(
+                          liveData?.findLiveById.live?.livePreviewDate
+                            .toString()
+                            .replace('T', ',')
+                            .substring(0, 19),
+                          'YYYY-MM-DD,HH:mm'
+                        )}
+                        showTime={{
+                          defaultValue: moment('00:00', 'HH:mm'),
+                          format: 'HH:mm',
+                        }}
                         value={value}
                         onChange={onChange}
+                        disabled={isInputDisabled}
                       />
                     )}
                   />
@@ -465,6 +597,8 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Controller
                     control={control}
                     name="delayedEntryTime"
+                    key={liveData?.findLiveById.live?.delayedEntryTime}
+                    defaultValue={liveData?.findLiveById.live?.delayedEntryTime}
                     rules={{
                       required: '위 항목은 필수 항목입니다.',
                     }}
@@ -473,8 +607,9 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         <Select
                           value={value}
                           onChange={onChange}
+                          disabled={isInputDisabled}
                           placeholder="라이브 시작 시간 이후">
-                          <Select.Option value={0} key={9999}>
+                          <Select.Option value={'notAvailable'} key={9999}>
                             구매불가
                           </Select.Option>
                           {delayedEntryTimeArr.map((data, index) => {
@@ -484,7 +619,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                               </Select.Option>
                             )
                           })}
-                          <Select.Option value={999} key={9999}>
+                          <Select.Option value={'end'} key={9999}>
                             라이브 종료까지
                           </Select.Option>
                         </Select>
@@ -502,8 +637,13 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <div className="form-group">
                   <span>Live Thumbnail</span>
                   <Controller
+                    key={liveData?.findLiveById.live?.mainImageName}
+                    defaultValue={liveData?.findLiveById.live?.mainImageName?.toString()}
                     control={control}
                     name="liveThumbnail"
+                    rules={{
+                      required: '위 항목은 필수 항목입니다.',
+                    }}
                     render={({ field: { onChange } }) => (
                       <ImgUploadBtnWrap className="profile-edit">
                         <Popover
@@ -518,11 +658,17 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                           placeholder="Please upload img. only png or jpg"
                           value={mainImgInfo.mainImg}
                           onChange={onChange}
+                          disabled={isInputDisabled}
                         />
                       </ImgUploadBtnWrap>
                     )}
                   />
                 </div>
+                {errors.liveThumbnail?.message && (
+                  <div className="form-message">
+                    <span>{errors.liveThumbnail.message}</span>
+                  </div>
+                )}
               </div>
               <div className="form-item">
                 <div className="form-group">
@@ -530,10 +676,13 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     Live
                     <span style={{ color: '#ada7a7' }}>
                       {locale === 'ko'
-                        ? ' ※live는 최대 8개까지 추가할 수 있습니다. '
+                        ? ' ※live는 최대 7개까지 추가할 수 있습니다. '
                         : ' ※Up to eight live can be uploaded. '}
                     </span>
-                    <Radio.Group defaultValue={'Auto'} buttonStyle="solid">
+                    <Radio.Group
+                      defaultValue={'Auto'}
+                      buttonStyle="solid"
+                      disabled={isInputDisabled}>
                       <Radio.Button value="Auto" onChange={() => setIsAuto('Auto')}>
                         자동생성
                       </Radio.Button>
@@ -556,17 +705,21 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                           )}
                         </div>
                         <Input
+                          key={data.linkPath}
                           className="input"
                           name={`liveUrl_${index}`}
                           placeholder="Please upload the video.(only mp4)"
                           disabled={isAuto === 'Auto' ? true : false}
-                          defaultValue={`live/{LIVEID}_${index + 1}`}
+                          defaultValue={data.linkPath || `live/{LIVEID}_${index + 1}`}
                         />
                       </div>
                     )
                   })}
-                  {liveInfoArr.length < 8 && (
-                    <Button className="thumbnailAddBtn" onClick={() => onAddLive('live')}>
+                  {liveInfoArr.length < 7 && (
+                    <Button
+                      className="thumbnailAddBtn"
+                      onClick={() => onAddLive('live')}
+                      disabled={isInputDisabled}>
                       {locale === 'ko' ? '추가' : 'Add'}
                     </Button>
                   )}
@@ -578,13 +731,18 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Controller
                     control={control}
                     name="content"
+                    key={liveData?.findLiveById.live?.content}
+                    defaultValue={liveData?.findLiveById.live?.content?.toString()}
                     render={({ field: { value, onChange } }) => (
                       <TextArea
+                        key={liveData?.findLiveById.live?.content}
                         className="input ant-input"
                         placeholder="Please upload content."
                         maxLength={1000}
                         value={value}
                         onChange={onChange}
+                        defaultValue={liveData?.findLiveById.live?.content?.toString()}
+                        disabled={isInputDisabled}
                       />
                     )}
                   />
@@ -613,30 +771,34 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                           <Controller
                             control={control}
                             name="share"
+                            rules={{
+                              required: '위 항목은 필수 항목입니다.',
+                            }}
                             render={() => (
                               <>
                                 <Select
-                                  defaultValue={memberShareInfo[0].memberId}
-                                  value={memberShareInfo[index].memberId}
+                                  defaultValue={memberShareInfo[0].nickName}
+                                  key={memberShareInfo[0].nickName}
                                   onChange={(value) =>
                                     setMemberShareInfo(
                                       memberShareInfo.map((data, i) => {
                                         return i === index
                                           ? {
                                               ...data,
-                                              memberId: value.toString(),
-                                              nickName:
-                                                memberData?.findMembersByType.members[i].nickName ||
-                                                '',
+                                              memberId: value.toString().split('/')[0],
+                                              nickName: value.toString().split('/')[1],
                                             }
                                           : data
                                       })
                                     )
                                   }
-                                  className={`member_${index}`}>
+                                  className={`member_${index}`}
+                                  disabled={isInputDisabled}>
                                   {memberData?.findMembersByType.members.map((data, i) => {
                                     return (
-                                      <Select.Option value={data._id} key={`type-${i}`}>
+                                      <Select.Option
+                                        value={data._id + '/' + data.nickName}
+                                        key={`type-${i}`}>
                                         {data.nickName}
                                       </Select.Option>
                                     )
@@ -657,6 +819,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                                       })
                                     )
                                   }
+                                  disabled={isInputDisabled}
                                 />
                                 <Input
                                   className="input"
@@ -664,6 +827,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                                   name={`directShare_${index}`}
                                   placeholder="directShare"
                                   value={memberShareInfo[index].directShare}
+                                  disabled={isInputDisabled}
                                   onChange={(e) =>
                                     setMemberShareInfo(
                                       memberShareInfo.map((data, i) => {
@@ -681,15 +845,38 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                       </div>
                     )
                   })}
-                  <Button className="thumbnailAddBtn" onClick={() => onAddLive('member')}>
+                  {errors.liveThumbnail?.message && (
+                    <div className="form-message">
+                      <span>{errors.liveThumbnail.message}</span>
+                    </div>
+                  )}
+                  <Button
+                    className="thumbnailAddBtn"
+                    onClick={() => onAddLive('member')}
+                    disabled={isInputDisabled}>
                     {locale === 'ko' ? '추가' : 'Add'}
                   </Button>
                 </div>
               </div>
               <div className="form-item">
                 <div className="button-group">
-                  <Button type="primary" role="button" htmlType="submit" className="submit-button">
-                    {locale === 'ko' ? '저장' : 'save'}
+                  <Button
+                    type="primary"
+                    role="button"
+                    className="submit-button"
+                    loading={editLoading}
+                    onClick={onSubmit}>
+                    {locale === 'ko' ? '수정' : 'Edit'}
+                  </Button>
+                  <Button
+                    type="primary"
+                    role="button"
+                    htmlType="button"
+                    className="submit-button"
+                    loading={editLoading}
+                    onClick={liveDelete}
+                    style={{ marginLeft: '10px' }}>
+                    {locale === 'ko' ? '삭제' : 'Remove'}
                   </Button>
                 </div>
               </div>
@@ -700,4 +887,4 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
     </Layout>
   )
 }
-export default CreateLive
+export default LiveDetail

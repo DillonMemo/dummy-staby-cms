@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { CreateAccountMutation, CreateAccountMutationVariables, MemberType } from '../../generated'
-
-import { Edit, Form, MainWrapper, md, styleMode } from '../../styles/styles'
+import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
 import { Button, Input, notification, Select } from 'antd'
 
 import Link from 'next/link'
@@ -25,7 +24,7 @@ export interface MemberCreateForm {
   paidPoint?: number
   freePoint?: number
   memberStatus?: string
-  createdAt: string
+  createDate: string
 }
 
 const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
