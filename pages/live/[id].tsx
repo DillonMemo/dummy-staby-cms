@@ -262,7 +262,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           editLiveInput: {
             _id: id,
             mainImageName: mainImgFileName,
-            liveStatus: LiveStatus[statusRadio],
+            liveStatus: (LiveStatus as any)[statusRadio],
             delayedEntryTime,
             hostName,
             liveLinkInfo: liveLinkArr,
@@ -609,7 +609,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                           onChange={onChange}
                           disabled={isInputDisabled}
                           placeholder="라이브 시작 시간 이후">
-                          <Select.Option value={'notAvailable'} key={9999}>
+                          <Select.Option value={0} key={0}>
                             구매불가
                           </Select.Option>
                           {delayedEntryTimeArr.map((data, index) => {
@@ -619,7 +619,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                               </Select.Option>
                             )
                           })}
-                          <Select.Option value={'end'} key={9999}>
+                          <Select.Option value={999} key={999}>
                             라이브 종료까지
                           </Select.Option>
                         </Select>

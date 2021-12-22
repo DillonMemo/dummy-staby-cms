@@ -5,7 +5,7 @@ import styled from 'styled-components'
 
 //date format YYMMDD_HHMMSS
 export const nowDate = new Date()
-export const nowDateStr = `_${nowDate.getFullYear().toString().padStart(4, '0')}${(
+export const nowDateStr = `${nowDate.getFullYear().toString().padStart(4, '0')}${(
   nowDate.getMonth() + 1
 )
   .toString()

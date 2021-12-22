@@ -232,7 +232,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               <span className="text">VOD</span>
             </li>
             <li className="nav-item">
-              <Link href="#">
+              <Link href="/vod/vods">
                 <a>
                   <SettingOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>

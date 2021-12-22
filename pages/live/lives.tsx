@@ -139,9 +139,9 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
     }
   }
   /**
-   * 닉네임 변경 이벤트 핸들러 입니다.
+   * 검색 이벤트 핸들러 입니다.
    */
-  const onTitleChange = useCallback(
+  const onSearch = useCallback(
     debounce(async ({ target: { value } }) => {
       try {
         const { data } = await lives({
@@ -225,7 +225,7 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Input.Search
                     placeholder={locale === 'ko' ? '타이틀' : 'Title'}
                     loading={livesLoading}
-                    onChange={onTitleChange}
+                    onChange={onSearch}
                   />
                 </Space>
               </div>
