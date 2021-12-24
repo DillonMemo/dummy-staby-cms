@@ -1,6 +1,10 @@
 import styled, { createGlobalStyle, keyframes } from 'styled-components'
 import themes from './themes'
 
+export const mediaQuery = (maxWidth: number) => `
+  @media (max-width: ${maxWidth}px)
+`
+
 export const { xxxs, xxs, xs, sm, md, _2md, lg, xl, xxl, _4xl } = {
   xxxs: '@media (max-width: 20rem)', // 320px
   xxs: '@media (max-width: 32rem)', // 512px

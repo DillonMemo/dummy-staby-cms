@@ -2,146 +2,73 @@ import type { NextPage } from 'next'
 import { useReactiveVar } from '@apollo/client'
 import styled from 'styled-components'
 import Layout from '../components/Layout'
-import { styleMode } from '../styles/styles'
-import React, { useEffect, useState } from 'react'
+import { MainWrapper, md, styleMode } from '../styles/styles'
+import React, { useCallback, useState } from 'react'
 import { authTokenVar } from '../lib/apolloClient'
-import { Button, Space, Upload } from 'antd'
-import * as mongoose from 'mongoose'
+
+/** components */
+import WriteEditor from '../components/write/WriteEditor'
 
 type Props = styleMode
 
 const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const [file, setFile] = useState<any>()
   const getData = useReactiveVar(authTokenVar)
+  const [title, setTitle] = useState<string>('')
+  const [content, setContent] = useState<string>('')
+  console.log(getData)
 
-  const onSubmit = async () => {
-    try {
-      const formData = new FormData()
-      const params = {
-        id: 'testID', // string > Live ID
-        paths: ['1', '2'], // string[] > 채널 링크
-      }
-
-      formData.append('json', JSON.stringify(params))
-      // 이미지 파일이 여러개면 formData를 여러번 선언 해야 합니다.
-      /**
-       * example:
-       * for (const file of files) {
-       *  console.log(file)
-       *  // do something...
-       * }
-       */
-      formData.append('files', file)
-      formData.append('files', file)
-      formData.append('files', file)
-      // const request =
-      await (
-        await fetch(`${process.env.NEXT_PUBLIC_FETCH_URL}/uploads/live`, {
-          method: 'POST',
-          body: formData,
-        })
-      ).json()
-      // console.log(request)
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  useEffect(() => {
-    const id = new mongoose.Types.ObjectId().toHexString()
-    console.log('id', id)
-  }, [])
+  const onChangeTitle = useCallback((title: string) => setTitle(title), [title])
+  const onChangeContent = useCallback((content: string) => setContent(content), [content])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
-      <DivWrapper>
-        <main className="main">
-          <p>{getData || '토큰이 존재 하지 않습니다.'}</p>
-          <Space direction="vertical" style={{ width: '100%' }} size="large">
-            <Upload
-              accept="image/*"
-              multiple={false}
-              onChange={(data) => setFile(data.file.originFileObj)}
-              showUploadList={false}>
-              <Button>Upload</Button>
-            </Upload>
-          </Space>
-          <Button type="primary" onClick={onSubmit}>
-            Submit
-          </Button>
-          <p>{file ? 'true' : 'false'}</p>
-        </main>
-      </DivWrapper>
+      <MainWrapper>
+        {/* <QuillWrapper modules={modules} formats={formats} theme="snow" /> */}
+        <ContentWrapper className="main-content">
+          <div className="card write-wrapper">
+            <WriteEditor
+              title={title}
+              content={content}
+              onChangeTitle={onChangeTitle}
+              onChangeContent={onChangeContent}
+            />
+          </div>
+        </ContentWrapper>
+      </MainWrapper>
     </Layout>
   )
 }
 
-const DivWrapper = styled.div`
-  min-height: 100vh;
-  padding: 0 0.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+const ContentWrapper = styled.div`
+  display: grid;
+  gap: 1.5rem;
 
-  main {
-    padding: 5rem 0;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+  > div {
+    display: grid;
+    ${md} {
+      grid-template-columns: 1fr !important;
+    }
 
-  .grid {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    max-width: 800px;
-    margin-top: 3rem;
-  }
+    &.write-wrapper {
+      display: grid;
+      /* grid-template-columns: 1fr 1fr; */
+      grid-template-columns: 1fr;
+      gap: 2rem;
 
-  .card {
-    margin: 1rem;
-    padding: 1.5rem;
-    text-align: left;
-    color: inherit;
-    text-decoration: none;
-    border: ${({ theme }) => `1px solid ${theme.text}`};
-    border-radius: 10px;
-    transition: color 0.15s ease, border-color 0.15s ease;
-    width: 45%;
-  }
+      ${md} {
+        grid-template-columns: 1fr;
+      }
 
-  .card:hover,
-  .card:focus,
-  .card:active {
-    color: #0070f3;
-    border-color: #0070f3;
-  }
+      .editor-container {
+        min-width: 0px;
+        padding: 1.5rem;
+        margin: 0;
+        position: relative;
 
-  .card h2 {
-    margin: 0 0 1rem 0;
-    font-size: 1.5rem;
-  }
-
-  .card p {
-    margin: 0;
-    font-size: 1.25rem;
-    line-height: 1.5;
-  }
-
-  .logo {
-    height: 1em;
-    margin-left: 0.5rem;
-  }
-
-  @media (max-width: 600px) {
-    .grid {
-      width: 100%;
-      flex-direction: column;
+        ${md} {
+          padding: 0;
+        }
+      }
     }
   }
 `
