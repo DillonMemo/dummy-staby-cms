@@ -1,7 +1,9 @@
 import { Skeleton } from 'antd'
 import dynamic from 'next/dynamic'
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import styled from 'styled-components'
+import Parser from 'html-react-parser'
+import { debounce, find } from 'lodash'
 
 /** lib */
 import detectIOS from '../../lib/detectIOS'
@@ -13,10 +15,24 @@ import Toolbar from './Toolbar'
 
 /** Quill */
 import 'react-quill/dist/quill.snow.css'
-const Quill = dynamic(import('react-quill'), {
-  ssr: false,
-  loading: () => <Skeleton title={false} paragraph={{ rows: 10 }} />,
-})
+import { Delta, DeltaStatic, Sources } from 'quill'
+import ReactQuill from 'react-quill'
+const Quill = dynamic(
+  async () => {
+    const { default: RQ } = await import('react-quill')
+    return function comp({ forwardedRef, ...props }: any) {
+      return <RQ ref={forwardedRef} {...props} />
+    }
+  },
+  {
+    ssr: false,
+    loading: () => <Skeleton title={false} paragraph={{ rows: 10 }} />,
+  }
+)
+// const Quill = dynamic(import('react-quill'), {
+//   ssr: false,
+//   loading: () => <Skeleton title={false} paragraph={{ rows: 10 }} />,
+// })
 
 interface WriteEditorProps {
   title: string
@@ -30,6 +46,7 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
   onChangeTitle,
   onChangeContent,
 }) => {
+  const quillRef = useRef<ReactQuill | null>(null)
   const [hideUpper] = useState<boolean>(false)
   const isIOS = detectIOS()
   const modules: { [key: string]: any } = {
@@ -44,20 +61,95 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
     [title]
   )
 
+  /** 내용 변경 이벤트 핸들러 */
+  const handleContentChange = useCallback(
+    (content: string, delta: Delta) => {
+      const quill = quillRef.current
+
+      if (quill) {
+        const findAttr = find(delta.ops, 'attributes')
+        console.log('text-change', delta)
+        if (findAttr) {
+          const findLink = find(findAttr, 'link')?.link
+          const isInternet = new RegExp(/\b(?:https?|ftp):\/\//gim)
+          if (!isInternet.test(findLink)) {
+            const [editor, selection] = [quill.getEditor(), quill.getEditor().getSelection()]
+            if (selection) {
+              editor.updateContents(new Delta().retain(selection.index).delete(selection.length))
+            }
+          }
+        }
+      }
+      // setTimeout(() => onChangeContent(content), 1000)
+    },
+    [content]
+  )
+
   return (
-    <>
-      <div className="editor-container">
+    <Wrapper>
+      <EditorContainer>
         <Title placeholder="제목을 입력하세요" value={title} onChange={handleTitleChange} />
         <HorizontalBar />
         <Toolbar shadow={hideUpper} ios={isIOS} />
         <QuillWrapper>
-          <Quill theme="snow" modules={modules} placeholder="내용을 입력해주세요..." />
+          <Quill
+            forwardedRef={quillRef}
+            theme="snow"
+            modules={modules}
+            placeholder="내용을 입력해주세요..."
+            onChange={handleContentChange}
+          />
         </QuillWrapper>
-        <button onClick={() => console.log('submit')}>제출</button>
-      </div>
-    </>
+      </EditorContainer>
+      <PreviewContainer className="preview-container">
+        <div className="title">{title}</div>
+        <div>{Parser(content)}</div>
+      </PreviewContainer>
+    </Wrapper>
   )
 }
+const Wrapper = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+
+  ${md} {
+    grid-template-columns: 1fr;
+  }
+`
+const EditorContainer = styled.div`
+  min-width: 0px;
+  padding: 1.5rem;
+  margin: 0;
+  position: relative;
+
+  ${md} {
+    padding: 0;
+  }
+`
+
+const PreviewContainer = styled.div`
+  padding: 1.5rem;
+
+  ${md} {
+    display: none;
+  }
+
+  .title {
+    font-weight: bold;
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+
+    ${md} {
+      font-size: 1.25rem;
+    }
+  }
+
+  a {
+    text-decoration: underline;
+    color: #06c;
+  }
+`
 
 const HorizontalBar = styled.div`
   background: ${({ theme }) => theme.border};
@@ -80,8 +172,30 @@ const QuillWrapper = styled.div`
     }
     .ql-editor {
       padding: 0.75rem 0.5rem;
+      font-family: 'Montserrat', 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       &.ql-blank::before {
         color: ${({ theme }) => `${theme.text}${opacityHex._40}`};
+      }
+    }
+    .ql-tooltip {
+      background-color: ${({ theme }) => theme.card};
+      color: ${({ theme }) => theme.text};
+      box-shadow: ${({ theme }) => `0px 0px 5px ${theme.card}`};
+      border: ${({ theme }) => `1px solid ${theme.text}${opacityHex._40}`};
+      z-index: 1000;
+
+      input {
+        outline: none;
+        border: 0;
+        background-color: ${({ theme }) => theme.body};
+      }
+
+      a {
+        color: ${({ theme }) => theme.text};
+
+        &:hover {
+          color: #06c;
+        }
       }
     }
   }

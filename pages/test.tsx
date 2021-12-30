@@ -12,13 +12,17 @@ import WriteEditor from '../components/write/WriteEditor'
 type Props = styleMode
 
 const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const getData = useReactiveVar(authTokenVar)
+  // const getData = useReactiveVar(authTokenVar)
+  // console.log(getData)
   const [title, setTitle] = useState<string>('')
   const [content, setContent] = useState<string>('')
-  console.log(getData)
 
   const onChangeTitle = useCallback((title: string) => setTitle(title), [title])
   const onChangeContent = useCallback((content: string) => setContent(content), [content])
+
+  const onSubmit = () => {
+    console.log('submit', { title, content })
+  }
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
@@ -32,6 +36,11 @@ const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
               onChangeTitle={onChangeTitle}
               onChangeContent={onChangeContent}
             />
+            <div className="button-wrapper">
+              <button type="button" onClick={onSubmit}>
+                제출
+              </button>
+            </div>
           </div>
         </ContentWrapper>
       </MainWrapper>
@@ -44,30 +53,19 @@ const ContentWrapper = styled.div`
   gap: 1.5rem;
 
   > div {
-    display: grid;
-    ${md} {
-      grid-template-columns: 1fr !important;
-    }
-
-    &.write-wrapper {
-      display: grid;
-      /* grid-template-columns: 1fr 1fr; */
-      grid-template-columns: 1fr;
-      gap: 2rem;
+    .button-wrapper {
+      display: flex;
+      justify-content: flex-start;
+      padding: 0 1.5rem;
 
       ${md} {
-        grid-template-columns: 1fr;
+        padding: 0;
+        justify-content: flex-end;
       }
 
-      .editor-container {
-        min-width: 0px;
-        padding: 1.5rem;
-        margin: 0;
-        position: relative;
-
-        ${md} {
-          padding: 0;
-        }
+      button {
+        width: 100%;
+        max-width: 5rem;
       }
     }
   }

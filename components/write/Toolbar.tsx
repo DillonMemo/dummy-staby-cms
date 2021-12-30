@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import styled from 'styled-components'
 import { md } from '../../styles/styles'
 
@@ -7,12 +6,30 @@ interface ToolbarProps {
   ios?: boolean
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ shadow, ios }) => {
-  const innerRef = useRef<HTMLDivElement>(null)
-  console.log(ios)
+const Toolbar: React.FC<ToolbarProps> = ({ shadow }) => {
+  const renderColor = (className: string): JSX.Element => {
+    return (
+      <select className={className}>
+        <option value="rgb(0, 0, 0)" />
+        <option value="rgb(230, 0, 0)" />
+        <option value="rgb(255, 153, 0)" />
+        <option value="rgb(255, 255, 0)" />
+        <option value="rgb(0, 138, 0)" />
+        <option value="rgb(0, 102, 204)" />
+        <option value="rgb(153, 51, 255)" />
+        <option value="rgb(255, 255, 255)" />
+        <option value="rgb(250, 204, 204)" />
+        <option value="rgb(255, 235, 204)" />
+        <option value="rgb(204, 224, 245)" />
+        <option value="rgb(235, 214, 255)" />
+        <option value="rgb(187, 187, 187)" />
+        <option value="rgb(102, 185, 102)" />
+      </select>
+    )
+  }
 
   return (
-    <ToolbarWrapper id="toolbar" shadow={shadow} ref={innerRef}>
+    <ToolbarWrapper id="toolbar" shadow={shadow}>
       <ToolbarItem className="ql-header" value={1}></ToolbarItem>
       <ToolbarItem className="ql-header" value={2}></ToolbarItem>
       <ToolbarItem className="ql-header" value={3}></ToolbarItem>
@@ -20,6 +37,16 @@ const Toolbar: React.FC<ToolbarProps> = ({ shadow, ios }) => {
       <Separator />
       <ToolbarItem className="ql-bold"></ToolbarItem>
       <ToolbarItem className="ql-italic"></ToolbarItem>
+      <ToolbarItem className="ql-strike"></ToolbarItem>
+      <Separator />
+      <ToolbarItem className="ql-blockquote"></ToolbarItem>
+      <ToolbarItem className="ql-script" value="sub"></ToolbarItem>
+      <ToolbarItem className="ql-script" value="super"></ToolbarItem>
+      <Separator />
+      {renderColor('ql-color')}
+      {renderColor('ql-background')}
+      <ToolbarItem className="ql-link"></ToolbarItem>
+      <ToolbarItem className="ql-image"></ToolbarItem>
     </ToolbarWrapper>
   )
 }
@@ -47,8 +74,8 @@ const ToolbarWrapper = styled.div<{ shadow: boolean }>`
 `
 
 const ToolbarItem = styled.button`
-  width: 3rem;
-  height: 3rem;
+  width: 1.75rem !important;
+  height: 1.5rem !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,8 +85,6 @@ const ToolbarItem = styled.button`
   flex-shrink: 0;
 
   ${md} {
-    width: 2.5rem;
-    height: 2.5rem;
     font-size: 1.45rem;
   }
 
@@ -84,7 +109,12 @@ const ToolbarItem = styled.button`
 
   .ql-stroke {
     stroke: ${({ theme }) => theme.text};
+    fill: ${({ theme }) => theme.card};
   }
+  .ql-fill {
+    fill: ${({ theme }) => theme.text};
+  }
+
   &.ql-header {
     &[value='1'] {
       > svg {
@@ -156,7 +186,7 @@ const Separator = styled.div`
   height: 1.25rem;
   margin-left: 0.5rem;
   margin-right: 0.5rem;
-  background: ${({ theme }) => `${theme.text_hover}`}; ;
+  background: ${({ theme }) => `${theme.text_hover}`};
 `
 
 export default Toolbar

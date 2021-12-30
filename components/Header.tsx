@@ -41,6 +41,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
     fetchPolicy: 'network-only',
   })
   const [logout] = useMutation<LogoutMutation, LogoutMutationVariables>(LOGOUT_MUTATION)
+  const isHide = pathname.includes('/test')
 
   /**
    * `side navigator` 마우스 이벤트 핸들러 입니다.
@@ -392,9 +393,11 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               </div>
               <span></span>
             </div>
-            <div className="header-item">
-              <DarkModeToggle toggleStyle={toggleStyle} theme={theme} />
-            </div>
+            {!isHide && (
+              <div className="header-item">
+                <DarkModeToggle toggleStyle={toggleStyle} theme={theme} />
+              </div>
+            )}
             <div className="header-item profile">
               <div className="info">
                 <span className="user-name">{data?.my.nickName}</span>
