@@ -203,7 +203,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               </ul>
             </li>
             {(data?.my.memberType === 'ADMIN' || data?.my.memberType === 'SYSTEM') && (
-              <>
+              <ul className="menu-content">
                 <li className="nav-item-header">
                   <EllipsisOutlined className="icon" />
                   <span className="text">MEMBER</span>
@@ -224,50 +224,69 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                     </a>
                   </Link>
                 </li>
-              </>
+              </ul>
             )}
+            <ul className="menu-content">
+              <li className="nav-item-header">
+                <EllipsisOutlined className="icon" />
+                <span className="text">Contents</span>
+              </li>
+              <li className="nav-item">
+                <Link href="/contents/contents">
+                  <a>
+                    <SettingOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                  </a>
+                </Link>
+              </li>
+            </ul>
 
-            <li className="nav-item-header">
-              <EllipsisOutlined className="icon" />
-              <span className="text">VOD</span>
-            </li>
-            <li className="nav-item">
-              <Link href="/vod/vods">
-                <a>
-                  <SettingOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="/vod/createVod">
-                <a>
-                  <PlusOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
-                </a>
-              </Link>
-            </li>
+            <ul className="menu-content">
+              <li className="nav-item-header">
+                <EllipsisOutlined className="icon" />
+                <span className="text">VOD</span>
+              </li>
+              <li className="nav-item">
+                <Link href="/vod/vods">
+                  <a>
+                    <SettingOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                  </a>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link href="/vod/createVod">
+                  <a>
+                    <PlusOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                  </a>
+                </Link>
+              </li>
+            </ul>
 
-            <li className="nav-item-header">
-              <EllipsisOutlined className="icon" />
-              <span className="text">LIVE</span>
-            </li>
-            <li className="nav-item">
-              <Link href="/live/lives">
-                <a>
-                  <SettingOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link href="/live/createLive">
-                <a>
-                  <PlusOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
-                </a>
-              </Link>
-            </li>
+            <ul className="menu-content">
+              <li className="nav-item-header">
+                <EllipsisOutlined className="icon" />
+                <span className="text">LIVE</span>
+              </li>
+              <li className="nav-item">
+                <Link href="/live/lives">
+                  <a>
+                    <SettingOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                  </a>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link href="/live/createLive">
+                  <a>
+                    <PlusOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                  </a>
+                </Link>
+              </li>
+            </ul>
+
             <li className="nav-item has-sub">
               <Link href="#">
                 <a onClick={handleClickItem}>

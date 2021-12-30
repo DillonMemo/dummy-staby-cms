@@ -34,7 +34,7 @@ import {
 import { FIND_MEMBERS_BY_TYPE_QUERY, LIVE_QUERY } from '../../graphql/queries'
 
 import { S3 } from '../../lib/awsClient'
-import { delayedEntryTimeArr, nowDateStr, onDeleteBtn } from '../../Common/comminFn'
+import { delayedEntryTimeArr, nowDateStr, onDeleteBtn } from '../../Common/commonFn'
 import { omit } from 'lodash'
 
 type Props = styleMode

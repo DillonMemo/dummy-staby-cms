@@ -1,7 +1,7 @@
-import { Button, Upload } from 'antd'
-import ImgCrop from 'antd-img-crop'
 import { Dispatch, SetStateAction } from 'react'
-import styled from 'styled-components'
+import { styleMode } from '../styles/styles'
+
+export type Props = styleMode
 
 //date format YYMMDD_HHMMSS
 export const nowDate = new Date()

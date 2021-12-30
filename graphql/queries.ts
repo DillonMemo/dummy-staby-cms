@@ -102,3 +102,45 @@ export const LIVE_QUERY = gql`
     }
   }
 `
+
+export const VOD_QUERY = gql`
+  query FindVodById($vodInput: FindVodByIdInput!) {
+    findVodById(input: $vodInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      vod {
+        _id
+        title
+        content
+        paymentAmount
+        mainImageName
+        vodLinkInfo {
+          linkPath
+          introImageName
+          playingImageName
+          transcodeStatus
+          listingOrder
+        }
+        vodShareInfo {
+          # 지분정보
+          shareApplyDate # 지분시작일자
+          vodId # vod 고유식별 ID
+          memberShareInfo {
+            memberId # 회원 ID
+            nickName # 닉네임
+            priorityShare # 우선환수 지분률
+            directShare # 직분배 지분률
+          }
+        }
+        storageTotalCount
+        vodStatus
+        liveId
+        createDate
+        updateDate
+      }
+    }
+  }
+`

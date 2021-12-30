@@ -393,7 +393,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         placeholder="Please enter the hostName."
                         value={value}
                         onChange={onChange}
-                        maxLength={20}
+                        maxLength={50}
                       />
                     )}
                   />

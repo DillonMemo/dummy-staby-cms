@@ -510,8 +510,9 @@ export const Form = styled.form`
 `
 
 export const Edit = styled.div`
-  width: 50%;
-
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto;
   ${md} {
     width: 100%;
   }
