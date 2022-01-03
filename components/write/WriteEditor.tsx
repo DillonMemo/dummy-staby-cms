@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic'
 import { useCallback, useRef, useState } from 'react'
 import styled from 'styled-components'
 import Parser from 'html-react-parser'
-import { debounce, find } from 'lodash'
+import { find } from 'lodash'
 
 /** lib */
 import detectIOS from '../../lib/detectIOS'
@@ -15,7 +15,7 @@ import Toolbar from './Toolbar'
 
 /** Quill */
 import 'react-quill/dist/quill.snow.css'
-import { Delta, DeltaStatic, Sources } from 'quill'
+import { Delta } from 'quill'
 import ReactQuill from 'react-quill'
 const Quill = dynamic(
   async () => {
@@ -68,19 +68,18 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
 
       if (quill) {
         const findAttr = find(delta.ops, 'attributes')
-        console.log('text-change', delta)
         if (findAttr) {
           const findLink = find(findAttr, 'link')?.link
-          const isInternet = new RegExp(/\b(?:https?|ftp):\/\//gim)
-          if (!isInternet.test(findLink)) {
-            const [editor, selection] = [quill.getEditor(), quill.getEditor().getSelection()]
-            if (selection) {
-              editor.updateContents(new Delta().retain(selection.index).delete(selection.length))
-            }
+          // const isInternet = new RegExp(/\b(?:https?|ftp):\/\//gim)
+          if (findLink) {
+            // 링크 툴을 이용할때 [https://, http://] 프로토콜체크후 강제 변환 시킵니다.
+            content = content.replace(/\b(href="https:\/\/)/gim, 'href="')
+            content = content.replace(/\b(href="http:\/\/)/gim, 'href="')
+            content = content.replace(/\b(href=")/gim, 'href="https://')
           }
         }
       }
-      // setTimeout(() => onChangeContent(content), 1000)
+      onChangeContent(content)
     },
     [content]
   )

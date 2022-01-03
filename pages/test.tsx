@@ -1,10 +1,10 @@
 import type { NextPage } from 'next'
-import { useReactiveVar } from '@apollo/client'
+// import { useReactisveVar } from '@apollo/client'
 import styled from 'styled-components'
 import Layout from '../components/Layout'
 import { MainWrapper, md, styleMode } from '../styles/styles'
 import React, { useCallback, useState } from 'react'
-import { authTokenVar } from '../lib/apolloClient'
+// import { authTokenVar } from '../lib/apolloClient'
 
 /** components */
 import WriteEditor from '../components/write/WriteEditor'

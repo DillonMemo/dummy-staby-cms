@@ -41,6 +41,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
     fetchPolicy: 'network-only',
   })
   const [logout] = useMutation<LogoutMutation, LogoutMutationVariables>(LOGOUT_MUTATION)
+  /** 텍스트 에디터 컴포넌트가 적용된 페이지는 서버사이드렌더링 이슈가 있어 다크모드스위치를 가려주어야 합니다. */
   const isHide = pathname.includes('/test')
 
   /**
@@ -114,7 +115,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
         localStorage.removeItem(LOCALSTORAGE_TOKEN)
         push('/login', 'login', { locale })
       }
-    } catch (error) {
+    } catch (error: any) {
       notification.error({
         message: error.message,
       })
