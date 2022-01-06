@@ -228,7 +228,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </li>
               </ul>
             )}
-            <ul className="menu-content">
+            {/* <ul className="menu-content">
               <li className="nav-item-header">
                 <EllipsisOutlined className="icon" />
                 <span className="text">Contents</span>
@@ -241,7 +241,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   </a>
                 </Link>
               </li>
-            </ul>
+            </ul> */}
 
             <ul className="menu-content">
               <li className="nav-item-header">
@@ -288,6 +288,29 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </Link>
               </li>
             </ul>
+
+            {/* <ul className="menu-content">
+              <li className="nav-item-header">
+                <EllipsisOutlined className="icon" />
+                <span className="text">AD</span>
+              </li>
+              <li className="nav-item">
+                <Link href="/ad/ads">
+                  <a>
+                    <SettingOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                  </a>
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link href="/ad/createAd">
+                  <a>
+                    <PlusOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                  </a>
+                </Link>
+              </li>
+            </ul> */}
 
             <li className="nav-item has-sub">
               <Link href="#">
