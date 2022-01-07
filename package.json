@@ -4,11 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=devlopment npm run codegen:dev && next dev",
-    "build": "cross-env NODE_ENV=production npm run codegen && next build",
+    "build": "cross-env NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
-    "codegen": "rimraf generated && graphql-codegen --config codegen.yml",
-    "codegen:dev": "rimraf generated && graphql-codegen --config codegen.dev.yml"
+    "codegen": "rimraf generated && graphql-codegen --config codegen.yml"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
