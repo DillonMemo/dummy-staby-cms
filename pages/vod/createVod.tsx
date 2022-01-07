@@ -32,7 +32,7 @@ import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 /** utils */
 import { S3 } from '../../lib/awsClient'
 import * as mongoose from 'mongoose'
-import { nowDateStr, onDeleteBtn } from '../../Common/commonFn'
+import { nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
 import Spinner from '../../components/Spinner'
 
 type Props = styleMode
@@ -91,17 +91,19 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [memberShareInfo, setMemberShareInfo] = useState<Array<ShareInfo>>([
     { memberId: '', nickName: '', priorityShare: 0, directShare: 0 },
   ]) //지분 관리
-  const [upLoading, setUploading] = useState(false)
+  const [upLoading, setUploading] = useState(false) //스피너
 
   const [createVod] = useMutation<CreateVodMutation, CreateVodMutationVariables>(
     CREATE_VOD_MUTATION
   )
 
+  //지분 설정을 위한 멤버쿼리
   const [getMember, { data: memberData }] = useLazyQuery<
     FindMembersByTypeQuery,
     FindMembersByTypeQueryVariables
   >(FIND_MEMBERS_BY_TYPE_QUERY)
 
+  //연결된 live 를 위한 live query
   const [getLives, { data: livesData }] = useMutation<LivesMutation, LivesMutationVariables>(
     LIVES_MUTATION
   )
@@ -122,7 +124,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         fileInfo: '',
         playingImg: '',
       }
-      if (vodInfoArr.length < 8) {
+      if (vodInfoArr.length < 7) {
         setVodInfoArr(() => vodInfoArr.concat(live))
       }
       return
@@ -147,20 +149,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       const { title, paymentAmount, content, liveId } = getValues()
 
       const vodLinkArr = [] //라이브 채널 링크 배열
+
       //memberShareData 유효성 확인, 100이 되야한다.
-      let priorityShare = 0
-      let directShare = 0
-
-      for (let i = 0; i < memberShareInfo.length; i++) {
-        priorityShare += memberShareInfo[i].priorityShare
-        directShare += memberShareInfo[i].directShare
-      }
-
-      if (priorityShare !== 100 || directShare !== 100) {
-        notification.error({
-          message:
-            locale === 'ko' ? '지분분배의 총합은 100이 되어야 합니다.' : 'Has been completed',
-        })
+      if (!shareCheck(memberShareInfo, locale)) {
         return
       }
 
@@ -191,11 +182,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         const vodUrlInput: HTMLInputElement | null = document.querySelector(
           `input[name=vodFile_${i}]`
         )
-        // let vodUrlInputValue
-
-        // if (vodUrlInput && vodUrlInput?.files) {
-        //   vodUrlInputValue = vodUrlInput.files[0].name + nowDateStr
-        // }
 
         let introImageName = ''
         let vodName = ''
@@ -503,9 +489,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <Controller
                       control={control}
                       name="mainThumbnail"
-                      rules={{
-                        required: '위 항목은 필수 항목입니다.',
-                      }}
                       render={({ field: { onChange } }) => (
                         <ImgUploadBtnWrap className="profile-edit">
                           <Popover
@@ -525,12 +508,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       )}
                     />
                   </div>
-
-                  {errors.mainThumbnail?.message && (
-                    <div className="form-message">
-                      <span>{errors.mainThumbnail.message}</span>
-                    </div>
-                  )}
                 </div>
                 <div className="form-item">
                   <div className="form-group">
@@ -538,7 +515,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       Vod
                       <span style={{ color: '#ada7a7' }}>
                         {locale === 'ko'
-                          ? ' ※vod 최대 8개까지 추가할 수 있습니다. '
+                          ? ' ※vod 최대 7개까지 추가할 수 있습니다. '
                           : ' ※Up to eight live can be uploaded. '}
                       </span>
                     </span>
@@ -673,18 +650,16 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               render={() => (
                                 <>
                                   <Select
-                                    defaultValue={memberShareInfo[0].memberId}
-                                    value={memberShareInfo[index].memberId}
+                                    defaultValue={memberShareInfo[0].nickName}
+                                    value={memberShareInfo[index].nickName}
                                     onChange={(value) =>
                                       setMemberShareInfo(
                                         memberShareInfo.map((data, i) => {
                                           return i === index
                                             ? {
                                                 ...data,
-                                                memberId: value.toString(),
-                                                nickName:
-                                                  memberData?.findMembersByType.members[i]
-                                                    .nickName || '',
+                                                memberId: value.toString().split('/')[0],
+                                                nickName: value.toString().split('/')[1],
                                               }
                                             : data
                                         })
@@ -693,7 +668,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                                     className={`member_${index}`}>
                                     {memberData?.findMembersByType.members.map((data, i) => {
                                       return (
-                                        <Select.Option value={data._id} key={`type-${i}`}>
+                                        <Select.Option
+                                          value={data._id + '/' + data.nickName}
+                                          key={`type-${i}`}>
                                           {data.nickName}
                                         </Select.Option>
                                       )
@@ -742,19 +719,20 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       {locale === 'ko' ? '추가' : 'Add'}
                     </Button>
                   </div>
-                  {errors.share?.message && (
+                  {/* {errors.share?.message && (
                     <div className="form-message">
                       <span>{errors.share.message}</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
                 <div className="form-item">
                   <div className="button-group">
                     <Button
                       type="primary"
                       role="button"
-                      htmlType="submit"
-                      className="submit-button">
+                      //htmlType="submit"
+                      className="submit-button"
+                      onClick={onSubmit}>
                       {locale === 'ko' ? '저장' : 'save'}
                     </Button>
                   </div>

@@ -34,7 +34,7 @@ import {
 import { FIND_MEMBERS_BY_TYPE_QUERY, LIVE_QUERY } from '../../graphql/queries'
 
 import { S3 } from '../../lib/awsClient'
-import { delayedEntryTimeArr, nowDateStr, onDeleteBtn } from '../../Common/commonFn'
+import { delayedEntryTimeArr, nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
 import { omit } from 'lodash'
 
 type Props = styleMode
@@ -106,9 +106,9 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     mode: 'onChange',
   })
 
-  const liveStatus = ['Hide', 'Display', 'Active', 'Finish']
+  const liveStatus = ['Hide', 'Display', 'Active', 'Finish'] //라이브 상태
 
-  //받아온 라이브 아이디
+  //현재 라이브 아이디
   const liveId = router.query.id ? router.query.id?.toString() : ''
 
   //지분 설정을 위한 멤버 쿼리
@@ -123,10 +123,12 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     FindLiveByIdQueryVariables
   >(LIVE_QUERY)
 
+  //라이브 상태
   const [statusRadio, setStatusRadio] = useState(
     liveData?.findLiveById.live ? liveData?.findLiveById.live.liveStatus : 'Hide'
-  ) //라이브 상태
+  )
 
+  //인풋 상태
   const [isInputDisabled, setIsInputDisabled] = useState(false)
 
   const onCompleted = async (data: EditLiveMutation) => {
@@ -207,21 +209,10 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         getValues()
 
       //memberShareData 유효성 확인, 100이 되야한다.
-      let priorityShare = 0
-      let directShare = 0
-
-      for (let i = 0; i < memberShareInfo.length; i++) {
-        priorityShare += memberShareInfo[i].priorityShare
-        directShare += memberShareInfo[i].directShare
-      }
-
-      if (priorityShare !== 100 || directShare !== 100) {
-        notification.error({
-          message:
-            locale === 'ko' ? '지분분배의 총합은 100이 되어야 합니다.' : 'Has been completed',
-        })
+      if (!shareCheck(memberShareInfo, locale)) {
         return
       }
+
       //메인 이미지 s3 업로드
       const id = liveData?.findLiveById.live ? liveData?.findLiveById.live?._id : ''
       let mainImgFileName = '' //메인 썸네일
@@ -423,7 +414,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
       setLiveInfoArr(infoResult)
       setMemberShareInfo(result)
-      setIsInputDisabled(liveData?.findLiveById.live?.liveStatus !== 'HIDE' ? true : false)
+      setIsInputDisabled(liveData?.findLiveById.live?.liveStatus !== 'HIDE' && true)
     }
   }, [liveData])
 
@@ -778,7 +769,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                               <>
                                 <Select
                                   defaultValue={memberShareInfo[0].nickName}
-                                  key={memberShareInfo[0].nickName}
+                                  value={memberShareInfo[index].nickName}
                                   onChange={(value) =>
                                     setMemberShareInfo(
                                       memberShareInfo.map((data, i) => {

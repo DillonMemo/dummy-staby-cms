@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import router, { useRouter } from 'next/router'
-import { MainWrapper, md, styleMode } from '../../styles/styles'
+import { MainWrapper, ManagementWrapper, md, styleMode } from '../../styles/styles'
 import styled from 'styled-components'
 import { Button, Dropdown, Input, Menu, Pagination, Skeleton, Space, Table } from 'antd'
 import { ColumnsType } from 'antd/lib/table'
@@ -345,41 +345,4 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
     </Layout>
   )
 }
-
-const ManagementWrapper = styled.div`
-  width: 100%;
-  min-height: 2rem;
-
-  .table-wrapper {
-    display: flex;
-    flex-flow: column nowrap;
-    gap: 2rem;
-
-    ${md} {
-      gap: 1rem;
-    }
-
-    .filter-container {
-      display: inline-flex;
-      flex-flow: row nowrap;
-      justify-content: space-between;
-
-      .dropdown {
-        display: inline-flex;
-        flex-flow: column nowrap;
-
-        span.title {
-          font-size: 0.625rem;
-          line-height: 1;
-        }
-      }
-    }
-
-    .pagination-content {
-      display: inline-flex;
-      justify-content: flex-end;
-    }
-  }
-`
-
 export default Members

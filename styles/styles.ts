@@ -567,3 +567,40 @@ export const Edit = styled.div`
     }
   }
 `
+
+export const ManagementWrapper = styled.div`
+  width: 100%;
+  min-height: 2rem;
+
+  .table-wrapper {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 2rem;
+
+    ${md} {
+      gap: 1rem;
+    }
+
+    .filter-container {
+      display: inline-flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+      align-items: end;
+
+      .dropdown {
+        display: inline-flex;
+        flex-flow: column nowrap;
+
+        span.title {
+          font-size: 0.625rem;
+          line-height: 1;
+        }
+      }
+    }
+
+    .pagination-content {
+      display: inline-flex;
+      justify-content: flex-end;
+    }
+  }
+`

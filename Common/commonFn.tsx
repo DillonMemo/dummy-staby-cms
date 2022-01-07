@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react'
 import { styleMode } from '../styles/styles'
+import { notification } from 'antd'
 
 export type Props = styleMode
 
@@ -28,4 +29,23 @@ export const onDeleteBtn = (index: number, setState: Dispatch<SetStateAction<any
     })
   )
   return
+}
+
+//지분 체크
+export const shareCheck = (shareArray: Array<any>, locale?: string) => {
+  let priorityShare = 0
+  let directShare = 0
+
+  for (let i = 0; i < shareArray.length; i++) {
+    priorityShare += shareArray[i].priorityShare
+    directShare += shareArray[i].directShare
+  }
+
+  if (priorityShare !== 100 || directShare !== 100) {
+    notification.error({
+      message: locale === 'ko' ? '지분분배의 총합은 100이 되어야 합니다.' : 'Has been completed',
+    })
+    return false
+  }
+  return true
 }

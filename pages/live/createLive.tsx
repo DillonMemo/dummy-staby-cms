@@ -14,9 +14,9 @@ import Layout from '../../components/Layout'
 import { Controller, useForm } from 'react-hook-form'
 import TextArea from 'rc-textarea'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import ImgCrop from 'antd-img-crop'
+import { useEffect, useState } from 'react'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { CREATE_LIVE_MUTATION } from '../../graphql/mutations'
 import {
@@ -31,7 +31,7 @@ import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 /** utils */
 import { S3 } from '../../lib/awsClient'
 import * as mongoose from 'mongoose'
-import { delayedEntryTimeArr, nowDateStr, onDeleteBtn } from '../../Common/comminFn'
+import { delayedEntryTimeArr, nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
 
 type Props = styleMode
 
@@ -143,19 +143,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         getValues()
 
       //memberShareData 유효성 확인, 100이 되야한다.
-      let priorityShare = 0
-      let directShare = 0
-
-      for (let i = 0; i < memberShareInfo.length; i++) {
-        priorityShare += memberShareInfo[i].priorityShare
-        directShare += memberShareInfo[i].directShare
-      }
-
-      if (priorityShare !== 100 || directShare !== 100) {
-        notification.error({
-          message:
-            locale === 'ko' ? '지분분배의 총합은 100이 되어야 합니다.' : 'Has been completed',
-        })
+      if (!shareCheck(memberShareInfo, locale)) {
         return
       }
 
@@ -530,7 +518,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     Live
                     <span style={{ color: '#ada7a7' }}>
                       {locale === 'ko'
-                        ? ' ※live는 최대 8개까지 추가할 수 있습니다. '
+                        ? ' ※live는 최대 7개까지 추가할 수 있습니다. '
                         : ' ※Up to eight live can be uploaded. '}
                     </span>
                     <Radio.Group defaultValue={'Auto'} buttonStyle="solid">
@@ -616,18 +604,16 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                             render={() => (
                               <>
                                 <Select
-                                  defaultValue={memberShareInfo[0].memberId}
-                                  value={memberShareInfo[index].memberId}
+                                  defaultValue={memberShareInfo[0].nickName}
+                                  value={memberShareInfo[index].nickName}
                                   onChange={(value) =>
                                     setMemberShareInfo(
                                       memberShareInfo.map((data, i) => {
                                         return i === index
                                           ? {
                                               ...data,
-                                              memberId: value.toString(),
-                                              nickName:
-                                                memberData?.findMembersByType.members[i].nickName ||
-                                                '',
+                                              memberId: value.toString().split('/')[0],
+                                              nickName: value.toString().split('/')[1],
                                             }
                                           : data
                                       })
@@ -636,7 +622,9 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                                   className={`member_${index}`}>
                                   {memberData?.findMembersByType.members.map((data, i) => {
                                     return (
-                                      <Select.Option value={data._id} key={`type-${i}`}>
+                                      <Select.Option
+                                        value={data._id + '/' + data.nickName}
+                                        key={`type-${i}`}>
                                         {data.nickName}
                                       </Select.Option>
                                     )

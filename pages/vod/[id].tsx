@@ -36,7 +36,7 @@ import { FIND_MEMBERS_BY_TYPE_QUERY, VOD_QUERY } from '../../graphql/queries'
 
 /** utils */
 import { S3 } from '../../lib/awsClient'
-import { nowDateStr, onDeleteBtn } from '../../Common/commonFn'
+import { nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
 import Spinner from '../../components/Spinner'
 import { omit } from 'lodash'
 
@@ -128,12 +128,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     LIVES_MUTATION
   )
 
-  const onCompleted = async (data: EditLiveMutation) => {
+  const onCompleted = async (data: EditVodMutation) => {
     const {
-      editLive: { ok },
+      editVod: { ok },
     } = data
 
-    if (ok && liveData && refreshMe) {
+    if (ok && vodData && refreshMe) {
       await refreshMe()
     }
   }
@@ -186,12 +186,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   //라이브 채널 추가 버튼
   const onAddLive = (type: string) => {
     if (type === 'live') {
-      const live = {
+      const vod = {
+        introImageName: '',
         fileInfo: '',
-        introImgName: '',
+        linkPath: '',
+        listingOrder: 0,
       }
       if (vodInfoArr.length < 8) {
-        setVodInfoArr(() => vodInfoArr.concat(live))
+        setVodInfoArr(() => vodInfoArr.concat(vod))
       }
       return
     }
@@ -215,20 +217,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       const { title, paymentAmount, content, liveId } = getValues()
 
       const vodLinkArr = [] //라이브 채널 링크 배열
+
       //memberShareData 유효성 확인, 100이 되야한다.
-      let priorityShare = 0
-      let directShare = 0
-
-      for (let i = 0; i < memberShareInfo.length; i++) {
-        priorityShare += memberShareInfo[i].priorityShare
-        directShare += memberShareInfo[i].directShare
-      }
-
-      if (priorityShare !== 100 || directShare !== 100) {
-        notification.error({
-          message:
-            locale === 'ko' ? '지분분배의 총합은 100이 되어야 합니다.' : 'Has been completed',
-        })
+      if (!shareCheck(memberShareInfo, locale)) {
         return
       }
 
@@ -258,15 +249,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         const vodUrlInput: HTMLInputElement | null = document.querySelector(
           `input[name=vodFile_${i}]`
         )
-        // let vodUrlInputValue
-
-        // if (vodUrlInput && vodUrlInput?.files) {
-        //   vodUrlInputValue = vodUrlInput.files[0].name + nowDateStr
-        // }
 
         let introImageName = ''
         let vodName = ''
         let vodUrlInputFilesName = ''
+
         if (vodUrlInput) {
           //introImgNameName
           introImageName = `${
@@ -846,8 +833,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               render={() => (
                                 <>
                                   <Select
-                                    defaultValue={memberShareInfo[0].memberId}
-                                    value={memberShareInfo[index].memberId}
+                                    defaultValue={memberShareInfo[0].nickName}
+                                    value={memberShareInfo[index].nickName}
                                     disabled={isInputDisabled}
                                     onChange={(value) =>
                                       setMemberShareInfo(
@@ -855,10 +842,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                                           return i === index
                                             ? {
                                                 ...data,
-                                                memberId: value.toString(),
-                                                nickName:
-                                                  memberData?.findMembersByType.members[i]
-                                                    .nickName || '',
+                                                memberId: value.toString().split('/')[0],
+                                                nickName: value.toString().split('/')[1],
                                               }
                                             : data
                                         })
@@ -867,7 +852,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                                     className={`member_${index}`}>
                                     {memberData?.findMembersByType.members.map((data, i) => {
                                       return (
-                                        <Select.Option value={data._id} key={`type-${i}`}>
+                                        <Select.Option
+                                          value={data._id + '/' + data.nickName}
+                                          key={`type-${i}`}>
                                           {data.nickName}
                                         </Select.Option>
                                       )
