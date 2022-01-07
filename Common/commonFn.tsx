@@ -24,7 +24,7 @@ export const delayedEntryTimeArr = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110
 //라이브, VOD, 사용자등 삭제 버튼
 export const onDeleteBtn = (index: number, setState: Dispatch<SetStateAction<any>>, state: any) => {
   setState(
-    state.filter((data, i) => {
+    state.filter((data: any, i: number) => {
       return i !== index
     })
   )
