@@ -95,7 +95,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
       }
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   }
 

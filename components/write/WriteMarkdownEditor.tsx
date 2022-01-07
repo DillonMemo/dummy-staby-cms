@@ -52,7 +52,6 @@ const WriteMarkdownEditor: React.FC<MarkdownEditorProps> = ({
   /** toolbar 클릭 이벤트 핸들러 */
   const handleToolbarClick = (mode: string) => {
     if (!editorElement.current) return
-    console.log(editorElement.current)
   }
 
   return (

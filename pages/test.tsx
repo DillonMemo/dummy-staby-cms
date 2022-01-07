@@ -21,7 +21,7 @@ const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
   const onChangeContent = useCallback((content: string) => setContent(content), [content])
 
   const onSubmit = () => {
-    console.log('submit', { title, content })
+    //  console.log('submit', { title, content })
   }
 
   return (
