@@ -3,13 +3,17 @@ import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Badge, Modal, notification, Select, Skeleton, Space } from 'antd'
-import {
+import Icon, {
   ArrowRightOutlined,
   EllipsisOutlined,
   FileTextOutlined,
+  LayoutOutlined,
   LogoutOutlined,
+  MoreOutlined,
   PlusOutlined,
   SettingOutlined,
+  SoundOutlined,
+  UnorderedListOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 import moment from 'moment'
@@ -228,142 +232,184 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </li>
               </ul>
             )}
-            {/* <ul className="menu-content">
-              <li className="nav-item-header">
-                <EllipsisOutlined className="icon" />
-                <span className="text">Contents</span>
-              </li>
-              <li className="nav-item">
-                <Link href="/contents/contents">
-                  <a>
-                    <SettingOutlined className="icon" />
-                    <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
-                  </a>
-                </Link>
-              </li>
-            </ul> */}
 
             <ul className="menu-content">
               <li className="nav-item-header">
                 <EllipsisOutlined className="icon" />
-                <span className="text">VOD</span>
+                <span className="text">GOING</span>
               </li>
-              <li className="nav-item">
-                <Link href="/vod/vods">
-                  <a>
-                    <SettingOutlined className="icon" />
-                    <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
-                  </a>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link href="/vod/createVod">
-                  <a>
-                    <PlusOutlined className="icon" />
-                    <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
-                  </a>
-                </Link>
-              </li>
-            </ul>
-
-            <ul className="menu-content">
-              <li className="nav-item-header">
-                <EllipsisOutlined className="icon" />
-                <span className="text">LIVE</span>
-              </li>
-              <li className="nav-item">
-                <Link href="/live/lives">
-                  <a>
-                    <SettingOutlined className="icon" />
-                    <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
-                  </a>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link href="/live/createLive">
-                  <a>
-                    <PlusOutlined className="icon" />
-                    <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
-                  </a>
-                </Link>
-              </li>
-            </ul>
-
-            {/* <ul className="menu-content">
-              <li className="nav-item-header">
-                <EllipsisOutlined className="icon" />
-                <span className="text">AD</span>
-              </li>
-              <li className="nav-item">
-                <Link href="/ad/ads">
-                  <a>
-                    <SettingOutlined className="icon" />
-                    <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
-                  </a>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link href="/ad/createAd">
-                  <a>
-                    <PlusOutlined className="icon" />
-                    <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
-                  </a>
-                </Link>
-              </li>
-            </ul> */}
-
-            <li className="nav-item has-sub">
-              <Link href="#">
+              {/* VOD */}
+              <li className="nav-item has-sub">
                 <a onClick={handleClickItem}>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? 'test' : 'Edit'}</span>
+                  <MoreOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? 'VOD' : 'VOD'}</span>
                 </a>
-              </Link>
-              <ul className="menu-content">
-                <div className="collapse">
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <ArrowRightOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <ArrowRightOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <ArrowRightOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <ArrowRightOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                </div>
-              </ul>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기3' : 'undefined'}</span>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      <Link href="/vod/vods">
+                        <a>
+                          <LayoutOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="/vod/createVod">
+                        <a>
+                          <PlusOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+              {/* LIVE */}
+              <li className="nav-item has-sub">
+                <a onClick={handleClickItem}>
+                  <MoreOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '라이브' : 'Live'}</span>
                 </a>
-              </Link>
-            </li>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      <Link href="/live/lives">
+                        <a>
+                          <LayoutOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="/live/createLive">
+                        <a>
+                          <PlusOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+              {/* 게시판 */}
+              <li className="nav-item has-sub">
+                <a onClick={handleClickItem}>
+                  <SoundOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '안내' : 'News'}</span>
+                </a>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '게시판' : 'Board'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? 'FAQ' : 'FAQ'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '문의' : 'Inquiry'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+              {/* 콘텐츠 */}
+              <li className="nav-item">
+                {/* <Link href="/contents/contents"> */}
+                <Link href="#">
+                  <a onClick={() => alert('준비중 입니다')}>
+                    <UnorderedListOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '콘텐츠' : 'Contents'}</span>
+                  </a>
+                </Link>
+              </li>
+              {/* AD */}
+              <li className="nav-item has-sub">
+                <a onClick={handleClickItem}>
+                  <Icon component={AdSvg} className="icon" />
+                  <span className="text">{locale === 'ko' ? '광고' : 'AD'}</span>
+                </a>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      {/* <Link href="/ad/ads"> */}
+                      <Link href="#">
+                        <a onClick={() => alert('준비중 입니다')}>
+                          <SettingOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      {/* <Link href="/ad/createAd"> */}
+                      <Link href="#">
+                        <a onClick={() => alert('준비중 입니다')}>
+                          <PlusOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+            </ul>
+
+            <ul className="menu-content">
+              <li className="nav-item-header">
+                <EllipsisOutlined className="icon" />
+                <span className="text">GO 2.0</span>
+              </li>
+              <li className="nav-item">
+                <Link href="#">
+                  <a>
+                    <FileTextOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '준비중' : 'Comming soon'}</span>
+                  </a>
+                </Link>
+              </li>
+              <li className="nav-item has-sub">
+                <Link href="#">
+                  <a onClick={handleClickItem}>
+                    <MoreOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '준비중' : 'Comming soon'}</span>
+                  </a>
+                </Link>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '서브1' : 'SUB1'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '서브2' : 'SUB2'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+            </ul>
           </ul>
         </div>
       </NavigatorWrapper>
@@ -666,6 +712,7 @@ const NavigatorWrapper = styled.div`
             }
           }
           .icon {
+            margin-top: 1px;
             margin-right: 1.25rem;
 
             width: 1.25rem;
@@ -955,5 +1002,21 @@ const CountryOption = styled.div`
     }
   }
 `
+
+const AdSvg = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    role="img"
+    width="1em"
+    height="1em"
+    preserveAspectRatio="xMidYMid meet"
+    viewBox="0 0 16 16">
+    <g fill="currentColor">
+      <path d="M3.7 11l.47-1.542h2.004L6.644 11h1.261L5.901 5.001H4.513L2.5 11h1.2zm1.503-4.852l.734 2.426H4.416l.734-2.426h.053zm4.759.128c-1.059 0-1.753.765-1.753 2.043v.695c0 1.279.685 2.043 1.74 2.043c.677 0 1.222-.33 1.367-.804h.057V11h1.138V4.685h-1.16v2.36h-.053c-.18-.475-.68-.77-1.336-.77zm.387.923c.58 0 1.002.44 1.002 1.138v.602c0 .76-.396 1.2-.984 1.2c-.598 0-.972-.449-.972-1.248v-.453c0-.795.37-1.24.954-1.24z" />
+      <path d="M14 3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h12zM2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2z" />
+    </g>
+  </svg>
+)
 
 export default Header
