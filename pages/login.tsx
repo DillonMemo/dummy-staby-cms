@@ -67,6 +67,7 @@ const Login: NextPage = () => {
       })
     }
   }
+
   return (
     <>
       <Head>
@@ -144,7 +145,11 @@ const Login: NextPage = () => {
                 </Button>
                 {loginMutationResult?.login.error && (
                   <div className="form-message">
-                    <span>{loginMutationResult.login.error}</span>
+                    <span>
+                      {locale === 'ko'
+                        ? loginMutationResult.login.error.ko
+                        : loginMutationResult.login.error.en}
+                    </span>
                   </div>
                 )}
               </div>

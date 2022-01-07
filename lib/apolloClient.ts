@@ -32,7 +32,7 @@ export let isLoggedInVar: ReactiveVar<boolean> = makeVar(Boolean(null))
 export let authTokenVar: ReactiveVar<string> = makeVar('')
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: 'http://cms-api-dev.staby.co.kr/graphql',
   credentials: 'same-origin',
 })
 

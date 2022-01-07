@@ -2,12 +2,14 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
-import { Button, Input, Popover, Select, Skeleton, Upload } from 'antd'
+import { Button, Input, notification, Popover, Select, Skeleton, Upload } from 'antd'
 import styled from 'styled-components'
 import { useMutation, useQuery } from '@apollo/client'
 import { FormOutlined } from '@ant-design/icons'
 import ImgCrop from 'antd-img-crop'
 import { UploadChangeParam } from 'antd/lib/upload'
+import { UploadRequestOption } from 'rc-upload/lib/interface'
+import moment from 'moment'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -25,19 +27,24 @@ import {
 import { MY_QUERY } from '../../graphql/queries'
 import { EDIT_ACCOUNT_MUTATION } from '../../graphql/mutations'
 
+/** utils */
+import { S3 } from '../../lib/awsClient'
+
+const noneProfileImg = '/static/img/profile-img.png'
+
 type Props = styleMode
 
 export interface IEditForm {
   profileImageName: File | string
   email: string
   password: string
-  nickname: string
+  nickName: string
   memberType: MemberType
 }
 
 const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale } = useRouter()
-  const { getValues, handleSubmit, control } = useForm<IEditForm>({
+  const { getValues, handleSubmit, control, setValue } = useForm<IEditForm>({
     mode: 'onChange',
   })
   const { loading, data: myData, refetch: refreshMe } = useQuery<MyQuery>(MY_QUERY)
@@ -58,21 +65,57 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
     onCompleted,
   })
 
-  const onSubmit = () => {
-    const { email, password, nickname, memberType, profileImageName } = getValues()
-    debugger
-    // editAccount({
-    //   variables: {
-    //     editUserInput: {
-    //       email,
-    //       role,
-    //       ...(username !== '' && { username }),
-    //       ...(password !== '' && { password }),
-    //     },
-    //   },
-    // })
+  const onSubmit = async () => {
+    try {
+      const { password, nickName, memberType, profileImageName } = getValues()
+      let saveFileName = ''
+
+      if (profileImageName instanceof File) {
+        const lastIndexOf: number = profileImageName.name.lastIndexOf('.')
+        saveFileName =
+          process.env.NODE_ENV === 'development'
+            ? `dev/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
+            : `prod/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
+
+        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+          (await S3.upload({
+            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+            Key: saveFileName,
+            Body: profileImageName,
+            ACL: 'public-read',
+          }).promise())
+      }
+
+      const { data } = await editAccount({
+        variables: {
+          editMemberInput: {
+            profileImageName: myData?.my.profileImageName || saveFileName,
+            ...(password !== '' && { password }),
+            memberType,
+            ...(nickName !== '' && { nickName }),
+          },
+        },
+      })
+
+      if (!data?.editAccount.ok) {
+        const message = locale === 'ko' ? data?.editAccount.error?.ko : data?.editAccount.error?.en
+        notification.error({
+          message,
+        })
+        throw new Error(message)
+      } else {
+        notification.success({
+          message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
+  /**
+   * @returns {Promise<void>} JSX element를 리턴 합니다.
+   */
   const renderPopoverContent = () => {
     const Wrapper = styled.div`
       display: inline-flex;
@@ -82,43 +125,55 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
       }
     `
 
-    const onProfileChange = async ({ file }: UploadChangeParam) => {
+    /**
+     * upload file change 이전에 해당 함수를 실행합니다.
+     * @param {UploadRequestOption} params 커스텀 요청 옵션
+     */
+    const customRequest = async ({ file, onError, onSuccess }: UploadRequestOption) => {
       try {
-        let src = file.url
-
-        if (!src) {
-          src = await new Promise((resolve) => {
+        const defineOnSuccess = onSuccess as any
+        if (file instanceof File) {
+          const src: string = await new Promise((resolve) => {
             const reader = new FileReader()
-            reader.readAsDataURL(file.originFileObj as any)
-            reader.onload = () => resolve(reader.result as any)
+            reader.readAsDataURL(file as Blob)
+            reader.onload = () => resolve(reader.result as string)
           })
           const profileNode: HTMLImageElement | null = document.querySelector('#profile')
 
           if (profileNode && src) {
             profileNode.src = src
+            defineOnSuccess(file)
+          } else {
+            throw new Error('not found profileNode or src or originFileObj')
           }
+        } else {
+          throw new Error('not found file')
         }
-
-        // const resultFile: File = file.originFileObj
-        // setValue('profileImageName', resultFile)
-        // = async () => {
-        //   const profileNode: HTMLImageElement | null = document.querySelector('.profile')
-        //   console.log(reader.result)
-        //   debugger
-
-        //   // if (profileNode) {
-        //   // }
-        // }
-      } catch (error) {
+      } catch (error: any) {
         console.error(error)
+        onError && onError(error)
       }
     }
 
-    // const onProfilePreview = async (file: UploadFile<any>) => {
-    //   console.log(file)
-    //   debugger
-    //   const src = file.url
-    // }
+    /**
+     * upload > customRequest > onProfileChange 순서의 함수 로직입니다.
+     * @param {UploadChangeParam} params file Obj를 가져옵니다.
+     */
+    const onProfileChange = ({ file }: UploadChangeParam) => {
+      if (file.originFileObj) setValue('profileImageName', file.originFileObj)
+    }
+
+    /**
+     * profile을 비우는 클릭 이벤트 핸들러 입니다.
+     */
+    const onRemoveProfileClick = () => {
+      const profileNode: HTMLImageElement | null = document.querySelector('#profile')
+
+      if (profileNode) {
+        setValue('profileImageName', '')
+        profileNode.src = noneProfileImg
+      }
+    }
 
     return (
       <Wrapper>
@@ -130,12 +185,13 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
           <Upload
             accept="image/*"
             multiple={false}
+            customRequest={customRequest}
             onChange={onProfileChange}
             showUploadList={false}>
             <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
           </Upload>
         </ImgCrop>
-        <Button onClick={() => console.log('click 2')}>
+        <Button onClick={onRemoveProfileClick}>
           {locale === 'ko' ? '사진 삭제' : 'Remove photo'}
         </Button>
       </Wrapper>
@@ -184,7 +240,13 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <div className="profile-img">
                         <img
                           id="profile"
-                          src={myData?.my?.profileImageName || '/static/img/profile-img.png'}
+                          src={
+                            myData?.my?.profileImageName
+                              ? `https://image.staby.co.kr/${
+                                  myData?.my?.profileImageName
+                                }?date=${moment().format('YYYYMMDDHHmmss')}`
+                              : noneProfileImg
+                          }
                           alt="profile"
                         />
                         {/* {myData?.my.profileImageName ? (
@@ -275,8 +337,8 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <span>Nickname</span>
                     <Controller
                       control={control}
-                      name="nickname"
-                      defaultValue={myData?.my.nickname}
+                      name="nickName"
+                      defaultValue={myData?.my.nickName}
                       render={({ field: { value, onChange } }) => (
                         <Input
                           className="input"

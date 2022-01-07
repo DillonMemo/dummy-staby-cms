@@ -1,12 +1,17 @@
 import styled from 'styled-components'
 import { WIDTH } from '../lib/constants'
 import { md } from '../styles/styles'
+import Link from 'next/link'
 
 const Footer: React.FC = () => {
   return (
     <FooterWrapper>
       <p>
-        COPYRIGHT © 2022 <a href="https://www.staby.co.kr">Staby</a>, All rights Reserved
+        COPYRIGHT © 2022{' '}
+        <Link href="https://www.staby.co.kr">
+          <a>Staby</a>
+        </Link>
+        , All rights Reserved
       </p>
     </FooterWrapper>
   )
@@ -22,6 +27,8 @@ const FooterWrapper = styled.footer`
 
   position: relative;
   right: 0;
+
+  background-color: ${({ theme }) => theme.body};
 
   p {
     color: ${({ theme }) => theme.text};

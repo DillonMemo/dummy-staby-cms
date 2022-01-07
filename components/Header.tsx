@@ -2,13 +2,21 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Badge, Modal, Select, Skeleton, Space } from 'antd'
-import {
+import { Badge, Modal, notification, Select, Skeleton, Space } from 'antd'
+import Icon, {
   ArrowRightOutlined,
   EllipsisOutlined,
   FileTextOutlined,
+  LayoutOutlined,
+  LogoutOutlined,
+  MoreOutlined,
+  PlusOutlined,
+  SettingOutlined,
+  SoundOutlined,
+  UnorderedListOutlined,
   UserOutlined,
 } from '@ant-design/icons'
+import moment from 'moment'
 
 /** components */
 import DarkModeToggle from './DarkModeToggle'
@@ -22,9 +30,10 @@ import { authTokenVar } from '../lib/apolloClient'
 import { md, styleMode } from '../styles/styles'
 
 /** graphql */
-import { useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { MY_QUERY } from '../graphql/queries'
-import { MyQuery, MyQueryVariables } from '../generated'
+import { LogoutMutation, LogoutMutationVariables, MyQuery, MyQueryVariables } from '../generated'
+import { LOGOUT_MUTATION } from '../graphql/mutations'
 
 type Props = styleMode
 
@@ -35,6 +44,9 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
     fetchPolicy: 'network-only',
   })
+  const [logout] = useMutation<LogoutMutation, LogoutMutationVariables>(LOGOUT_MUTATION)
+  /** 텍스트 에디터 컴포넌트가 적용된 페이지는 서버사이드렌더링 이슈가 있어 다크모드스위치를 가려주어야 합니다. */
+  const isHide = pathname.includes('/test')
 
   /**
    * `side navigator` 마우스 이벤트 핸들러 입니다.
@@ -96,6 +108,25 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
     }
   }
 
+  /**
+   * logout 클릭 이벤트 핸들러 입니다.
+   */
+  const handleClickLogout = async () => {
+    try {
+      const { data } = await logout()
+
+      if (data?.logout.ok) {
+        localStorage.removeItem(LOCALSTORAGE_TOKEN)
+        push('/login', 'login', { locale })
+      }
+    } catch (error: any) {
+      notification.error({
+        message: error.message,
+      })
+      console.error(error)
+    }
+  }
+
   useEffect(() => {
     if (document) {
       document.addEventListener('mousedown', handleClickOutside as any)
@@ -128,7 +159,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
         onMouseLeave={useCallback(() => setIsNavOpen(false), [isNavOpen])}>
         <div className="navbar-header">
           <ul className="nav">
-            <li className="nav-item">
+            <li className="nav-item logo">
               <Link href="/">
                 <a>
                   <div className="status">
@@ -143,13 +174,19 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
         <div className="shadow-bottom"></div>
         <div className="navbar-container">
           <ul className="nav">
+            <li className="nav-item">
+              <button className="logout" onClick={handleClickLogout}>
+                <LogoutOutlined className="icon" />
+                <span className="text">{locale === 'ko' ? '로그아웃' : 'Logout'}</span>
+              </button>
+            </li>
             <li
               className={[
                 'nav-item',
                 'has-sub',
                 pathname.includes('/mypage') ? 'open' : undefined,
               ].join(' ')}>
-              <Link href="">
+              <Link href="#">
                 <a onClick={handleClickItem}>
                   <UserOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '마이페이지' : 'My Page'}</span>
@@ -171,70 +208,208 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </div>
               </ul>
             </li>
-            <li className="nav-item-header">
-              <EllipsisOutlined className="icon" />
-              <span className="text">GOING</span>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기1' : 'undefined'}</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item has-sub">
-              <Link href="">
-                <a onClick={handleClickItem}>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기2' : 'undefined'}</span>
-                </a>
-              </Link>
+            {(data?.my.memberType === 'ADMIN' || data?.my.memberType === 'SYSTEM') && (
               <ul className="menu-content">
-                <div className="collapse">
-                  <li className="nav-item">
-                    <Link href="">
-                      <a>
-                        <ArrowRightOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <ArrowRightOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <ArrowRightOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link href="#">
-                      <a>
-                        <ArrowRightOutlined className="icon" />
-                        <span>TEXT</span>
-                      </a>
-                    </Link>
-                  </li>
-                </div>
+                <li className="nav-item-header">
+                  <EllipsisOutlined className="icon" />
+                  <span className="text">MEMBER</span>
+                </li>
+                <li className="nav-item">
+                  <Link href="/member/members">
+                    <a>
+                      <SettingOutlined className="icon" />
+                      <span className="text">{locale === 'ko' ? '관리' : 'Management'}</span>
+                    </a>
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link href="/member/createMember">
+                    <a>
+                      <PlusOutlined className="icon" />
+                      <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                    </a>
+                  </Link>
+                </li>
               </ul>
-            </li>
-            <li className="nav-item">
-              <Link href="#">
-                <a>
-                  <FileTextOutlined className="icon" />
-                  <span className="text">{locale === 'ko' ? '바로가기3' : 'undefined'}</span>
+            )}
+
+            <ul className="menu-content">
+              <li className="nav-item-header">
+                <EllipsisOutlined className="icon" />
+                <span className="text">GOING</span>
+              </li>
+              {/* VOD */}
+              <li className="nav-item has-sub">
+                <a onClick={handleClickItem}>
+                  <MoreOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? 'VOD' : 'VOD'}</span>
                 </a>
-              </Link>
-            </li>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      <Link href="/vod/vods">
+                        <a>
+                          <LayoutOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="/vod/createVod">
+                        <a>
+                          <PlusOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+              {/* LIVE */}
+              <li className="nav-item has-sub">
+                <a onClick={handleClickItem}>
+                  <MoreOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '라이브' : 'Live'}</span>
+                </a>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      <Link href="/live/lives">
+                        <a>
+                          <LayoutOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="/live/createLive">
+                        <a>
+                          <PlusOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+              {/* 게시판 */}
+              <li className="nav-item has-sub">
+                <a onClick={handleClickItem}>
+                  <SoundOutlined className="icon" />
+                  <span className="text">{locale === 'ko' ? '안내' : 'News'}</span>
+                </a>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '게시판' : 'Board'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? 'FAQ' : 'FAQ'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '문의' : 'Inquiry'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+              {/* 콘텐츠 */}
+              <li className="nav-item">
+                {/* <Link href="/contents/contents"> */}
+                <Link href="#">
+                  <a onClick={() => alert('준비중 입니다')}>
+                    <UnorderedListOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '콘텐츠' : 'Contents'}</span>
+                  </a>
+                </Link>
+              </li>
+              {/* AD */}
+              <li className="nav-item has-sub">
+                <a onClick={handleClickItem}>
+                  <Icon component={AdSvg} className="icon" />
+                  <span className="text">{locale === 'ko' ? '광고' : 'AD'}</span>
+                </a>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      {/* <Link href="/ad/ads"> */}
+                      <Link href="#">
+                        <a onClick={() => alert('준비중 입니다')}>
+                          <SettingOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      {/* <Link href="/ad/createAd"> */}
+                      <Link href="#">
+                        <a onClick={() => alert('준비중 입니다')}>
+                          <PlusOutlined className="icon" />
+                          <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+            </ul>
+
+            <ul className="menu-content">
+              <li className="nav-item-header">
+                <EllipsisOutlined className="icon" />
+                <span className="text">GO 2.0</span>
+              </li>
+              <li className="nav-item">
+                <Link href="#">
+                  <a>
+                    <FileTextOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '준비중' : 'Comming soon'}</span>
+                  </a>
+                </Link>
+              </li>
+              <li className="nav-item has-sub">
+                <Link href="#">
+                  <a onClick={handleClickItem}>
+                    <MoreOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '준비중' : 'Comming soon'}</span>
+                  </a>
+                </Link>
+                <ul className="menu-content">
+                  <div className="collapse">
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '서브1' : 'SUB1'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link href="#">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '서브2' : 'SUB2'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+            </ul>
           </ul>
         </div>
       </NavigatorWrapper>
@@ -288,16 +463,27 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               </div>
               <span></span>
             </div>
-            <div className="header-item">
-              <DarkModeToggle toggleStyle={toggleStyle} theme={theme} />
-            </div>
+            {!isHide && (
+              <div className="header-item">
+                <DarkModeToggle toggleStyle={toggleStyle} theme={theme} />
+              </div>
+            )}
             <div className="header-item profile">
               <div className="info">
-                <span className="user-name">{data?.my.nickname}</span>
+                <span className="user-name">{data?.my.nickName}</span>
                 <span className="user-role">{data?.my.memberType}</span>
               </div>
               <div className="img">
-                <img src="/static/img/none-profile.png" alt="profile" />
+                <img
+                  src={
+                    data?.my.profileImageName
+                      ? `https://image.staby.co.kr/${
+                          data.my.profileImageName
+                        }?date=${moment().format('YYYYMMDDHHmmss')}`
+                      : '/static/img/none-profile.png'
+                  }
+                  alt="profile"
+                />
               </div>
             </div>
           </div>
@@ -352,12 +538,17 @@ const NavigatorWrapper = styled.div`
       border-radius: 0.25rem;
 
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
 
       height: 100%;
 
       .nav-item {
         width: 100%;
+
+        &.logo {
+          flex: 1;
+        }
+
         a {
           outline: none;
           display: flex;
@@ -477,7 +668,7 @@ const NavigatorWrapper = styled.div`
         }
 
         .text {
-          display: none;
+          display: none !important;
         }
 
         .icon {
@@ -493,12 +684,16 @@ const NavigatorWrapper = styled.div`
         background-color: ${({ theme }) => theme.card};
         margin: 0 !important;
 
-        a {
+        a,
+        button {
+          cursor: pointer;
           outline: none;
+          border: 0;
           text-overflow: inherit;
           margin: 0 0.9375rem;
           padding: 0.625rem 0.9375rem;
 
+          background-color: ${({ theme }) => theme.card};
           color: ${({ theme }) => theme.text};
           line-height: 1.45;
 
@@ -517,6 +712,7 @@ const NavigatorWrapper = styled.div`
             }
           }
           .icon {
+            margin-top: 1px;
             margin-right: 1.25rem;
 
             width: 1.25rem;
@@ -553,6 +749,12 @@ const NavigatorWrapper = styled.div`
               transform: translate(5px);
               transition: transform 0.25s ease;
             }
+          }
+        }
+
+        button.logout {
+          .text {
+            display: none;
           }
         }
 
@@ -621,7 +823,7 @@ const NavigatorWrapper = styled.div`
           justify-content: flex-start;
 
           .text {
-            display: block;
+            display: block !important;
           }
 
           .icon {
@@ -630,6 +832,13 @@ const NavigatorWrapper = styled.div`
         }
 
         .nav-item {
+          button.logout {
+            margin: 0 auto;
+            padding-right: 2rem;
+            .text {
+              display: flex;
+            }
+          }
           &.has-sub {
             > a:after {
               content: '';
@@ -793,5 +1002,21 @@ const CountryOption = styled.div`
     }
   }
 `
+
+const AdSvg = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    role="img"
+    width="1em"
+    height="1em"
+    preserveAspectRatio="xMidYMid meet"
+    viewBox="0 0 16 16">
+    <g fill="currentColor">
+      <path d="M3.7 11l.47-1.542h2.004L6.644 11h1.261L5.901 5.001H4.513L2.5 11h1.2zm1.503-4.852l.734 2.426H4.416l.734-2.426h.053zm4.759.128c-1.059 0-1.753.765-1.753 2.043v.695c0 1.279.685 2.043 1.74 2.043c.677 0 1.222-.33 1.367-.804h.057V11h1.138V4.685h-1.16v2.36h-.053c-.18-.475-.68-.77-1.336-.77zm.387.923c.58 0 1.002.44 1.002 1.138v.602c0 .76-.396 1.2-.984 1.2c-.598 0-.972-.449-.972-1.248v-.453c0-.795.37-1.24.954-1.24z" />
+      <path d="M14 3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h12zM2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2z" />
+    </g>
+  </svg>
+)
 
 export default Header

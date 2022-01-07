@@ -1,94 +1,73 @@
-import type { NextPage } from 'next';
-import { useReactiveVar } from '@apollo/client';
-import styled from 'styled-components';
-import Layout from '../components/Layout';
-import { styleMode } from '../styles/styles';
-import React from 'react';
-import { authTokenVar } from '../lib/apolloClient';
+import type { NextPage } from 'next'
+// import { useReactisveVar } from '@apollo/client'
+import styled from 'styled-components'
+import Layout from '../components/Layout'
+import { MainWrapper, md, styleMode } from '../styles/styles'
+import React, { useCallback, useState } from 'react'
+// import { authTokenVar } from '../lib/apolloClient'
 
-type Props = styleMode;
+/** components */
+import WriteEditor from '../components/write/WriteEditor'
+
+type Props = styleMode
 
 const Test: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const getData = useReactiveVar(authTokenVar);
+  // const getData = useReactiveVar(authTokenVar)
+  // console.log(getData)
+  const [title, setTitle] = useState<string>('')
+  const [content, setContent] = useState<string>('')
+
+  const onChangeTitle = useCallback((title: string) => setTitle(title), [title])
+  const onChangeContent = useCallback((content: string) => setContent(content), [content])
+
+  const onSubmit = () => {
+    //  console.log('submit', { title, content })
+  }
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
-      <DivWrapper>
-        <main className="main">
-          <p>{getData || '토큰이 존재 하지 않습니다.'}</p>
-        </main>
-      </DivWrapper>
+      <MainWrapper>
+        {/* <QuillWrapper modules={modules} formats={formats} theme="snow" /> */}
+        <ContentWrapper className="main-content">
+          <div className="card write-wrapper">
+            <WriteEditor
+              title={title}
+              content={content}
+              onChangeTitle={onChangeTitle}
+              onChangeContent={onChangeContent}
+            />
+            <div className="button-wrapper">
+              <button type="button" onClick={onSubmit}>
+                제출
+              </button>
+            </div>
+          </div>
+        </ContentWrapper>
+      </MainWrapper>
     </Layout>
-  );
-};
+  )
+}
 
-const DivWrapper = styled.div`
-  min-height: 100vh;
-  padding: 0 0.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+const ContentWrapper = styled.div`
+  display: grid;
+  gap: 1.5rem;
 
-  main {
-    padding: 5rem 0;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+  > div {
+    .button-wrapper {
+      display: flex;
+      justify-content: flex-start;
+      padding: 0 1.5rem;
 
-  .grid {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    max-width: 800px;
-    margin-top: 3rem;
-  }
+      ${md} {
+        padding: 0;
+        justify-content: flex-end;
+      }
 
-  .card {
-    margin: 1rem;
-    padding: 1.5rem;
-    text-align: left;
-    color: inherit;
-    text-decoration: none;
-    border: ${({ theme }) => `1px solid ${theme.text}`};
-    border-radius: 10px;
-    transition: color 0.15s ease, border-color 0.15s ease;
-    width: 45%;
-  }
-
-  .card:hover,
-  .card:focus,
-  .card:active {
-    color: #0070f3;
-    border-color: #0070f3;
-  }
-
-  .card h2 {
-    margin: 0 0 1rem 0;
-    font-size: 1.5rem;
-  }
-
-  .card p {
-    margin: 0;
-    font-size: 1.25rem;
-    line-height: 1.5;
-  }
-
-  .logo {
-    height: 1em;
-    margin-left: 0.5rem;
-  }
-
-  @media (max-width: 600px) {
-    .grid {
-      width: 100%;
-      flex-direction: column;
+      button {
+        width: 100%;
+        max-width: 5rem;
+      }
     }
   }
-`;
-export default Test;
+`
+export default Test
