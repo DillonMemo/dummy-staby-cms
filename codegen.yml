@@ -1,5 +1,5 @@
 overwrite: true
-schema: 'https://cms-api-dev.staby.co.kr/graphql'
+schema: https://cms-api-dev.staby.co.kr/graphql
 documents: 'graphql/*.ts'
 
 generates:
