@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { AppProps } from 'next/app'
-import { useRouter } from 'next/router'
 import { ThemeProvider } from 'styled-components'
 import { GlobalStyles, TypeOfTheme } from '../styles/styles'
 import themes from '../styles/themes'
@@ -10,7 +9,6 @@ import { useApollo } from '../lib/apolloClient'
 import 'antd/dist/antd.css'
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const { pathname, reload } = useRouter()
   const apolloClient = useApollo(pageProps)
   const [theme, setTheme] = useState<TypeOfTheme>('light')
 
@@ -21,6 +19,14 @@ function MyApp({ Component, pageProps }: AppProps) {
     },
     [theme]
   )
+
+  useEffect(() => {
+    const getTheme = localStorage.getItem('theme') as TypeOfTheme | null
+
+    if (getTheme) {
+      setTheme(getTheme)
+    }
+  }, [theme])
 
   return (
     <ApolloProvider client={apolloClient}>

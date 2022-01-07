@@ -6,7 +6,7 @@ interface ToolbarProps {
   ios?: boolean
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ shadow }) => {
+const Toolbar: React.FC<ToolbarProps> = ({ shadow, ios }) => {
   const renderColor = (className: string): JSX.Element => {
     return (
       <select className={className}>
@@ -36,17 +36,21 @@ const Toolbar: React.FC<ToolbarProps> = ({ shadow }) => {
       <ToolbarItem className="ql-header" value={4}></ToolbarItem>
       <Separator />
       <ToolbarItem className="ql-bold"></ToolbarItem>
-      <ToolbarItem className="ql-italic"></ToolbarItem>
-      <ToolbarItem className="ql-strike"></ToolbarItem>
-      <Separator />
-      <ToolbarItem className="ql-blockquote"></ToolbarItem>
-      <ToolbarItem className="ql-script" value="sub"></ToolbarItem>
-      <ToolbarItem className="ql-script" value="super"></ToolbarItem>
-      <Separator />
-      {renderColor('ql-color')}
-      {renderColor('ql-background')}
-      <ToolbarItem className="ql-link"></ToolbarItem>
-      <ToolbarItem className="ql-image"></ToolbarItem>
+      {!ios && (
+        <>
+          <ToolbarItem className="ql-italic"></ToolbarItem>
+          <ToolbarItem className="ql-strike"></ToolbarItem>
+          <Separator />
+          <ToolbarItem className="ql-blockquote"></ToolbarItem>
+          <ToolbarItem className="ql-script" value="sub"></ToolbarItem>
+          <ToolbarItem className="ql-script" value="super"></ToolbarItem>
+          <Separator />
+          {renderColor('ql-color')}
+          {renderColor('ql-background')}
+          <ToolbarItem className="ql-link"></ToolbarItem>
+          <ToolbarItem className="ql-image"></ToolbarItem>
+        </>
+      )}
     </ToolbarWrapper>
   )
 }

@@ -1,6 +1,6 @@
 import { Skeleton } from 'antd'
 import dynamic from 'next/dynamic'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import styled from 'styled-components'
 import Parser from 'html-react-parser'
 import { find } from 'lodash'
@@ -16,23 +16,11 @@ import Toolbar from './Toolbar'
 /** Quill */
 import 'react-quill/dist/quill.snow.css'
 import { Delta } from 'quill'
-import ReactQuill from 'react-quill'
-const Quill = dynamic(
-  async () => {
-    const { default: RQ } = await import('react-quill')
-    return function comp({ forwardedRef, ...props }: any) {
-      return <RQ ref={forwardedRef} {...props} />
-    }
-  },
-  {
-    ssr: false,
-    loading: () => <Skeleton title={false} paragraph={{ rows: 10 }} />,
-  }
-)
-// const Quill = dynamic(import('react-quill'), {
-//   ssr: false,
-//   loading: () => <Skeleton title={false} paragraph={{ rows: 10 }} />,
-// })
+
+const Quill = dynamic(import('react-quill'), {
+  ssr: false,
+  loading: () => <Skeleton title={false} paragraph={{ rows: 10 }} />,
+})
 
 interface WriteEditorProps {
   title: string
@@ -46,7 +34,6 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
   onChangeTitle,
   onChangeContent,
 }) => {
-  const quillRef = useRef<ReactQuill | null>(null)
   const [hideUpper] = useState<boolean>(false)
   const isIOS = detectIOS()
   const modules: { [key: string]: any } = {
@@ -64,19 +51,15 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
   /** 내용 변경 이벤트 핸들러 */
   const handleContentChange = useCallback(
     (content: string, delta: Delta) => {
-      const quill = quillRef.current
-
-      if (quill) {
-        const findAttr = find(delta.ops, 'attributes')
-        if (findAttr) {
-          const findLink = find(findAttr, 'link')?.link
-          // const isInternet = new RegExp(/\b(?:https?|ftp):\/\//gim)
-          if (findLink) {
-            // 링크 툴을 이용할때 [https://, http://] 프로토콜체크후 강제 변환 시킵니다.
-            content = content.replace(/\b(href="https:\/\/)/gim, 'href="')
-            content = content.replace(/\b(href="http:\/\/)/gim, 'href="')
-            content = content.replace(/\b(href=")/gim, 'href="https://')
-          }
+      const findAttr = find(delta.ops, 'attributes')
+      if (findAttr) {
+        const findLink = find(findAttr, 'link')?.link
+        // const isInternet = new RegExp(/\b(?:https?|ftp):\/\//gim)
+        if (findLink) {
+          // 링크 툴을 이용할때 [https://, http://] 프로토콜체크후 강제 변환 시킵니다.
+          content = content.replace(/\b(href="https:\/\/)/gim, 'href="')
+          content = content.replace(/\b(href="http:\/\/)/gim, 'href="')
+          content = content.replace(/\b(href=")/gim, 'href="https://')
         }
       }
       onChangeContent(content)
@@ -92,7 +75,7 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
         <Toolbar shadow={hideUpper} ios={isIOS} />
         <QuillWrapper>
           <Quill
-            forwardedRef={quillRef}
+            className="editor"
             theme="snow"
             modules={modules}
             placeholder="내용을 입력해주세요..."
@@ -172,6 +155,8 @@ const QuillWrapper = styled.div`
     .ql-editor {
       padding: 0.75rem 0.5rem;
       font-family: 'Montserrat', 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: text;
+      -webkit-user-select: text;
       &.ql-blank::before {
         color: ${({ theme }) => `${theme.text}${opacityHex._40}`};
       }
