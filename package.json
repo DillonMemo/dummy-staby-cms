@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=devlopment npm run codegen:dev && next dev",
-    "build": "next build",
-    "start": "cross-env NODE_ENV=production npm run codegen && next start",
+    "build": "cross-env NODE_ENV=production npm run codegen next build",
+    "start": "next start",
     "lint": "next lint",
     "codegen": "rimraf generated && graphql-codegen --config codegen.yml",
     "codegen:dev": "rimraf generated && graphql-codegen --config codegen.dev.yml"
