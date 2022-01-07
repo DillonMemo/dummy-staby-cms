@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npm run codegen && next dev",
-    "build": "graphql-codegen --config codegen.yml && next build",
+    "build": "npm run codegen && next build",
     "start": "npm run codegen && next start",
     "lint": "next lint",
     "codegen": "rimraf generated && graphql-codegen --config codegen.yml"
