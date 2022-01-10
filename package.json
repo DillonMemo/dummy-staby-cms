@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=devlopment npm run codegen:dev && next dev",
+    "dev": "cross-env NODE_ENV=devlopment npm run codegen && next dev",
     "build": "cross-env NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",

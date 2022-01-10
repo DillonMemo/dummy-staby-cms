@@ -301,10 +301,18 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
+                      <Link href="/news/notice">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '공지사항' : 'Notice'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
                       <Link href="#">
                         <a>
                           <ArrowRightOutlined className="icon" />
-                          <span>{locale === 'ko' ? '게시판' : 'Board'}</span>
+                          <span>{locale === 'ko' ? '이벤트' : 'Event'}</span>
                         </a>
                       </Link>
                     </li>

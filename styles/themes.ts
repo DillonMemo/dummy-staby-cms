@@ -1,6 +1,6 @@
 const lightTheme = {
   mode: 'light',
-  body: '#e8e8e8',
+  body: '#dfdfdf',
   card: '#ffffff',
   card_radius: '0.428rem',
   text: '#6e6b7b',
