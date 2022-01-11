@@ -232,3 +232,16 @@ export const DELETE_VOD_MUTATION = gql`
     }
   }
 `
+
+/** Main Banner Live Mutation */
+export const MAIN_BANNER_LIVE_MUTATION = gql`
+  mutation MainBannerLiveContents($mainBannerLiveInput: MainBannerLiveInput!) {
+    mainBannerLiveContents(input: $mainBannerLiveInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`

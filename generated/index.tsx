@@ -287,6 +287,21 @@ export type LogoutOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type MainBannerLiveInput = {
+  mainBannerLive: Array<MainBannerLiveInputType>;
+};
+
+export type MainBannerLiveInputType = {
+  listingOrder: Scalars['Float'];
+  liveId: Scalars['ID'];
+};
+
+export type MainBannerLiveOutput = {
+  __typename?: 'MainBannerLiveOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export type Member = {
   __typename?: 'Member';
   _id: Scalars['ID'];
@@ -384,6 +399,7 @@ export type Mutation = {
   lives: LivesOutput;
   login: LoginOutput;
   logout: LogoutOutput;
+  mainBannerLiveContents: MainBannerLiveOutput;
   members: MembersOutput;
   vods: VodsOutput;
 };
@@ -441,6 +457,11 @@ export type MutationLivesArgs = {
 
 export type MutationLoginArgs = {
   input: LoginInput;
+};
+
+
+export type MutationMainBannerLiveContentsArgs = {
+  input: MainBannerLiveInput;
 };
 
 
@@ -685,6 +706,13 @@ export type DeleteVodMutationVariables = Exact<{
 
 
 export type DeleteVodMutation = { __typename?: 'Mutation', deleteVod: { __typename?: 'DeleteVodOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type MainBannerLiveContentsMutationVariables = Exact<{
+  mainBannerLiveInput: MainBannerLiveInput;
+}>;
+
+
+export type MainBannerLiveContentsMutation = { __typename?: 'Mutation', mainBannerLiveContents: { __typename?: 'MainBannerLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
 
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1288,6 +1316,43 @@ export function useDeleteVodMutation(baseOptions?: Apollo.MutationHookOptions<De
 export type DeleteVodMutationHookResult = ReturnType<typeof useDeleteVodMutation>;
 export type DeleteVodMutationResult = Apollo.MutationResult<DeleteVodMutation>;
 export type DeleteVodMutationOptions = Apollo.BaseMutationOptions<DeleteVodMutation, DeleteVodMutationVariables>;
+export const MainBannerLiveContentsDocument = gql`
+    mutation MainBannerLiveContents($mainBannerLiveInput: MainBannerLiveInput!) {
+  mainBannerLiveContents(input: $mainBannerLiveInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type MainBannerLiveContentsMutationFn = Apollo.MutationFunction<MainBannerLiveContentsMutation, MainBannerLiveContentsMutationVariables>;
+
+/**
+ * __useMainBannerLiveContentsMutation__
+ *
+ * To run a mutation, you first call `useMainBannerLiveContentsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMainBannerLiveContentsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mainBannerLiveContentsMutation, { data, loading, error }] = useMainBannerLiveContentsMutation({
+ *   variables: {
+ *      mainBannerLiveInput: // value for 'mainBannerLiveInput'
+ *   },
+ * });
+ */
+export function useMainBannerLiveContentsMutation(baseOptions?: Apollo.MutationHookOptions<MainBannerLiveContentsMutation, MainBannerLiveContentsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MainBannerLiveContentsMutation, MainBannerLiveContentsMutationVariables>(MainBannerLiveContentsDocument, options);
+      }
+export type MainBannerLiveContentsMutationHookResult = ReturnType<typeof useMainBannerLiveContentsMutation>;
+export type MainBannerLiveContentsMutationResult = Apollo.MutationResult<MainBannerLiveContentsMutation>;
+export type MainBannerLiveContentsMutationOptions = Apollo.BaseMutationOptions<MainBannerLiveContentsMutation, MainBannerLiveContentsMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {
