@@ -191,7 +191,7 @@ export const FIND_VOD_BY_TYPES_QUERY = gql`
  * 콘텐츠 목록들을 가져옵니다.
  */
 export const MAIN_BANNER_LIVE_CONTENTS_QUERY = gql`
-  query MainBannerLiveContents() {
+  query MainBannerLiveContents {
     mainBannerLiveContents {
       ok
       error {
