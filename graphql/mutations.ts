@@ -234,9 +234,9 @@ export const DELETE_VOD_MUTATION = gql`
 `
 
 /** Main Banner Live Mutation */
-export const MAIN_BANNER_LIVE_MUTATION = gql`
-  mutation MainBannerLiveContents($mainBannerLiveInput: MainBannerLiveInput!) {
-    mainBannerLiveContents(input: $mainBannerLiveInput) {
+export const CREATE_MAIN_BANNER_LIVE_MUTATION = gql`
+  mutation CreateMainBannerLiveContents($createMainBannerLiveInput: CreateMainBannerLiveInput!) {
+    createMainBannerLiveContents(input: $createMainBannerLiveInput) {
       ok
       error {
         ko
