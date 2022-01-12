@@ -18,6 +18,47 @@ export type Scalars = {
   DateTime: any;
 };
 
+export enum AdvertiseStatus {
+  Display = 'DISPLAY',
+  Removed = 'REMOVED',
+  Wait = 'WAIT'
+}
+
+export type Advertisement = {
+  __typename?: 'Advertisement';
+  _id: Scalars['ID'];
+  advertiseStatus: AdvertiseStatus;
+  content?: Maybe<Scalars['String']>;
+  createDate: Scalars['DateTime'];
+  createMember: AuthMember;
+  displayCount: Scalars['Float'];
+  displayDeviceType: DisplayDeviceType;
+  displayType: DisplayType;
+  endDate: Scalars['DateTime'];
+  linkType: LinkType;
+  linkUrl: Scalars['String'];
+  mainImageName: Scalars['String'];
+  startDate: Scalars['DateTime'];
+  title: Scalars['String'];
+  updateDate: Scalars['DateTime'];
+  updateMember: AuthMember;
+};
+
+export type AdvertisementsInput = {
+  displayType?: Maybe<DisplayType>;
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+};
+
+export type AdvertisementsOutput = {
+  __typename?: 'AdvertisementsOutput';
+  advertisements?: Maybe<Array<Advertisement>>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
+};
+
 export type AnswerInfo = {
   __typename?: 'AnswerInfo';
   answer: Scalars['String'];
@@ -33,6 +74,35 @@ export type AuthMember = {
   __typename?: 'AuthMember';
   email: Scalars['String'];
   memberId: Scalars['ID'];
+};
+
+export type ChangeAdvertisementStatusInput = {
+  _id: Scalars['ID'];
+  advertiseStatus?: Maybe<AdvertiseStatus>;
+};
+
+export type ChangeAdvertisementStatusOutput = {
+  __typename?: 'ChangeAdvertisementStatusOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type CreateAdvertisementInput = {
+  advertiseStatus?: Maybe<AdvertiseStatus>;
+  displayDeviceType: DisplayDeviceType;
+  displayType: DisplayType;
+  endDate: Scalars['DateTime'];
+  linkType: LinkType;
+  linkUrl: Scalars['String'];
+  mainImageName: Scalars['String'];
+  startDate: Scalars['DateTime'];
+  title: Scalars['String'];
+};
+
+export type CreateAdvertisementOutput = {
+  __typename?: 'CreateAdvertisementOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
 };
 
 export type CreateLiveInput = {
@@ -108,6 +178,35 @@ export type DeleteVodOutput = {
   ok: Scalars['Boolean'];
 };
 
+export enum DisplayDeviceType {
+  Android = 'ANDROID',
+  Common = 'COMMON',
+  Ios = 'IOS'
+}
+
+export enum DisplayType {
+  Banner = 'BANNER',
+  Popup = 'POPUP'
+}
+
+export type EditAdvertisementInput = {
+  _id?: Maybe<Scalars['ID']>;
+  displayDeviceType?: Maybe<DisplayDeviceType>;
+  displayType?: Maybe<DisplayType>;
+  endDate?: Maybe<Scalars['DateTime']>;
+  linkType?: Maybe<LinkType>;
+  linkUrl?: Maybe<Scalars['String']>;
+  mainImageName?: Maybe<Scalars['String']>;
+  startDate?: Maybe<Scalars['DateTime']>;
+  title?: Maybe<Scalars['String']>;
+};
+
+export type EditAdvertisementOutput = {
+  __typename?: 'EditAdvertisementOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export type EditLiveInput = {
   _id: Scalars['ID'];
   content?: Maybe<Scalars['String']>;
@@ -165,6 +264,28 @@ export type EditVodOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type FindAdvertisementByIdInput = {
+  _id: Scalars['ID'];
+};
+
+export type FindAdvertisementByIdOutput = {
+  __typename?: 'FindAdvertisementByIdOutput';
+  advertisement?: Maybe<Advertisement>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type FindLiveByTypesInput = {
+  liveStatus: Array<LiveStatus>;
+};
+
+export type FindLiveByTypesOutput = {
+  __typename?: 'FindLiveByTypesOutput';
+  error?: Maybe<LangErrorMessage>;
+  lives: Array<Live>;
+  ok: Scalars['Boolean'];
+};
+
 export type FindVodByIdInput = {
   vodId: Scalars['ID'];
 };
@@ -176,11 +297,28 @@ export type FindVodByIdOutput = {
   vod?: Maybe<Vod>;
 };
 
+export type FindVodByTypesInput = {
+  vodStatus: Array<VodStatus>;
+};
+
+export type FindVodByTypesOutput = {
+  __typename?: 'FindVodByTypesOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+  vods: Array<Vod>;
+};
+
 export type LangErrorMessage = {
   __typename?: 'LangErrorMessage';
   en: Scalars['String'];
   ko: Scalars['String'];
 };
+
+export enum LinkType {
+  Live = 'LIVE',
+  Vod = 'VOD',
+  Web = 'WEB'
+}
 
 export type Live = {
   __typename?: 'Live';
@@ -387,12 +525,16 @@ export type MembersOutput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  advertisements: AdvertisementsOutput;
+  changeAdvertisementStatus: ChangeAdvertisementStatusOutput;
   createAccount: CreateMemberOutput;
+  createAdvertisement: CreateAdvertisementOutput;
   createLive: CreateLiveOutput;
   createVod: CreateVodOutput;
   deleteLive: DeleteLiveOutput;
   deleteVod: DeleteVodOutput;
   editAccount: EditMemberOutput;
+  editAdvertisement: EditAdvertisementOutput;
   editLive: EditLiveOutput;
   editMemberById: EditMemberOutput;
   editVod: EditVodOutput;
@@ -405,8 +547,23 @@ export type Mutation = {
 };
 
 
+export type MutationAdvertisementsArgs = {
+  input: AdvertisementsInput;
+};
+
+
+export type MutationChangeAdvertisementStatusArgs = {
+  input: ChangeAdvertisementStatusInput;
+};
+
+
 export type MutationCreateAccountArgs = {
   input: CreateMemberInput;
+};
+
+
+export type MutationCreateAdvertisementArgs = {
+  input: CreateAdvertisementInput;
 };
 
 
@@ -432,6 +589,11 @@ export type MutationDeleteVodArgs = {
 
 export type MutationEditAccountArgs = {
   input: EditMemberInput;
+};
+
+
+export type MutationEditAdvertisementArgs = {
+  input: EditAdvertisementInput;
 };
 
 
@@ -487,17 +649,30 @@ export type Point = {
 
 export type Query = {
   __typename?: 'Query';
+  findAdvertisementById: FindAdvertisementByIdOutput;
   findLiveById: LiveOutput;
+  findLiveByTypes: FindLiveByTypesOutput;
   findMemberById: MemberOutput;
   findMembersByType: MembersByTypeOutput;
   findVodById: FindVodByIdOutput;
+  findVodByTypes: FindVodByTypesOutput;
   my: Member;
   testBoard: Scalars['Boolean'];
 };
 
 
+export type QueryFindAdvertisementByIdArgs = {
+  input: FindAdvertisementByIdInput;
+};
+
+
 export type QueryFindLiveByIdArgs = {
   input: LiveInput;
+};
+
+
+export type QueryFindLiveByTypesArgs = {
+  input: FindLiveByTypesInput;
 };
 
 
@@ -513,6 +688,11 @@ export type QueryFindMembersByTypeArgs = {
 
 export type QueryFindVodByIdArgs = {
   input: FindVodByIdInput;
+};
+
+
+export type QueryFindVodByTypesArgs = {
+  input: FindVodByTypesInput;
 };
 
 export enum TranscodeStatus {
@@ -714,6 +894,34 @@ export type MainBannerLiveContentsMutationVariables = Exact<{
 
 export type MainBannerLiveContentsMutation = { __typename?: 'Mutation', mainBannerLiveContents: { __typename?: 'MainBannerLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
 
+export type CreateAdvertisementMutationVariables = Exact<{
+  createAdvertisementInput: CreateAdvertisementInput;
+}>;
+
+
+export type CreateAdvertisementMutation = { __typename?: 'Mutation', createAdvertisement: { __typename?: 'CreateAdvertisementOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type AdvertisementsMutationVariables = Exact<{
+  advertisementsInput: AdvertisementsInput;
+}>;
+
+
+export type AdvertisementsMutation = { __typename?: 'Mutation', advertisements: { __typename?: 'AdvertisementsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, advertisements?: Array<{ __typename?: 'Advertisement', _id: string, advertiseStatus: AdvertiseStatus, displayType: DisplayType, title: string, content?: string | null | undefined, linkType: LinkType, linkUrl: string, startDate: any, endDate: any }> | null | undefined } };
+
+export type EditAdvertisementMutationVariables = Exact<{
+  editAdvertisementInput: EditAdvertisementInput;
+}>;
+
+
+export type EditAdvertisementMutation = { __typename?: 'Mutation', editAdvertisement: { __typename?: 'EditAdvertisementOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type ChangeAdvertisementStatusMutationVariables = Exact<{
+  changeAdvertisementStatusInput: ChangeAdvertisementStatusInput;
+}>;
+
+
+export type ChangeAdvertisementStatusMutation = { __typename?: 'Mutation', changeAdvertisementStatus: { __typename?: 'ChangeAdvertisementStatusOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -746,6 +954,20 @@ export type FindVodByIdQueryVariables = Exact<{
 
 
 export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, mainImageName: string, storageTotalCount?: number | null | undefined, vodStatus: VodStatus, liveId?: string | null | undefined, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null | undefined, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null | undefined, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+
+export type FindLiveByTypesQueryVariables = Exact<{
+  findLiveByTypesInput: FindLiveByTypesInput;
+}>;
+
+
+export type FindLiveByTypesQuery = { __typename?: 'Query', findLiveByTypes: { __typename?: 'FindLiveByTypesOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives: Array<{ __typename?: 'Live', _id: string, title: string }> } };
+
+export type FindVodByTypesQueryVariables = Exact<{
+  findVodByTypesInput: FindVodByTypesInput;
+}>;
+
+
+export type FindVodByTypesQuery = { __typename?: 'Query', findVodByTypes: { __typename?: 'FindVodByTypesOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods: Array<{ __typename?: 'Vod', _id: string, title: string }> } };
 
 
 export const LoginDocument = gql`
@@ -1353,6 +1575,167 @@ export function useMainBannerLiveContentsMutation(baseOptions?: Apollo.MutationH
 export type MainBannerLiveContentsMutationHookResult = ReturnType<typeof useMainBannerLiveContentsMutation>;
 export type MainBannerLiveContentsMutationResult = Apollo.MutationResult<MainBannerLiveContentsMutation>;
 export type MainBannerLiveContentsMutationOptions = Apollo.BaseMutationOptions<MainBannerLiveContentsMutation, MainBannerLiveContentsMutationVariables>;
+export const CreateAdvertisementDocument = gql`
+    mutation CreateAdvertisement($createAdvertisementInput: CreateAdvertisementInput!) {
+  createAdvertisement(input: $createAdvertisementInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type CreateAdvertisementMutationFn = Apollo.MutationFunction<CreateAdvertisementMutation, CreateAdvertisementMutationVariables>;
+
+/**
+ * __useCreateAdvertisementMutation__
+ *
+ * To run a mutation, you first call `useCreateAdvertisementMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAdvertisementMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAdvertisementMutation, { data, loading, error }] = useCreateAdvertisementMutation({
+ *   variables: {
+ *      createAdvertisementInput: // value for 'createAdvertisementInput'
+ *   },
+ * });
+ */
+export function useCreateAdvertisementMutation(baseOptions?: Apollo.MutationHookOptions<CreateAdvertisementMutation, CreateAdvertisementMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateAdvertisementMutation, CreateAdvertisementMutationVariables>(CreateAdvertisementDocument, options);
+      }
+export type CreateAdvertisementMutationHookResult = ReturnType<typeof useCreateAdvertisementMutation>;
+export type CreateAdvertisementMutationResult = Apollo.MutationResult<CreateAdvertisementMutation>;
+export type CreateAdvertisementMutationOptions = Apollo.BaseMutationOptions<CreateAdvertisementMutation, CreateAdvertisementMutationVariables>;
+export const AdvertisementsDocument = gql`
+    mutation Advertisements($advertisementsInput: AdvertisementsInput!) {
+  advertisements(input: $advertisementsInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    totalPages
+    totalResults
+    advertisements {
+      _id
+      advertiseStatus
+      displayType
+      title
+      content
+      linkType
+      linkUrl
+      startDate
+      endDate
+    }
+  }
+}
+    `;
+export type AdvertisementsMutationFn = Apollo.MutationFunction<AdvertisementsMutation, AdvertisementsMutationVariables>;
+
+/**
+ * __useAdvertisementsMutation__
+ *
+ * To run a mutation, you first call `useAdvertisementsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAdvertisementsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [advertisementsMutation, { data, loading, error }] = useAdvertisementsMutation({
+ *   variables: {
+ *      advertisementsInput: // value for 'advertisementsInput'
+ *   },
+ * });
+ */
+export function useAdvertisementsMutation(baseOptions?: Apollo.MutationHookOptions<AdvertisementsMutation, AdvertisementsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AdvertisementsMutation, AdvertisementsMutationVariables>(AdvertisementsDocument, options);
+      }
+export type AdvertisementsMutationHookResult = ReturnType<typeof useAdvertisementsMutation>;
+export type AdvertisementsMutationResult = Apollo.MutationResult<AdvertisementsMutation>;
+export type AdvertisementsMutationOptions = Apollo.BaseMutationOptions<AdvertisementsMutation, AdvertisementsMutationVariables>;
+export const EditAdvertisementDocument = gql`
+    mutation EditAdvertisement($editAdvertisementInput: EditAdvertisementInput!) {
+  editAdvertisement(input: $editAdvertisementInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type EditAdvertisementMutationFn = Apollo.MutationFunction<EditAdvertisementMutation, EditAdvertisementMutationVariables>;
+
+/**
+ * __useEditAdvertisementMutation__
+ *
+ * To run a mutation, you first call `useEditAdvertisementMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditAdvertisementMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editAdvertisementMutation, { data, loading, error }] = useEditAdvertisementMutation({
+ *   variables: {
+ *      editAdvertisementInput: // value for 'editAdvertisementInput'
+ *   },
+ * });
+ */
+export function useEditAdvertisementMutation(baseOptions?: Apollo.MutationHookOptions<EditAdvertisementMutation, EditAdvertisementMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditAdvertisementMutation, EditAdvertisementMutationVariables>(EditAdvertisementDocument, options);
+      }
+export type EditAdvertisementMutationHookResult = ReturnType<typeof useEditAdvertisementMutation>;
+export type EditAdvertisementMutationResult = Apollo.MutationResult<EditAdvertisementMutation>;
+export type EditAdvertisementMutationOptions = Apollo.BaseMutationOptions<EditAdvertisementMutation, EditAdvertisementMutationVariables>;
+export const ChangeAdvertisementStatusDocument = gql`
+    mutation ChangeAdvertisementStatus($changeAdvertisementStatusInput: ChangeAdvertisementStatusInput!) {
+  changeAdvertisementStatus(input: $changeAdvertisementStatusInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type ChangeAdvertisementStatusMutationFn = Apollo.MutationFunction<ChangeAdvertisementStatusMutation, ChangeAdvertisementStatusMutationVariables>;
+
+/**
+ * __useChangeAdvertisementStatusMutation__
+ *
+ * To run a mutation, you first call `useChangeAdvertisementStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangeAdvertisementStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changeAdvertisementStatusMutation, { data, loading, error }] = useChangeAdvertisementStatusMutation({
+ *   variables: {
+ *      changeAdvertisementStatusInput: // value for 'changeAdvertisementStatusInput'
+ *   },
+ * });
+ */
+export function useChangeAdvertisementStatusMutation(baseOptions?: Apollo.MutationHookOptions<ChangeAdvertisementStatusMutation, ChangeAdvertisementStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangeAdvertisementStatusMutation, ChangeAdvertisementStatusMutationVariables>(ChangeAdvertisementStatusDocument, options);
+      }
+export type ChangeAdvertisementStatusMutationHookResult = ReturnType<typeof useChangeAdvertisementStatusMutation>;
+export type ChangeAdvertisementStatusMutationResult = Apollo.MutationResult<ChangeAdvertisementStatusMutation>;
+export type ChangeAdvertisementStatusMutationOptions = Apollo.BaseMutationOptions<ChangeAdvertisementStatusMutation, ChangeAdvertisementStatusMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {
@@ -1631,3 +2014,89 @@ export function useFindVodByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type FindVodByIdQueryHookResult = ReturnType<typeof useFindVodByIdQuery>;
 export type FindVodByIdLazyQueryHookResult = ReturnType<typeof useFindVodByIdLazyQuery>;
 export type FindVodByIdQueryResult = Apollo.QueryResult<FindVodByIdQuery, FindVodByIdQueryVariables>;
+export const FindLiveByTypesDocument = gql`
+    query FindLiveByTypes($findLiveByTypesInput: FindLiveByTypesInput!) {
+  findLiveByTypes(input: $findLiveByTypesInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    lives {
+      _id
+      title
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindLiveByTypesQuery__
+ *
+ * To run a query within a React component, call `useFindLiveByTypesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindLiveByTypesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindLiveByTypesQuery({
+ *   variables: {
+ *      findLiveByTypesInput: // value for 'findLiveByTypesInput'
+ *   },
+ * });
+ */
+export function useFindLiveByTypesQuery(baseOptions: Apollo.QueryHookOptions<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>(FindLiveByTypesDocument, options);
+      }
+export function useFindLiveByTypesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>(FindLiveByTypesDocument, options);
+        }
+export type FindLiveByTypesQueryHookResult = ReturnType<typeof useFindLiveByTypesQuery>;
+export type FindLiveByTypesLazyQueryHookResult = ReturnType<typeof useFindLiveByTypesLazyQuery>;
+export type FindLiveByTypesQueryResult = Apollo.QueryResult<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>;
+export const FindVodByTypesDocument = gql`
+    query FindVodByTypes($findVodByTypesInput: FindVodByTypesInput!) {
+  findVodByTypes(input: $findVodByTypesInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    vods {
+      _id
+      title
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindVodByTypesQuery__
+ *
+ * To run a query within a React component, call `useFindVodByTypesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindVodByTypesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindVodByTypesQuery({
+ *   variables: {
+ *      findVodByTypesInput: // value for 'findVodByTypesInput'
+ *   },
+ * });
+ */
+export function useFindVodByTypesQuery(baseOptions: Apollo.QueryHookOptions<FindVodByTypesQuery, FindVodByTypesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindVodByTypesQuery, FindVodByTypesQueryVariables>(FindVodByTypesDocument, options);
+      }
+export function useFindVodByTypesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindVodByTypesQuery, FindVodByTypesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindVodByTypesQuery, FindVodByTypesQueryVariables>(FindVodByTypesDocument, options);
+        }
+export type FindVodByTypesQueryHookResult = ReturnType<typeof useFindVodByTypesQuery>;
+export type FindVodByTypesLazyQueryHookResult = ReturnType<typeof useFindVodByTypesLazyQuery>;
+export type FindVodByTypesQueryResult = Apollo.QueryResult<FindVodByTypesQuery, FindVodByTypesQueryVariables>;
