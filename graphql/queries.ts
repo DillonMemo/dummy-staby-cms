@@ -201,6 +201,7 @@ export const MAIN_BANNER_LIVE_CONTENTS_QUERY = gql`
       mainBannerLives {
         liveId
         listingOrder
+        title
       }
     }
   }
