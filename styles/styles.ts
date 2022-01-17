@@ -71,6 +71,25 @@ export type styleMode = {
 }
 
 export const GlobalStyles = createGlobalStyle`
+    :root {
+        --status-indicator-size: 10px;
+        --status-indicator-animation-duration: 2s;
+        --status-indicator-color: #d8e2e9;
+        --status-indicator-color-semi: rgba(216,226,233,0.5);
+        --status-indicator-color-transparent: rgba(216,226,233,0);
+        --status-indicator-color-active: #0095ff;
+        --status-indicator-color-active-semi: rgba(0,149,255,0.5);
+        --status-indicator-color-active-transparent: rgba(0,149,255,0);
+        --status-indicator-color-positive: #4bd28f;
+        --status-indicator-color-positive-semi: rgba(75,210,143,0.5);
+        --status-indicator-color-positive-transparent: rgba(75,210,143,0);
+        --status-indicator-color-intermediary: #fa0;
+        --status-indicator-color-intermediary-semi: rgba(255,170,0,0.5);
+        --status-indicator-color-intermediary-transparent: rgba(255,170,0,0);
+        --status-indicator-color-negative: #ff4d4d;
+        --status-indicator-color-negative-semi: rgba(255,77,77,0.5);
+        --status-indicator-color-negative-transparent: rgba(255,77,77,0);
+    }
     *, *::after, *::before {
         padding: 0;
         margin: 0;
@@ -489,6 +508,15 @@ export const Form = styled.form`
     .button-group {
       display: flex;
       justify-content: flex-end;
+
+      &.add-write {
+        padding: 0 1.5rem;
+
+        ${md} {
+          padding: 0;
+        }
+      }
+
       .submit-button {
         padding: 0.786rem 1.5rem;
         border: 1px solid transparent;
@@ -596,11 +624,32 @@ export const ManagementWrapper = styled.div`
           line-height: 1;
         }
       }
+
+      .create-btn {
+        padding: 0.786rem 1.5rem;
+        border: 1px solid transparent;
+        box-shadow: none;
+        min-height: 2.714rem;
+
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
     }
 
     .pagination-content {
       display: inline-flex;
       justify-content: flex-end;
+    }
+  }
+
+  .write-wrapper {
+    .button-wrapper {
+      padding: 1.5rem;
+
+      ${md} {
+        padding: 1rem 0;
+      }
     }
   }
 `

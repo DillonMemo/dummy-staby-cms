@@ -37,6 +37,7 @@ export type Advertisement = {
   endDate: Scalars['DateTime'];
   linkType: LinkType;
   linkUrl: Scalars['String'];
+  listingOrder?: Maybe<Scalars['Float']>;
   mainImageName: Scalars['String'];
   startDate: Scalars['DateTime'];
   title: Scalars['String'];
@@ -76,6 +77,13 @@ export type AuthMember = {
   memberId: Scalars['ID'];
 };
 
+export enum BoardCategoryType {
+  Event = 'EVENT',
+  Faq = 'FAQ',
+  Notice = 'NOTICE',
+  Qna = 'QNA'
+}
+
 export type ChangeAdvertisementStatusInput = {
   _id: Scalars['ID'];
   advertiseStatus?: Maybe<AdvertiseStatus>;
@@ -101,12 +109,6 @@ export type CreateAdvertisementInput = {
 
 export type CreateAdvertisementOutput = {
   __typename?: 'CreateAdvertisementOutput';
-  error?: Maybe<LangErrorMessage>;
-  ok: Scalars['Boolean'];
-};
-
-export type CreateBoardOutput = {
-  __typename?: 'CreateBoardOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
@@ -152,6 +154,19 @@ export type CreateMemberInput = {
 
 export type CreateMemberOutput = {
   __typename?: 'CreateMemberOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type CreateNoticeInput = {
+  _id?: Maybe<Scalars['ID']>;
+  boardCategoryType?: Maybe<BoardCategoryType>;
+  content?: Maybe<Scalars['String']>;
+  title?: Maybe<Scalars['String']>;
+};
+
+export type CreateNoticeOutput = {
+  __typename?: 'CreateNoticeOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
@@ -341,6 +356,7 @@ export type Live = {
   _id: Scalars['ID'];
   content?: Maybe<Scalars['String']>;
   createDate: Scalars['DateTime'];
+  createMember: AuthMember;
   delayedEntryTime: Scalars['Float'];
   hostName: Scalars['String'];
   likeCount?: Maybe<Scalars['Float']>;
@@ -354,6 +370,7 @@ export type Live = {
   paymentAmount: Scalars['Float'];
   title: Scalars['String'];
   updateDate: Scalars['DateTime'];
+  updateMember: AuthMember;
   viewCount?: Maybe<Scalars['Float']>;
   vodId?: Maybe<Scalars['ID']>;
 };
@@ -555,9 +572,9 @@ export type Mutation = {
   changeAdvertisementStatus: ChangeAdvertisementStatusOutput;
   createAccount: CreateMemberOutput;
   createAdvertisement: CreateAdvertisementOutput;
-  createBoard: CreateBoardOutput;
   createLive: CreateLiveOutput;
   createMainBannerLiveContents: CreateMainBannerLiveOutput;
+  createNotice: CreateNoticeOutput;
   createVod: CreateVodOutput;
   deleteLive: DeleteLiveOutput;
   deleteVod: DeleteVodOutput;
@@ -601,6 +618,11 @@ export type MutationCreateLiveArgs = {
 
 export type MutationCreateMainBannerLiveContentsArgs = {
   input: CreateMainBannerLiveInput;
+};
+
+
+export type MutationCreateNoticeArgs = {
+  input: CreateNoticeInput;
 };
 
 
@@ -948,6 +970,13 @@ export type ChangeAdvertisementStatusMutationVariables = Exact<{
 
 
 export type ChangeAdvertisementStatusMutation = { __typename?: 'Mutation', changeAdvertisementStatus: { __typename?: 'ChangeAdvertisementStatusOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type CreateNoticeMutationVariables = Exact<{
+  createNoticeInput: CreateNoticeInput;
+}>;
+
+
+export type CreateNoticeMutation = { __typename?: 'Mutation', createNotice: { __typename?: 'CreateNoticeOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
 
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1768,6 +1797,43 @@ export function useChangeAdvertisementStatusMutation(baseOptions?: Apollo.Mutati
 export type ChangeAdvertisementStatusMutationHookResult = ReturnType<typeof useChangeAdvertisementStatusMutation>;
 export type ChangeAdvertisementStatusMutationResult = Apollo.MutationResult<ChangeAdvertisementStatusMutation>;
 export type ChangeAdvertisementStatusMutationOptions = Apollo.BaseMutationOptions<ChangeAdvertisementStatusMutation, ChangeAdvertisementStatusMutationVariables>;
+export const CreateNoticeDocument = gql`
+    mutation CreateNotice($createNoticeInput: CreateNoticeInput!) {
+  createNotice(input: $createNoticeInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type CreateNoticeMutationFn = Apollo.MutationFunction<CreateNoticeMutation, CreateNoticeMutationVariables>;
+
+/**
+ * __useCreateNoticeMutation__
+ *
+ * To run a mutation, you first call `useCreateNoticeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateNoticeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createNoticeMutation, { data, loading, error }] = useCreateNoticeMutation({
+ *   variables: {
+ *      createNoticeInput: // value for 'createNoticeInput'
+ *   },
+ * });
+ */
+export function useCreateNoticeMutation(baseOptions?: Apollo.MutationHookOptions<CreateNoticeMutation, CreateNoticeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateNoticeMutation, CreateNoticeMutationVariables>(CreateNoticeDocument, options);
+      }
+export type CreateNoticeMutationHookResult = ReturnType<typeof useCreateNoticeMutation>;
+export type CreateNoticeMutationResult = Apollo.MutationResult<CreateNoticeMutation>;
+export type CreateNoticeMutationOptions = Apollo.BaseMutationOptions<CreateNoticeMutation, CreateNoticeMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {

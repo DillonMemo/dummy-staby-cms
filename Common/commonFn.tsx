@@ -4,6 +4,24 @@ import { notification } from 'antd'
 
 export type Props = styleMode
 
+export type DateType = 'ALL' | 'YYYYMMDD'
+
+// Date Format YYYYMMDD_HHMMSS <-- 이걸로 요청 드려요
+export const DATE_FORMAT = (type: DateType): string => {
+  switch (type) {
+    case 'ALL':
+      return new Date(+new Date() + 3240 * 10000)
+        .toISOString()
+        .replace('T', '_')
+        .replace(/-/gi, '')
+        .replace(/:/gi, '')
+        .replace(/\..*/, '')
+    case 'YYYYMMDD':
+      return new Date(+new Date() + 3240 * 10000).toISOString().split('T')[0].replace(/-/gi, '')
+    default:
+      throw new Error('type error')
+  }
+}
 //date format YYMMDD_HHMMSS
 export const nowDate = new Date()
 export const nowDateYYMMDD = `${nowDate.getFullYear().toString().padStart(4, '0')}${(

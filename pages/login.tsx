@@ -34,7 +34,7 @@ const Login: NextPage = () => {
   })
   const router = useRouter()
   const { locale } = router
-  const onCompleted = (data: any) => {
+  const onCompleted = (data: LoginMutation) => {
     const {
       login: { ok, token },
     } = data

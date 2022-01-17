@@ -353,3 +353,15 @@ export const CHANGE_ADVERTISEMENT_STATUS_MUTATION = gql`
     }
   }
 `
+
+export const CREATE_NOTICE_MUTATION = gql`
+  mutation CreateNotice($createNoticeInput: CreateNoticeInput!) {
+    createNotice(input: $createNoticeInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
