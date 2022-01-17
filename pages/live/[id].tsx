@@ -856,7 +856,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     role="button"
                     className="submit-button"
                     loading={editLoading}
-                    onClick={onSubmit}>
+                    onClick={onSubmit}
+                    disabled={isInputDisabled}>
                     {locale === 'ko' ? '수정' : 'Edit'}
                   </Button>
                   <Button
