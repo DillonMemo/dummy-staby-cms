@@ -105,6 +105,12 @@ export type CreateAdvertisementOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type CreateBoardOutput = {
+  __typename?: 'CreateBoardOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export type CreateLiveInput = {
   _id: Scalars['ID'];
   content?: Maybe<Scalars['String']>;
@@ -442,6 +448,7 @@ export type MainBannerLive = {
   createMember: AuthMember;
   listingOrder: Scalars['Float'];
   liveId: Scalars['ID'];
+  title?: Maybe<Scalars['String']>;
   updateDate: Scalars['DateTime'];
   updateMember: AuthMember;
 };
@@ -449,6 +456,7 @@ export type MainBannerLive = {
 export type MainBannerLiveInputType = {
   listingOrder: Scalars['Float'];
   liveId: Scalars['ID'];
+  title?: Maybe<Scalars['String']>;
 };
 
 export type MainBannerLiveOutput = {
@@ -547,6 +555,7 @@ export type Mutation = {
   changeAdvertisementStatus: ChangeAdvertisementStatusOutput;
   createAccount: CreateMemberOutput;
   createAdvertisement: CreateAdvertisementOutput;
+  createBoard: CreateBoardOutput;
   createLive: CreateLiveOutput;
   createMainBannerLiveContents: CreateMainBannerLiveOutput;
   createVod: CreateVodOutput;
@@ -676,7 +685,6 @@ export type Query = {
   findVodByTypes: FindVodByTypesOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
   my: Member;
-  testBoard: Scalars['Boolean'];
 };
 
 
@@ -940,6 +948,58 @@ export type ChangeAdvertisementStatusMutationVariables = Exact<{
 
 
 export type ChangeAdvertisementStatusMutation = { __typename?: 'Mutation', changeAdvertisementStatus: { __typename?: 'ChangeAdvertisementStatusOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type MyQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MyQuery = { __typename?: 'Query', my: { __typename?: 'Member', _id: string, email: string, password: string, nickName: string, profileImageName?: string | null | undefined, memberStatus: MemberStatus, memberType: MemberType, refreshToken?: string | null | undefined, lastLoginDate?: any | null | undefined } };
+
+export type FindMemberByIdQueryVariables = Exact<{
+  memberInput: MemberInput;
+}>;
+
+
+export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number } } | null | undefined } };
+
+export type FindMembersByTypeQueryVariables = Exact<{
+  membersByTypeInput: MembersByTypeInput;
+}>;
+
+
+export type FindMembersByTypeQuery = { __typename?: 'Query', findMembersByType: { __typename?: 'MembersByTypeOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members: Array<{ __typename?: 'Member', _id: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType }> } };
+
+export type FindLiveByIdQueryVariables = Exact<{
+  liveInput: LiveInput;
+}>;
+
+
+export type FindLiveByIdQuery = { __typename?: 'Query', findLiveById: { __typename?: 'LiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, live?: { __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName?: string | null | undefined, viewCount?: number | null | undefined, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, createDate: any, updateDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }>, liveShareInfo: { __typename?: 'LiveShareInfo', shareApplyDate?: any | null | undefined, liveId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+
+export type FindVodByIdQueryVariables = Exact<{
+  vodInput: FindVodByIdInput;
+}>;
+
+
+export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, mainImageName: string, storageTotalCount?: number | null | undefined, vodStatus: VodStatus, liveId?: string | null | undefined, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null | undefined, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null | undefined, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+
+export type FindLiveByTypesQueryVariables = Exact<{
+  findLiveByTypesInput: FindLiveByTypesInput;
+}>;
+
+
+export type FindLiveByTypesQuery = { __typename?: 'Query', findLiveByTypes: { __typename?: 'FindLiveByTypesOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives: Array<{ __typename?: 'Live', _id: string, title: string }> } };
+
+export type FindVodByTypesQueryVariables = Exact<{
+  findVodByTypesInput: FindVodByTypesInput;
+}>;
+
+
+export type FindVodByTypesQuery = { __typename?: 'Query', findVodByTypes: { __typename?: 'FindVodByTypesOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods: Array<{ __typename?: 'Vod', _id: string, title: string }> } };
+
+export type MainBannerLiveContentsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MainBannerLiveContentsQuery = { __typename?: 'Query', mainBannerLiveContents: { __typename?: 'MainBannerLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, mainBannerLives?: Array<{ __typename?: 'MainBannerLive', liveId: string, listingOrder: number, title?: string | null | undefined }> | null | undefined } };
 
 
 export const LoginDocument = gql`
@@ -1708,3 +1768,410 @@ export function useChangeAdvertisementStatusMutation(baseOptions?: Apollo.Mutati
 export type ChangeAdvertisementStatusMutationHookResult = ReturnType<typeof useChangeAdvertisementStatusMutation>;
 export type ChangeAdvertisementStatusMutationResult = Apollo.MutationResult<ChangeAdvertisementStatusMutation>;
 export type ChangeAdvertisementStatusMutationOptions = Apollo.BaseMutationOptions<ChangeAdvertisementStatusMutation, ChangeAdvertisementStatusMutationVariables>;
+export const MyDocument = gql`
+    query My {
+  my {
+    _id
+    email
+    password
+    nickName
+    profileImageName
+    memberStatus
+    memberType
+    refreshToken
+    lastLoginDate
+  }
+}
+    `;
+
+/**
+ * __useMyQuery__
+ *
+ * To run a query within a React component, call `useMyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMyQuery(baseOptions?: Apollo.QueryHookOptions<MyQuery, MyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MyQuery, MyQueryVariables>(MyDocument, options);
+      }
+export function useMyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MyQuery, MyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MyQuery, MyQueryVariables>(MyDocument, options);
+        }
+export type MyQueryHookResult = ReturnType<typeof useMyQuery>;
+export type MyLazyQueryHookResult = ReturnType<typeof useMyLazyQuery>;
+export type MyQueryResult = Apollo.QueryResult<MyQuery, MyQueryVariables>;
+export const FindMemberByIdDocument = gql`
+    query FindMemberById($memberInput: MemberInput!) {
+  findMemberById(input: $memberInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    member {
+      email
+      nickName
+      memberStatus
+      memberType
+      point {
+        totalPoint
+        paidPoint
+        freePoint
+      }
+      createDate
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindMemberByIdQuery__
+ *
+ * To run a query within a React component, call `useFindMemberByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindMemberByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindMemberByIdQuery({
+ *   variables: {
+ *      memberInput: // value for 'memberInput'
+ *   },
+ * });
+ */
+export function useFindMemberByIdQuery(baseOptions: Apollo.QueryHookOptions<FindMemberByIdQuery, FindMemberByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindMemberByIdQuery, FindMemberByIdQueryVariables>(FindMemberByIdDocument, options);
+      }
+export function useFindMemberByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindMemberByIdQuery, FindMemberByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindMemberByIdQuery, FindMemberByIdQueryVariables>(FindMemberByIdDocument, options);
+        }
+export type FindMemberByIdQueryHookResult = ReturnType<typeof useFindMemberByIdQuery>;
+export type FindMemberByIdLazyQueryHookResult = ReturnType<typeof useFindMemberByIdLazyQuery>;
+export type FindMemberByIdQueryResult = Apollo.QueryResult<FindMemberByIdQuery, FindMemberByIdQueryVariables>;
+export const FindMembersByTypeDocument = gql`
+    query FindMembersByType($membersByTypeInput: MembersByTypeInput!) {
+  findMembersByType(input: $membersByTypeInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    members {
+      _id
+      nickName
+      memberStatus
+      memberType
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindMembersByTypeQuery__
+ *
+ * To run a query within a React component, call `useFindMembersByTypeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindMembersByTypeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindMembersByTypeQuery({
+ *   variables: {
+ *      membersByTypeInput: // value for 'membersByTypeInput'
+ *   },
+ * });
+ */
+export function useFindMembersByTypeQuery(baseOptions: Apollo.QueryHookOptions<FindMembersByTypeQuery, FindMembersByTypeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindMembersByTypeQuery, FindMembersByTypeQueryVariables>(FindMembersByTypeDocument, options);
+      }
+export function useFindMembersByTypeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindMembersByTypeQuery, FindMembersByTypeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindMembersByTypeQuery, FindMembersByTypeQueryVariables>(FindMembersByTypeDocument, options);
+        }
+export type FindMembersByTypeQueryHookResult = ReturnType<typeof useFindMembersByTypeQuery>;
+export type FindMembersByTypeLazyQueryHookResult = ReturnType<typeof useFindMembersByTypeLazyQuery>;
+export type FindMembersByTypeQueryResult = Apollo.QueryResult<FindMembersByTypeQuery, FindMembersByTypeQueryVariables>;
+export const FindLiveByIdDocument = gql`
+    query FindLiveById($liveInput: LiveInput!) {
+  findLiveById(input: $liveInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    live {
+      _id
+      title
+      content
+      hostName
+      paymentAmount
+      livePreviewDate
+      liveStartDate
+      liveEndDate
+      mainImageName
+      liveLinkInfo {
+        linkPath
+        playingImageName
+        listingOrder
+      }
+      liveShareInfo {
+        shareApplyDate
+        liveId
+        memberShareInfo {
+          memberId
+          nickName
+          priorityShare
+          directShare
+        }
+      }
+      viewCount
+      delayedEntryTime
+      likeCount
+      liveStatus
+      vodId
+      createDate
+      updateDate
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindLiveByIdQuery__
+ *
+ * To run a query within a React component, call `useFindLiveByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindLiveByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindLiveByIdQuery({
+ *   variables: {
+ *      liveInput: // value for 'liveInput'
+ *   },
+ * });
+ */
+export function useFindLiveByIdQuery(baseOptions: Apollo.QueryHookOptions<FindLiveByIdQuery, FindLiveByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindLiveByIdQuery, FindLiveByIdQueryVariables>(FindLiveByIdDocument, options);
+      }
+export function useFindLiveByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindLiveByIdQuery, FindLiveByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindLiveByIdQuery, FindLiveByIdQueryVariables>(FindLiveByIdDocument, options);
+        }
+export type FindLiveByIdQueryHookResult = ReturnType<typeof useFindLiveByIdQuery>;
+export type FindLiveByIdLazyQueryHookResult = ReturnType<typeof useFindLiveByIdLazyQuery>;
+export type FindLiveByIdQueryResult = Apollo.QueryResult<FindLiveByIdQuery, FindLiveByIdQueryVariables>;
+export const FindVodByIdDocument = gql`
+    query FindVodById($vodInput: FindVodByIdInput!) {
+  findVodById(input: $vodInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    vod {
+      _id
+      title
+      content
+      paymentAmount
+      mainImageName
+      vodLinkInfo {
+        linkPath
+        introImageName
+        playingImageName
+        transcodeStatus
+        listingOrder
+      }
+      vodShareInfo {
+        shareApplyDate
+        vodId
+        memberShareInfo {
+          memberId
+          nickName
+          priorityShare
+          directShare
+        }
+      }
+      storageTotalCount
+      vodStatus
+      liveId
+      createDate
+      updateDate
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindVodByIdQuery__
+ *
+ * To run a query within a React component, call `useFindVodByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindVodByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindVodByIdQuery({
+ *   variables: {
+ *      vodInput: // value for 'vodInput'
+ *   },
+ * });
+ */
+export function useFindVodByIdQuery(baseOptions: Apollo.QueryHookOptions<FindVodByIdQuery, FindVodByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindVodByIdQuery, FindVodByIdQueryVariables>(FindVodByIdDocument, options);
+      }
+export function useFindVodByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindVodByIdQuery, FindVodByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindVodByIdQuery, FindVodByIdQueryVariables>(FindVodByIdDocument, options);
+        }
+export type FindVodByIdQueryHookResult = ReturnType<typeof useFindVodByIdQuery>;
+export type FindVodByIdLazyQueryHookResult = ReturnType<typeof useFindVodByIdLazyQuery>;
+export type FindVodByIdQueryResult = Apollo.QueryResult<FindVodByIdQuery, FindVodByIdQueryVariables>;
+export const FindLiveByTypesDocument = gql`
+    query FindLiveByTypes($findLiveByTypesInput: FindLiveByTypesInput!) {
+  findLiveByTypes(input: $findLiveByTypesInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    lives {
+      _id
+      title
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindLiveByTypesQuery__
+ *
+ * To run a query within a React component, call `useFindLiveByTypesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindLiveByTypesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindLiveByTypesQuery({
+ *   variables: {
+ *      findLiveByTypesInput: // value for 'findLiveByTypesInput'
+ *   },
+ * });
+ */
+export function useFindLiveByTypesQuery(baseOptions: Apollo.QueryHookOptions<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>(FindLiveByTypesDocument, options);
+      }
+export function useFindLiveByTypesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>(FindLiveByTypesDocument, options);
+        }
+export type FindLiveByTypesQueryHookResult = ReturnType<typeof useFindLiveByTypesQuery>;
+export type FindLiveByTypesLazyQueryHookResult = ReturnType<typeof useFindLiveByTypesLazyQuery>;
+export type FindLiveByTypesQueryResult = Apollo.QueryResult<FindLiveByTypesQuery, FindLiveByTypesQueryVariables>;
+export const FindVodByTypesDocument = gql`
+    query FindVodByTypes($findVodByTypesInput: FindVodByTypesInput!) {
+  findVodByTypes(input: $findVodByTypesInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    vods {
+      _id
+      title
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindVodByTypesQuery__
+ *
+ * To run a query within a React component, call `useFindVodByTypesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindVodByTypesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindVodByTypesQuery({
+ *   variables: {
+ *      findVodByTypesInput: // value for 'findVodByTypesInput'
+ *   },
+ * });
+ */
+export function useFindVodByTypesQuery(baseOptions: Apollo.QueryHookOptions<FindVodByTypesQuery, FindVodByTypesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindVodByTypesQuery, FindVodByTypesQueryVariables>(FindVodByTypesDocument, options);
+      }
+export function useFindVodByTypesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindVodByTypesQuery, FindVodByTypesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindVodByTypesQuery, FindVodByTypesQueryVariables>(FindVodByTypesDocument, options);
+        }
+export type FindVodByTypesQueryHookResult = ReturnType<typeof useFindVodByTypesQuery>;
+export type FindVodByTypesLazyQueryHookResult = ReturnType<typeof useFindVodByTypesLazyQuery>;
+export type FindVodByTypesQueryResult = Apollo.QueryResult<FindVodByTypesQuery, FindVodByTypesQueryVariables>;
+export const MainBannerLiveContentsDocument = gql`
+    query MainBannerLiveContents {
+  mainBannerLiveContents {
+    ok
+    error {
+      ko
+      en
+    }
+    mainBannerLives {
+      liveId
+      listingOrder
+      title
+    }
+  }
+}
+    `;
+
+/**
+ * __useMainBannerLiveContentsQuery__
+ *
+ * To run a query within a React component, call `useMainBannerLiveContentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMainBannerLiveContentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMainBannerLiveContentsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMainBannerLiveContentsQuery(baseOptions?: Apollo.QueryHookOptions<MainBannerLiveContentsQuery, MainBannerLiveContentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MainBannerLiveContentsQuery, MainBannerLiveContentsQueryVariables>(MainBannerLiveContentsDocument, options);
+      }
+export function useMainBannerLiveContentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MainBannerLiveContentsQuery, MainBannerLiveContentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MainBannerLiveContentsQuery, MainBannerLiveContentsQueryVariables>(MainBannerLiveContentsDocument, options);
+        }
+export type MainBannerLiveContentsQueryHookResult = ReturnType<typeof useMainBannerLiveContentsQuery>;
+export type MainBannerLiveContentsLazyQueryHookResult = ReturnType<typeof useMainBannerLiveContentsLazyQuery>;
+export type MainBannerLiveContentsQueryResult = Apollo.QueryResult<MainBannerLiveContentsQuery, MainBannerLiveContentsQueryVariables>;

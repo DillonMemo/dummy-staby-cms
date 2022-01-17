@@ -177,13 +177,14 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         )
         let liveUrlInputValue = ''
         if (liveUrlInput) {
-          liveUrlInputValue = liveUrlInput.value + nowDateStr
+          liveUrlInputValue = liveUrlInput.value
           liveLinkArr.push({
             listingOrder: i + 1,
             linkPath: isAuto ? liveUrlInputValue.replace(`{LIVEID}`, id) : liveUrlInputValue, //자동생성인 경우 Replace, 수동생성인 경우 value 값을 그대로 넣어준다.})
           })
         }
       }
+
       const { data } = await createLive({
         variables: {
           createLiveInput: {
