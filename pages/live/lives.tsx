@@ -86,8 +86,8 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
     const dateTime = new Date(date)
 
     const year = dateTime.getFullYear()
-    const month = dateTime.getMonth()
-    const day = dateTime.getDay()
+    const month = dateTime.getMonth() + 1
+    const day = dateTime.getDate()
     const hours = ('0' + dateTime.getHours()).slice(-2)
     const minutes = ('0' + dateTime.getMinutes()).slice(-2)
 
@@ -188,8 +188,8 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <a>{locale === 'ko' ? '홈' : 'Home'}</a>
               </Link>
             </li>
-            <li>{locale === 'ko' ? 'LIVE' : 'Member'}</li>
-            <li>{locale === 'ko' ? 'LIVE 관리' : 'Management'}</li>
+            <li>LIVE</li>
+            <li>{locale === 'ko' ? 'LIVE 관리' : 'LIVE Management'}</li>
           </ol>
         </div>
         <div className="main-content">

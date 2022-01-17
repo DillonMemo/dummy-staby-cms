@@ -8,7 +8,7 @@ const ShadowWrapper = styled.div`
   background: ${({ theme }) =>
     theme.mode === 'dark'
       ? 'linear-gradient(180deg,rgba(40,48,70,.9) 44%,rgba(40,48,70,.43) 73%,rgba(40,48,70,0))'
-      : 'linear-gradient(180deg,hsla(0,0%,91.3%,.95) 44%,hsla(0,0%,91.3%,.46) 73%,hsla(0,0%,94%,0))'};
+      : 'linear-gradient(180deg,hsla(0,0%,90.3%,.95) 44%,hsla(0,0%,90.3%,.46) 73%,hsla(0,0%,93%,0))'};
   padding-top: 2.2rem;
   display: block;
   width: 100%;

@@ -144,3 +144,65 @@ export const VOD_QUERY = gql`
     }
   }
 `
+
+/**
+ * 타입별로 LIVE를 검색 합니다.
+ * @param {Array} liveStatus live status
+ * @example {input: {liveStatus: [DISPLAY, ACTIVE]}}
+ */
+export const FIND_LIVD_BY_TYPES_QUERY = gql`
+  query FindLiveByTypes($findLiveByTypesInput: FindLiveByTypesInput!) {
+    findLiveByTypes(input: $findLiveByTypesInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      lives {
+        _id
+        title
+      }
+    }
+  }
+`
+
+/**
+ * 타입별로 VOD를 검색합니다
+ * @param {Array} vodStatus vod status
+ * @example {input: {vodStatus: [WAIT, ...]}}
+ */
+export const FIND_VOD_BY_TYPES_QUERY = gql`
+  query FindVodByTypes($findVodByTypesInput: FindVodByTypesInput!) {
+    findVodByTypes(input: $findVodByTypesInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      vods {
+        _id
+        title
+      }
+    }
+  }
+`
+
+/**
+ * 콘텐츠 목록들을 가져옵니다.
+ */
+export const MAIN_BANNER_LIVE_CONTENTS_QUERY = gql`
+  query MainBannerLiveContents {
+    mainBannerLiveContents {
+      ok
+      error {
+        ko
+        en
+      }
+      mainBannerLives {
+        liveId
+        listingOrder
+        title
+      }
+    }
+  }
+`

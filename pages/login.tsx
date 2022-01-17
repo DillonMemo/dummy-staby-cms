@@ -34,7 +34,7 @@ const Login: NextPage = () => {
   })
   const router = useRouter()
   const { locale } = router
-  const onCompleted = (data: any) => {
+  const onCompleted = (data: LoginMutation) => {
     const {
       login: { ok, token },
     } = data
@@ -85,11 +85,11 @@ const Login: NextPage = () => {
         </div>
         <div className="wrapper">
           <div className="container">
-            <h2>Welcom to Staby CMS 👋</h2>
-            <div style={{ marginBottom: '1.5rem' }}>
+            <h2 style={{ marginBottom: '2.5rem' }}>Welcom to Staby CMS 👋</h2>
+            {/* <div style={{ marginBottom: '1.5rem' }}>
               <p>ID : system@staby.co.kr</p>
               <p>PW : 123123</p>
-            </div>
+            </div> */}
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="form-item">
                 <div className="form-group">

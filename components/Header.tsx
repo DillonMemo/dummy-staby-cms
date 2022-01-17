@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { Badge, Modal, notification, Select, Skeleton, Space } from 'antd'
 import Icon, {
   ArrowRightOutlined,
@@ -144,7 +144,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
           Modal.info({
             title: locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login',
             okText: locale === 'ko' ? '로그인' : 'Login',
-            onOk: () => push('/login', 'login', { locale }),
+            onOk: () => push('/login', '/login', { locale }),
           })
         }
       }
@@ -301,10 +301,18 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
+                      <Link href="/notice">
+                        <a>
+                          <ArrowRightOutlined className="icon" />
+                          <span>{locale === 'ko' ? '공지사항' : 'Notice'}</span>
+                        </a>
+                      </Link>
+                    </li>
+                    <li className="nav-item">
                       <Link href="#">
                         <a>
                           <ArrowRightOutlined className="icon" />
-                          <span>{locale === 'ko' ? '게시판' : 'Board'}</span>
+                          <span>{locale === 'ko' ? '이벤트' : 'Event'}</span>
                         </a>
                       </Link>
                     </li>
@@ -493,6 +501,21 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   )
 }
 
+const statusIndicatorPulsePositive = keyframes`
+0% {
+    box-shadow: 0 0 0 0 rgb(75 210 143 / 50%);
+    box-shadow: 0 0 0 0 var(--status-indicator-color-positive-semi);
+}
+70% {
+    box-shadow: 0 0 0 10px rgb(75 210 143 / 0%);
+    box-shadow: 0 0 0 var(--status-indicator-size) var(--status-indicator-color-positive-transparent);
+}
+100% {
+    box-shadow: 0 0 0 0 rgb(75 210 143 / 0%);
+    box-shadow: 0 0 0 0 var(--status-indicator-color-positive-transparent);
+}
+`
+
 const NavigatorWrapper = styled.div`
   color: ${({ theme }) => theme.text};
   background-color: ${({ theme }) => theme.card};
@@ -575,7 +598,7 @@ const NavigatorWrapper = styled.div`
                 height: 100%;
                 border: 1px solid;
                 border-radius: 50%;
-                animation: antStatusProcessing 0.7s infinite ease-in-out !important;
+                animation: ${statusIndicatorPulsePositive} 1s infinite ease-in-out !important;
                 content: '';
               }
               &.ant-badge-status-success:after {

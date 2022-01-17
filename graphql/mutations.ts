@@ -232,3 +232,136 @@ export const DELETE_VOD_MUTATION = gql`
     }
   }
 `
+
+/** Main Banner Live Mutation */
+export const CREATE_MAIN_BANNER_LIVE_MUTATION = gql`
+  mutation CreateMainBannerLiveContents($createMainBannerLiveInput: CreateMainBannerLiveInput!) {
+    createMainBannerLiveContents(input: $createMainBannerLiveInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/**
+ * AD(광고)를 생성 합니다
+ * @default advertiseStatus WAIT
+ * @example {input: {
+ *  _id: <ObjectId>
+ *  displayType: <Enum>
+ *  title: <String>
+ *  mainImageName: <String>
+ *  linkType: <Enum>
+ *  linkUrl: <String>
+ *  startDate: <Date>
+ *  endDate: <Date>
+ * }}
+ */
+export const CREATE_ADVERTISEMENT_MUTATION = gql`
+  mutation CreateAdvertisement($createAdvertisementInput: CreateAdvertisementInput!) {
+    createAdvertisement(input: $createAdvertisementInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/**
+ * AD(광고) 목록을 가져옵니다
+ * @default page 1
+ * @default pageView 20
+ * @example {input: {
+ *  page: <Number>
+ *  pageView: <Number>
+ *  displayType: <Enum>
+ * }}
+ */
+export const ADVERTISEMENTS_MUTATION = gql`
+  mutation Advertisements($advertisementsInput: AdvertisementsInput!) {
+    advertisements(input: $advertisementsInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      advertisements {
+        _id
+        advertiseStatus
+        displayType
+        title
+        content
+        linkType
+        linkUrl
+        startDate
+        endDate
+      }
+    }
+  }
+`
+
+/**
+ * AD(광고)를 수정 합니다
+ * @example {input: {
+ *  _id: <ObjectId>
+ *  displayType: <Enum>
+ *  title: <String>
+ *  mainImageName: <String>
+ *  linkType: <Enum>
+ *  linkUrl: <String>
+ *  startDate: <Date>
+ *  endDate: <Date>
+ * }}
+ */
+export const EDIT_ADVERTISEMENTS_MUTATION = gql`
+  mutation EditAdvertisement($editAdvertisementInput: EditAdvertisementInput!) {
+    editAdvertisement(input: $editAdvertisementInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/**
+ * AD(광고)의 상태를 변경합니다.
+ * @default advertiseStatus WAIT
+ * @example {input: {
+ *  _id: <ObjectId>
+ *  advertiseStatus: <Enum>
+ * }}
+ */
+export const CHANGE_ADVERTISEMENT_STATUS_MUTATION = gql`
+  mutation ChangeAdvertisementStatus(
+    $changeAdvertisementStatusInput: ChangeAdvertisementStatusInput!
+  ) {
+    changeAdvertisementStatus(input: $changeAdvertisementStatusInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+export const CREATE_NOTICE_MUTATION = gql`
+  mutation CreateNotice($createNoticeInput: CreateNoticeInput!) {
+    createNotice(input: $createNoticeInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`

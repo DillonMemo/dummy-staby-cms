@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import router, { useRouter } from 'next/router'
-import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
 import { Button, Dropdown, Input, Menu, Pagination, Skeleton, Space, Table } from 'antd'
 import { ColumnsType } from 'antd/lib/table'
 import { MenuInfo } from 'rc-menu/lib/interface'
@@ -11,6 +10,9 @@ import { debounce } from 'lodash'
 /** components */
 import Layout from '../../components/Layout'
 import { LoadingOutlined } from '@ant-design/icons'
+
+/** styles */
+import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
 
 /** graphql */
 import { useMutation } from '@apollo/client'
