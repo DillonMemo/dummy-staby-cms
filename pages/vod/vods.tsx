@@ -110,7 +110,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
     }
   }
   /**
-   * 닉네임 변경 이벤트 핸들러 입니다.
+   * 제목변경 핸들러 입니다.
    */
   const onTitleChange = useCallback(
     debounce(async ({ target: { value } }) => {
