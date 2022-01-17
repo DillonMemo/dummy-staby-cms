@@ -360,7 +360,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           shape="rect"
           modalTitle={locale === 'ko' ? '이미지 편집' : 'Edit image'}
           modalOk={locale === 'ko' ? '확인' : 'OK'}
-          modalCancel={locale === 'ko' ? '취소' : 'Cancel'}>
+          modalCancel={locale === 'ko' ? '취소' : 'Cancel'}
+          aspect={1 / 1.25}>
           <Upload
             accept="image/*"
             multiple={false}

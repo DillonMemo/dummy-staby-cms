@@ -6,11 +6,12 @@ export type Props = styleMode
 
 //date format YYMMDD_HHMMSS
 export const nowDate = new Date()
-export const nowDateStr = `${nowDate.getFullYear().toString().padStart(4, '0')}${(
+export const nowDateYYMMDD = `${nowDate.getFullYear().toString().padStart(4, '0')}${(
   nowDate.getMonth() + 1
 )
   .toString()
-  .padStart(2, '0')}${nowDate.getDate().toString().padStart(2, '0')}_${nowDate
+  .padStart(2, '0')}${nowDate.getDate().toString().padStart(2, '0')}`
+export const nowDateStr = `${nowDateYYMMDD}_${nowDate
   .getHours()
   .toString()
   .padStart(2, '0')}${nowDate.getMinutes().toString().padStart(2, '0')}${nowDate

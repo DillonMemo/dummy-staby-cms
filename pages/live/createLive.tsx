@@ -184,7 +184,6 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
           })
         }
       }
-
       const { data } = await createLive({
         variables: {
           createLiveInput: {
@@ -295,7 +294,8 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
           shape="rect"
           modalTitle={locale === 'ko' ? '이미지 편집' : 'Edit image'}
           modalOk={locale === 'ko' ? '확인' : 'OK'}
-          modalCancel={locale === 'ko' ? '취소' : 'Cancel'}>
+          modalCancel={locale === 'ko' ? '취소' : 'Cancel'}
+          aspect={1 / 1.25}>
           <Upload
             accept="image/*"
             multiple={false}
@@ -581,7 +581,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               <div className="form-item">
                 <div className="form-group">
                   {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                  <span>Share</span>
+                  <span>Share (회원, 우선분배 지분, 직분배 지분)</span>
                   {memberShareInfo.map((data, index) => {
                     return (
                       <div key={index}>
