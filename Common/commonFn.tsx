@@ -60,9 +60,12 @@ export const shareCheck = (shareArray: Array<any>, locale?: string) => {
     directShare += shareArray[i].directShare
   }
 
-  if (priorityShare !== 100 || directShare !== 100) {
+  if (priorityShare > 100 || directShare !== 100) {
     notification.error({
-      message: locale === 'ko' ? '지분분배의 총합은 100이 되어야 합니다.' : 'Has been completed',
+      message:
+        locale === 'ko'
+          ? '직분배의 총합은 100 이 되고 우선 환수지분의 총합은 100 이 넘으면 안됩니다.'
+          : 'Has been completed',
     })
     return false
   }

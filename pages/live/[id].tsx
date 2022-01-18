@@ -232,6 +232,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           }).promise())
       }
 
+      mainImgFileName = `${id.toString()}_main_${nowDateStr}.png`
+
       //라이브 채널 링크 배열
       const liveLinkArr = []
       for (let i = 0; i < liveInfoArr.length; i++) {
@@ -857,8 +859,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     role="button"
                     className="submit-button"
                     loading={editLoading}
-                    onClick={onSubmit}
-                    disabled={isInputDisabled}>
+                    onClick={onSubmit}>
                     {locale === 'ko' ? '수정' : 'Edit'}
                   </Button>
                   <Button
