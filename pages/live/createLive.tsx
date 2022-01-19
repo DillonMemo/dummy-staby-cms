@@ -15,7 +15,6 @@ import { Controller, useForm } from 'react-hook-form'
 import TextArea from 'rc-textarea'
 import moment from 'moment'
 import styled from 'styled-components'
-import ImgCrop from 'antd-img-crop'
 import { useEffect, useState } from 'react'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { CREATE_LIVE_MUTATION } from '../../graphql/mutations'
@@ -31,13 +30,7 @@ import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 /** utils */
 import { S3 } from '../../lib/awsClient'
 import * as mongoose from 'mongoose'
-import {
-  delayedEntryTimeArr,
-  nowDate,
-  nowDateStr,
-  onDeleteBtn,
-  shareCheck,
-} from '../../Common/commonFn'
+import { delayedEntryTimeArr, nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
 
 type Props = styleMode
 
@@ -182,7 +175,6 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         )
         let liveUrlInputValue = ''
         if (liveUrlInput) {
-          console.log('진입')
           liveUrlInputValue = liveUrlInput.value
           liveLinkArr.push({
             listingOrder: i + 1,
