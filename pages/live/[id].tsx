@@ -216,10 +216,11 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       //메인 이미지 s3 업로드
       const id = liveData?.findLiveById.live ? liveData?.findLiveById.live?._id : ''
       let mainImgFileName = '' //메인 썸네일
+      const nowDate = `${id.toString()}_main_${nowDateStr}.png`
 
       mainImgFileName = `${
         process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-      }/going/live/${id.toString()}/main/${id.toString()}_main_${nowDateStr}.png`
+      }/going/live/${id.toString()}/main/${nowDate}`
 
       //MainThumbnail upload
       if (mainImgInfo.fileInfo instanceof File) {
@@ -230,9 +231,11 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
             Body: mainImgInfo.fileInfo,
             ACL: 'public-read',
           }).promise())
-      }
 
-      mainImgFileName = `${id.toString()}_main_${nowDateStr}.png`
+        mainImgFileName = nowDate
+      } else {
+        mainImgFileName = `${liveData?.findLiveById.live?.mainImageName}`
+      }
 
       //라이브 채널 링크 배열
       const liveLinkArr = []
@@ -240,12 +243,10 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         const liveUrlInput: HTMLInputElement | null = document.querySelector(
           `input[name=liveUrl_${i}]`
         )
-        let liveUrlInputValue = ''
         if (liveUrlInput) {
-          liveUrlInputValue = liveUrlInput.value + nowDateStr
           liveLinkArr.push({
             listingOrder: i + 1,
-            linkPath: isAuto ? liveUrlInputValue.replace(`{LIVEID}`, id) : liveUrlInputValue, //자동생성인 경우 Replace, 수동생성인 경우 value 값을 그대로 넣어준다.})
+            linkPath: isAuto ? liveUrlInput.value.replace(`{LIVEID}`, id) : liveUrlInput.value, //자동생성인 경우 Replace, 수동생성인 경우 value 값을 그대로 넣어준다.})
           })
         }
       }

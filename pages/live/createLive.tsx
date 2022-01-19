@@ -31,7 +31,13 @@ import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 /** utils */
 import { S3 } from '../../lib/awsClient'
 import * as mongoose from 'mongoose'
-import { delayedEntryTimeArr, nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
+import {
+  delayedEntryTimeArr,
+  nowDate,
+  nowDateStr,
+  onDeleteBtn,
+  shareCheck,
+} from '../../Common/commonFn'
 
 type Props = styleMode
 
@@ -152,12 +158,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       const id = new mongoose.Types.ObjectId() as any
 
       let mainImgFileName = '' //메인 썸네일
-
+      const nowDate = `${id.toString()}_main_${nowDateStr}.png`
       //MainThumbnail upload
       if (mainImgInfo.fileInfo instanceof File) {
         mainImgFileName = `${
           process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/live/${id.toString()}/main/${id.toString()}_main_${nowDateStr}.png`
+        }/going/live/${id.toString()}/main/${nowDate}`
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({
             Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
@@ -165,9 +171,8 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
             Body: mainImgInfo.fileInfo,
             ACL: 'public-read',
           }).promise())
-
-        mainImgFileName = `${id.toString()}_main_${nowDateStr}.png`
       }
+      mainImgFileName = `${nowDate}`
 
       //라이브 채널 링크 배열
       const liveLinkArr = []
@@ -177,6 +182,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         )
         let liveUrlInputValue = ''
         if (liveUrlInput) {
+          console.log('진입')
           liveUrlInputValue = liveUrlInput.value
           liveLinkArr.push({
             listingOrder: i + 1,
@@ -184,7 +190,6 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
           })
         }
       }
-
       const { data } = await createLive({
         variables: {
           createLiveInput: {
@@ -291,21 +296,14 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
 
     return (
       <Wrapper>
-        <ImgCrop
-          shape="rect"
-          modalTitle={locale === 'ko' ? '이미지 편집' : 'Edit image'}
-          modalOk={locale === 'ko' ? '확인' : 'OK'}
-          modalCancel={locale === 'ko' ? '취소' : 'Cancel'}
-          aspect={1 / 1.25}>
-          <Upload
-            accept="image/*"
-            multiple={false}
-            customRequest={customRequest}
-            onChange={onProfileChange}
-            showUploadList={false}>
-            <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
-          </Upload>
-        </ImgCrop>
+        <Upload
+          accept="image/*"
+          multiple={false}
+          customRequest={customRequest}
+          onChange={onProfileChange}
+          showUploadList={false}>
+          <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
+        </Upload>
         <Button onClick={onRemoveProfileClick}>
           {locale === 'ko' ? '사진 삭제' : 'Remove photo'}
         </Button>
