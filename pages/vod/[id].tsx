@@ -226,12 +226,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       //메인 이미지 s3 업로드
       //아이디 생성
       let mainImgFileName = '' //메인 썸네일
-
+      const nowDate = nowDateStr
       //MainThumbnail upload
       if (mainImgInfo.fileInfo instanceof File) {
         mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/vod/${vodId.toString()}/vod/${vodId.toString()}_main_${nowDateStr}.jpg`
+          process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+        }/going/vod/${vodId.toString()}/vod/${vodId.toString()}_main_${nowDate}.jpg`
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({
             Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
@@ -241,7 +241,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
           }).promise())
       }
 
-      mainImgFileName = `${vodId.toString()}_main_${nowDateStr}.jpg`
+      mainImgFileName = `${vodId.toString()}_main_${nowDate}.jpg`
 
       //playImg upload
       for (let i = 0; i < vodInfoArr.length; i++) {
@@ -257,11 +257,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         if (vodUrlInput) {
           //introImgNameName
           introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${vodId}/intro/${vodId}__intro_${i + 1}_${nowDateStr}.jpg`
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          }/going/vod/${vodId}/intro/${vodId}__intro_${i + 1}_${nowDate}.jpg`
           vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${vodId}/${vodId}_${i + 1}_${nowDateStr}.mp4`
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          }/going/vod/${vodId}/${vodId}_${i + 1}_${nowDate}.mp4`
 
           if (vodUrlInput?.files && vodUrlInput?.files[0] instanceof File) {
             process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
@@ -280,9 +280,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 ACL: 'bucket-owner-read',
               }).promise())
 
-            introImageName = `${vodId}__intro_${i + 1}_${nowDateStr}.jpg`
+            introImageName = `${vodId}__intro_${i + 1}_${nowDate}.jpg`
             //vodUrlInputFilesName = vodUrlInput?.files[0].name
-            vodName = `${vodId}_${i + 1}_${nowDateStr}.mp4`
+            vodName = `${vodId}_${i + 1}_${nowDate}.mp4`
           }
 
           vodLinkArr.push({

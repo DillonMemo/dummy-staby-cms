@@ -6,7 +6,24 @@ export type Props = styleMode
 
 export type DateType = 'ALL' | 'YYYYMMDD'
 
+/**
+ * Date Time to String
+ * 관리 페이지용
+ */
+export const dateToString = (date: Date) => {
+  const dateTime = new Date(date)
+
+  const year = dateTime.getFullYear()
+  const month = dateTime.getMonth()
+  const day = dateTime.getDay()
+  const hours = ('0' + dateTime.getHours()).slice(-2)
+  const minutes = ('0' + dateTime.getMinutes()).slice(-2)
+
+  return year + '/' + month + '/' + day + ' ' + hours + ':' + minutes
+}
+
 // Date Format YYYYMMDD_HHMMSS <-- 이걸로 요청 드려요
+// 등록용
 export const DATE_FORMAT = (type: DateType): string => {
   switch (type) {
     case 'ALL':

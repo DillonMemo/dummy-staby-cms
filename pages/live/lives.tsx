@@ -17,6 +17,7 @@ import { useMutation } from '@apollo/client'
 import { LivesMutation, LivesMutationVariables, LiveStatus } from '../../generated'
 import { LIVES_MUTATION } from '../../graphql/mutations'
 import { Maybe } from 'graphql/jsutils/Maybe'
+import { dateToString } from '../../Common/commonFn'
 
 type Props = styleMode
 
@@ -78,21 +79,6 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
     LivesMutation,
     LivesMutationVariables
   >(LIVES_MUTATION)
-
-  /**
-   * Date Time to String
-   */
-  const dateToString = (date: Date) => {
-    const dateTime = new Date(date)
-
-    const year = dateTime.getFullYear()
-    const month = dateTime.getMonth() + 1
-    const day = dateTime.getDate()
-    const hours = ('0' + dateTime.getHours()).slice(-2)
-    const minutes = ('0' + dateTime.getMinutes()).slice(-2)
-
-    return year + '/' + month + '/' + day + ' ' + hours + ':' + minutes
-  }
 
   /**
    * pagination 클릭 이벤트 핸들러 입니다.

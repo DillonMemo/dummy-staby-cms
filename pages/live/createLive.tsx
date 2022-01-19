@@ -153,9 +153,10 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       let mainImgFileName = '' //메인 썸네일
       const nowDate = `${id.toString()}_main_${nowDateStr}.png`
       //MainThumbnail upload
+      //cn
       if (mainImgInfo.fileInfo instanceof File) {
         mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+          process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
         }/going/live/${id.toString()}/main/${nowDate}`
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({
