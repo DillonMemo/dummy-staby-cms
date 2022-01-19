@@ -338,8 +338,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               {/* 콘텐츠 */}
               <li className="nav-item">
                 {/* <Link href="/contents/contents"> */}
-                <Link href="#">
-                  <a onClick={() => alert('준비중 입니다')}>
+                <Link href="/contents/contents">
+                  <a>
                     <UnorderedListOutlined className="icon" />
                     <span className="text">{locale === 'ko' ? '콘텐츠' : 'Contents'}</span>
                   </a>

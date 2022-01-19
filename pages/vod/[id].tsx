@@ -239,9 +239,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
             Body: mainImgInfo.fileInfo,
             ACL: 'public-read',
           }).promise())
-
-        mainImgFileName = `${vodId.toString()}_main_${nowDateStr}.jpg`
       }
+
+      mainImgFileName = `${vodId.toString()}_main_${nowDateStr}.jpg`
 
       //playImg upload
       for (let i = 0; i < vodInfoArr.length; i++) {
@@ -252,7 +252,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
         let introImageName = ''
         let vodName = ''
-        let vodUrlInputFilesName = ''
+        //let vodUrlInputFilesName = ''
 
         if (vodUrlInput) {
           //introImgNameName
@@ -281,12 +281,13 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               }).promise())
 
             introImageName = `${vodId}__intro_${i + 1}_${nowDateStr}.jpg`
-            vodUrlInputFilesName = vodUrlInput?.files[0].name
+            //vodUrlInputFilesName = vodUrlInput?.files[0].name
+            vodName = `${vodId}_${i + 1}_${nowDateStr}.mp4`
           }
 
           vodLinkArr.push({
             listingOrder: i + 1,
-            linkPath: vodUrlInputFilesName || vodInfoArr[i].linkPath || '',
+            linkPath: vodName || vodInfoArr[i].linkPath || '',
             introImageName: introImageName,
           })
         }

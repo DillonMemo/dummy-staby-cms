@@ -214,9 +214,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
           introImageName = `${id}__intro_${i + 1}_${nowDateStr}.jpg`
 
+          vodName = `${id}_${i + 1}_${nowDateStr}.mp4`
+
           vodLinkArr.push({
             listingOrder: i + 1,
-            linkPath: vodUrlInput?.files[0].name || '',
+            linkPath: vodName || '',
             introImageName: introImageName,
           })
         }
@@ -244,8 +246,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         notification.error({
           message,
         })
-        throw new Error(message)
         setUploading(false)
+        throw new Error(message)
       } else {
         notification.success({
           message: locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed',
@@ -256,6 +258,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         }, 500)
       }
     } catch (error) {
+      setUploading(false)
       console.error(error)
     }
   }
@@ -597,9 +600,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <Controller
                       control={control}
                       name="liveId"
-                      rules={{
-                        required: '위 항목은 필수 항목입니다.',
-                      }}
                       render={({ field: { value, onChange } }) => (
                         <>
                           <Select value={value} onChange={onChange}>
@@ -616,11 +616,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       )}
                     />
                   </div>
-                  {errors.liveId?.message && (
-                    <div className="form-message">
-                      <span>{errors.liveId.message}</span>
-                    </div>
-                  )}
                 </div>
                 <div className="form-item">
                   <div className="form-group">
