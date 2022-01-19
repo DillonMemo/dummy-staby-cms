@@ -77,7 +77,15 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       key: 'history',
       width: 100,
       fixed: 'right',
-      render: () => <Button onClick={() => alert('comming soon')}>history</Button>,
+      render: () => (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation()
+            alert('comming soon')
+          }}>
+          history
+        </Button>
+      ),
     },
   ]
   const [{ page, memberType, memberStatus, nickName }, setFilterOptions] = useState<Options>({
