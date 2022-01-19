@@ -15,7 +15,6 @@ import { Controller, useForm } from 'react-hook-form'
 import TextArea from 'rc-textarea'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import ImgCrop from 'antd-img-crop'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { CREATE_VOD_MUTATION, LIVES_MUTATION } from '../../graphql/mutations'
 import {
@@ -160,11 +159,13 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       const id = new mongoose.Types.ObjectId() as any
       let mainImgFileName = '' //메인 썸네일
 
+      const nowDate = nowDateStr
+
       //MainThumbnail upload
       if (mainImgInfo.fileInfo instanceof File) {
         mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/vod/${id.toString()}/vod/${id.toString()}_main_${nowDateStr}.jpg`
+          process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+        }/going/vod/${id.toString()}/vod/${id.toString()}_main_${nowDate}.jpg`
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({
             Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
@@ -173,7 +174,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
             ACL: 'public-read',
           }).promise())
 
-        mainImgFileName = `${id.toString()}_main_${nowDateStr}.jpg`
+        mainImgFileName = `${id.toString()}_main_${nowDate}.jpg`
       }
 
       //playImg upload
@@ -189,12 +190,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         if (vodUrlInput && vodUrlInput?.files && vodUrlInput?.files[0] instanceof File) {
           //playingImgName
           introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${id}/intro/${id}__intro_${i + 1}_${nowDateStr}.jpg`
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          }/going/vod/${id}/intro/${id}__intro_${i + 1}_${nowDate}.jpg`
 
           vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${id}/${id}_${i + 1}_${nowDateStr}.mp4`
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
 
           process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
             (await S3.upload({
@@ -212,9 +213,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               ACL: 'bucket-owner-read',
             }).promise())
 
-          introImageName = `${id}__intro_${i + 1}_${nowDateStr}.jpg`
+          introImageName = `${id}__intro_${i + 1}_${nowDate}.jpg`
 
-          vodName = `${id}_${i + 1}_${nowDateStr}.mp4`
+          vodName = `${id}_${i + 1}_${nowDate}.mp4`
 
           vodLinkArr.push({
             listingOrder: i + 1,
@@ -358,21 +359,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
     return (
       <Wrapper>
-        <ImgCrop
-          shape="rect"
-          modalTitle={locale === 'ko' ? '이미지 편집' : 'Edit image'}
-          modalOk={locale === 'ko' ? '확인' : 'OK'}
-          modalCancel={locale === 'ko' ? '취소' : 'Cancel'}
-          aspect={1 / 1.25}>
-          <Upload
-            accept="image/*"
-            multiple={false}
-            customRequest={customRequest}
-            onChange={onProfileChange}
-            showUploadList={false}>
-            <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
-          </Upload>
-        </ImgCrop>
+        <Upload
+          accept="image/*"
+          multiple={false}
+          customRequest={customRequest}
+          onChange={onProfileChange}
+          showUploadList={false}>
+          <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
+        </Upload>
         <Button onClick={onRemoveProfileClick}>
           {locale === 'ko' ? '사진 삭제' : 'Remove photo'}
         </Button>
