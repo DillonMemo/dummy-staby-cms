@@ -102,6 +102,17 @@ export enum BoardCategoryType {
   Qna = 'QNA'
 }
 
+export type BoardInput = {
+  boardId: Scalars['ID'];
+};
+
+export type BoardOutput = {
+  __typename?: 'BoardOutput';
+  board?: Maybe<Board>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export enum BoardStatus {
   Delete = 'DELETE',
   Display = 'DISPLAY'
@@ -114,12 +125,6 @@ export type ChangeAdvertisementStatusInput = {
 
 export type ChangeAdvertisementStatusOutput = {
   __typename?: 'ChangeAdvertisementStatusOutput';
-  error?: Maybe<LangErrorMessage>;
-  ok: Scalars['Boolean'];
-};
-
-export type CoreOutput = {
-  __typename?: 'CoreOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
@@ -753,6 +758,7 @@ export type Point = {
 export type Query = {
   __typename?: 'Query';
   findAdvertisementById: FindAdvertisementByIdOutput;
+  findBoardById: BoardOutput;
   findLiveById: LiveOutput;
   findLiveByTypes: FindLiveByTypesOutput;
   findMemberById: MemberOutput;
@@ -761,12 +767,16 @@ export type Query = {
   findVodByTypes: FindVodByTypesOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
   my: Member;
-  testChennel: CoreOutput;
 };
 
 
 export type QueryFindAdvertisementByIdArgs = {
   input: FindAdvertisementByIdInput;
+};
+
+
+export type QueryFindBoardByIdArgs = {
+  input: BoardInput;
 };
 
 
@@ -1099,6 +1109,20 @@ export type MainBannerLiveContentsQueryVariables = Exact<{ [key: string]: never;
 
 
 export type MainBannerLiveContentsQuery = { __typename?: 'Query', mainBannerLiveContents: { __typename?: 'MainBannerLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, mainBannerLives?: Array<{ __typename?: 'MainBannerLive', liveId: string, listingOrder: number, title?: string | null | undefined }> | null | undefined } };
+
+export type FindAdvertisementByIdQueryVariables = Exact<{
+  findAdvertisementByIdInput: FindAdvertisementByIdInput;
+}>;
+
+
+export type FindAdvertisementByIdQuery = { __typename?: 'Query', findAdvertisementById: { __typename?: 'FindAdvertisementByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, advertisement?: { __typename?: 'Advertisement', _id: string, advertiseStatus: AdvertiseStatus, displayType: DisplayType, title: string, content?: string | null | undefined, linkType: LinkType, linkUrl: string, startDate: any, endDate: any } | null | undefined } };
+
+export type FindBoardByIdQueryVariables = Exact<{
+  boardInput: BoardInput;
+}>;
+
+
+export type FindBoardByIdQuery = { __typename?: 'Query', findBoardById: { __typename?: 'BoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, board?: { __typename?: 'Board', title: string, content: string } | null | undefined } };
 
 
 export const LoginDocument = gql`
@@ -2357,3 +2381,96 @@ export function useMainBannerLiveContentsLazyQuery(baseOptions?: Apollo.LazyQuer
 export type MainBannerLiveContentsQueryHookResult = ReturnType<typeof useMainBannerLiveContentsQuery>;
 export type MainBannerLiveContentsLazyQueryHookResult = ReturnType<typeof useMainBannerLiveContentsLazyQuery>;
 export type MainBannerLiveContentsQueryResult = Apollo.QueryResult<MainBannerLiveContentsQuery, MainBannerLiveContentsQueryVariables>;
+export const FindAdvertisementByIdDocument = gql`
+    query FindAdvertisementById($findAdvertisementByIdInput: FindAdvertisementByIdInput!) {
+  findAdvertisementById(input: $findAdvertisementByIdInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    advertisement {
+      _id
+      advertiseStatus
+      displayType
+      title
+      content
+      linkType
+      linkUrl
+      startDate
+      endDate
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindAdvertisementByIdQuery__
+ *
+ * To run a query within a React component, call `useFindAdvertisementByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindAdvertisementByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindAdvertisementByIdQuery({
+ *   variables: {
+ *      findAdvertisementByIdInput: // value for 'findAdvertisementByIdInput'
+ *   },
+ * });
+ */
+export function useFindAdvertisementByIdQuery(baseOptions: Apollo.QueryHookOptions<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>(FindAdvertisementByIdDocument, options);
+      }
+export function useFindAdvertisementByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>(FindAdvertisementByIdDocument, options);
+        }
+export type FindAdvertisementByIdQueryHookResult = ReturnType<typeof useFindAdvertisementByIdQuery>;
+export type FindAdvertisementByIdLazyQueryHookResult = ReturnType<typeof useFindAdvertisementByIdLazyQuery>;
+export type FindAdvertisementByIdQueryResult = Apollo.QueryResult<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>;
+export const FindBoardByIdDocument = gql`
+    query FindBoardById($boardInput: BoardInput!) {
+  findBoardById(input: $boardInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    board {
+      title
+      content
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindBoardByIdQuery__
+ *
+ * To run a query within a React component, call `useFindBoardByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindBoardByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindBoardByIdQuery({
+ *   variables: {
+ *      boardInput: // value for 'boardInput'
+ *   },
+ * });
+ */
+export function useFindBoardByIdQuery(baseOptions: Apollo.QueryHookOptions<FindBoardByIdQuery, FindBoardByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindBoardByIdQuery, FindBoardByIdQueryVariables>(FindBoardByIdDocument, options);
+      }
+export function useFindBoardByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindBoardByIdQuery, FindBoardByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindBoardByIdQuery, FindBoardByIdQueryVariables>(FindBoardByIdDocument, options);
+        }
+export type FindBoardByIdQueryHookResult = ReturnType<typeof useFindBoardByIdQuery>;
+export type FindBoardByIdLazyQueryHookResult = ReturnType<typeof useFindBoardByIdLazyQuery>;
+export type FindBoardByIdQueryResult = Apollo.QueryResult<FindBoardByIdQuery, FindBoardByIdQueryVariables>;

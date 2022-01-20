@@ -624,17 +624,6 @@ export const ManagementWrapper = styled.div`
           line-height: 1;
         }
       }
-
-      .create-btn {
-        padding: 0.786rem 1.5rem;
-        border: 1px solid transparent;
-        box-shadow: none;
-        min-height: 2.714rem;
-
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-      }
     }
 
     .pagination-content {
@@ -651,5 +640,16 @@ export const ManagementWrapper = styled.div`
         padding: 1rem 0;
       }
     }
+  }
+
+  .default-btn {
+    padding: 0.786rem 1.5rem;
+    border: 1px solid transparent;
+    box-shadow: none;
+    min-height: 2.714rem;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
   }
 `

@@ -354,6 +354,14 @@ export const CHANGE_ADVERTISEMENT_STATUS_MUTATION = gql`
   }
 `
 
+/**
+ * 공지사항글을 생성 합니다.
+ * @example {input: {
+ *  boardCategoryType: <Enum>
+ *  title: <String>
+ *  content: <String>
+ * }}
+ */
 export const CREATE_NOTICE_MUTATION = gql`
   mutation CreateNotice($createNoticeInput: CreateNoticeInput!) {
     createNotice(input: $createNoticeInput) {
@@ -361,6 +369,36 @@ export const CREATE_NOTICE_MUTATION = gql`
       error {
         ko
         en
+      }
+    }
+  }
+`
+
+/**
+ * 공지사항 목록을 가져옵니다.
+ * @default page 1
+ * @default pageView 20
+ * @example {input: {
+ *  page: <Number>
+ *  pageView: <Number>
+ * }}
+ */
+export const NOTICES_MUTATION = gql`
+  mutation Notices($noticesInput: NoticesInput!) {
+    notices(input: $noticesInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      notices {
+        _id
+        title
+        content
+        boardCategoryType
+        createDate
       }
     }
   }

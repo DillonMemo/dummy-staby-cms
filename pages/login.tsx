@@ -209,7 +209,7 @@ const Wrapper = styled.div`
 
       img {
         border-style: none;
-        max-width: 100%;
+        max-width: 100vh;
         height: auto;
       }
     }

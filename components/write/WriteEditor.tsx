@@ -1,13 +1,15 @@
 import { Skeleton } from 'antd'
 import dynamic from 'next/dynamic'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import Parser from 'html-react-parser'
 import { find } from 'lodash'
+import { useQuery } from '@apollo/client'
 
 /** lib */
 import detectIOS from '../../lib/detectIOS'
 import { md, opacityHex } from '../../styles/styles'
+import { S3 } from '../../lib/awsClient'
 
 /** components */
 import Title from './Title'
@@ -15,12 +17,27 @@ import Toolbar from './Toolbar'
 
 /** Quill */
 import 'react-quill/dist/quill.snow.css'
+import ReactQuill from 'react-quill'
 import { Delta } from 'quill'
 
-const Quill = dynamic(import('react-quill'), {
-  ssr: false,
-  loading: () => <Skeleton title={false} paragraph={{ rows: 10 }} />,
-})
+/** Apollo */
+import { MyQuery } from '../../generated'
+import { MY_QUERY } from '../../graphql/queries'
+import { DATE_FORMAT } from '../../Common/commonFn'
+
+// const Quill = dynamic(import('react-quill'), {
+//   ssr: false,
+//   loading: () => <Skeleton title={false} paragraph={{ rows: 10 }} />,
+// })
+const Quill = dynamic(
+  async () => {
+    const { default: RQ } = await import('react-quill')
+    return function comp({ forwardedRef, ...props }: { [key: string]: any }) {
+      return <RQ ref={forwardedRef} {...props} />
+    }
+  },
+  { ssr: false, loading: () => <Skeleton active title={false} paragraph={{ rows: 10 }} /> }
+)
 
 interface WriteEditorProps {
   title: string
@@ -36,15 +53,79 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
 }) => {
   const [hideUpper] = useState<boolean>(false)
   const isIOS = detectIOS()
-  const modules: { [key: string]: any } = {
-    toolbar: {
-      container: '#toolbar',
-    },
+  const quillRef = useRef<ReactQuill>()
+  const { loading, data: myData } = useQuery<MyQuery>(MY_QUERY)
+
+  // Text Editor image 툴바 클릭 이벤트 핸들러
+  const onImageHandler = () => {
+    const input = document.createElement('input')
+
+    input.setAttribute('type', 'file')
+    input.setAttribute('accept', 'image/*')
+    document.body.appendChild(input)
+
+    input.click()
+
+    input.onchange = async () => {
+      const file = (input.files as FileList).item(0)
+      if (!file) return alert('선택한 파일이 없습니다')
+
+      const saveFileName =
+        process.env.NODE_ENV === 'development'
+          ? `dev/going/editor/${DATE_FORMAT('YYYYMMDD')}/${myData?.my._id}_${DATE_FORMAT(
+              'ALL'
+            )}.jpg`
+          : `dev/going/editor/${DATE_FORMAT('YYYYMMDD')}/${myData?.my._id}_${DATE_FORMAT(
+              'ALL'
+            )}.jpg`
+
+      const result =
+        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+        (await S3.upload({
+          Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+          Key: saveFileName,
+          Body: file,
+          ACL: 'public-read',
+        }).promise())
+
+      if (result && quillRef.current) {
+        const range = quillRef.current.getEditor().getSelection()
+        if (range) {
+          quillRef.current.getEditor().insertEmbed(range.index, 'image', result.Location)
+          quillRef.current.getEditor().setSelection(range)
+
+          document.body.querySelector(':scope > input')?.remove()
+        }
+      } else {
+        return alert('이미지 업로드중 문제가 발생했습니다.')
+      }
+    }
   }
+
+  // useMemo를 사용한 이유는 modules가 렌더링마다 변하면 에디터에서 입력이 끊기는 버그가 발생
+  const modules = useMemo(
+    () => ({
+      toolbar: {
+        container: '#toolbar',
+        handlers: {
+          image: onImageHandler,
+        },
+      },
+    }),
+    [myData]
+  )
 
   /** 제목 변경 이벤트 핸들러 */
   const handleTitleChange = useCallback(
-    ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => onChangeTitle(value),
+    ({ target }: React.ChangeEvent<HTMLTextAreaElement>) => {
+      target.onkeydown = (e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault()
+          quillRef.current?.focus()
+        }
+      }
+      onChangeTitle(target.value)
+    },
     [title]
   )
 
@@ -73,19 +154,22 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
         <Title placeholder="제목을 입력하세요" value={title} onChange={handleTitleChange} />
         <HorizontalBar />
         <Toolbar shadow={hideUpper} ios={isIOS} />
-        <QuillWrapper>
-          <Quill
-            className="editor"
-            theme="snow"
-            modules={modules}
-            placeholder="내용을 입력해주세요..."
-            onChange={handleContentChange}
-          />
-        </QuillWrapper>
+        {!loading && (
+          <QuillWrapper>
+            <Quill
+              forwardedRef={quillRef}
+              className="editor"
+              theme="snow"
+              modules={modules}
+              placeholder="내용을 입력해주세요..."
+              onChange={handleContentChange}
+            />
+          </QuillWrapper>
+        )}
       </EditorContainer>
       <PreviewContainer className="preview-container">
-        <div className="title">{title}</div>
-        <div>{Parser(content)}</div>
+        <TitleStyled>{title}</TitleStyled>
+        <ContentStyled>{Parser(content)}</ContentStyled>
       </PreviewContainer>
     </Wrapper>
   )
@@ -115,16 +199,6 @@ const PreviewContainer = styled.div`
 
   ${md} {
     display: none;
-  }
-
-  .title {
-    font-weight: bold;
-    font-size: 1.75rem;
-    margin-bottom: 1.5rem;
-
-    ${md} {
-      font-size: 1.25rem;
-    }
   }
 
   a {
@@ -182,6 +256,23 @@ const QuillWrapper = styled.div`
         }
       }
     }
+  }
+`
+
+export const TitleStyled = styled.div`
+  font-weight: bold;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+
+  ${md} {
+    font-size: 1.5rem;
+  }
+`
+
+export const ContentStyled = styled.div`
+  image,
+  img {
+    max-width: 100%;
   }
 `
 
