@@ -4,27 +4,26 @@ import { notification } from 'antd'
 
 export type Props = styleMode
 
-export type DateType = 'ALL' | 'YYYYMMDD'
-
-/**
- * Date Time to String
- * 관리 페이지용
- */
-export const dateToString = (date: Date) => {
-  const dateTime = new Date(date)
-
-  const year = dateTime.getFullYear()
-  const month = dateTime.getMonth()
-  const day = dateTime.getDay()
-  const hours = ('0' + dateTime.getHours()).slice(-2)
-  const minutes = ('0' + dateTime.getMinutes()).slice(-2)
-
-  return year + '/' + month + '/' + day + ' ' + hours + ':' + minutes
-}
+export type DateType = 'ALL' | 'YYYYMMDD' | 'YYYY-MM-DD' | 'YYYY/MM/DD'
 
 // Date Format YYYYMMDD_HHMMSS <-- 이걸로 요청 드려요
 // 등록용
-export const DATE_FORMAT = (type: DateType): string => {
+export const DATE_FORMAT = (type: DateType, date?: Date): string | Date => {
+  let year
+  let month
+  let day
+  let hours
+  let minutes
+
+  if (date) {
+    const dateTime = new Date(date)
+    year = dateTime.getFullYear()
+    month = dateTime.getMonth() + 1
+    day = dateTime.getDate()
+    hours = ('0' + dateTime.getHours()).slice(-2)
+    minutes = ('0' + dateTime.getMinutes()).slice(-2)
+  }
+
   switch (type) {
     case 'ALL':
       return new Date(+new Date() + 3240 * 10000)
@@ -35,6 +34,10 @@ export const DATE_FORMAT = (type: DateType): string => {
         .replace(/\..*/, '')
     case 'YYYYMMDD':
       return new Date(+new Date() + 3240 * 10000).toISOString().split('T')[0].replace(/-/gi, '')
+    case 'YYYY-MM-DD':
+      return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes
+    case 'YYYY/MM/DD':
+      return year + '/' + month + '/' + day + ' ' + hours + ':' + minutes
     default:
       throw new Error('type error')
   }

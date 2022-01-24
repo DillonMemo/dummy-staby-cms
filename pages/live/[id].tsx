@@ -34,8 +34,15 @@ import {
 import { FIND_MEMBERS_BY_TYPE_QUERY, LIVE_QUERY } from '../../graphql/queries'
 
 import { S3 } from '../../lib/awsClient'
-import { delayedEntryTimeArr, nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
+import {
+  DATE_FORMAT,
+  delayedEntryTimeArr,
+  nowDateStr,
+  onDeleteBtn,
+  shareCheck,
+} from '../../Common/commonFn'
 import { omit } from 'lodash'
+import { CopyOutlined } from '@ant-design/icons'
 
 type Props = styleMode
 
@@ -381,6 +388,29 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     )
   }
 
+  /**
+   * 라이브 주소 복사
+   */
+
+  const liveAddrCopy = (text: string) => {
+    const copyText = text
+
+    const createInput = document.createElement('input')
+    createInput.setAttribute('type', 'text')
+
+    document.body.appendChild(createInput)
+
+    createInput.value = copyText
+    const contents = copyText
+    //createInput.select()
+    //document.execCommand('copy')
+    navigator.clipboard.writeText(contents).catch((err) => {
+      console.error('Something went wrong', err)
+    })
+
+    document.body.removeChild(createInput)
+  }
+
   useEffect(() => {
     getMember({
       variables: {
@@ -562,10 +592,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <DatePicker
                         key={liveData?.findLiveById.live?.livePreviewDate}
                         defaultValue={moment(
-                          liveData?.findLiveById.live?.livePreviewDate
-                            .toString()
-                            .replace('T', ',')
-                            .substring(0, 19),
+                          DATE_FORMAT('YYYY-MM-DD', liveData?.findLiveById.live?.livePreviewDate),
                           'YYYY-MM-DD,HH:mm'
                         )}
                         showTime={{
@@ -690,7 +717,15 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     return (
                       <div key={index}>
                         <div>
-                          <em className="fontSize12 mrT5">Ch{index + 1}</em>
+                          <em className="fontSize12 mrT5">
+                            Ch{index + 1}
+                            <CopyOutlined
+                              onClick={() =>
+                                liveAddrCopy(`rtmp://stream.stabygo.com:1935/${data.linkPath}`)
+                              }
+                              style={{ marginLeft: '7px', fontSize: '15px' }}
+                            />
+                          </em>
                           {index >= 1 && (
                             <Button
                               className="delectBtn"
