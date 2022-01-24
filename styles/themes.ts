@@ -6,6 +6,7 @@ const lightTheme = {
   text: '#6e6b7b',
   text_hover: '#a6a4b0',
   border: '#c8c8c8',
+  disable: '#f5f5f5',
 }
 const darkTheme = {
   mode: 'dark',
@@ -15,6 +16,7 @@ const darkTheme = {
   text: '#b4b7bd',
   text_hover: '#676d7d',
   border: '#404656',
+  disable: '#4f5872',
 }
 
 const themes = {

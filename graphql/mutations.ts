@@ -302,6 +302,7 @@ export const ADVERTISEMENTS_MUTATION = gql`
         linkUrl
         startDate
         endDate
+        createDate
       }
     }
   }
@@ -354,9 +355,153 @@ export const CHANGE_ADVERTISEMENT_STATUS_MUTATION = gql`
   }
 `
 
+/**
+ * 공지사항글을 생성 합니다.
+ * @example {input: {
+ *  title: <String>
+ *  content: <String>
+ * }}
+ */
 export const CREATE_NOTICE_MUTATION = gql`
   mutation CreateNotice($createNoticeInput: CreateNoticeInput!) {
     createNotice(input: $createNoticeInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/**
+ * 공지사항 목록을 가져옵니다.
+ * @default page 1
+ * @default pageView 20
+ * @example {input: {
+ *  page: <Number>
+ *  pageView: <Number>
+ * }}
+ */
+export const NOTICES_MUTATION = gql`
+  mutation Notices($noticesInput: NoticesInput!) {
+    notices(input: $noticesInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      notices {
+        _id
+        title
+        content
+        boardCategoryType
+        createDate
+      }
+    }
+  }
+`
+
+/**
+ * 공지사항을 수정합니다.
+ * @example {input: {
+ *  _id: <ObjectId>
+ *  title: <String>
+ *  content: <String>
+ * }}
+ */
+export const EDIT_NOTICE_MUTATION = gql`
+  mutation EditNotice($editNoticeInput: EditNoticeInput!) {
+    editNotice(input: $editNoticeInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/**
+ * 게시판을 삭제 합니다.
+ * @example {input: {
+ *  boardId: <ObjectId>
+ * }}
+ */
+export const DELETE_BOARD_MUTATION = gql`
+  mutation DeleteBoard($deleteBoardInput: DeleteBoardInput!) {
+    deleteBoard(input: $deleteBoardInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/**
+ * 이벤트 게시판을 생성 합니다.
+ * @example {input: {
+ *  title: <String>
+ *  content: <String>
+ *  questionType: <Enum>
+ * }}
+ */
+export const CREATE_EVENT_MUTATION = gql`
+  mutation CreateEvent($createEventInput: CreateEventInput!) {
+    createEvent(input: $createEventInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+/**
+ * 이벤트 목록을 가져옵니다.
+ * @default page 1
+ * @default pageView 20
+ * @example {input: {
+ *  page: <Number>
+ *  pageView: <Number>
+ * }}
+ */
+export const EVENTS_MUTATION = gql`
+  mutation Events($eventsInput: EventsInput!) {
+    events(input: $eventsInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      events {
+        _id
+        title
+        content
+        boardCategoryType
+        createDate
+      }
+    }
+  }
+`
+
+/**
+ * 이벤트를 수정합니다.
+ * @example {input: {
+ *  _id: <ObjectId>
+ *  title: <String>
+ *  content: <String>
+ * }}
+ */
+export const EDIT_EVENT_MUTATION = gql`
+  mutation EditEvent($editEventInput: EditEventInput!) {
+    editEvent(input: $editEventInput) {
       ok
       error {
         ko

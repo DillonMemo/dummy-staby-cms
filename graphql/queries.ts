@@ -206,3 +206,52 @@ export const MAIN_BANNER_LIVE_CONTENTS_QUERY = gql`
     }
   }
 `
+
+/**
+ * 고유식별아이디로 특정 광고를 가져옵니다.
+ * @example {input: {_id: <ObjectId>}}
+ */
+export const FIND_ADVERTISEMENT_BY_ID_QUERY = gql`
+  query FindAdvertisementById($findAdvertisementByIdInput: FindAdvertisementByIdInput!) {
+    findAdvertisementById(input: $findAdvertisementByIdInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      advertisement {
+        _id
+        advertiseStatus
+        displayType
+        displayDeviceType
+        title
+        content
+        mainImageName
+        linkType
+        linkUrl
+        startDate
+        endDate
+      }
+    }
+  }
+`
+
+/**
+ * ID별로 게시판을 데이터를 검색합니다
+ */
+export const FIND_BOARD_BY_ID_QUERY = gql`
+  query FindBoardById($boardInput: BoardInput!) {
+    findBoardById(input: $boardInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      board {
+        title
+        content
+        boardStatus
+      }
+    }
+  }
+`

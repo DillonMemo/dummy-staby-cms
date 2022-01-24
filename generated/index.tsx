@@ -102,6 +102,17 @@ export enum BoardCategoryType {
   Qna = 'QNA'
 }
 
+export type BoardInput = {
+  boardId: Scalars['ID'];
+};
+
+export type BoardOutput = {
+  __typename?: 'BoardOutput';
+  board?: Maybe<Board>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export enum BoardStatus {
   Delete = 'DELETE',
   Display = 'DISPLAY'
@@ -114,12 +125,6 @@ export type ChangeAdvertisementStatusInput = {
 
 export type ChangeAdvertisementStatusOutput = {
   __typename?: 'ChangeAdvertisementStatusOutput';
-  error?: Maybe<LangErrorMessage>;
-  ok: Scalars['Boolean'];
-};
-
-export type CoreOutput = {
-  __typename?: 'CoreOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
@@ -138,6 +143,17 @@ export type CreateAdvertisementInput = {
 
 export type CreateAdvertisementOutput = {
   __typename?: 'CreateAdvertisementOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type CreateEventInput = {
+  content?: Maybe<Scalars['String']>;
+  title?: Maybe<Scalars['String']>;
+};
+
+export type CreateEventOutput = {
+  __typename?: 'CreateEventOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
@@ -188,7 +204,6 @@ export type CreateMemberOutput = {
 };
 
 export type CreateNoticeInput = {
-  boardCategoryType?: Maybe<BoardCategoryType>;
   content?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
 };
@@ -213,6 +228,16 @@ export type CreateVodInput = {
 
 export type CreateVodOutput = {
   __typename?: 'CreateVodOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type DeleteBoardInput = {
+  boardId: Scalars['ID'];
+};
+
+export type DeleteBoardOutput = {
+  __typename?: 'DeleteBoardOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
@@ -266,6 +291,18 @@ export type EditAdvertisementOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type EditEventInput = {
+  _id?: Maybe<Scalars['ID']>;
+  content?: Maybe<Scalars['String']>;
+  title?: Maybe<Scalars['String']>;
+};
+
+export type EditEventOutput = {
+  __typename?: 'EditEventOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export type EditLiveInput = {
   _id: Scalars['ID'];
   content?: Maybe<Scalars['String']>;
@@ -305,6 +342,18 @@ export type EditMemberOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type EditNoticeInput = {
+  _id?: Maybe<Scalars['ID']>;
+  content?: Maybe<Scalars['String']>;
+  title?: Maybe<Scalars['String']>;
+};
+
+export type EditNoticeOutput = {
+  __typename?: 'EditNoticeOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export type EditVodInput = {
   _id: Scalars['ID'];
   content?: Maybe<Scalars['String']>;
@@ -321,6 +370,20 @@ export type EditVodOutput = {
   __typename?: 'EditVodOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
+};
+
+export type EventsInput = {
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+};
+
+export type EventsOutput = {
+  __typename?: 'EventsOutput';
+  error?: Maybe<LangErrorMessage>;
+  events?: Maybe<Array<Board>>;
+  ok: Scalars['Boolean'];
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
 };
 
 export enum FaqType {
@@ -606,17 +669,22 @@ export type Mutation = {
   changeAdvertisementStatus: ChangeAdvertisementStatusOutput;
   createAccount: CreateMemberOutput;
   createAdvertisement: CreateAdvertisementOutput;
+  createEvent: CreateEventOutput;
   createLive: CreateLiveOutput;
   createMainBannerLiveContents: CreateMainBannerLiveOutput;
   createNotice: CreateNoticeOutput;
   createVod: CreateVodOutput;
+  deleteBoard: DeleteBoardOutput;
   deleteLive: DeleteLiveOutput;
   deleteVod: DeleteVodOutput;
   editAccount: EditMemberOutput;
   editAdvertisement: EditAdvertisementOutput;
+  editEvent: EditEventOutput;
   editLive: EditLiveOutput;
   editMemberById: EditMemberOutput;
+  editNotice: EditNoticeOutput;
   editVod: EditVodOutput;
+  events: EventsOutput;
   lives: LivesOutput;
   login: LoginOutput;
   logout: LogoutOutput;
@@ -646,6 +714,11 @@ export type MutationCreateAdvertisementArgs = {
 };
 
 
+export type MutationCreateEventArgs = {
+  input: CreateEventInput;
+};
+
+
 export type MutationCreateLiveArgs = {
   input: CreateLiveInput;
 };
@@ -663,6 +736,11 @@ export type MutationCreateNoticeArgs = {
 
 export type MutationCreateVodArgs = {
   input: CreateVodInput;
+};
+
+
+export type MutationDeleteBoardArgs = {
+  input: DeleteBoardInput;
 };
 
 
@@ -686,6 +764,11 @@ export type MutationEditAdvertisementArgs = {
 };
 
 
+export type MutationEditEventArgs = {
+  input: EditEventInput;
+};
+
+
 export type MutationEditLiveArgs = {
   input: EditLiveInput;
 };
@@ -696,8 +779,18 @@ export type MutationEditMemberByIdArgs = {
 };
 
 
+export type MutationEditNoticeArgs = {
+  input: EditNoticeInput;
+};
+
+
 export type MutationEditVodArgs = {
   input: EditVodInput;
+};
+
+
+export type MutationEventsArgs = {
+  input: EventsInput;
 };
 
 
@@ -753,6 +846,7 @@ export type Point = {
 export type Query = {
   __typename?: 'Query';
   findAdvertisementById: FindAdvertisementByIdOutput;
+  findBoardById: BoardOutput;
   findLiveById: LiveOutput;
   findLiveByTypes: FindLiveByTypesOutput;
   findMemberById: MemberOutput;
@@ -761,12 +855,16 @@ export type Query = {
   findVodByTypes: FindVodByTypesOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
   my: Member;
-  testChennel: CoreOutput;
 };
 
 
 export type QueryFindAdvertisementByIdArgs = {
   input: FindAdvertisementByIdInput;
+};
+
+
+export type QueryFindBoardByIdArgs = {
+  input: BoardInput;
 };
 
 
@@ -1048,6 +1146,41 @@ export type NoticesMutationVariables = Exact<{
 
 export type NoticesMutation = { __typename?: 'Mutation', notices: { __typename?: 'NoticesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, notices?: Array<{ __typename?: 'Board', _id: string, title: string, content: string, boardCategoryType: BoardCategoryType, createDate: any }> | null | undefined } };
 
+export type EditNoticeMutationVariables = Exact<{
+  editNoticeInput: EditNoticeInput;
+}>;
+
+
+export type EditNoticeMutation = { __typename?: 'Mutation', editNotice: { __typename?: 'EditNoticeOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type DeleteBoardMutationVariables = Exact<{
+  deleteBoardInput: DeleteBoardInput;
+}>;
+
+
+export type DeleteBoardMutation = { __typename?: 'Mutation', deleteBoard: { __typename?: 'DeleteBoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type CreateEventMutationVariables = Exact<{
+  createEventInput: CreateEventInput;
+}>;
+
+
+export type CreateEventMutation = { __typename?: 'Mutation', createEvent: { __typename?: 'CreateEventOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type EventsMutationVariables = Exact<{
+  eventsInput: EventsInput;
+}>;
+
+
+export type EventsMutation = { __typename?: 'Mutation', events: { __typename?: 'EventsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, events?: Array<{ __typename?: 'Board', _id: string, title: string, content: string, boardCategoryType: BoardCategoryType, createDate: any }> | null | undefined } };
+
+export type EditEventMutationVariables = Exact<{
+  editEventInput: EditEventInput;
+}>;
+
+
+export type EditEventMutation = { __typename?: 'Mutation', editEvent: { __typename?: 'EditEventOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1099,6 +1232,20 @@ export type MainBannerLiveContentsQueryVariables = Exact<{ [key: string]: never;
 
 
 export type MainBannerLiveContentsQuery = { __typename?: 'Query', mainBannerLiveContents: { __typename?: 'MainBannerLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, mainBannerLives?: Array<{ __typename?: 'MainBannerLive', liveId: string, listingOrder: number, title?: string | null | undefined }> | null | undefined } };
+
+export type FindAdvertisementByIdQueryVariables = Exact<{
+  findAdvertisementByIdInput: FindAdvertisementByIdInput;
+}>;
+
+
+export type FindAdvertisementByIdQuery = { __typename?: 'Query', findAdvertisementById: { __typename?: 'FindAdvertisementByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, advertisement?: { __typename?: 'Advertisement', _id: string, advertiseStatus: AdvertiseStatus, displayType: DisplayType, displayDeviceType: DisplayDeviceType, title: string, content?: string | null | undefined, mainImageName: string, linkType: LinkType, linkUrl: string, startDate: any, endDate: any } | null | undefined } };
+
+export type FindBoardByIdQueryVariables = Exact<{
+  boardInput: BoardInput;
+}>;
+
+
+export type FindBoardByIdQuery = { __typename?: 'Query', findBoardById: { __typename?: 'BoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, board?: { __typename?: 'Board', title: string, content: string, boardStatus: BoardStatus } | null | undefined } };
 
 
 export const LoginDocument = gql`
@@ -1950,6 +2097,200 @@ export function useNoticesMutation(baseOptions?: Apollo.MutationHookOptions<Noti
 export type NoticesMutationHookResult = ReturnType<typeof useNoticesMutation>;
 export type NoticesMutationResult = Apollo.MutationResult<NoticesMutation>;
 export type NoticesMutationOptions = Apollo.BaseMutationOptions<NoticesMutation, NoticesMutationVariables>;
+export const EditNoticeDocument = gql`
+    mutation EditNotice($editNoticeInput: EditNoticeInput!) {
+  editNotice(input: $editNoticeInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type EditNoticeMutationFn = Apollo.MutationFunction<EditNoticeMutation, EditNoticeMutationVariables>;
+
+/**
+ * __useEditNoticeMutation__
+ *
+ * To run a mutation, you first call `useEditNoticeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditNoticeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editNoticeMutation, { data, loading, error }] = useEditNoticeMutation({
+ *   variables: {
+ *      editNoticeInput: // value for 'editNoticeInput'
+ *   },
+ * });
+ */
+export function useEditNoticeMutation(baseOptions?: Apollo.MutationHookOptions<EditNoticeMutation, EditNoticeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditNoticeMutation, EditNoticeMutationVariables>(EditNoticeDocument, options);
+      }
+export type EditNoticeMutationHookResult = ReturnType<typeof useEditNoticeMutation>;
+export type EditNoticeMutationResult = Apollo.MutationResult<EditNoticeMutation>;
+export type EditNoticeMutationOptions = Apollo.BaseMutationOptions<EditNoticeMutation, EditNoticeMutationVariables>;
+export const DeleteBoardDocument = gql`
+    mutation DeleteBoard($deleteBoardInput: DeleteBoardInput!) {
+  deleteBoard(input: $deleteBoardInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type DeleteBoardMutationFn = Apollo.MutationFunction<DeleteBoardMutation, DeleteBoardMutationVariables>;
+
+/**
+ * __useDeleteBoardMutation__
+ *
+ * To run a mutation, you first call `useDeleteBoardMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteBoardMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteBoardMutation, { data, loading, error }] = useDeleteBoardMutation({
+ *   variables: {
+ *      deleteBoardInput: // value for 'deleteBoardInput'
+ *   },
+ * });
+ */
+export function useDeleteBoardMutation(baseOptions?: Apollo.MutationHookOptions<DeleteBoardMutation, DeleteBoardMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteBoardMutation, DeleteBoardMutationVariables>(DeleteBoardDocument, options);
+      }
+export type DeleteBoardMutationHookResult = ReturnType<typeof useDeleteBoardMutation>;
+export type DeleteBoardMutationResult = Apollo.MutationResult<DeleteBoardMutation>;
+export type DeleteBoardMutationOptions = Apollo.BaseMutationOptions<DeleteBoardMutation, DeleteBoardMutationVariables>;
+export const CreateEventDocument = gql`
+    mutation CreateEvent($createEventInput: CreateEventInput!) {
+  createEvent(input: $createEventInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type CreateEventMutationFn = Apollo.MutationFunction<CreateEventMutation, CreateEventMutationVariables>;
+
+/**
+ * __useCreateEventMutation__
+ *
+ * To run a mutation, you first call `useCreateEventMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateEventMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createEventMutation, { data, loading, error }] = useCreateEventMutation({
+ *   variables: {
+ *      createEventInput: // value for 'createEventInput'
+ *   },
+ * });
+ */
+export function useCreateEventMutation(baseOptions?: Apollo.MutationHookOptions<CreateEventMutation, CreateEventMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateEventMutation, CreateEventMutationVariables>(CreateEventDocument, options);
+      }
+export type CreateEventMutationHookResult = ReturnType<typeof useCreateEventMutation>;
+export type CreateEventMutationResult = Apollo.MutationResult<CreateEventMutation>;
+export type CreateEventMutationOptions = Apollo.BaseMutationOptions<CreateEventMutation, CreateEventMutationVariables>;
+export const EventsDocument = gql`
+    mutation Events($eventsInput: EventsInput!) {
+  events(input: $eventsInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    totalPages
+    totalResults
+    events {
+      _id
+      title
+      content
+      boardCategoryType
+      createDate
+    }
+  }
+}
+    `;
+export type EventsMutationFn = Apollo.MutationFunction<EventsMutation, EventsMutationVariables>;
+
+/**
+ * __useEventsMutation__
+ *
+ * To run a mutation, you first call `useEventsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEventsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [eventsMutation, { data, loading, error }] = useEventsMutation({
+ *   variables: {
+ *      eventsInput: // value for 'eventsInput'
+ *   },
+ * });
+ */
+export function useEventsMutation(baseOptions?: Apollo.MutationHookOptions<EventsMutation, EventsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EventsMutation, EventsMutationVariables>(EventsDocument, options);
+      }
+export type EventsMutationHookResult = ReturnType<typeof useEventsMutation>;
+export type EventsMutationResult = Apollo.MutationResult<EventsMutation>;
+export type EventsMutationOptions = Apollo.BaseMutationOptions<EventsMutation, EventsMutationVariables>;
+export const EditEventDocument = gql`
+    mutation EditEvent($editEventInput: EditEventInput!) {
+  editEvent(input: $editEventInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type EditEventMutationFn = Apollo.MutationFunction<EditEventMutation, EditEventMutationVariables>;
+
+/**
+ * __useEditEventMutation__
+ *
+ * To run a mutation, you first call `useEditEventMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditEventMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editEventMutation, { data, loading, error }] = useEditEventMutation({
+ *   variables: {
+ *      editEventInput: // value for 'editEventInput'
+ *   },
+ * });
+ */
+export function useEditEventMutation(baseOptions?: Apollo.MutationHookOptions<EditEventMutation, EditEventMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditEventMutation, EditEventMutationVariables>(EditEventDocument, options);
+      }
+export type EditEventMutationHookResult = ReturnType<typeof useEditEventMutation>;
+export type EditEventMutationResult = Apollo.MutationResult<EditEventMutation>;
+export type EditEventMutationOptions = Apollo.BaseMutationOptions<EditEventMutation, EditEventMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {
@@ -2357,3 +2698,99 @@ export function useMainBannerLiveContentsLazyQuery(baseOptions?: Apollo.LazyQuer
 export type MainBannerLiveContentsQueryHookResult = ReturnType<typeof useMainBannerLiveContentsQuery>;
 export type MainBannerLiveContentsLazyQueryHookResult = ReturnType<typeof useMainBannerLiveContentsLazyQuery>;
 export type MainBannerLiveContentsQueryResult = Apollo.QueryResult<MainBannerLiveContentsQuery, MainBannerLiveContentsQueryVariables>;
+export const FindAdvertisementByIdDocument = gql`
+    query FindAdvertisementById($findAdvertisementByIdInput: FindAdvertisementByIdInput!) {
+  findAdvertisementById(input: $findAdvertisementByIdInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    advertisement {
+      _id
+      advertiseStatus
+      displayType
+      displayDeviceType
+      title
+      content
+      mainImageName
+      linkType
+      linkUrl
+      startDate
+      endDate
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindAdvertisementByIdQuery__
+ *
+ * To run a query within a React component, call `useFindAdvertisementByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindAdvertisementByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindAdvertisementByIdQuery({
+ *   variables: {
+ *      findAdvertisementByIdInput: // value for 'findAdvertisementByIdInput'
+ *   },
+ * });
+ */
+export function useFindAdvertisementByIdQuery(baseOptions: Apollo.QueryHookOptions<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>(FindAdvertisementByIdDocument, options);
+      }
+export function useFindAdvertisementByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>(FindAdvertisementByIdDocument, options);
+        }
+export type FindAdvertisementByIdQueryHookResult = ReturnType<typeof useFindAdvertisementByIdQuery>;
+export type FindAdvertisementByIdLazyQueryHookResult = ReturnType<typeof useFindAdvertisementByIdLazyQuery>;
+export type FindAdvertisementByIdQueryResult = Apollo.QueryResult<FindAdvertisementByIdQuery, FindAdvertisementByIdQueryVariables>;
+export const FindBoardByIdDocument = gql`
+    query FindBoardById($boardInput: BoardInput!) {
+  findBoardById(input: $boardInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    board {
+      title
+      content
+      boardStatus
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindBoardByIdQuery__
+ *
+ * To run a query within a React component, call `useFindBoardByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindBoardByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindBoardByIdQuery({
+ *   variables: {
+ *      boardInput: // value for 'boardInput'
+ *   },
+ * });
+ */
+export function useFindBoardByIdQuery(baseOptions: Apollo.QueryHookOptions<FindBoardByIdQuery, FindBoardByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindBoardByIdQuery, FindBoardByIdQueryVariables>(FindBoardByIdDocument, options);
+      }
+export function useFindBoardByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindBoardByIdQuery, FindBoardByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindBoardByIdQuery, FindBoardByIdQueryVariables>(FindBoardByIdDocument, options);
+        }
+export type FindBoardByIdQueryHookResult = ReturnType<typeof useFindBoardByIdQuery>;
+export type FindBoardByIdLazyQueryHookResult = ReturnType<typeof useFindBoardByIdLazyQuery>;
+export type FindBoardByIdQueryResult = Apollo.QueryResult<FindBoardByIdQuery, FindBoardByIdQueryVariables>;

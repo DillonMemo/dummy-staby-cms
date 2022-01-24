@@ -17,7 +17,7 @@ import { useMutation } from '@apollo/client'
 import { LivesMutation, LivesMutationVariables, LiveStatus } from '../../generated'
 import { LIVES_MUTATION } from '../../graphql/mutations'
 import { Maybe } from 'graphql/jsutils/Maybe'
-import { dateToString } from '../../Common/commonFn'
+import { DATE_FORMAT } from '../../Common/commonFn'
 
 type Props = styleMode
 
@@ -248,7 +248,7 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                               title: live.title,
                               hostName: live.hostName,
                               paymentAmount: live.paymentAmount + ' G',
-                              livePreviewDate: dateToString(live.livePreviewDate),
+                              livePreviewDate: DATE_FORMAT('YYYY-MM-DD', live.livePreviewDate),
                             }))
                           : []
                       }

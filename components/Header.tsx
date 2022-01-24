@@ -38,7 +38,7 @@ import { LOGOUT_MUTATION } from '../graphql/mutations'
 type Props = styleMode
 
 const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
-  const { locale, push, pathname } = useRouter()
+  const { locale, push, pathname, query, asPath } = useRouter()
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false)
   const hamburgerRef = React.useRef<HTMLDivElement>(null)
   const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
@@ -309,7 +309,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="#">
+                      <Link href="/event">
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '이벤트' : 'Event'}</span>
@@ -354,8 +354,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      {/* <Link href="/ad/ads"> */}
-                      <Link href="#">
+                      <Link href="/ad/ads">
                         <a onClick={() => alert('준비중 입니다')}>
                           <SettingOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
@@ -363,8 +362,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      {/* <Link href="/ad/createAd"> */}
-                      <Link href="#">
+                      <Link href="/ad/createAd">
                         <a onClick={() => alert('준비중 입니다')}>
                           <PlusOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
@@ -446,7 +444,9 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <CountrySelect
                   defaultValue={locale}
                   placeholder={'Select a country'}
-                  onChange={(value) => push(pathname, pathname, { locale: value as string })}
+                  onChange={(value) =>
+                    push({ pathname, query }, asPath, { locale: value as string })
+                  }
                   bordered={false}
                   showArrow={false}>
                   <Select.Option value="ko">

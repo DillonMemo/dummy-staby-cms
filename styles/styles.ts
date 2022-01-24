@@ -166,6 +166,14 @@ export const GlobalStyles = createGlobalStyle`
         background: ${({ theme }) => `${theme.body}`};
         color: ${({ theme }) => theme.text_hover};
       }
+
+      &[disabled] {
+        background-color: ${({ theme }) => `${theme.disable} !important`};
+
+        &:hover, &:focus, &:active {
+          background-color: ${({ theme }) => `${theme.disable} !important`};
+        }
+      }
     }
     .ant-popover {
       z-index: 999;
@@ -333,6 +341,23 @@ export const GlobalStyles = createGlobalStyle`
             background-color: ${({ theme }) => theme.card};
           }
         }
+      }
+    }
+
+    .ant-select-dropdown {
+      color: ${({ theme }) => theme.text};
+      background-color: ${({ theme }) => theme.body};
+      .ant-select-item {
+        color: ${({ theme }) => theme.text};
+      }
+      .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+        color: ${({ theme }) => theme.text};
+        background-color: ${({ theme }) => theme.card};
+      }
+      .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+        transition: .3s ease;
+        color: ${({ theme }) => `${theme.text}${opacityHex._40}`};
+        background-color: ${({ theme }) => `${theme.disable}`};
       }
     }
 
@@ -528,12 +553,11 @@ export const Form = styled.form`
         align-items: center;
       }
     }
-  }
-
-  .ant-input-group-addon {
-    min-width: 7.5rem;
-    color: ${({ theme }) => theme.text};
-    background-color: ${({ theme }) => theme.body};
+    .ant-input-group-addon {
+      min-width: 7.5rem;
+      color: ${({ theme }) => theme.text};
+      background-color: ${({ theme }) => theme.body};
+    }
   }
 `
 
@@ -624,17 +648,6 @@ export const ManagementWrapper = styled.div`
           line-height: 1;
         }
       }
-
-      .create-btn {
-        padding: 0.786rem 1.5rem;
-        border: 1px solid transparent;
-        box-shadow: none;
-        min-height: 2.714rem;
-
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-      }
     }
 
     .pagination-content {
@@ -651,5 +664,16 @@ export const ManagementWrapper = styled.div`
         padding: 1rem 0;
       }
     }
+  }
+
+  .default-btn {
+    padding: 0.786rem 1.5rem;
+    border: 1px solid transparent;
+    box-shadow: none;
+    min-height: 2.714rem;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
   }
 `

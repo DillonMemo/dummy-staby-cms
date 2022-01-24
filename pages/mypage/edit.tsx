@@ -222,13 +222,13 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                   .map((_, index) => (
                     <div className="form-item" key={`form-${index}`}>
                       <div className="form-group">
-                        <Skeleton.Input style={{ width: '100%', minHeight: '3rem' }} active />
+                        <Skeleton.Input active style={{ width: '100%', minHeight: '3rem' }} />
                       </div>
                     </div>
                   ))}
                 <div className="form-item">
                   <div className="button-group">
-                    <Skeleton.Button style={{ minHeight: '3rem' }} active />
+                    <Skeleton.Button active style={{ minHeight: '3rem' }} />
                   </div>
                 </div>
               </Form>
