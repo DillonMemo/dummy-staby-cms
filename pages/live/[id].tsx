@@ -395,20 +395,11 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const liveAddrCopy = (text: string) => {
     const copyText = text
 
-    const createInput = document.createElement('input')
-    createInput.setAttribute('type', 'text')
-
-    document.body.appendChild(createInput)
-
-    createInput.value = copyText
-    const contents = copyText
     //createInput.select()
     //document.execCommand('copy')
-    navigator.clipboard.writeText(contents).catch((err) => {
+    navigator.clipboard.writeText(copyText).catch((err) => {
       console.error('Something went wrong', err)
     })
-
-    document.body.removeChild(createInput)
   }
 
   useEffect(() => {
