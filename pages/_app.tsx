@@ -5,8 +5,10 @@ import { GlobalStyles, TypeOfTheme } from '../styles/styles'
 import themes from '../styles/themes'
 import { ApolloProvider } from '@apollo/client'
 import { useApollo } from '../lib/apolloClient'
+import { ToastContainer } from 'react-toastify'
 
 import 'antd/dist/antd.css'
+import 'react-toastify/dist/ReactToastify.css'
 
 function MyApp({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(pageProps)
@@ -33,6 +35,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={themes[theme]}>
         <GlobalStyles />
         <Component {...pageProps} toggleStyle={toggleStyle} theme={theme} />
+        <ToastContainer />
       </ThemeProvider>
     </ApolloProvider>
   )

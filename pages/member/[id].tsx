@@ -85,9 +85,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       if (!data?.editMemberById.ok) {
         const message =
           locale === 'ko' ? data?.editMemberById.error?.ko : data?.editMemberById.error?.en
-        notification.error({
-          message,
-        })
+        notification.error({ message })
         throw new Error(message)
       } else {
         notification.success({

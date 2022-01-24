@@ -1,22 +1,32 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import styled from 'styled-components'
-import { useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { Button, Skeleton } from 'antd'
 import Parser from 'html-react-parser'
+import { toast } from 'react-toastify'
 
 /** components */
 import Layout from '../../components/Layout'
+import WriteEditor, { ContentStyled, TitleStyled } from '../../components/write/WriteEditor'
 
 /** styles */
 import { MainWrapper, ManagementWrapper, md, styleMode } from '../../styles/styles'
 
 /** graphql */
 import { FIND_BOARD_BY_ID_QUERY } from '../../graphql/queries'
-import { FindBoardByIdQuery, FindBoardByIdQueryVariables } from '../../generated'
-import { ContentStyled, TitleStyled } from '../../components/write/WriteEditor'
+import {
+  BoardStatus,
+  DeleteBoardMutation,
+  DeleteBoardMutationVariables,
+  EditNoticeMutation,
+  EditNoticeMutationVariables,
+  FindBoardByIdQuery,
+  FindBoardByIdQueryVariables,
+} from '../../generated'
+import { DELETE_BOARD_MUTATION, EDIT_NOTICE_MUTATION } from '../../graphql/mutations'
 
 type Props = styleMode
 export interface NoticeEditForm {
@@ -24,10 +34,13 @@ export interface NoticeEditForm {
   content: string
 }
 const NoticeDetail: NextPage<Props> = (props) => {
-  const { push, locale, query } = useRouter()
+  const { push, locale, query, asPath } = useRouter()
   const boardId = query.id ? query.id?.toString() : ''
   const [isEdit, setIsEdit] = useState<boolean>(false)
+  const [title, setTitle] = useState<string>('')
+  const [content, setContent] = useState<string>('')
 
+  /** 공지사항 정보를 가져오는 Query */
   const {
     data: boardData,
     refetch: refreshBoard,
@@ -35,12 +48,100 @@ const NoticeDetail: NextPage<Props> = (props) => {
   } = useQuery<FindBoardByIdQuery, FindBoardByIdQueryVariables>(FIND_BOARD_BY_ID_QUERY, {
     variables: { boardInput: { boardId } },
   })
+  /** 공지사항 정보를 수정 하는 Mutation */
+  const [editNotice, { loading: editLoading }] = useMutation<
+    EditNoticeMutation,
+    EditNoticeMutationVariables
+  >(EDIT_NOTICE_MUTATION)
+  /** 공지사항 정보를 삭제 하는 Mutation */
+  const [deleteNotice, { loading: deleteLoading }] = useMutation<
+    DeleteBoardMutation,
+    DeleteBoardMutationVariables
+  >(DELETE_BOARD_MUTATION)
+
+  /** 제목 변경 이벤트 핸들러 */
+  const onChangeTitle = useCallback((title: string) => setTitle(title), [title])
+  /** 내용 변경 이벤트 핸들러 */
+  const onChangeContent = useCallback((content: string) => setContent(content), [content])
+  /** 공지사항 저장 클릭 이벤트 핸들러 */
+  const onSave = async () => {
+    try {
+      const { data } = await editNotice({
+        variables: {
+          editNoticeInput: {
+            _id: boardId,
+            ...(title !== '' && { title }),
+            ...(content !== '' && { content }),
+          },
+        },
+      })
+
+      if (!data?.editNotice.ok) {
+        const message = locale === 'ko' ? data?.editNotice.error?.ko : data?.editNotice.error?.en
+
+        toast.error(message, { theme: localStorage.theme || 'light' })
+        throw new Error(message)
+      } else {
+        toast.success(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Modify has been completed', {
+          theme: localStorage.theme || 'light',
+        })
+
+        setIsEdit(!isEdit)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  /** 공지사항 수정 클릭 이벤트 핸들러 */
+  const onEdit = () => setIsEdit(!isEdit)
+  /** 공지사항 삭제 클릭 이벤트 핸들러 */
+  const onDelete = async () => {
+    try {
+      const { data } = await deleteNotice({
+        variables: {
+          deleteBoardInput: {
+            boardId,
+          },
+        },
+      })
+
+      if (!data?.deleteBoard.ok) {
+        const message = locale === 'ko' ? data?.deleteBoard.error?.ko : data?.deleteBoard.error?.en
+
+        toast.error(message, { theme: localStorage.theme || 'light' })
+        throw new Error(message)
+      } else {
+        toast.success(locale === 'ko' ? '삭제가 완료 되었습니다.' : 'Delete has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 1000,
+          onClose: () => push('/notice', asPath, { locale }),
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   useEffect(() => {
     if (boardId) {
       refreshBoard()
     }
-  }, [query])
+  }, [query, isEdit])
+  useEffect(() => {
+    if (boardData) {
+      if (boardData.findBoardById.board) {
+        if (boardData.findBoardById.board.boardStatus === BoardStatus.Delete) {
+          toast(locale === 'ko' ? '삭제된 게시물 입니다.' : 'Deleted posts.', {
+            theme: localStorage.theme || 'light',
+            autoClose: 1000,
+            onClose: () => push('/notice', '/notice', { locale }),
+          })
+        }
+        setTitle(boardData.findBoardById.board.title)
+        setContent(boardData.findBoardById.board.content)
+      }
+    }
+  }, [boardData])
   return (
     <Layout {...props}>
       <MainWrapper>
@@ -63,17 +164,20 @@ const NoticeDetail: NextPage<Props> = (props) => {
                 <Skeleton active paragraph={{ rows: 10 }} />
               ) : (
                 <>
-                  <ViewContainer>
-                    <TitleStyled>{boardData?.findBoardById.board?.title}</TitleStyled>
-                    <ContentStyled>
-                      {Parser(boardData?.findBoardById.board?.content as string)}
-                    </ContentStyled>
-                  </ViewContainer>
                   <EditContainer>
-                    {isEdit && (
+                    {isEdit ? (
                       <>
-                        <h2>Hello Edit container</h2>
-                        <h3>Description!!</h3>
+                        <WriteEditor
+                          title={title}
+                          content={content}
+                          onChangeTitle={onChangeTitle}
+                          onChangeContent={onChangeContent}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <TitleStyled>{title}</TitleStyled>
+                        <ContentStyled>{Parser(content)}</ContentStyled>
                       </>
                     )}
                   </EditContainer>
@@ -88,17 +192,27 @@ const NoticeDetail: NextPage<Props> = (props) => {
                       <Skeleton.Button active />
                       <Skeleton.Button active />
                     </>
+                  ) : isEdit ? (
+                    <>
+                      <Button
+                        className="default-btn"
+                        onClick={onSave}
+                        loading={editLoading}
+                        disabled={editLoading}>
+                        {locale === 'ko' ? '저장' : 'Save'}
+                      </Button>
+                    </>
                   ) : (
                     <>
-                      <Button className="default-btn" onClick={() => setIsEdit(true)}>
+                      <Button className="default-btn" onClick={onEdit} loading={deleteLoading}>
                         {locale === 'ko' ? '수정' : 'Edit'}
                       </Button>
-                      <Button className="default-btn" onClick={() => console.log('삭제1')}>
+                      <Button className="default-btn" onClick={onDelete} loading={deleteLoading}>
                         {locale === 'ko' ? '삭제' : 'Delete'}
                       </Button>
                     </>
                   ),
-                [isEdit, boardLoading]
+                [isEdit, boardLoading, title, content]
               )}
             </ButtonGroup>
           </ManagementWrapper>
@@ -108,30 +222,26 @@ const NoticeDetail: NextPage<Props> = (props) => {
   )
 }
 
-const Wrapper = styled.div<{ isEdit: boolean }>`
-  display: grid;
-  grid-template-columns: ${({ isEdit }) => (isEdit ? `1fr 1fr` : `1fr`)};
-  transition: 0.5s ease-in-out;
+type CommonStyleProps = {
+  isEdit: boolean
+}
+
+const Wrapper = styled.div<CommonStyleProps>`
   position: relative;
 
   padding: ${({ isEdit }) => (isEdit ? `0` : `1rem 3rem`)};
+  transition: 0.5s ease-in-out;
 
   ${md} {
     padding: 0;
   }
 `
 
-const ButtonGroup = styled.div<{ isEdit: boolean }>`
+const ButtonGroup = styled.div<CommonStyleProps>`
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
   padding: ${({ isEdit }) => (isEdit ? `0` : `1.5rem 3rem`)};
-`
-
-const ViewContainer = styled.div`
-  min-width: 0;
-  margin: 0;
-  position: relative;
 `
 
 const EditContainer = styled.div`

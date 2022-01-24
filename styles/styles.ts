@@ -166,6 +166,14 @@ export const GlobalStyles = createGlobalStyle`
         background: ${({ theme }) => `${theme.body}`};
         color: ${({ theme }) => theme.text_hover};
       }
+
+      &[disabled] {
+        background-color: ${({ theme }) => `${theme.disable} !important`};
+
+        &:hover, &:focus, &:active {
+          background-color: ${({ theme }) => `${theme.disable} !important`};
+        }
+      }
     }
     .ant-popover {
       z-index: 999;
@@ -333,6 +341,23 @@ export const GlobalStyles = createGlobalStyle`
             background-color: ${({ theme }) => theme.card};
           }
         }
+      }
+    }
+
+    .ant-select-dropdown {
+      color: ${({ theme }) => theme.text};
+      background-color: ${({ theme }) => theme.body};
+      .ant-select-item {
+        color: ${({ theme }) => theme.text};
+      }
+      .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+        color: ${({ theme }) => theme.text};
+        background-color: ${({ theme }) => theme.card};
+      }
+      .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+        transition: .3s ease;
+        color: ${({ theme }) => `${theme.text}${opacityHex._40}`};
+        background-color: ${({ theme }) => `${theme.disable}`};
       }
     }
 
@@ -528,12 +553,11 @@ export const Form = styled.form`
         align-items: center;
       }
     }
-  }
-
-  .ant-input-group-addon {
-    min-width: 7.5rem;
-    color: ${({ theme }) => theme.text};
-    background-color: ${({ theme }) => theme.body};
+    .ant-input-group-addon {
+      min-width: 7.5rem;
+      color: ${({ theme }) => theme.text};
+      background-color: ${({ theme }) => theme.body};
+    }
   }
 `
 

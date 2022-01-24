@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -21,12 +21,7 @@ type Props = styleMode
 /** News 작성 폼 랜딩페이지 */
 const Create: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale, push } = useRouter()
-  const {
-    // getValues,
-    handleSubmit,
-    // formState: { errors, isValid },
-    // control,
-  } = useForm<NoticeForm>({ mode: 'onChange' })
+  const { handleSubmit } = useForm<NoticeForm>({ mode: 'onChange' })
   const [title, setTitle] = useState<string>('')
   const [content, setContent] = useState<string>('')
 

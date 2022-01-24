@@ -36,7 +36,7 @@ const Quill = dynamic(
       return <RQ ref={forwardedRef} {...props} />
     }
   },
-  { ssr: false, loading: () => <Skeleton active title={false} paragraph={{ rows: 10 }} /> }
+  { ssr: false, loading: () => <Skeleton active title={false} paragraph={{ rows: 15 }} /> }
 )
 
 interface WriteEditorProps {
@@ -163,13 +163,20 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
               modules={modules}
               placeholder="내용을 입력해주세요..."
               onChange={handleContentChange}
+              value={content || ''}
             />
           </QuillWrapper>
         )}
       </EditorContainer>
       <PreviewContainer className="preview-container">
-        <TitleStyled>{title}</TitleStyled>
-        <ContentStyled>{Parser(content)}</ContentStyled>
+        {loading ? (
+          <Skeleton active paragraph={{ rows: 20 }} />
+        ) : (
+          <>
+            <TitleStyled>{title}</TitleStyled>
+            <ContentStyled>{Parser(content)}</ContentStyled>
+          </>
+        )}
       </PreviewContainer>
     </Wrapper>
   )

@@ -223,8 +223,10 @@ export const FIND_ADVERTISEMENT_BY_ID_QUERY = gql`
         _id
         advertiseStatus
         displayType
+        displayDeviceType
         title
         content
+        mainImageName
         linkType
         linkUrl
         startDate
@@ -248,6 +250,7 @@ export const FIND_BOARD_BY_ID_QUERY = gql`
       board {
         title
         content
+        boardStatus
       }
     }
   }
