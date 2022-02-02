@@ -98,7 +98,7 @@ const Inquiry: NextPage<Props> = (props) => {
     try {
       await inquiries({
         variables: {
-          faqsInput: { page },
+          inquiriesInput: { page },
         },
       })
 
@@ -116,7 +116,7 @@ const Inquiry: NextPage<Props> = (props) => {
             inquiriesInput: {
               page,
               questionType: key !== 'All' ? (key as Maybe<QuestionType>) : undefined,
-              boardStatus: boardStatus !== 'All' ? boardStatus : undefined,
+              boardStatus: boardStatus !== 'All' ? (boardStatus as Maybe<BoardStatus>) : undefined,
             },
           },
         })
