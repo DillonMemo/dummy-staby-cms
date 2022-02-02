@@ -317,7 +317,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="#">
+                      <Link href="/faq">
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? 'FAQ' : 'FAQ'}</span>
@@ -325,7 +325,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="#">
+                      <Link href="/inquiry">
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '문의' : 'Inquiry'}</span>

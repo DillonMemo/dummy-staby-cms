@@ -1,8 +1,8 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { useEffect } from 'react'
-import { Button, Skeleton, Space, Table } from 'antd'
+import { useEffect, useState } from 'react'
+import { Button, Pagination, Skeleton, Space, Table } from 'antd'
 import { ColumnsType } from 'antd/lib/table'
 
 /** components */
@@ -18,6 +18,11 @@ import { EVENTS_MUTATION } from '../../graphql/mutations'
 import moment from 'moment'
 
 type Props = styleMode
+
+/** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
+interface Options {
+  page: number
+}
 
 export interface EventForm {
   title: string
@@ -35,7 +40,7 @@ const Event: NextPage<Props> = ({ toggleStyle, theme }) => {
       key: 'title',
     },
     {
-      title: locale === 'ko' ? '등록일' : 'creation date',
+      title: locale === 'ko' ? '등록일' : 'createDate',
       dataIndex: 'createDate',
       key: 'createDate',
       width: '30%',
@@ -43,10 +48,32 @@ const Event: NextPage<Props> = ({ toggleStyle, theme }) => {
     },
   ]
 
+  const [{ page }, setFilterOptions] = useState<Options>({
+    page: 1,
+  })
   const [events, { data: eventsData, loading: eventsLoading }] = useMutation<
     EventsMutation,
     EventsMutationVariables
   >(EVENTS_MUTATION)
+
+  /**
+   * pagination 클릭 이벤트 핸들러 입니다.
+   * @param {Number} page 이동할 페이지 번호
+   * @param {Number} _pageSize 페이지당 리스트 개수 `default: 20`
+   */
+  const onPageChange = async (page: number, _pageSize?: number) => {
+    try {
+      await events({
+        variables: {
+          eventsInput: { page },
+        },
+      })
+
+      setFilterOptions((prev) => ({ ...prev, page }))
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   useEffect(() => {
     const fetch = async () => {
@@ -123,6 +150,15 @@ const Event: NextPage<Props> = ({ toggleStyle, theme }) => {
                         pageSize: 20,
                         hideOnSinglePage: true,
                       }}
+                    />
+                  </div>
+                  <div className="pagination-content">
+                    <Pagination
+                      pageSize={20}
+                      current={page}
+                      total={eventsData?.events.totalResults || undefined}
+                      onChange={onPageChange}
+                      responsive
                     />
                   </div>
                 </>
