@@ -86,13 +86,14 @@ export type Board = {
   content: Scalars['String'];
   createDate: Scalars['DateTime'];
   createMember: AuthMember;
+  email?: Maybe<Scalars['String']>;
   faqType?: Maybe<FaqType>;
   memberId: Scalars['ID'];
   questionType?: Maybe<QuestionType>;
   title: Scalars['String'];
   updateDate: Scalars['DateTime'];
   updateMember: AuthMember;
-  uploadImageInfo?: Maybe<UploadImageInfo>;
+  uploadImageInfo?: Maybe<Array<UploadImageInfo>>;
 };
 
 export enum BoardCategoryType {
@@ -114,8 +115,10 @@ export type BoardOutput = {
 };
 
 export enum BoardStatus {
+  Completed = 'COMPLETED',
   Delete = 'DELETE',
-  Display = 'DISPLAY'
+  Display = 'DISPLAY',
+  Wait = 'WAIT'
 }
 
 export type ChangeAdvertisementStatusInput = {
@@ -147,6 +150,17 @@ export type CreateAdvertisementOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type CreateAnswerInput = {
+  _id?: Maybe<Scalars['ID']>;
+  answerInfo?: Maybe<AnswerInfoInputType>;
+};
+
+export type CreateAnswerOutput = {
+  __typename?: 'CreateAnswerOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export type CreateEventInput = {
   content?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
@@ -154,6 +168,18 @@ export type CreateEventInput = {
 
 export type CreateEventOutput = {
   __typename?: 'CreateEventOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type CreateFaqInput = {
+  content?: Maybe<Scalars['String']>;
+  faqType?: Maybe<FaqType>;
+  title?: Maybe<Scalars['String']>;
+};
+
+export type CreateFaqOutput = {
+  __typename?: 'CreateFaqOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
@@ -303,6 +329,19 @@ export type EditEventOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type EditFaqInput = {
+  _id?: Maybe<Scalars['ID']>;
+  content?: Maybe<Scalars['String']>;
+  faqType?: Maybe<FaqType>;
+  title?: Maybe<Scalars['String']>;
+};
+
+export type EditFaqOutput = {
+  __typename?: 'EditFaqOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export type EditLiveInput = {
   _id: Scalars['ID'];
   content?: Maybe<Scalars['String']>;
@@ -392,6 +431,21 @@ export enum FaqType {
   Payment = 'PAYMENT'
 }
 
+export type FaqsInput = {
+  faqType?: Maybe<FaqType>;
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+};
+
+export type FaqsOutput = {
+  __typename?: 'FaqsOutput';
+  error?: Maybe<LangErrorMessage>;
+  faqs?: Maybe<Array<Board>>;
+  ok: Scalars['Boolean'];
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
+};
+
 export type FindAdvertisementByIdInput = {
   _id: Scalars['ID'];
 };
@@ -434,6 +488,22 @@ export type FindVodByTypesOutput = {
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
   vods: Array<Vod>;
+};
+
+export type InquiriesInput = {
+  boardStatus?: Maybe<BoardStatus>;
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+  questionType?: Maybe<QuestionType>;
+};
+
+export type InquiriesOutput = {
+  __typename?: 'InquiriesOutput';
+  error?: Maybe<LangErrorMessage>;
+  inquiries?: Maybe<Array<Board>>;
+  ok: Scalars['Boolean'];
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
 };
 
 export type LangErrorMessage = {
@@ -669,7 +739,9 @@ export type Mutation = {
   changeAdvertisementStatus: ChangeAdvertisementStatusOutput;
   createAccount: CreateMemberOutput;
   createAdvertisement: CreateAdvertisementOutput;
+  createAnswer: CreateAnswerOutput;
   createEvent: CreateEventOutput;
+  createFaq: CreateFaqOutput;
   createLive: CreateLiveOutput;
   createMainBannerLiveContents: CreateMainBannerLiveOutput;
   createNotice: CreateNoticeOutput;
@@ -680,11 +752,14 @@ export type Mutation = {
   editAccount: EditMemberOutput;
   editAdvertisement: EditAdvertisementOutput;
   editEvent: EditEventOutput;
+  editFaq: EditFaqOutput;
   editLive: EditLiveOutput;
   editMemberById: EditMemberOutput;
   editNotice: EditNoticeOutput;
   editVod: EditVodOutput;
   events: EventsOutput;
+  faqs: FaqsOutput;
+  inquiries: InquiriesOutput;
   lives: LivesOutput;
   login: LoginOutput;
   logout: LogoutOutput;
@@ -714,8 +789,18 @@ export type MutationCreateAdvertisementArgs = {
 };
 
 
+export type MutationCreateAnswerArgs = {
+  input: CreateAnswerInput;
+};
+
+
 export type MutationCreateEventArgs = {
   input: CreateEventInput;
+};
+
+
+export type MutationCreateFaqArgs = {
+  input: CreateFaqInput;
 };
 
 
@@ -769,6 +854,11 @@ export type MutationEditEventArgs = {
 };
 
 
+export type MutationEditFaqArgs = {
+  input: EditFaqInput;
+};
+
+
 export type MutationEditLiveArgs = {
   input: EditLiveInput;
 };
@@ -791,6 +881,16 @@ export type MutationEditVodArgs = {
 
 export type MutationEventsArgs = {
   input: EventsInput;
+};
+
+
+export type MutationFaqsArgs = {
+  input: FaqsInput;
+};
+
+
+export type MutationInquiriesArgs = {
+  input: InquiriesInput;
 };
 
 
@@ -914,11 +1014,6 @@ export enum TranscodeStatus {
 
 export type UploadImageInfo = {
   __typename?: 'UploadImageInfo';
-  displayOrder: Scalars['Float'];
-  uploadImageName: Scalars['String'];
-};
-
-export type UploadImageInfoInputType = {
   displayOrder: Scalars['Float'];
   uploadImageName: Scalars['String'];
 };
@@ -1116,7 +1211,7 @@ export type AdvertisementsMutationVariables = Exact<{
 }>;
 
 
-export type AdvertisementsMutation = { __typename?: 'Mutation', advertisements: { __typename?: 'AdvertisementsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, advertisements?: Array<{ __typename?: 'Advertisement', _id: string, advertiseStatus: AdvertiseStatus, displayType: DisplayType, title: string, content?: string | null | undefined, linkType: LinkType, linkUrl: string, startDate: any, endDate: any }> | null | undefined } };
+export type AdvertisementsMutation = { __typename?: 'Mutation', advertisements: { __typename?: 'AdvertisementsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, advertisements?: Array<{ __typename?: 'Advertisement', _id: string, advertiseStatus: AdvertiseStatus, displayType: DisplayType, title: string, content?: string | null | undefined, linkType: LinkType, linkUrl: string, startDate: any, endDate: any, createDate: any }> | null | undefined } };
 
 export type EditAdvertisementMutationVariables = Exact<{
   editAdvertisementInput: EditAdvertisementInput;
@@ -1180,6 +1275,41 @@ export type EditEventMutationVariables = Exact<{
 
 
 export type EditEventMutation = { __typename?: 'Mutation', editEvent: { __typename?: 'EditEventOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type CreateFaqMutationVariables = Exact<{
+  createFaqInput: CreateFaqInput;
+}>;
+
+
+export type CreateFaqMutation = { __typename?: 'Mutation', createFaq: { __typename?: 'CreateFaqOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type FaqsMutationVariables = Exact<{
+  faqsInput: FaqsInput;
+}>;
+
+
+export type FaqsMutation = { __typename?: 'Mutation', faqs: { __typename?: 'FaqsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, faqs?: Array<{ __typename?: 'Board', _id: string, title: string, content: string, boardCategoryType: BoardCategoryType, faqType?: FaqType | null | undefined, createDate: any }> | null | undefined } };
+
+export type EditFaqMutationVariables = Exact<{
+  editFaqInput: EditFaqInput;
+}>;
+
+
+export type EditFaqMutation = { __typename?: 'Mutation', editFaq: { __typename?: 'EditFaqOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type CreateAnswerMutationVariables = Exact<{
+  createAnswerInput: CreateAnswerInput;
+}>;
+
+
+export type CreateAnswerMutation = { __typename?: 'Mutation', createAnswer: { __typename?: 'CreateAnswerOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type InquiriesMutationVariables = Exact<{
+  inquiriesInput: InquiriesInput;
+}>;
+
+
+export type InquiriesMutation = { __typename?: 'Mutation', inquiries: { __typename?: 'InquiriesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, inquiries?: Array<{ __typename?: 'Board', _id: string, email?: string | null | undefined, title: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, createDate: any }> | null | undefined } };
 
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1245,7 +1375,7 @@ export type FindBoardByIdQueryVariables = Exact<{
 }>;
 
 
-export type FindBoardByIdQuery = { __typename?: 'Query', findBoardById: { __typename?: 'BoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, board?: { __typename?: 'Board', title: string, content: string, boardStatus: BoardStatus } | null | undefined } };
+export type FindBoardByIdQuery = { __typename?: 'Query', findBoardById: { __typename?: 'BoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, board?: { __typename?: 'Board', email?: string | null | undefined, title: string, content: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, faqType?: FaqType | null | undefined, createDate: any, uploadImageInfo?: Array<{ __typename?: 'UploadImageInfo', uploadImageName: string, displayOrder: number }> | null | undefined, answerInfo?: { __typename?: 'AnswerInfo', answer: string, createDate: any } | null | undefined } | null | undefined } };
 
 
 export const LoginDocument = gql`
@@ -1910,6 +2040,7 @@ export const AdvertisementsDocument = gql`
       linkUrl
       startDate
       endDate
+      createDate
     }
   }
 }
@@ -2291,6 +2422,211 @@ export function useEditEventMutation(baseOptions?: Apollo.MutationHookOptions<Ed
 export type EditEventMutationHookResult = ReturnType<typeof useEditEventMutation>;
 export type EditEventMutationResult = Apollo.MutationResult<EditEventMutation>;
 export type EditEventMutationOptions = Apollo.BaseMutationOptions<EditEventMutation, EditEventMutationVariables>;
+export const CreateFaqDocument = gql`
+    mutation CreateFaq($createFaqInput: CreateFaqInput!) {
+  createFaq(input: $createFaqInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type CreateFaqMutationFn = Apollo.MutationFunction<CreateFaqMutation, CreateFaqMutationVariables>;
+
+/**
+ * __useCreateFaqMutation__
+ *
+ * To run a mutation, you first call `useCreateFaqMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateFaqMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createFaqMutation, { data, loading, error }] = useCreateFaqMutation({
+ *   variables: {
+ *      createFaqInput: // value for 'createFaqInput'
+ *   },
+ * });
+ */
+export function useCreateFaqMutation(baseOptions?: Apollo.MutationHookOptions<CreateFaqMutation, CreateFaqMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateFaqMutation, CreateFaqMutationVariables>(CreateFaqDocument, options);
+      }
+export type CreateFaqMutationHookResult = ReturnType<typeof useCreateFaqMutation>;
+export type CreateFaqMutationResult = Apollo.MutationResult<CreateFaqMutation>;
+export type CreateFaqMutationOptions = Apollo.BaseMutationOptions<CreateFaqMutation, CreateFaqMutationVariables>;
+export const FaqsDocument = gql`
+    mutation Faqs($faqsInput: FaqsInput!) {
+  faqs(input: $faqsInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    totalPages
+    totalResults
+    faqs {
+      _id
+      title
+      content
+      boardCategoryType
+      faqType
+      createDate
+    }
+  }
+}
+    `;
+export type FaqsMutationFn = Apollo.MutationFunction<FaqsMutation, FaqsMutationVariables>;
+
+/**
+ * __useFaqsMutation__
+ *
+ * To run a mutation, you first call `useFaqsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFaqsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [faqsMutation, { data, loading, error }] = useFaqsMutation({
+ *   variables: {
+ *      faqsInput: // value for 'faqsInput'
+ *   },
+ * });
+ */
+export function useFaqsMutation(baseOptions?: Apollo.MutationHookOptions<FaqsMutation, FaqsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<FaqsMutation, FaqsMutationVariables>(FaqsDocument, options);
+      }
+export type FaqsMutationHookResult = ReturnType<typeof useFaqsMutation>;
+export type FaqsMutationResult = Apollo.MutationResult<FaqsMutation>;
+export type FaqsMutationOptions = Apollo.BaseMutationOptions<FaqsMutation, FaqsMutationVariables>;
+export const EditFaqDocument = gql`
+    mutation EditFaq($editFaqInput: EditFaqInput!) {
+  editFaq(input: $editFaqInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type EditFaqMutationFn = Apollo.MutationFunction<EditFaqMutation, EditFaqMutationVariables>;
+
+/**
+ * __useEditFaqMutation__
+ *
+ * To run a mutation, you first call `useEditFaqMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditFaqMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editFaqMutation, { data, loading, error }] = useEditFaqMutation({
+ *   variables: {
+ *      editFaqInput: // value for 'editFaqInput'
+ *   },
+ * });
+ */
+export function useEditFaqMutation(baseOptions?: Apollo.MutationHookOptions<EditFaqMutation, EditFaqMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditFaqMutation, EditFaqMutationVariables>(EditFaqDocument, options);
+      }
+export type EditFaqMutationHookResult = ReturnType<typeof useEditFaqMutation>;
+export type EditFaqMutationResult = Apollo.MutationResult<EditFaqMutation>;
+export type EditFaqMutationOptions = Apollo.BaseMutationOptions<EditFaqMutation, EditFaqMutationVariables>;
+export const CreateAnswerDocument = gql`
+    mutation CreateAnswer($createAnswerInput: CreateAnswerInput!) {
+  createAnswer(input: $createAnswerInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type CreateAnswerMutationFn = Apollo.MutationFunction<CreateAnswerMutation, CreateAnswerMutationVariables>;
+
+/**
+ * __useCreateAnswerMutation__
+ *
+ * To run a mutation, you first call `useCreateAnswerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAnswerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAnswerMutation, { data, loading, error }] = useCreateAnswerMutation({
+ *   variables: {
+ *      createAnswerInput: // value for 'createAnswerInput'
+ *   },
+ * });
+ */
+export function useCreateAnswerMutation(baseOptions?: Apollo.MutationHookOptions<CreateAnswerMutation, CreateAnswerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateAnswerMutation, CreateAnswerMutationVariables>(CreateAnswerDocument, options);
+      }
+export type CreateAnswerMutationHookResult = ReturnType<typeof useCreateAnswerMutation>;
+export type CreateAnswerMutationResult = Apollo.MutationResult<CreateAnswerMutation>;
+export type CreateAnswerMutationOptions = Apollo.BaseMutationOptions<CreateAnswerMutation, CreateAnswerMutationVariables>;
+export const InquiriesDocument = gql`
+    mutation Inquiries($inquiriesInput: InquiriesInput!) {
+  inquiries(input: $inquiriesInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    totalPages
+    totalResults
+    inquiries {
+      _id
+      email
+      title
+      questionType
+      boardStatus
+      createDate
+    }
+  }
+}
+    `;
+export type InquiriesMutationFn = Apollo.MutationFunction<InquiriesMutation, InquiriesMutationVariables>;
+
+/**
+ * __useInquiriesMutation__
+ *
+ * To run a mutation, you first call `useInquiriesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInquiriesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [inquiriesMutation, { data, loading, error }] = useInquiriesMutation({
+ *   variables: {
+ *      inquiriesInput: // value for 'inquiriesInput'
+ *   },
+ * });
+ */
+export function useInquiriesMutation(baseOptions?: Apollo.MutationHookOptions<InquiriesMutation, InquiriesMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<InquiriesMutation, InquiriesMutationVariables>(InquiriesDocument, options);
+      }
+export type InquiriesMutationHookResult = ReturnType<typeof useInquiriesMutation>;
+export type InquiriesMutationResult = Apollo.MutationResult<InquiriesMutation>;
+export type InquiriesMutationOptions = Apollo.BaseMutationOptions<InquiriesMutation, InquiriesMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {
@@ -2759,9 +3095,21 @@ export const FindBoardByIdDocument = gql`
       en
     }
     board {
+      email
       title
       content
+      questionType
       boardStatus
+      faqType
+      uploadImageInfo {
+        uploadImageName
+        displayOrder
+      }
+      answerInfo {
+        answer
+        createDate
+      }
+      createDate
     }
   }
 }

@@ -1,15 +1,16 @@
+import { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { CreateAccountMutation, CreateAccountMutationVariables, MemberType } from '../../generated'
-import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
 import { Button, Input, notification, Select } from 'antd'
-
+import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
+import { useMutation } from '@apollo/client'
+
+/** styles */
+import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
 
 /** components */
+import { CreateAccountMutation, CreateAccountMutationVariables, MemberType } from '../../generated'
 import Layout from '../../components/Layout'
-import { Controller, useForm } from 'react-hook-form'
-import { NextPage } from 'next'
-import { useMutation } from '@apollo/client'
 import { CREATE_ACCOUNT_MUTATION } from '../../graphql/mutations'
 
 type Props = styleMode

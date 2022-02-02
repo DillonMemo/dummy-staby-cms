@@ -483,7 +483,6 @@ export const MainWrapper = styled.main`
 export const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
 
   .form-item {
     color: ${({ theme }) => theme.text};
@@ -516,7 +515,8 @@ export const Form = styled.form`
       color: ${({ theme }) => theme.text};
     }
 
-    *::placeholder {
+    *::placeholder,
+    .ant-select-selection-placeholder {
       color: ${({ theme }) => `${theme.text}75`}!important;
     }
 
@@ -657,6 +657,17 @@ export const ManagementWrapper = styled.div`
   }
 
   .write-wrapper {
+    .form-item:not(:last-child) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      padding: 1.5rem;
+
+      ${md} {
+        grid-template-columns: 1fr;
+        padding: 0;
+      }
+    }
     .button-wrapper {
       padding: 1.5rem;
 

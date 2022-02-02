@@ -447,7 +447,6 @@ export const DELETE_BOARD_MUTATION = gql`
  * @example {input: {
  *  title: <String>
  *  content: <String>
- *  questionType: <Enum>
  * }}
  */
 export const CREATE_EVENT_MUTATION = gql`
@@ -506,6 +505,131 @@ export const EDIT_EVENT_MUTATION = gql`
       error {
         ko
         en
+      }
+    }
+  }
+`
+
+/**
+ * FAQ 게시판을 생성 합니다.
+ * @example {input: {
+ *  title: <String>
+ *  content: <String>
+ *  faqType: <Enum>
+ * }}
+ */
+export const CREATE_FAQ_MUTATION = gql`
+  mutation CreateFaq($createFaqInput: CreateFaqInput!) {
+    createFaq(input: $createFaqInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+/**
+ * FAQ 목록을 가져옵니다.
+ * @default page 1
+ * @default pageView 20
+ * @example {input: {
+ *  page: <Number>
+ *  pageView: <Number>
+ *  faqType: <Enum>
+ * }}
+ */
+export const FAQS_MUTATION = gql`
+  mutation Faqs($faqsInput: FaqsInput!) {
+    faqs(input: $faqsInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      faqs {
+        _id
+        title
+        content
+        boardCategoryType
+        faqType
+        createDate
+      }
+    }
+  }
+`
+
+/**
+ * FAQ를 수정합니다.
+ * @example {input: {
+ *  _id: <ObjectId>
+ *  title: <String>
+ *  content: <String>
+ *  faqType: <Enum>
+ * }}
+ */
+export const EDIT_FAQ_MUTATION = gql`
+  mutation EditFaq($editFaqInput: EditFaqInput!) {
+    editFaq(input: $editFaqInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/**
+ * 문의 게시판에서 답변을 생성 합니다.
+ * @example {input: {
+ *  answerInfo: {
+ *    answer: <String>
+ *    createDate: <Date>
+ *  }
+ * }}
+ */
+export const CREATE_ANSWER_MUTATION = gql`
+  mutation CreateAnswer($createAnswerInput: CreateAnswerInput!) {
+    createAnswer(input: $createAnswerInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/**
+ * 문의 목록을 가져옵니다.
+ * @default page 1
+ * @default pageView 20
+ * @example {input: {
+ *  page: <Number>
+ *  pageView: <Number>
+ *  questionType?: <Enum>
+ * }}
+ */
+export const INQUIRIES_MUTATION = gql`
+  mutation Inquiries($inquiriesInput: InquiriesInput!) {
+    inquiries(input: $inquiriesInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      inquiries {
+        _id
+        email
+        title
+        questionType
+        boardStatus
+        createDate
       }
     }
   }

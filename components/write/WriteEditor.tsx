@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import Parser from 'html-react-parser'
 import { find } from 'lodash'
 import { useQuery } from '@apollo/client'
+import { useRouter } from 'next/router'
 
 /** lib */
 import detectIOS from '../../lib/detectIOS'
@@ -44,13 +45,16 @@ interface WriteEditorProps {
   content: string
   onChangeTitle: (title: string) => void
   onChangeContent: (content: string) => void
+  isTitleVisible?: boolean
 }
 const WriteEditor: React.FC<WriteEditorProps> = ({
   title,
   content,
   onChangeTitle,
   onChangeContent,
+  isTitleVisible = true,
 }) => {
+  const { locale } = useRouter()
   const [hideUpper] = useState<boolean>(false)
   const isIOS = detectIOS()
   const quillRef = useRef<ReactQuill>()
@@ -118,13 +122,13 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
   /** 제목 변경 이벤트 핸들러 */
   const handleTitleChange = useCallback(
     ({ target }: React.ChangeEvent<HTMLTextAreaElement>) => {
+      onChangeTitle(target.value)
       target.onkeydown = (e) => {
         if (e.key === 'Tab') {
           e.preventDefault()
           quillRef.current?.focus()
         }
       }
-      onChangeTitle(target.value)
     },
     [title]
   )
@@ -151,8 +155,16 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
   return (
     <Wrapper>
       <EditorContainer>
-        <Title placeholder="제목을 입력하세요" value={title} onChange={handleTitleChange} />
-        <HorizontalBar />
+        {isTitleVisible && (
+          <>
+            <Title
+              placeholder={locale === 'ko' ? '제목을 입력하세요' : 'Enter the title'}
+              value={title}
+              onChange={handleTitleChange}
+            />
+            <HorizontalBar />
+          </>
+        )}
         <Toolbar shadow={hideUpper} ios={isIOS} />
         {!loading && (
           <QuillWrapper>
@@ -161,7 +173,7 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
               className="editor"
               theme="snow"
               modules={modules}
-              placeholder="내용을 입력해주세요..."
+              placeholder={locale === 'ko' ? '내용을 입력해주세요...' : 'Enter the content...'}
               onChange={handleContentChange}
               value={content || ''}
             />
@@ -271,12 +283,16 @@ export const TitleStyled = styled.div`
   font-size: 2rem;
   margin-bottom: 1.5rem;
 
+  word-break: break-word;
+  line-height: 1.25;
+
   ${md} {
     font-size: 1.5rem;
   }
 `
 
 export const ContentStyled = styled.div`
+  word-break: break-all;
   image,
   img {
     max-width: 100%;

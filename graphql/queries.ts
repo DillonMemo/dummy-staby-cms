@@ -248,9 +248,21 @@ export const FIND_BOARD_BY_ID_QUERY = gql`
         en
       }
       board {
+        email
         title
         content
+        questionType
         boardStatus
+        faqType
+        uploadImageInfo {
+          uploadImageName
+          displayOrder
+        }
+        answerInfo {
+          answer
+          createDate
+        }
+        createDate
       }
     }
   }

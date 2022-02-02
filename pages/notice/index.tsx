@@ -1,10 +1,10 @@
 import { useMutation } from '@apollo/client'
-import { Button, Skeleton, Space, Table } from 'antd'
+import { Button, Pagination, Skeleton, Space, Table } from 'antd'
 import { ColumnsType } from 'antd/lib/table'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import moment from 'moment'
 
 /** components */
@@ -18,6 +18,11 @@ import { NoticesMutation, NoticesMutationVariables } from '../../generated'
 import { NOTICES_MUTATION } from '../../graphql/mutations'
 
 type Props = styleMode
+
+/** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
+interface Options {
+  page: number
+}
 
 export interface NoticeForm {
   title: string
@@ -35,18 +40,39 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
       key: 'title',
     },
     {
-      title: locale === 'ko' ? '등록일' : 'creation date',
+      title: locale === 'ko' ? '등록일' : 'createDate',
       dataIndex: 'createDate',
       key: 'createDate',
       width: '30%',
       responsive: ['md'],
     },
   ]
-
+  const [{ page }, setFilterOptions] = useState<Options>({
+    page: 1,
+  })
   const [notices, { data: noticesData, loading: noticesLoading }] = useMutation<
     NoticesMutation,
     NoticesMutationVariables
   >(NOTICES_MUTATION)
+
+  /**
+   * pagination 클릭 이벤트 핸들러 입니다.
+   * @param {Number} page 이동할 페이지 번호
+   * @param {Number} _pageSize 페이지당 리스트 개수 `default: 20`
+   */
+  const onPageChange = async (page: number, _pageSize?: number) => {
+    try {
+      await notices({
+        variables: {
+          noticesInput: { page },
+        },
+      })
+
+      setFilterOptions((prev) => ({ ...prev, page }))
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   useEffect(() => {
     const fetch = async () => {
@@ -130,6 +156,15 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
                         pageSize: 20,
                         hideOnSinglePage: true,
                       }}
+                    />
+                  </div>
+                  <div className="pagination-content">
+                    <Pagination
+                      pageSize={20}
+                      current={page}
+                      total={noticesData?.notices.totalResults || undefined}
+                      onChange={onPageChange}
+                      responsive
                     />
                   </div>
                 </>

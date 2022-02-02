@@ -1,12 +1,12 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { useMutation, useQuery } from '@apollo/client'
+import { pick } from 'lodash'
 import { Button, Skeleton } from 'antd'
 import Parser from 'html-react-parser'
-import { toast } from 'react-toastify'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -16,28 +16,29 @@ import WriteEditor, { ContentStyled, TitleStyled } from '../../components/write/
 import { MainWrapper, ManagementWrapper, md, styleMode } from '../../styles/styles'
 
 /** graphql */
-import { FIND_BOARD_BY_ID_QUERY } from '../../graphql/queries'
 import {
   BoardStatus,
   DeleteBoardMutation,
   DeleteBoardMutationVariables,
-  EditNoticeMutation,
-  EditNoticeMutationVariables,
+  EditEventMutation,
+  EditEventMutationVariables,
   FindBoardByIdQuery,
   FindBoardByIdQueryVariables,
 } from '../../generated'
-import { DELETE_BOARD_MUTATION, EDIT_NOTICE_MUTATION } from '../../graphql/mutations'
+import { FIND_BOARD_BY_ID_QUERY } from '../../graphql/queries'
+import { useMutation, useQuery } from '@apollo/client'
+import { DELETE_BOARD_MUTATION, EDIT_EVENT_MUTATION } from '../../graphql/mutations'
 
 type Props = styleMode
 
-const NoticeDetail: NextPage<Props> = (props) => {
+const EventDetail: NextPage<Props> = (props) => {
   const { push, locale, query } = useRouter()
   const boardId = query.id ? query.id?.toString() : ''
   const [isEdit, setIsEdit] = useState<boolean>(false)
   const [title, setTitle] = useState<string>('')
   const [content, setContent] = useState<string>('')
 
-  /** 공지사항 정보를 가져오는 Query */
+  /** 이벤트 정보를 가져오는 Query */
   const {
     data: boardData,
     refetch: refreshBoard,
@@ -45,13 +46,13 @@ const NoticeDetail: NextPage<Props> = (props) => {
   } = useQuery<FindBoardByIdQuery, FindBoardByIdQueryVariables>(FIND_BOARD_BY_ID_QUERY, {
     variables: { boardInput: { boardId } },
   })
-  /** 공지사항 정보를 수정 하는 Mutation */
-  const [editNotice, { loading: editLoading }] = useMutation<
-    EditNoticeMutation,
-    EditNoticeMutationVariables
-  >(EDIT_NOTICE_MUTATION)
-  /** 공지사항 정보를 삭제 하는 Mutation */
-  const [deleteNotice, { loading: deleteLoading }] = useMutation<
+  /** 이벤트 정보를 수정 하는 Mutation */
+  const [editEvent, { loading: editLoading }] = useMutation<
+    EditEventMutation,
+    EditEventMutationVariables
+  >(EDIT_EVENT_MUTATION)
+  /** 이벤트 정보를 삭제 하는 Mutation */
+  const [deleteEvent, { loading: deleteLoading }] = useMutation<
     DeleteBoardMutation,
     DeleteBoardMutationVariables
   >(DELETE_BOARD_MUTATION)
@@ -60,12 +61,12 @@ const NoticeDetail: NextPage<Props> = (props) => {
   const onChangeTitle = useCallback((title: string) => setTitle(title), [title])
   /** 내용 변경 이벤트 핸들러 */
   const onChangeContent = useCallback((content: string) => setContent(content), [content])
-  /** 공지사항 저장 클릭 이벤트 핸들러 */
+  /** 이벤트 저장 클릭 이벤트 핸들러 */
   const onSave = async () => {
     try {
-      const { data } = await editNotice({
+      const { data } = await editEvent({
         variables: {
-          editNoticeInput: {
+          editEventInput: {
             _id: boardId,
             ...(title !== '' && { title }),
             ...(content !== '' && { content }),
@@ -73,8 +74,8 @@ const NoticeDetail: NextPage<Props> = (props) => {
         },
       })
 
-      if (!data?.editNotice.ok) {
-        const message = locale === 'ko' ? data?.editNotice.error?.ko : data?.editNotice.error?.en
+      if (!data?.editEvent.ok) {
+        const message = locale === 'ko' ? data?.editEvent.error?.ko : data?.editEvent.error?.en
 
         toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
@@ -89,12 +90,12 @@ const NoticeDetail: NextPage<Props> = (props) => {
       console.error(error)
     }
   }
-  /** 공지사항 수정 클릭 이벤트 핸들러 */
+  /** 이벤트 수정 클릭 이벤트 핸들러 */
   const onEdit = () => setIsEdit(!isEdit)
-  /** 공지사항 삭제 클릭 이벤트 핸들러 */
+  /** 이벤트 삭제 클릭 이벤트 핸들러 */
   const onDelete = async () => {
     try {
-      const { data } = await deleteNotice({
+      const { data } = await deleteEvent({
         variables: {
           deleteBoardInput: {
             boardId,
@@ -108,7 +109,7 @@ const NoticeDetail: NextPage<Props> = (props) => {
         toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
       } else {
-        push('/notice', '/notice', { locale })
+        push('/event', '/event', { locale })
         toast.success(locale === 'ko' ? '삭제가 완료 되었습니다.' : 'Delete has been completed', {
           theme: localStorage.theme || 'light',
           autoClose: 1000,
@@ -131,7 +132,7 @@ const NoticeDetail: NextPage<Props> = (props) => {
           toast(locale === 'ko' ? '삭제된 게시물 입니다.' : 'Deleted posts.', {
             theme: localStorage.theme || 'light',
             autoClose: 1000,
-            onClose: () => push('/notice', '/notice', { locale }),
+            onClose: () => push('/event', '/event', { locale }),
           })
         }
         setTitle(boardData.findBoardById.board.title)
@@ -139,11 +140,12 @@ const NoticeDetail: NextPage<Props> = (props) => {
       }
     }
   }, [boardData])
+
   return (
-    <Layout {...props}>
+    <Layout {...pick(props, ['toggleStyle', 'theme'])}>
       <MainWrapper>
         <div className="main-header">
-          <h2>{locale === 'ko' ? '공지사항' : 'Notice'}</h2>
+          <h2>{locale === 'ko' ? '이벤트' : 'Event'}</h2>
           <ol>
             <li>
               <Link href="/">
@@ -151,7 +153,7 @@ const NoticeDetail: NextPage<Props> = (props) => {
               </Link>
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
-            <li>{locale === 'ko' ? '공지사항' : 'Notice'}</li>
+            <li>{locale === 'ko' ? '이벤트' : 'Event'}</li>
           </ol>
         </div>
         <div className="main-content">
@@ -247,4 +249,4 @@ const EditContainer = styled.div`
   position: relative;
 `
 
-export default NoticeDetail
+export default EventDetail

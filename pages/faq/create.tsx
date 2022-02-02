@@ -1,36 +1,42 @@
+import { pick } from 'lodash'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useCallback, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Button } from 'antd'
+import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
+import { Button, Select } from 'antd'
 
 /** components */
-import { NoticeForm } from '.'
+import { FaqForm } from '.'
 import Layout from '../../components/Layout'
 
 /** styles */
 import { Form, MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
-import WriteEditor from '../../components/write/WriteEditor'
 
 /** graphql */
+import { CreateFaqMutation, CreateFaqMutationVariables, FaqType } from '../../generated'
 import { useMutation } from '@apollo/client'
-import { CreateNoticeMutation, CreateNoticeMutationVariables } from '../../generated'
-import { CREATE_NOTICE_MUTATION } from '../../graphql/mutations'
+import { CREATE_FAQ_MUTATION } from '../../graphql/mutations'
+import WriteEditor from '../../components/write/WriteEditor'
 
 type Props = styleMode
 
-/** News 작성 폼 랜딩페이지 */
-const Create: NextPage<Props> = ({ toggleStyle, theme }) => {
+/** FAQ 작성 폼 랜딩페이지 */
+const Create: NextPage<Props> = (props) => {
   const { locale, push } = useRouter()
-  const { handleSubmit } = useForm<NoticeForm>({ mode: 'onChange' })
+  const {
+    handleSubmit,
+    getValues,
+    control,
+    formState: { errors },
+  } = useForm<FaqForm>({ mode: 'onChange' })
   const [title, setTitle] = useState<string>('')
   const [content, setContent] = useState<string>('')
 
-  const onCompleted = (data: CreateNoticeMutation) => {
+  const onCompleted = (data: CreateFaqMutation) => {
     const {
-      createNotice: { ok },
+      createFaq: { ok },
     } = data
 
     if (ok) {
@@ -38,27 +44,28 @@ const Create: NextPage<Props> = ({ toggleStyle, theme }) => {
         autoClose: 1000,
         theme: localStorage.theme || 'light',
       })
-      push('/notice', '/notice', { locale })
+
+      push('/faq', '/faq', { locale })
     }
   }
-  const [createNotice] = useMutation<CreateNoticeMutation, CreateNoticeMutationVariables>(
-    CREATE_NOTICE_MUTATION,
-    {
-      onCompleted,
-    }
+  const [createFaq] = useMutation<CreateFaqMutation, CreateFaqMutationVariables>(
+    CREATE_FAQ_MUTATION,
+    { onCompleted }
   )
-
   const onChangeTitle = useCallback((title: string) => setTitle(title), [title])
   const onChangeContent = useCallback((content: string) => setContent(content), [content])
   const onSubmit = async () => {
     try {
       if (!title) return
       if (!content) return
-      createNotice({
+
+      const { faqType } = getValues()
+      createFaq({
         variables: {
-          createNoticeInput: {
+          createFaqInput: {
             title,
             content,
+            faqType,
           },
         },
       })
@@ -68,10 +75,10 @@ const Create: NextPage<Props> = ({ toggleStyle, theme }) => {
   }
 
   return (
-    <Layout toggleStyle={toggleStyle} theme={theme}>
+    <Layout {...pick(props, ['toggleStyle', 'theme'])}>
       <MainWrapper className="card">
         <div className="main-header">
-          <h2>{locale === 'ko' ? '공지사항' : 'Notice'}</h2>
+          <h2>FAQ</h2>
           <ol>
             <li>
               <Link href="/">
@@ -79,19 +86,48 @@ const Create: NextPage<Props> = ({ toggleStyle, theme }) => {
               </Link>
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
-            <li>{locale === 'ko' ? '공지사항' : 'Notice'}</li>
+            <li>FAQ</li>
           </ol>
         </div>
         <div className="main-content">
           <ManagementWrapper className="card">
             <div className="write-wrapper">
               <Form onSubmit={handleSubmit(onSubmit)}>
+                <div className="form-item">
+                  <div className="form-group">
+                    <Controller
+                      name="faqType"
+                      control={control}
+                      rules={{
+                        required: locale === 'ko' ? '분류는 필수 선택입니다' : 'Group is required',
+                      }}
+                      render={({ field: { value, onChange } }) => (
+                        <Select
+                          value={value}
+                          onChange={onChange}
+                          placeholder={locale === 'ko' ? '분류를 선택하세요' : 'Choose the group'}>
+                          {Object.keys(FaqType).map((data, index) => (
+                            <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
+                              {data}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      )}
+                    />
+                    {errors.faqType?.message && (
+                      <div className="form-message">
+                        <span>{errors.faqType.message}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <WriteEditor
                   title={title}
                   content={content}
                   onChangeTitle={onChangeTitle}
                   onChangeContent={onChangeContent}
                 />
+
                 <div className="form-item">
                   <div className="button-group add-write">
                     <Button
