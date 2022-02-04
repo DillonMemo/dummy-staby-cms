@@ -226,7 +226,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       const nowDate = `${id.toString()}_main_${nowDateStr}.png`
 
       mainImgFileName = `${
-        process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+        process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
       }/going/live/${id.toString()}/main/${nowDate}`
 
       //MainThumbnail upload

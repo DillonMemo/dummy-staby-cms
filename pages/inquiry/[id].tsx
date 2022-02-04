@@ -193,7 +193,7 @@ const InquiryDetail: NextPage<Props> = (props) => {
                             [...boardData.findBoardById.board.uploadImageInfo]
                               .sort((a, b) => a.displayOrder - b.displayOrder)
                               .map((data, index) => {
-                                const mode = process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+                                const mode = process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
                                 const date = data.uploadImageName.split('_')
                                 return (
                                   <div key={index}>

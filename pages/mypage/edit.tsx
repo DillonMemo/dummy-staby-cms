@@ -75,7 +75,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
         saveFileName =
           process.env.NODE_ENV === 'development'
             ? `dev/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
-            : `dev/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
+            : `prod/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
 
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({
