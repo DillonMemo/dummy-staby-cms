@@ -195,7 +195,7 @@ const AdDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       //MainThumbnail upload
       if (mainImgFile && mainImgFile.originFileObj && mainImgFile.originFileObj instanceof File) {
         mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
         }/going/ad/${nowDateYYMMDD}/${id.toString()}_${nowDateStr}.png`
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({

@@ -79,7 +79,7 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
           ? `dev/going/editor/${DATE_FORMAT('YYYYMMDD')}/${myData?.my._id}_${DATE_FORMAT(
               'ALL'
             )}.jpg`
-          : `dev/going/editor/${DATE_FORMAT('YYYYMMDD')}/${myData?.my._id}_${DATE_FORMAT(
+          : `prod/going/editor/${DATE_FORMAT('YYYYMMDD')}/${myData?.my._id}_${DATE_FORMAT(
               'ALL'
             )}.jpg`
 

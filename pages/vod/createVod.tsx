@@ -164,7 +164,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       //MainThumbnail upload
       if (mainImgInfo.fileInfo instanceof File) {
         mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
         }/going/vod/${id.toString()}/vod/${id.toString()}_main_${nowDate}.jpg`
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({
@@ -190,11 +190,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         if (vodUrlInput && vodUrlInput?.files && vodUrlInput?.files[0] instanceof File) {
           //playingImgName
           introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
           }/going/vod/${id}/intro/${id}__intro_${i + 1}_${nowDate}.jpg`
 
           vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
           }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
 
           process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&

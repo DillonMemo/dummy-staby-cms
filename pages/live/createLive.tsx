@@ -156,7 +156,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       //cn
       if (mainImgInfo.fileInfo instanceof File) {
         mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
         }/going/live/${id.toString()}/main/${nowDate}`
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({
