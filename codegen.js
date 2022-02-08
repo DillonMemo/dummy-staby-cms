@@ -3,7 +3,7 @@ loadEnvConfig(process.cwd(), process.env.NODE_ENV !== 'production')
 
 module.exports = {
   overwrite: true,
-  schema: process.env.NEXT_PUBLIC_HTTP_LINK,
+  schema: process.env.NEXT_PUBLIC_SCHEMA_LINK,
   documents: 'graphql/*.ts',
 
   generates: {

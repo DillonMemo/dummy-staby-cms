@@ -3,10 +3,9 @@
   "version": "0.8.1",
   "private": true,
   "scripts": {
-    "codegen:dev": "rimraf generated && NODE_ENV=development graphql-codegen --config codegen.js",
-    "dev": "npm run codegen:dev && next dev",
-    "codegen": "rimraf generated && NODE_ENV=production graphql-codegen --config codegen.js",
-    "build": "npm run codegen && next build",
+    "codegen": "rimraf generated && graphql-codegen --config codegen.js",
+    "dev": "npm run codegen && next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
