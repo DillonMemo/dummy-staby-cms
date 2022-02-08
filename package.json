@@ -3,11 +3,11 @@
   "version": "0.8.1",
   "private": true,
   "scripts": {
+    "codegen": "rimraf generated && graphql-codegen --config codegen.js",
     "dev": "npm run codegen && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "codegen": "rimraf generated && graphql-codegen --config codegen.yml"
+    "lint": "next lint"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
@@ -17,6 +17,7 @@
     "aws-sdk": "^2.1023.0",
     "cross-env": "^7.0.3",
     "deepmerge": "^4.2.2",
+    "dotenv": "^16.0.0",
     "graphql": "^15.5.1",
     "html-react-parser": "^1.4.4",
     "lodash": "^4.17.21",
