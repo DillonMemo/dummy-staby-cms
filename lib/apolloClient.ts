@@ -34,7 +34,7 @@ export let authTokenVar: ReactiveVar<string> = makeVar('')
 const httpLink = createHttpLink({
   uri:
     process.env.NODE_ENV === 'production'
-      ? 'https://cms-api.staby.co.kr/graphql'
+      ? process.env.NEXT_PUBLIC_APOLLO_LINK
       : process.env.NEXT_PUBLIC_APOLLO_LINK,
   credentials: 'same-origin',
 })
