@@ -6,7 +6,7 @@
     "codegen:dev": "rimraf generated && cross-env NODE_ENV=development graphql-codegen --config codegen.js",
     "codegen": "rimraf generated && cross-env NODE_ENV=production graphql-codegen --config codegen.js",
     "dev": "npm run codegen:dev && next dev",
-    "build": "npm run codegen && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
