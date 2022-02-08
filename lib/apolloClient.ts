@@ -35,7 +35,7 @@ const httpLink = createHttpLink({
   uri:
     process.env.NODE_ENV === 'production'
       ? 'https://cms-api.staby.co.kr/graphql'
-      : 'http://cms-api-dev.staby.co.kr/graphql',
+      : process.env.NEXT_PUBLIC_HTTP_LINK,
   credentials: 'same-origin',
 })
 
