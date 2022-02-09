@@ -43,6 +43,13 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   const hamburgerRef = React.useRef<HTMLDivElement>(null)
   const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
     fetchPolicy: 'network-only',
+    onError: (error) => {
+      Modal.error({
+        title: error.message,
+        okText: locale === 'ko' ? '로그인' : 'Login',
+        onOk: () => push('/login', '/login', { locale }),
+      })
+    },
   })
   const [logout] = useMutation<LogoutMutation, LogoutMutationVariables>(LOGOUT_MUTATION)
   /** 텍스트 에디터 컴포넌트가 적용된 페이지는 서버사이드렌더링 이슈가 있어 다크모드스위치를 가려주어야 합니다. */
@@ -477,7 +484,9 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               </div>
             )}
             <div className="header-item profile">
-              <div className="info">
+              <div
+                className="info"
+                onClick={() => push('/mypage/edit', '/mypage/edit', { locale })}>
                 <span className="user-name">{data?.my.nickName}</span>
                 <span className="user-role">{data?.my.memberType}</span>
               </div>
