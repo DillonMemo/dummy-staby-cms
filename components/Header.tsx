@@ -17,6 +17,7 @@ import Icon, {
   UserOutlined,
 } from '@ant-design/icons'
 import moment from 'moment'
+import { toast } from 'react-toastify'
 
 /** components */
 import DarkModeToggle from './DarkModeToggle'
@@ -44,10 +45,10 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
     fetchPolicy: 'network-only',
     onError: (error) => {
-      Modal.error({
-        title: error.message,
-        okText: locale === 'ko' ? '로그인' : 'Login',
-        onOk: () => push('/login', '/login', { locale }),
+      toast.error(error.message, {
+        theme: localStorage.theme || 'light',
+        autoClose: 1000,
+        onClose: () => push('/login', '/login', { locale }),
       })
     },
   })
