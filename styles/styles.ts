@@ -637,7 +637,7 @@ export const ManagementWrapper = styled.div`
       display: inline-flex;
       flex-flow: row nowrap;
       justify-content: space-between;
-      align-items: end;
+      align-items: flex-end;
 
       .dropdown {
         display: inline-flex;
@@ -653,6 +653,15 @@ export const ManagementWrapper = styled.div`
     .pagination-content {
       display: inline-flex;
       justify-content: flex-end;
+    }
+
+    .responsive-cell {
+      ${md} {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
 

@@ -58,11 +58,17 @@ const Inquiry: NextPage<Props> = (props) => {
       title: locale === 'ko' ? '제목' : 'title',
       dataIndex: 'title',
       key: 'title',
+      render: (text, _, index) => (
+        <div className="responsive-cell" key={index}>
+          {text}
+        </div>
+      ),
     },
     {
       title: locale === 'ko' ? '문의자' : 'inquirer',
       dataIndex: 'email',
       key: 'email',
+      responsive: ['md'],
     },
     {
       title: locale === 'ko' ? '응답상태' : 'responsive status',
@@ -73,6 +79,7 @@ const Inquiry: NextPage<Props> = (props) => {
       title: locale === 'ko' ? '접수일' : 'received date',
       dataIndex: 'createDate',
       key: 'createDate',
+      responsive: ['md'],
     },
   ]
   const [{ page, questionType, boardStatus }, setFilterOptions] = useState<Options>({
