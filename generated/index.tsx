@@ -490,6 +490,22 @@ export type FindVodByTypesOutput = {
   vods: Array<Vod>;
 };
 
+export type GetGoingDashboardOutput = {
+  __typename?: 'GetGoingDashboardOutput';
+  dashboard?: Maybe<GoingDashboard>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type GoingDashboard = {
+  __typename?: 'GoingDashboard';
+  _id: Scalars['ID'];
+  createDate: Scalars['DateTime'];
+  loginCountByDate: Array<Scalars['Float']>;
+  totalMemberCount: Scalars['Float'];
+  updateDate: Scalars['DateTime'];
+};
+
 export type InquiriesInput = {
   boardStatus?: Maybe<BoardStatus>;
   page?: Maybe<Scalars['Int']>;
@@ -953,6 +969,7 @@ export type Query = {
   findMembersByType: MembersByTypeOutput;
   findVodById: FindVodByIdOutput;
   findVodByTypes: FindVodByTypesOutput;
+  getGoingDashboard: GetGoingDashboardOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
   my: Member;
 };
@@ -1376,6 +1393,11 @@ export type FindBoardByIdQueryVariables = Exact<{
 
 
 export type FindBoardByIdQuery = { __typename?: 'Query', findBoardById: { __typename?: 'BoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, board?: { __typename?: 'Board', email?: string | null | undefined, title: string, content: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, faqType?: FaqType | null | undefined, createDate: any, uploadImageInfo?: Array<{ __typename?: 'UploadImageInfo', uploadImageName: string, displayOrder: number }> | null | undefined, answerInfo?: { __typename?: 'AnswerInfo', answer: string, createDate: any } | null | undefined } | null | undefined } };
+
+export type GetGoingDashboardQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetGoingDashboardQuery = { __typename?: 'Query', getGoingDashboard: { __typename?: 'GetGoingDashboardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, dashboard?: { __typename?: 'GoingDashboard', totalMemberCount: number, loginCountByDate: Array<number> } | null | undefined } };
 
 
 export const LoginDocument = gql`
@@ -3142,3 +3164,45 @@ export function useFindBoardByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
 export type FindBoardByIdQueryHookResult = ReturnType<typeof useFindBoardByIdQuery>;
 export type FindBoardByIdLazyQueryHookResult = ReturnType<typeof useFindBoardByIdLazyQuery>;
 export type FindBoardByIdQueryResult = Apollo.QueryResult<FindBoardByIdQuery, FindBoardByIdQueryVariables>;
+export const GetGoingDashboardDocument = gql`
+    query GetGoingDashboard {
+  getGoingDashboard {
+    ok
+    error {
+      ko
+      en
+    }
+    dashboard {
+      totalMemberCount
+      loginCountByDate
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetGoingDashboardQuery__
+ *
+ * To run a query within a React component, call `useGetGoingDashboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGoingDashboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGoingDashboardQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetGoingDashboardQuery(baseOptions?: Apollo.QueryHookOptions<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>(GetGoingDashboardDocument, options);
+      }
+export function useGetGoingDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>(GetGoingDashboardDocument, options);
+        }
+export type GetGoingDashboardQueryHookResult = ReturnType<typeof useGetGoingDashboardQuery>;
+export type GetGoingDashboardLazyQueryHookResult = ReturnType<typeof useGetGoingDashboardLazyQuery>;
+export type GetGoingDashboardQueryResult = Apollo.QueryResult<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>;

@@ -7,8 +7,8 @@ const Shadow: React.FC = () => {
 const ShadowWrapper = styled.div`
   background: ${({ theme }) =>
     theme.mode === 'dark'
-      ? 'linear-gradient(180deg,rgba(40,48,70,.9) 44%,rgba(40,48,70,.43) 73%,rgba(40,48,70,0))'
-      : 'linear-gradient(180deg,hsla(0,0%,90.3%,.95) 44%,hsla(0,0%,90.3%,.46) 73%,hsla(0,0%,93%,0))'};
+      ? 'linear-gradient(180deg,rgba(40,48,70,.65) 44%,rgba(40,48,70,.43) 73%,rgba(40,48,70,0))'
+      : 'linear-gradient(180deg,hsla(0,0%,85.3%,.65) 44%,hsla(0,0%,85.3%,.46) 73%,hsla(0,0%,88%,0))'};
   padding-top: 2.2rem;
   display: block;
   width: 100%;

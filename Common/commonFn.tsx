@@ -91,3 +91,31 @@ export const shareCheck = (shareArray: Array<any>, locale?: string) => {
   }
   return true
 }
+
+// 통화 변환
+export const currencyConvert = (currency: number) => {
+  const billion = 1000000000
+  const million = 1000000
+  const thousand = 1000
+  const calcCurrency =
+    currency / billion > 1
+      ? currency / billion
+      : currency / million > 1
+      ? currency / million
+      : currency / thousand > 1
+      ? currency / thousand
+      : currency
+  const symbol =
+    currency / billion > 1
+      ? 'B'
+      : currency / million > 1
+      ? 'M'
+      : currency / thousand > 1
+      ? 'K'
+      : currency
+
+  return {
+    currency: calcCurrency,
+    symbol,
+  }
+}

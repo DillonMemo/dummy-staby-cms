@@ -301,6 +301,7 @@ export const Wrapper = styled.div<CommonStyleProps>`
         justify-content: center;
         img {
           object-fit: contain;
+          max-width: 100%;
           max-height: 15rem;
 
           ${md} {
