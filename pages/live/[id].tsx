@@ -142,8 +142,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           ...mainImgInfo,
           mainImg: liveData?.findLiveById.live?.mainImageName,
         })
-        setLiveInfoArr(infoResult)
-        setMemberShareInfo(result)
+        setLiveInfoArr(infoResult as any)
+        setMemberShareInfo(result as any)
         setIsInputDisabled(liveData?.findLiveById.live?.liveStatus !== 'HIDE' && true)
         setStatusRadio(
           liveData?.findLiveById.live?.liveStatus ? liveData?.findLiveById.live?.liveStatus : 'HIDE'
