@@ -12,7 +12,7 @@ const Odometer: React.ComponentType<any> = dynamic(import('react-odometerjs'), {
 import Layout from '../components/Layout'
 
 /** styles */
-import { MainWrapper, md, styleMode } from '../styles/styles'
+import { MainWrapper, md, styleMode, xl } from '../styles/styles'
 import { useQuery } from '@apollo/client'
 import { GetGoingDashboardQuery, GetGoingDashboardQueryVariables } from '../generated'
 import { GET_GOING_DASHBOARD } from '../graphql/queries'
@@ -257,11 +257,27 @@ const ContentWrapper = styled.div`
       font-size: 1.714rem;
       font-weight: 600;
       line-height: 1.2;
+
+      ${xl} {
+        font-size: 1.325rem;
+      }
+
+      ${md} {
+        font-size: 1.714rem;
+      }
     }
     h6 {
       font-size: 1rem;
       font-weight: 500;
       line-height: 1.2;
+
+      ${xl} {
+        font-size: 0.825rem;
+      }
+
+      ${md} {
+        font-size: 1rem;
+      }
     }
   }
 
@@ -311,6 +327,14 @@ const ContentWrapper = styled.div`
     .odometer-content {
       display: inline-flex;
       font-size: 2rem;
+
+      ${xl} {
+        font-size: 1.25rem;
+      }
+
+      ${md} {
+        font-size: 1.75rem;
+      }
     }
   }
 `

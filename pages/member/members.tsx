@@ -344,6 +344,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                       total={membersData?.members.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
+                      showSizeChanger={false}
                     />
                   </div>
                 </>

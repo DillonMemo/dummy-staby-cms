@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
-import { Badge, Modal, notification, Select, Skeleton, Space } from 'antd'
+import { Badge, notification, Select, Skeleton, Space } from 'antd'
 import Icon, {
   ArrowRightOutlined,
   EllipsisOutlined,
@@ -149,10 +149,10 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
         const localToken = authTokenVar() || localStorage.getItem(LOCALSTORAGE_TOKEN)
         if (data.my.refreshToken !== localToken) {
           localStorage.removeItem(LOCALSTORAGE_TOKEN)
-          Modal.info({
-            title: locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login',
-            okText: locale === 'ko' ? '로그인' : 'Login',
-            onOk: () => push('/login', '/login', { locale }),
+          toast.info(locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login', {
+            theme: localStorage.theme || 'light',
+            autoClose: 1000,
+            onClose: () => push('/login', '/login', { locale }),
           })
         }
       }

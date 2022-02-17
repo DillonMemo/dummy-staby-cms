@@ -159,6 +159,7 @@ const Event: NextPage<Props> = ({ toggleStyle, theme }) => {
                       total={eventsData?.events.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
+                      showSizeChanger={false}
                     />
                   </div>
                 </>

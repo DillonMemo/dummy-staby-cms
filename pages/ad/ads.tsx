@@ -276,6 +276,7 @@ const Ads: NextPage<Props> = ({ toggleStyle, theme }) => {
                     total={adsData?.advertisements.totalResults || undefined}
                     onChange={onPageChange}
                     responsive
+                    showSizeChanger={false}
                   />
                 </div>
               </>

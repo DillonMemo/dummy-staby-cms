@@ -254,6 +254,7 @@ export const GlobalStyles = createGlobalStyle`
       .ant-table-tbody {
         >tr {
           &.ant-table-row {
+            cursor: pointer;
             &:hover {
               > td {
                 background: ${({ theme }) => theme.body} !important;
