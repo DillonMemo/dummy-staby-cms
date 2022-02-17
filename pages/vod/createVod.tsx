@@ -107,6 +107,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     LIVES_MUTATION
   )
 
+  const requiredText =
+    locale === 'ko' ? '위 항목은 필수 항목입니다.' : 'The above items are mandatory.'
+
   const {
     getValues,
     handleSubmit,
@@ -144,6 +147,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const onSubmit = async () => {
     setUploading(true)
+
     try {
       const { title, paymentAmount, content, liveId } = getValues()
 
@@ -151,6 +155,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
       //memberShareData 유효성 확인, 100이 되야한다.
       if (!shareCheck(memberShareInfo, locale)) {
+        setUploading(false)
         return
       }
 
@@ -165,7 +170,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       if (mainImgInfo.fileInfo instanceof File) {
         mainImgFileName = `${
           process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/vod/${id.toString()}/vod/${id.toString()}_main_${nowDate}.jpg`
+        }/going/vod/${id.toString()}/main/${id.toString()}_main_${nowDate}.jpg`
         process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
           (await S3.upload({
             Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
@@ -190,11 +195,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         if (vodUrlInput && vodUrlInput?.files && vodUrlInput?.files[0] instanceof File) {
           //playingImgName
           introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${id}/intro/${id}__intro_${i + 1}_${nowDate}.jpg`
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.jpg`
 
           vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
           }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
 
           process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
@@ -213,7 +218,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               ACL: 'bucket-owner-read',
             }).promise())
 
-          introImageName = `${id}__intro_${i + 1}_${nowDate}.jpg`
+          introImageName = `${id}_intro_${i + 1}_${nowDate}.jpg`
 
           vodName = `${id}_${i + 1}_${nowDate}.mp4`
 
@@ -388,6 +393,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(error)
       }
     }
+
     fetch()
   }, [])
 
@@ -403,6 +409,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(error)
       }
     }
+
     fetch()
   }, [])
 
@@ -428,12 +435,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               <Form name="createLiveForm" onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Title</span>
+                    <span>{locale === 'ko' ? '제목' : 'Title'}</span>
                     <Controller
                       control={control}
                       name="title"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { value, onChange } }) => (
                         <Input
@@ -455,12 +462,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Price</span>
+                    <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                     <Controller
                       control={control}
                       name="paymentAmount"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { value, onChange } }) => (
                         <Input
@@ -483,7 +490,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Main Thumbnail</span>
+                    <span>Main {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                     <Controller
                       control={control}
                       name="mainThumbnail"
@@ -526,7 +533,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               <Button
                                 className="delectBtn"
                                 onClick={() => onDeleteBtn(index, setVodInfoArr, vodInfoArr)}>
-                                삭제
+                                {locale === 'ko' ? '삭제' : 'Delete'}
                               </Button>
                             )}
                           </div>
@@ -563,12 +570,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Content</span>
+                    <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                     <Controller
                       control={control}
                       name="content"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { value, onChange } }) => (
                         <TextArea
@@ -613,8 +620,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                    <span>Share</span>
+                    {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정.*/}
+                    <span>{locale === 'ko' ? '지분' : 'Share'}</span>
                     {memberShareInfo.map((data, index) => {
                       return (
                         <div key={index}>
@@ -626,7 +633,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                                 onClick={() =>
                                   onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
                                 }>
-                                삭제
+                                {locale === 'ko' ? '삭제' : 'Delete'}
                               </Button>
                             )}
                           </div>
@@ -635,7 +642,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               control={control}
                               name="share"
                               rules={{
-                                required: '위 항목은 필수 항목입니다.',
+                                required: requiredText,
                               }}
                               render={() => (
                                 <>

@@ -208,7 +208,8 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       try {
         await members({
           variables: {
-            membersInput: {},
+            //현재 상태가 acrive 상태인 멤버들만 보여준다.
+            membersInput: { memberStatus: MemberStatus['Active'] },
           },
         })
       } catch (error) {

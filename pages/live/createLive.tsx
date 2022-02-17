@@ -101,6 +101,9 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
     FindMembersByTypeQueryVariables
   >(FIND_MEMBERS_BY_TYPE_QUERY)
 
+  const requiredText =
+    locale === 'ko' ? '위 항목은 필수 항목입니다.' : 'The above items are mandatory.'
+
   const {
     getValues,
     handleSubmit,
@@ -334,12 +337,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
             <Form name="createLiveForm" onSubmit={handleSubmit(onSubmit)}>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Title</span>
+                  <span>{locale === 'ko' ? '제목' : 'Title'} </span>
                   <Controller
                     control={control}
                     name="title"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -360,12 +363,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>HostName</span>
+                  <span>{locale === 'ko' ? '호스트' : 'HostName'}</span>
                   <Controller
                     control={control}
                     name="hostName"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -387,12 +390,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Price</span>
+                  <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                   <Controller
                     control={control}
                     name="paymentAmount"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -415,12 +418,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Estimated start date</span>
+                  <span>{locale === 'ko' ? 'Live 시작 예정 시간' : 'Estimated start date'}</span>
                   <Controller
                     control={control}
                     name="livePreviewDate"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <DatePicker
@@ -441,12 +444,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Set the purchase time</span>
+                  <span>{locale === 'ko' ? '시작 후 구매가능 시간' : 'Set the purchase time'}</span>
                   <Controller
                     control={control}
                     name="delayedEntryTime"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <>
@@ -455,17 +458,18 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                           onChange={onChange}
                           placeholder="라이브 시작 시간 이후">
                           <Select.Option value={0} key={9999}>
-                            구매불가
+                            {locale === 'ko' ? '구매불가' : 'Unable to purchase'}
                           </Select.Option>
                           {delayedEntryTimeArr.map((data, index) => {
                             return (
                               <Select.Option value={data} key={index}>
-                                {data}분
+                                {data}
+                                {locale === 'ko' ? '분' : 'min'}
                               </Select.Option>
                             )
                           })}
                           <Select.Option value={999} key={9999}>
-                            라이브 종료까지
+                            {locale === 'ko' ? '라이브 종료까지' : 'Until the end of the live'}
                           </Select.Option>
                         </Select>
                       </>
@@ -480,7 +484,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Live Thumbnail</span>
+                  <span>Live {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                   <Controller
                     control={control}
                     name="liveThumbnail"
@@ -515,10 +519,10 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     </span>
                     <Radio.Group defaultValue={'Auto'} buttonStyle="solid">
                       <Radio.Button value="Auto" onChange={() => setIsAuto('Auto')}>
-                        자동생성
+                        {locale === 'ko' ? '자동생성' : 'Automatic generation'}
                       </Radio.Button>
                       <Radio.Button value="Manual" onChange={() => setIsAuto('Manual')}>
-                        수동생성
+                        {locale === 'ko' ? '수동생성' : 'Manual generation'}
                       </Radio.Button>
                     </Radio.Group>
                   </span>
@@ -531,7 +535,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                             <Button
                               className="delectBtn"
                               onClick={() => onDeleteBtn(index, setLiveInfoArr, liveInfoArr)}>
-                              삭제
+                              {locale === 'ko' ? '삭제' : 'Delete'}
                             </Button>
                           )}
                         </div>
@@ -554,7 +558,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Content</span>
+                  <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                   <Controller
                     control={control}
                     name="content"
@@ -573,7 +577,9 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               <div className="form-item">
                 <div className="form-group">
                   {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                  <span>Share (회원, 우선분배 지분, 직분배 지분)</span>
+                  <span>
+                    {locale === 'ko' ? '지분' : 'Share'} (회원, 우선분배 지분, 직분배 지분)
+                  </span>
                   {memberShareInfo.map((data, index) => {
                     return (
                       <div key={index}>
@@ -585,7 +591,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                               onClick={() =>
                                 onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
                               }>
-                              삭제
+                              {locale === 'ko' ? '삭제' : 'Delete'}
                             </Button>
                           )}
                         </div>

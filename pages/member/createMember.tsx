@@ -93,7 +93,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
             <Form onSubmit={handleSubmit(onSubmit)}>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Member Type</span>
+                  <span>{locale === 'ko' ? '멤버타입' : 'Member Type'}</span>
                   <Controller
                     control={control}
                     name="memberType"
@@ -111,7 +111,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Email</span>
+                  <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
                   <Controller
                     name="email"
                     control={control}
@@ -141,7 +141,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Password</span>
+                  <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
                   <Controller
                     control={control}
                     name="password"
@@ -169,7 +169,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Nickname</span>
+                  <span>{locale === 'ko' ? '닉네임' : 'Nickname'}</span>
                   <Controller
                     control={control}
                     name="nickName"
