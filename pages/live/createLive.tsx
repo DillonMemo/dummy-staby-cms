@@ -308,13 +308,20 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
   }
 
   useEffect(() => {
-    getMember({
-      variables: {
-        membersByTypeInput: {
-          memberType: MemberType.Business,
-        },
-      },
-    })
+    const fetch = async () => {
+      try {
+        await getMember({
+          variables: {
+            membersByTypeInput: {
+              memberType: MemberType.Business,
+            },
+          },
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    fetch()
   }, [memberData])
 
   return (

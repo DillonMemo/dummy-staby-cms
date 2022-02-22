@@ -386,6 +386,15 @@ export const GlobalStyles = createGlobalStyle`
           background-color: ${({ theme }) => theme.body};
         }
       }
+
+      .ant-radio-button-wrapper-disabled{
+        background-color:#666;
+        color: ${({ theme }) => theme.disable};
+      }
+      
+      .ant-radio-button-wrapper-checked{
+        background: #1890ff!important;
+      }
     }
 
     .mrT5{

@@ -552,7 +552,10 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
       setVodInfoArr(infoResult)
       setMemberShareInfo(result)
-      setIsInputDisabled(vodData?.findVodById.vod?.vodStatus === 'WAIT')
+      setIsInputDisabled(
+        vodData?.findVodById.vod?.vodStatus === 'WAIT' ||
+          vodData?.findVodById.vod?.vodStatus === 'FAIL'
+      )
     }
   }, [vodData])
 
@@ -587,7 +590,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Radio.Button
                         key={i}
                         value={data}
-                        style={{ color: data === 'Fail' ? '#c00' : '' }}
                         onChange={() => setStatusRadio(data)}
                         disabled={data === 'Fail' || data === 'Wait' || isInputDisabled}>
                         {data}
