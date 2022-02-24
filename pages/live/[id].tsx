@@ -280,6 +280,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           })
         }
       }
+
       const { data } = await editLive({
         variables: {
           editLiveInput: {
@@ -302,6 +303,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         },
       })
+
       if (!data?.editLive.ok) {
         const message = locale === 'ko' ? data?.editLive.error?.ko : data?.editLive.error?.en
         notification.error({
@@ -489,7 +491,10 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       key={i}
                       value={data}
                       onChange={() => setStatusRadio(data)}
-                      disabled={data === 'Hide' && isInputDisabled}>
+                      disabled={
+                        (data === 'Hide' && isInputDisabled) ||
+                        liveData?.findLiveById.live?.liveStatus === 'FINISH'
+                      }>
                       {data}
                     </Radio.Button>
                   )
