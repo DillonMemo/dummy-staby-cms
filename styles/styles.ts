@@ -623,6 +623,10 @@ export const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr;
 
+  &:not(:first-child) {
+    margin-top: 1rem;
+  }
+
   .form-item {
     color: ${({ theme }) => theme.text};
     select,

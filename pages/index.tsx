@@ -105,6 +105,7 @@ const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <div className="grid col-2 gap">
                       <div className="card" style={{ minHeight: '12.5rem' }}>
                         <h6>{locale === 'ko' ? '총 회원수' : 'Total Members'}</h6>
+                        <p>&nbsp;</p>
                         <div className="content">
                           <div className="odometer-content">
                             <Odometer value={odometerValue.totalMember} format="(,ddd)" />
@@ -112,7 +113,8 @@ const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
                         </div>
                       </div>
                       <div className="card" style={{ minHeight: '12.5rem' }}>
-                        <h6>{locale === 'ko' ? '오늘 적립 포인트' : 'Today Earned Point'}</h6>
+                        <h6>{locale === 'ko' ? '누적 포인트' : 'Earned Point'}</h6>
+                        <p>{moment(new Date()).format('MM.DD')}</p>
                         <div className="content">
                           <div className="odometer-content">
                             <Odometer value={odometerValue.earnedPoint} format="(,ddd)" />
@@ -169,7 +171,7 @@ const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
                           }}
                           series={[
                             {
-                              name: 'count',
+                              name: locale === 'ko' ? '횟수' : 'Count',
                               data: goingData?.getGoingDashboard.dashboard?.loginCountByDate,
                             },
                           ]}

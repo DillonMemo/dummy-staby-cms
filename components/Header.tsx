@@ -35,12 +35,14 @@ import { useMutation, useQuery } from '@apollo/client'
 import { MY_QUERY } from '../graphql/queries'
 import { LogoutMutation, LogoutMutationVariables, MyQuery, MyQueryVariables } from '../generated'
 import { LOGOUT_MUTATION } from '../graphql/mutations'
+import useNetworkStatus from '../hooks/useNetworkStatus'
 
 type Props = styleMode
 
 const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   const { locale, push, pathname, query, asPath } = useRouter()
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false)
+  const { networkStatus } = useNetworkStatus()
   const hamburgerRef = React.useRef<HTMLDivElement>(null)
   const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
     fetchPolicy: 'network-only',
@@ -171,7 +173,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               <Link href="/">
                 <a>
                   <div className="status">
-                    <Badge status="success" />
+                    {networkStatus ? <Badge status="success" /> : <Badge status="error" />}
                   </div>
                   <div className="logo"></div>
                 </a>
@@ -525,6 +527,20 @@ const statusIndicatorPulsePositive = keyframes`
     box-shadow: 0 0 0 0 var(--status-indicator-color-positive-transparent);
 }
 `
+const statusIndicatorPulseNegative = keyframes`
+0% {
+    box-shadow: 0 0 0 0 rgb(255 77 79 / 50%);
+    box-shadow: 0 0 0 0 var(--status-indicator-color-negative-semi);
+}
+70% {
+    box-shadow: 0 0 0 10px rgb(255 77 79 / 0%);
+    box-shadow: 0 0 0 var(--status-indicator-size) var(--status-indicator-color-negative-transparent);
+}
+100% {
+    box-shadow: 0 0 0 0 rgb(255 77 79 / 0%);
+    box-shadow: 0 0 0 0 var(--status-indicator-color-negative-transparent);
+}
+`
 
 const NavigatorWrapper = styled.div`
   color: ${({ theme }) => theme.text};
@@ -608,14 +624,16 @@ const NavigatorWrapper = styled.div`
                 height: 100%;
                 border: 1px solid;
                 border-radius: 50%;
-                animation: ${statusIndicatorPulsePositive} 1s infinite ease-in-out !important;
+
                 content: '';
               }
               &.ant-badge-status-success:after {
                 border-color: #52c41a;
+                animation: ${statusIndicatorPulsePositive} 1s infinite ease-in-out !important;
               }
               &.ant-badge-status-error:after {
                 border-color: #ff4d4f;
+                animation: ${statusIndicatorPulseNegative} 1s infinite ease-in-out !important;
               }
             }
 
