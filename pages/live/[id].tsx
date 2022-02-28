@@ -153,7 +153,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   })
 
   //라이브 상태
-  const [statusRadio, setStatusRadio] = useState('Hide')
+  const [statusRadio, setStatusRadio] = useState('')
 
   //인풋 상태
   const [isInputDisabled, setIsInputDisabled] = useState(false)
@@ -280,13 +280,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           })
         }
       }
-
       const { data } = await editLive({
         variables: {
           editLiveInput: {
             _id: id,
             mainImageName: mainImgFileName,
-            liveStatus: (LiveStatus as any)[statusRadio],
+            liveStatus: (LiveStatus as any)[statusRadio]
+              ? (LiveStatus as any)[statusRadio]
+              : liveData?.findLiveById.live?.liveStatus,
             delayedEntryTime,
             hostName,
             liveLinkInfo: liveLinkArr,
@@ -303,7 +304,6 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         },
       })
-
       if (!data?.editLive.ok) {
         const message = locale === 'ko' ? data?.editLive.error?.ko : data?.editLive.error?.en
         notification.error({
@@ -314,6 +314,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         notification.success({
           message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
         })
+
         setTimeout(() => {
           location.reload()
         }, 500)
