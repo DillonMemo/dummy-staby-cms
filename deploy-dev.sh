@@ -6,4 +6,6 @@ cp ../.env.development .
 
 npm i
 
+npm run build
+
 pm2 reload staby-cms-client
