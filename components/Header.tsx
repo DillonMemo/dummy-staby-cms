@@ -545,7 +545,7 @@ const statusIndicatorPulseNegative = keyframes`
 const NavigatorWrapper = styled.div`
   color: ${({ theme }) => theme.text};
   background-color: ${({ theme }) => theme.card};
-  max-width: ${WIDTH};
+
   width: 100%;
   height: 100%;
   z-index: 999;
@@ -555,6 +555,10 @@ const NavigatorWrapper = styled.div`
 
   position: fixed;
   display: table-cell;
+
+  /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+  /* max-width: ${WIDTH}; */
+  max-width: ${EXPANDED_WIDTH};
 
   ${md} {
     max-width: ${EXPANDED_WIDTH};
@@ -644,7 +648,9 @@ const NavigatorWrapper = styled.div`
 
           div.logo {
             height: 37%;
-            display: none;
+            /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+            /* display: none; */
+            display: inline;
             background: ${({ theme }) =>
               theme.mode === 'dark'
                 ? `url('/static/img/logo_staby_white.png') no-repeat center/contain`
@@ -679,7 +685,9 @@ const NavigatorWrapper = styled.div`
     height: calc(100% - 4.5rem);
     position: relative;
 
-    overflow: hidden;
+    /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+    /* overflow: hidden; */
+    overflow: auto;
     overflow-anchor: none;
     touch-action: auto;
 
@@ -712,21 +720,28 @@ const NavigatorWrapper = styled.div`
         font-weight: 500;
 
         display: flex;
-        justify-content: center;
+        /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+        /* justify-content: center; */
+        justify-content: flex-start;
 
         ${md} {
           font-size: 1rem;
         }
 
         .text {
-          display: none !important;
+          /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+          /* display: none !important; */
+          display: block !important;
         }
 
         .icon {
           width: 1.125rem;
           height: 1.125rem;
-          display: block;
           font-size: 1.285rem;
+
+          /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+          /* display: block; */
+          display: none;
         }
       }
 
@@ -804,8 +819,13 @@ const NavigatorWrapper = styled.div`
         }
 
         button.logout {
+          /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+          margin: 0 auto;
+          padding-right: 2rem;
           .text {
-            display: none;
+            /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+            /* display: none; */
+            display: flex;
           }
         }
 
@@ -925,7 +945,8 @@ const HeaderWrapper = styled.header`
   z-index: 12;
   box-shadow: 0 4px 24px 0 rgb(34 41 47 / 10%);
 
-  width: calc(100% - 4.4rem - 74px);
+  /* width: calc(100% - 4.4rem - 74px); */
+  width: calc(100% - 15.4rem - 74px);
   min-height: ${WIDTH};
 
   padding: 0.8rem 1rem;

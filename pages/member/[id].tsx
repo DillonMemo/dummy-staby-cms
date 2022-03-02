@@ -11,6 +11,7 @@ import {
 import { MEMBER_QUERY } from '../../graphql/queries'
 import { defaultPalette, Form, MainWrapper, md, styleMode } from '../../styles/styles'
 import { Button, Input, notification, Select } from 'antd'
+import { toast } from 'react-toastify'
 
 import Link from 'next/link'
 import styled from 'styled-components'
@@ -88,8 +89,10 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         notification.error({ message })
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
+        toast(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 1000,
+          onClose: () => router.push('/member/members', '/member/members', { locale }),
         })
       }
     } catch (e) {

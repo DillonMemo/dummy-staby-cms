@@ -535,7 +535,8 @@ const FadeIn = keyframes`
 
 export const MainWrapper = styled.main`
   min-height: 100vh;
-  margin-left: 5rem;
+  /* margin-left: 5rem; */
+  margin-left: 16rem;
   padding: 7.75rem 2rem 0;
   background-color: ${({ theme }) => theme.body};
 
@@ -623,12 +624,13 @@ export const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr;
 
-  &:not(:first-child) {
-    margin-top: 1rem;
-  }
-
   .form-item {
     color: ${({ theme }) => theme.text};
+
+    &:not(:first-child) {
+      margin-top: 1rem;
+    }
+
     select,
     .input:not(.ant-input-disabled),
     .ant-select-selector {

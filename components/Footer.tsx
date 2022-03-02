@@ -21,7 +21,8 @@ const FooterWrapper = styled.footer`
   display: flex;
   align-items: center;
 
-  margin-left: ${WIDTH};
+  /* margin-left: ${WIDTH}; */
+  margin-left: 16rem;
   min-height: ${WIDTH};
   padding: 0.8rem 2rem;
 
