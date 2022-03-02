@@ -2,7 +2,7 @@
 
 export PATH='/home/stabydev/.nvm/versions/node/v16.13.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'
 
-cp ../.env.development .
+cp ../.env.development ./.env
 
 npm i
 
