@@ -8,7 +8,6 @@
     "dev": "npm run codegen:dev && next dev",
     "build": "next build",
     "start": "next start",
-    "build:dev": "cross-env NODE_ENV=development next build",
     "lint": "next lint"
   },
   "dependencies": {
