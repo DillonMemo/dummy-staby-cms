@@ -68,15 +68,14 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const onSubmit = async () => {
     try {
       const { password, nickName, memberType, paidPoint, freePoint } = getValues()
-
       const { data } = await editMember({
         variables: {
           editMemberInput: {
             _id: memberId,
             ...(password !== '' && { password }),
             ...(nickName !== '' && { nickName }),
-            ...(paidPoint !== 0 && { paidPoint: +paidPoint }),
-            ...(freePoint !== 0 && { freePoint: +freePoint }),
+            ...(paidPoint === 0 ? { paidPoint: 0 } : { paidPoint: +paidPoint }),
+            ...(freePoint === 0 ? { freePoint: 0 } : { freePoint: +freePoint }),
             memberType: memberType,
             //...(point !== 0 && { point }),
           },

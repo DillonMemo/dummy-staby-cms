@@ -647,6 +647,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                           placeholder="Please enter the paymentAmount."
                           value={value}
                           onChange={onChange}
+                          onKeyPress={(e) => {
+                            if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
+                              e.preventDefault()
+                              return false
+                            }
+                          }}
                           disabled={
                             isInputDisabled || vodData?.findVodById.vod?.vodStatus === 'ACTIVE'
                           }
@@ -847,7 +853,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <div className="form-item">
                   <div className="form-group">
                     {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                    <span>{locale === 'ko' ? '지분' : 'Share'}</span>
+                    <span>
+                      {locale === 'ko'
+                        ? '지분 - 우선환수, 직분배'
+                        : 'Share - priorityShare, directShare'}
+                    </span>
                     {memberShareInfo.map((data, index) => {
                       return (
                         <div key={index}>
@@ -961,7 +971,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       type="primary"
                       role="button"
                       className="submit-button"
-                      disabled={isInputDisabled}
+                      disabled={isInputDisabled || vodData?.findVodById.vod?.vodStatus === 'WAIT'}
                       loading={editLoading}
                       onClick={onSubmit}>
                       {locale === 'ko' ? '수정' : 'Edit'}

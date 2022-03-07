@@ -410,6 +410,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         className="input"
                         placeholder="Please enter the paymentAmount."
                         value={value}
+                        onKeyPress={(e) => {
+                          if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
+                            e.preventDefault()
+                            return false
+                          }
+                        }}
                         onChange={onChange}
                       />
                     )}

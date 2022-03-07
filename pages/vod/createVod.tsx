@@ -209,12 +209,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               Body: vodUrlInput.files[0],
               ACL: 'bucket-owner-read',
             }).promise())
-
+          debugger
           process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
             (await S3.upload({
               Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
               Key: introImageName,
-              Body: vodInfoArr[i].playingImg,
+              Body: vodInfoArr[i].fileInfo,
               ACL: 'bucket-owner-read',
             }).promise())
 
