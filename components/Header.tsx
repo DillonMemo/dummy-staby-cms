@@ -497,9 +497,9 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <img
                   src={
                     data?.my.profileImageName
-                      ? `https://image.staby.co.kr/${
-                          data.my.profileImageName
-                        }?date=${moment().format('YYYYMMDDHHmmss')}`
+                      ? `https://image.staby.co.kr/${data.my.profileImageName}?v=${moment().format(
+                          'YYYYMMDDHHmmss'
+                        )}`
                       : '/static/img/none-profile.png'
                   }
                   alt="profile"

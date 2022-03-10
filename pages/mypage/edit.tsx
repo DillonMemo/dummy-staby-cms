@@ -69,27 +69,40 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
     try {
       const { password, nickName, memberType, profileImageName } = getValues()
       let saveFileName = ''
-
       if (profileImageName instanceof File) {
-        const lastIndexOf: number = profileImageName.name.lastIndexOf('.')
+        // const lastIndexOf: number = profileImageName.name.lastIndexOf('.')
         saveFileName =
           process.env.NODE_ENV === 'development'
-            ? `dev/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
-            : `prod/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
+            ? `dev/going/profile/${myData?.my._id}.png`
+            : `prod/going/profile/${myData?.my._id}.png`
+        // ? `dev/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
+        // : `prod/going/profile/${myData?.my._id}.${profileImageName.name.slice(lastIndexOf + 1)}`
 
-        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-          (await S3.upload({
+        if (process.env.NEXT_PUBLIC_AWS_BUCKET_NAME) {
+          await S3.deleteObjects({
+            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+            Delete: {
+              Objects: [
+                {
+                  Key: saveFileName,
+                },
+              ],
+            },
+          }).promise()
+
+          await S3.upload({
             Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
             Key: saveFileName,
             Body: profileImageName,
             ACL: 'public-read',
-          }).promise())
+          }).promise()
+        }
       }
 
       const { data } = await editAccount({
         variables: {
           editMemberInput: {
-            profileImageName: myData?.my.profileImageName || saveFileName,
+            profileImageName: profileImageName instanceof File ? saveFileName : '',
             ...(password !== '' && { password }),
             memberType,
             ...(nickName !== '' && { nickName }),
@@ -244,7 +257,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                             myData?.my?.profileImageName
                               ? `https://image.staby.co.kr/${
                                   myData?.my?.profileImageName
-                                }?date=${moment().format('YYYYMMDDHHmmss')}`
+                                }?v=${moment().format('YYYYMMDDHHmmss')}`
                               : noneProfileImg
                           }
                           alt="profile"
