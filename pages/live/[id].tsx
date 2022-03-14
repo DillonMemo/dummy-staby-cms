@@ -720,7 +720,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     Live
                     <span style={{ color: '#ada7a7' }}>
                       {locale === 'ko'
-                        ? ' ※live는 최대 7개까지 추가할 수 있습니다. '
+                        ? ' ※live는 최대 8개까지 추가할 수 있습니다. '
                         : ' ※Up to eight live can be uploaded. '}
                     </span>
                     <Radio.Group
@@ -767,7 +767,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       </div>
                     )
                   })}
-                  {liveInfoArr.length < 7 && (
+                  {liveInfoArr.length < 9 && (
                     <Button
                       className="thumbnailAddBtn"
                       onClick={() => onAddLive('live')}
