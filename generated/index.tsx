@@ -18,6 +18,19 @@ export type Scalars = {
   DateTime: any;
 };
 
+export type AccountInfo = {
+  __typename?: 'AccountInfo';
+  accountNumber: Scalars['String'];
+  bankName: Scalars['String'];
+  depositor: Scalars['String'];
+};
+
+export type AccountInfoInputType = {
+  accountNumber: Scalars['String'];
+  bankName: Scalars['String'];
+  depositor: Scalars['String'];
+};
+
 export enum AdvertiseStatus {
   Display = 'DISPLAY',
   Removed = 'REMOVED',
@@ -217,6 +230,7 @@ export type CreateMainBannerLiveOutput = {
 };
 
 export type CreateMemberInput = {
+  accountInfo?: Maybe<AccountInfoInputType>;
   email: Scalars['String'];
   memberType?: Maybe<MemberType>;
   nickName: Scalars['String'];
@@ -669,6 +683,7 @@ export type MainBannerLiveOutput = {
 export type Member = {
   __typename?: 'Member';
   _id: Scalars['ID'];
+  accountInfo?: Maybe<AccountInfo>;
   createDate: Scalars['DateTime'];
   email: Scalars['String'];
   lastLoginDate?: Maybe<Scalars['DateTime']>;
@@ -779,6 +794,7 @@ export type Mutation = {
   lives: LivesOutput;
   login: LoginOutput;
   logout: LogoutOutput;
+  masterCreateAccount: CreateMemberOutput;
   members: MembersOutput;
   notices: NoticesOutput;
   vods: VodsOutput;
@@ -917,6 +933,11 @@ export type MutationLivesArgs = {
 
 export type MutationLoginArgs = {
   input: LoginInput;
+};
+
+
+export type MutationMasterCreateAccountArgs = {
+  input: CreateMemberInput;
 };
 
 

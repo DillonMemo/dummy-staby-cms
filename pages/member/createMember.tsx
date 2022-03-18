@@ -1,9 +1,10 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { Button, Input, notification, Select } from 'antd'
+import { Button, Input, Select } from 'antd'
 import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { useMutation } from '@apollo/client'
+import { toast } from 'react-toastify'
 
 /** styles */
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
@@ -34,7 +35,7 @@ export interface MemberCreateForm {
 }
 
 const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale } = useRouter()
+  const { locale, reload } = useRouter()
   const [accountInfo, setAccountInfo] = useState<MemberType>(MemberType.Normal)
   const {
     getValues,
@@ -59,30 +60,27 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
             password,
             nickName,
             memberType: accountInfo,
-            accountInfo: {
-              depositor: depositor || '',
-              bankName:
-                accountInfo === MemberType.Business && !bankName ? '국민은행' : bankName || '',
-              accountNumber: accountNumber || '',
-            },
+            ...(accountInfo === MemberType.Business && {
+              accountInfo: {
+                depositor: depositor || '',
+                bankName: bankName || '',
+                accountNumber: accountNumber || '',
+              },
+            }),
           },
         },
       })
       if (!data?.createAccount.ok) {
         const message =
           locale === 'ko' ? data?.createAccount.error?.ko : data?.createAccount.error?.en
-        notification.error({
-          message,
-        })
+        toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '추가되었습니다.' : 'Has been completed',
+        toast.success(locale === 'ko' ? '추가되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => reload(),
         })
-
-        setTimeout(() => {
-          location.reload()
-        }, 500)
       }
     } catch (e) {
       console.error(e)
@@ -219,7 +217,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
 
               {/* 계좌정보 (멤버타입이 BUSINESS 인 경우에만) */}
-              {accountInfo === 'BUSINESS' && (
+              {accountInfo === MemberType.Business && (
                 <>
                   <div className="form-item">
                     <div className="form-group">
@@ -227,8 +225,9 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Controller
                         control={control}
                         name="bankName"
+                        defaultValue={bankList[0]}
                         render={({ field: { value, onChange } }) => (
-                          <Select value={value} defaultValue={bankList[0]} onChange={onChange}>
+                          <Select value={value} onChange={onChange}>
                             {bankList.map((data, index) => (
                               <Select.Option value={data} key={`type-${index}`}>
                                 {data}
@@ -270,14 +269,9 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
                             type="number"
                             placeholder="accountNumber"
                             value={value}
-                            onKeyPress={(e) => {
-                              if (
-                                e.key === '.' ||
-                                e.key === 'e' ||
-                                e.key === '+' ||
-                                e.key === '-'
-                              ) {
-                                e.preventDefault()
+                            onKeyPress={({ key, preventDefault }) => {
+                              if (key === '.' || key === 'e' || key === '+' || key === '-') {
+                                preventDefault()
                                 return false
                               }
                             }}

@@ -2,12 +2,13 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, DatePicker, Input, notification, Popover, Radio, Select, Upload } from 'antd'
+import { Button, DatePicker, Input, Popover, Radio, Select, Upload } from 'antd'
 
 import { UploadChangeParam } from 'antd/lib/upload'
 import { UploadRequestOption } from 'rc-upload/lib/interface'
 
 import Link from 'next/link'
+import { toast } from 'react-toastify'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -82,7 +83,7 @@ const ImgUploadBtnWrap = styled.div`
 `
 
 const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale } = useRouter()
+  const { locale, push } = useRouter()
   const [liveInfoArr, setLiveInfoArr] = useState<Array<LiveInfoArr>>([
     { listingOrder: 0, linkPath: '' },
   ]) //링크 관리
@@ -92,9 +93,10 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
   ]) //지분 관리
   const [isAuto, setIsAuto] = useState('Auto') //라이브 링크 자동생성 수동생성
 
-  const [createLive] = useMutation<CreateLiveMutation, CreateLiveMutationVariables>(
-    CREATE_LIVE_MUTATION
-  )
+  const [createLive, { loading: isCreateLiveLoading }] = useMutation<
+    CreateLiveMutation,
+    CreateLiveMutationVariables
+  >(CREATE_LIVE_MUTATION)
 
   const [getMember, { data: memberData }] = useLazyQuery<
     FindMembersByTypeQuery,
@@ -207,18 +209,14 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
       if (!data?.createLive.ok) {
         const message = locale === 'ko' ? data?.createLive.error?.ko : data?.createLive.error?.en
-        notification.error({
-          message,
-        })
+        toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed',
+        toast.success(locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => push('/live/lives'),
         })
-
-        setTimeout(() => {
-          window.location.href = '/live/lives'
-        }, 500)
       }
     } catch (error) {
       console.error(error)
@@ -687,7 +685,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="button-group">
-                  <Button type="primary" role="button" htmlType="submit" className="submit-button">
+                  <Button
+                    type="primary"
+                    role="button"
+                    htmlType="submit"
+                    className="submit-button"
+                    loading={isCreateLiveLoading}>
                     {locale === 'ko' ? '저장' : 'save'}
                   </Button>
                 </div>

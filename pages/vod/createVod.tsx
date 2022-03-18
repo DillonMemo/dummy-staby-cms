@@ -2,10 +2,11 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, Input, notification, Popover, Select, Upload } from 'antd'
+import { Button, Input, Popover, Select, Upload } from 'antd'
 
 import { UploadChangeParam } from 'antd/lib/upload'
 import { UploadRequestOption } from 'rc-upload/lib/interface'
+import { toast } from 'react-toastify'
 
 import Link from 'next/link'
 
@@ -82,7 +83,7 @@ const ImgUploadBtnWrap = styled.div`
 `
 
 const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale } = useRouter()
+  const { locale, push } = useRouter()
   const [vodInfoArr, setVodInfoArr] = useState<Array<VodInfoArr>>([
     { playingImg: '', fileInfo: '' },
   ]) //링크, playing 이미지 관리
@@ -150,7 +151,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
     try {
       const { title, paymentAmount, content, liveId } = getValues()
-
       const vodLinkArr = [] //라이브 채널 링크 배열
 
       //memberShareData 유효성 확인, 100이 되야한다.
@@ -209,7 +209,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               Body: vodUrlInput.files[0],
               ACL: 'bucket-owner-read',
             }).promise())
-          debugger
           process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
             (await S3.upload({
               Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
@@ -249,19 +248,17 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
       if (!data?.createVod.ok) {
         const message = locale === 'ko' ? data?.createVod.error?.ko : data?.createVod.error?.en
-        notification.error({
-          message,
+        toast.error(message, {
+          theme: localStorage.theme || 'light',
+          onOpen: () => setUploading(false),
         })
-        setUploading(false)
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed',
+        toast.success(locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => push('/vod/vods'),
         })
-
-        setTimeout(() => {
-          window.location.href = '/vod/vods'
-        }, 500)
       }
     } catch (error) {
       setUploading(false)
@@ -467,7 +464,21 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       control={control}
                       name="paymentAmount"
                       rules={{
-                        required: requiredText,
+                        required: true,
+                        min: {
+                          value: 0,
+                          message:
+                            locale === 'ko'
+                              ? '0 ~ 65535까지 입력 가능합니다.'
+                              : 'You can enter from 0 to 65535.',
+                        },
+                        max: {
+                          value: 65535,
+                          message:
+                            locale === 'ko'
+                              ? '0 ~ 65535까지 입력 가능합니다.'
+                              : 'You can enter from 0 to 65535.',
+                        },
                       }}
                       render={({ field: { value, onChange } }) => (
                         <Input
@@ -476,6 +487,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                           placeholder="Please enter the paymentAmount."
                           value={value}
                           onChange={onChange}
+                          min={0}
+                          max={65535}
                         />
                       )}
                     />
@@ -729,7 +742,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       role="button"
                       //htmlType="submit"
                       className="submit-button"
-                      onClick={onSubmit}>
+                      onClick={onSubmit}
+                      disabled={Object.keys(errors).includes('paymentAmount')}>
                       {locale === 'ko' ? '저장' : 'save'}
                     </Button>
                   </div>
