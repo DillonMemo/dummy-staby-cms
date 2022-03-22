@@ -400,7 +400,21 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     control={control}
                     name="paymentAmount"
                     rules={{
-                      required: requiredText,
+                      required: true,
+                      min: {
+                        value: 0,
+                        message:
+                          locale === 'ko'
+                            ? '0 ~ 65535까지 입력 가능합니다.'
+                            : 'You can enter from 0 to 65535.',
+                      },
+                      max: {
+                        value: 65535,
+                        message:
+                          locale === 'ko'
+                            ? '0 ~ 65535까지 입력 가능합니다.'
+                            : 'You can enter from 0 to 65535.',
+                      },
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -690,6 +704,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     role="button"
                     htmlType="submit"
                     className="submit-button"
+                    disabled={Object.keys(errors).includes('paymentAmount')}
                     loading={isCreateLiveLoading}>
                     {locale === 'ko' ? '저장' : 'save'}
                   </Button>

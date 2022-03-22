@@ -1,6 +1,6 @@
 {
   "name": "staby-cms-client",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "private": true,
   "scripts": {
     "codegen:dev": "rimraf generated && cross-env NODE_ENV=development graphql-codegen --config codegen.js",

@@ -10,7 +10,7 @@ import {
 } from '../../generated'
 import { MEMBER_QUERY } from '../../graphql/queries'
 import { defaultPalette, Form, MainWrapper, md, styleMode } from '../../styles/styles'
-import { Button, Input, notification, Select } from 'antd'
+import { Button, Input, Select } from 'antd'
 import { toast } from 'react-toastify'
 
 import Link from 'next/link'
@@ -75,7 +75,17 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const onSubmit = async () => {
     try {
-      const { password, nickName, memberType, paidPoint, freePoint } = getValues()
+      const {
+        password,
+        nickName,
+        memberType,
+        paidPoint,
+        freePoint,
+        depositor,
+        bankName,
+        accountNumber,
+      } = getValues()
+
       const { data } = await editMember({
         variables: {
           editMemberInput: {
@@ -86,6 +96,13 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
             ...(freePoint === 0 ? { freePoint: 0 } : { freePoint: +freePoint }),
             memberType: memberType,
             //...(point !== 0 && { point }),
+            ...(watchMemberType === MemberType.Business && {
+              accountInfo: {
+                depositor: depositor || '',
+                bankName: bankName || '',
+                accountNumber: accountNumber || '',
+              },
+            }),
           },
         },
       })
@@ -93,13 +110,13 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       if (!data?.editMemberById.ok) {
         const message =
           locale === 'ko' ? data?.editMemberById.error?.ko : data?.editMemberById.error?.en
-        notification.error({ message })
+        toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
       } else {
-        toast(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
+        toast.success(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
           theme: localStorage.theme || 'light',
           autoClose: 750,
-          // onClose: () => router.push('/member/members', '/member/members', { locale }),
+          onClose: () => router.push('/member/members', '/member/members', { locale }),
         })
       }
     } catch (e) {
@@ -142,7 +159,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
             <Form onSubmit={handleSubmit(onSubmit)}>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Email</span>
+                  <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
                   <Controller
                     key={memberData?.findMemberById.member?.email}
                     control={control}
@@ -162,7 +179,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Password</span>
+                  <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
                   <Controller
                     control={control}
                     name="password"
@@ -179,7 +196,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Nickname</span>
+                  <span>{locale === 'ko' ? '닉네임' : 'Nickname'}</span>
                   <Controller
                     key={memberData?.findMemberById.member?.nickName}
                     control={control}
@@ -198,7 +215,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Member Type</span>
+                  <span>{locale === 'ko' ? '회원유형' : 'Member Type'}</span>
                   <Controller
                     key={memberData?.findMemberById.member?.memberType}
                     control={control}
@@ -232,7 +249,9 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         <Controller
                           control={control}
                           name="bankName"
-                          defaultValue={bankList[0]}
+                          defaultValue={
+                            memberData?.findMemberById.member?.accountInfo?.bankName || bankList[0]
+                          }
                           render={({ field: { value, onChange } }) => (
                             <Select value={value} onChange={onChange}>
                               {bankList.map((bank, index) => (
@@ -252,6 +271,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         <Controller
                           control={control}
                           name="depositor"
+                          defaultValue={memberData?.findMemberById.member?.accountInfo?.depositor}
                           render={({ field: { value, onChange } }) => (
                             <Input
                               className="input"
@@ -270,6 +290,9 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         <Controller
                           control={control}
                           name="accountNumber"
+                          defaultValue={
+                            memberData?.findMemberById.member?.accountInfo?.accountNumber
+                          }
                           render={({ field: { value, onChange } }) => (
                             <Input
                               className="input"
@@ -479,8 +502,8 @@ const Edit = styled.div`
       margin-top: 1rem;
       opacity: 1;
       visibility: visible;
-      height: auto;
-      max-height: auto;
+      height: 100%;
+      max-height: 15rem;
       transition: 0.5s ease;
     }
   }

@@ -2,7 +2,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, DatePicker, Input, notification, Popover, Radio, Select, Upload } from 'antd'
+import { Button, DatePicker, Input, Popover, Radio, Select, Upload } from 'antd'
 
 import { UploadChangeParam } from 'antd/lib/upload'
 import { UploadRequestOption } from 'rc-upload/lib/interface'
@@ -43,6 +43,7 @@ import {
 } from '../../Common/commonFn'
 import { omit } from 'lodash'
 import { CopyOutlined } from '@ant-design/icons'
+import { toast } from 'react-toastify'
 
 type Props = styleMode
 
@@ -94,8 +95,7 @@ const ImgUploadBtnWrap = styled.div`
 `
 
 const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const router = useRouter()
-  const { locale } = useRouter()
+  const { locale, reload, query, push } = useRouter()
   const [liveInfoArr, setLiveInfoArr] = useState<Array<LiveInfoArr>>([
     { listingOrder: 0, linkPath: '' },
   ]) //링크 관리
@@ -116,7 +116,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const liveStatus = ['Hide', 'Display', 'Active', 'Finish'] //라이브 상태
 
   //현재 라이브 아이디
-  const liveId = router.query.id ? router.query.id?.toString() : ''
+  const liveId = query.id ? query.id?.toString() : ''
 
   //지분 설정을 위한 멤버 쿼리
   const [getMember, { data: memberData }] = useLazyQuery<
@@ -192,18 +192,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
     if (!data?.deleteLive.ok) {
       const message = locale === 'ko' ? data?.deleteLive.error?.ko : data?.deleteLive.error?.en
-      notification.error({
-        message,
-      })
+      toast.error(message, { theme: localStorage.theme || 'light' })
       throw new Error(message)
     } else {
-      notification.success({
-        message: locale === 'ko' ? '삭제가 완료 되었습니다.' : 'Has been completed',
+      toast.success(locale === 'ko' ? '삭제가 완료 되었습니다.' : 'Has been completed', {
+        theme: localStorage.theme || 'light',
+        autoClose: 500,
+        onClose: () => push('/live/lives'),
       })
-
-      setTimeout(() => {
-        window.location.href = '/live/lives'
-      }, 500)
     }
   }
 
@@ -306,18 +302,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
       if (!data?.editLive.ok) {
         const message = locale === 'ko' ? data?.editLive.error?.ko : data?.editLive.error?.en
-        notification.error({
-          message,
-        })
+        toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
+        toast.success(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 500,
+          onClose: () => reload(),
         })
-
-        setTimeout(() => {
-          location.reload()
-        }, 500)
       }
     } catch (error) {
       console.error(error)

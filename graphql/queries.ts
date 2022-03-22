@@ -12,6 +12,11 @@ export const MY_QUERY = gql`
       memberType
       refreshToken
       lastLoginDate
+      accountInfo {
+        bankName
+        depositor
+        accountNumber
+      }
     }
   }
 `
@@ -35,6 +40,11 @@ export const MEMBER_QUERY = gql`
           freePoint
         }
         createDate
+        accountInfo {
+          bankName
+          depositor
+          accountNumber
+        }
       }
     }
   }

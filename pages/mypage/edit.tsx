@@ -2,7 +2,7 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Controller, useForm } from 'react-hook-form'
-import { Button, Input, notification, Popover, Select, Skeleton, Upload } from 'antd'
+import { Button, Input, Popover, Select, Skeleton, Upload } from 'antd'
 import styled from 'styled-components'
 import { useMutation, useQuery } from '@apollo/client'
 import { FormOutlined } from '@ant-design/icons'
@@ -29,6 +29,8 @@ import { EDIT_ACCOUNT_MUTATION } from '../../graphql/mutations'
 
 /** utils */
 import { S3 } from '../../lib/awsClient'
+import { toast } from 'react-toastify'
+import { bankList } from '../../Common/commonFn'
 
 const noneProfileImg = '/static/img/profile-img.png'
 
@@ -40,11 +42,14 @@ export interface IEditForm {
   password: string
   nickName: string
   memberType: MemberType
+  depositor?: string
+  bankName?: string
+  accountNumber?: string
 }
 
 const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale } = useRouter()
-  const { getValues, handleSubmit, control, setValue } = useForm<IEditForm>({
+  const { locale, reload } = useRouter()
+  const { getValues, handleSubmit, control, setValue, watch } = useForm<IEditForm>({
     mode: 'onChange',
   })
   const { loading, data: myData, refetch: refreshMe } = useQuery<MyQuery>(MY_QUERY)
@@ -64,10 +69,19 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
   >(EDIT_ACCOUNT_MUTATION, {
     onCompleted,
   })
+  const watchMemberType = watch('memberType')
 
   const onSubmit = async () => {
     try {
-      const { password, nickName, memberType, profileImageName } = getValues()
+      const {
+        password,
+        nickName,
+        memberType,
+        profileImageName,
+        depositor,
+        bankName,
+        accountNumber,
+      } = getValues()
       let saveFileName = ''
       if (profileImageName instanceof File) {
         // const lastIndexOf: number = profileImageName.name.lastIndexOf('.')
@@ -98,27 +112,34 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
           }).promise()
         }
       }
-
       const { data } = await editAccount({
         variables: {
           editMemberInput: {
-            profileImageName: profileImageName instanceof File ? saveFileName : '',
-            ...(password !== '' && { password }),
+            profileImageName:
+              profileImageName instanceof File ? saveFileName : myData?.my.profileImageName,
+            ...(password && { password }),
             memberType,
-            ...(nickName !== '' && { nickName }),
+            ...(nickName && { nickName }),
+            ...(myData?.my.memberType === MemberType.Business && {
+              accountInfo: {
+                depositor: depositor || '',
+                bankName: bankName || '',
+                accountNumber: accountNumber || '',
+              },
+            }),
           },
         },
       })
 
       if (!data?.editAccount.ok) {
         const message = locale === 'ko' ? data?.editAccount.error?.ko : data?.editAccount.error?.en
-        notification.error({
-          message,
-        })
+        toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
+        toast.success(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 500,
+          onClose: () => reload(),
         })
       }
     } catch (error) {
@@ -284,7 +305,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Email</span>
+                    <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
                     <Controller
                       control={control}
                       name="email"
@@ -303,7 +324,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Password</span>
+                    <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
                     <Controller
                       control={control}
                       name="password"
@@ -320,13 +341,15 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Member Type</span>
+                    <span>{locale === 'ko' ? '회원유형' : 'Member Type'}</span>
                     <Controller
+                      key={myData?.my.memberType}
                       control={control}
                       name="memberType"
                       defaultValue={myData?.my.memberType}
                       render={({ field: { value, onChange } }) => (
                         <Select
+                          defaultValue={myData?.my.memberType}
                           value={value}
                           onChange={onChange}
                           disabled={
@@ -335,7 +358,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                               myData?.my.memberType === MemberType.System
                             )
                           }>
-                          {Object.keys(MemberType).map((type, index) => (
+                          {Object.values(MemberType).map((type, index) => (
                             <Select.Option value={type} key={`type-${index}`}>
                               {type}
                             </Select.Option>
@@ -345,9 +368,84 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                     />
                   </div>
                 </div>
+                <div
+                  className={[
+                    'collapse',
+                    myData?.my.memberType === MemberType.Business ||
+                    watchMemberType === MemberType.Business
+                      ? 'open'
+                      : undefined,
+                  ].join(' ')}>
+                  <>
+                    <div className="form-item">
+                      <div className="form-group">
+                        <span>{locale === 'ko' ? '은행' : 'BankName'}</span>
+                        <Controller
+                          control={control}
+                          name="bankName"
+                          defaultValue={myData?.my.accountInfo?.bankName || bankList[0]}
+                          render={({ field: { value, onChange } }) => (
+                            <Select value={value} onChange={onChange}>
+                              {bankList.map((bank, index) => (
+                                <Select.Option value={bank} key={`type-${index}`}>
+                                  {bank}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-item">
+                      <div className="form-group">
+                        <span>{locale === 'ko' ? '예금주' : 'Depositor'}</span>
+                        <Controller
+                          control={control}
+                          name="depositor"
+                          defaultValue={myData?.my.accountInfo?.depositor}
+                          render={({ field: { value, onChange } }) => (
+                            <Input
+                              className="input"
+                              placeholder={locale === 'ko' ? '예금주' : 'Depositor'}
+                              value={value}
+                              onChange={onChange}
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-item">
+                      <div className="form-group">
+                        <span>{locale === 'ko' ? '계좌번호' : 'AccountNumber'}</span>
+                        <Controller
+                          control={control}
+                          name="accountNumber"
+                          defaultValue={myData?.my.accountInfo?.accountNumber}
+                          render={({ field: { value, onChange } }) => (
+                            <Input
+                              className="input"
+                              type="number"
+                              placeholder={locale === 'ko' ? '계좌번호' : 'AccountNumber'}
+                              value={value}
+                              onKeyPress={({ key, preventDefault }) => {
+                                if (key === '.' || key === 'e' || key === '+' || key === '-') {
+                                  preventDefault()
+                                  return false
+                                }
+                              }}
+                              onChange={onChange}
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </>
+                </div>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Nickname</span>
+                    <span>{locale === 'ko' ? '닉네임' : 'Nickname'}</span>
                     <Controller
                       control={control}
                       name="nickName"
@@ -435,6 +533,23 @@ const Edit = styled.div`
           font-size: 0.75rem;
         }
       }
+    }
+  }
+
+  .collapse {
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    max-height: 0;
+    transition: 0.5s ease;
+
+    &.open {
+      margin-top: 1rem;
+      opacity: 1;
+      visibility: visible;
+      height: 100%;
+      max-height: 15rem;
+      transition: 0.5s ease;
     }
   }
 `
