@@ -354,7 +354,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                           onChange={onChange}
                           disabled={
                             !(
-                              myData?.my.memberType === MemberType.Admin ||
+                              myData?.my.memberType === MemberType.Service ||
                               myData?.my.memberType === MemberType.System
                             )
                           }>

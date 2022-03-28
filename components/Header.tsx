@@ -218,7 +218,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </div>
               </ul>
             </li>
-            {(data?.my.memberType === 'ADMIN' || data?.my.memberType === 'SYSTEM') && (
+            {(data?.my.memberType === 'SERVICE' || data?.my.memberType === 'SYSTEM') && (
               <ul className="menu-content">
                 <li className="nav-item-header">
                   <EllipsisOutlined className="icon" />

@@ -736,9 +736,11 @@ export enum MemberStatus {
 }
 
 export enum MemberType {
-  Admin = 'ADMIN',
   Business = 'BUSINESS',
+  Contents = 'CONTENTS',
+  Cx = 'CX',
   Normal = 'NORMAL',
+  Service = 'SERVICE',
   System = 'SYSTEM'
 }
 
