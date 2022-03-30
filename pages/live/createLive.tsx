@@ -154,22 +154,35 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       //메인 이미지 s3 업로드
       //아이디 생성
       const id = new mongoose.Types.ObjectId() as any
-
       let mainImgFileName = '' //메인 썸네일
       const nowDate = `${id.toString()}_main_${nowDateStr}.png`
       //MainThumbnail upload
-      //cn
+      //이미지 확장자 체크
       if (mainImgInfo.fileInfo instanceof File) {
-        mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/live/${id.toString()}/main/${nowDate}`
-        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-          (await S3.upload({
-            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-            Key: mainImgFileName,
-            Body: mainImgInfo.fileInfo,
-            ACL: 'public-read',
-          }).promise())
+        if (
+          mainImgInfo.fileInfo.name.includes('jpg') ||
+          mainImgInfo.fileInfo.name.includes('png') ||
+          mainImgInfo.fileInfo.name.includes('jpeg')
+        ) {
+          mainImgFileName = `${
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+          }/going/live/${id.toString()}/main/${nowDate}`
+          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+            (await S3.upload({
+              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+              Key: mainImgFileName,
+              Body: mainImgInfo.fileInfo,
+              ACL: 'public-read',
+            }).promise())
+        } else {
+          toast.error(
+            locale === 'ko' ? '이미지의 확장자를 확인해주세요.' : 'Please check the Img extension.',
+            {
+              theme: localStorage.theme || 'light',
+            }
+          )
+          return
+        }
       }
       mainImgFileName = `${nowDate}`
 

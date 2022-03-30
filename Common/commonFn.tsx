@@ -80,16 +80,17 @@ export const shareCheck = (shareArray: Array<any>, locale?: string) => {
     directShare += shareArray[i].directShare
   }
 
-  if (priorityShare > 100 || directShare !== 100) {
+  if (directShare === 100 && (priorityShare === 100 || priorityShare === 0)) {
+    return true
+  } else {
     notification.error({
       message:
         locale === 'ko'
-          ? '직분배의 총합은 100 이 되고 우선 환수지분의 총합은 100 이 넘으면 안됩니다.'
+          ? '직분배의 총합은 100 이 되고 우선 환수지분의 총합은 100 또는 0이어야 합니다.'
           : 'Has been completed',
     })
     return false
   }
-  return true
 }
 
 // 통화 변환

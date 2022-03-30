@@ -249,17 +249,33 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       }/going/live/${id.toString()}/main/${nowDate}`
 
       //MainThumbnail upload
+      //이미지 확장자 체크
       if (mainImgInfo.fileInfo instanceof File) {
-        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-          (await S3.upload({
-            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-            Key: mainImgFileName,
-            Body: mainImgInfo.fileInfo,
-            ACL: 'public-read',
-          }).promise())
+        if (
+          mainImgInfo.fileInfo.name.includes('jpg') ||
+          mainImgInfo.fileInfo.name.includes('png') ||
+          mainImgInfo.fileInfo.name.includes('jpeg')
+        ) {
+          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+            (await S3.upload({
+              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+              Key: mainImgFileName,
+              Body: mainImgInfo.fileInfo,
+              ACL: 'public-read',
+            }).promise())
 
-        mainImgFileName = nowDate
+          mainImgFileName = nowDate
+        } else {
+          toast.error(
+            locale === 'ko' ? '이미지의 확장자를 확인해주세요.' : 'Please check the Img extension.',
+            {
+              theme: localStorage.theme || 'light',
+            }
+          )
+          return
+        }
       } else {
+        //mainImgInfo.fileInfo 이 file이 아닌경우
         mainImgFileName = `${liveData?.findLiveById.live?.mainImageName}`
       }
 

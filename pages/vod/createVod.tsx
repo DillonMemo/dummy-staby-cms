@@ -54,13 +54,13 @@ export type ShareInfo = {
 }
 
 export type MainImgInfo = {
-  fileInfo: Blob | string
+  fileInfo: any
   mainImg?: string
 }
 
 export type VodInfoArr = {
   playingImg?: string
-  fileInfo: Blob | string
+  fileInfo: any
 }
 
 const ShareWrap = styled.div`
@@ -168,18 +168,33 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
       //MainThumbnail upload
       if (mainImgInfo.fileInfo instanceof File) {
-        mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/vod/${id.toString()}/main/${id.toString()}_main_${nowDate}.jpg`
-        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-          (await S3.upload({
-            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-            Key: mainImgFileName,
-            Body: mainImgInfo.fileInfo,
-            ACL: 'public-read',
-          }).promise())
+        if (
+          mainImgInfo.fileInfo.type.includes('jpg') ||
+          mainImgInfo.fileInfo.type.includes('jpeg') ||
+          mainImgInfo.fileInfo.type.includes('png')
+        ) {
+          mainImgFileName = `${
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+          }/going/vod/${id.toString()}/main/${id.toString()}_main_${nowDate}.jpg`
+          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+            (await S3.upload({
+              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+              Key: mainImgFileName,
+              Body: mainImgInfo.fileInfo,
+              ACL: 'public-read',
+            }).promise())
 
-        mainImgFileName = `${id.toString()}_main_${nowDate}.jpg`
+          mainImgFileName = `${id.toString()}_main_${nowDate}.jpg`
+        } else {
+          toast.error(
+            locale === 'ko' ? 'Img의 확장자를 확인해주세요.' : 'Please check the Img extension.',
+            {
+              theme: localStorage.theme || 'light',
+              onOpen: () => setUploading(false),
+            }
+          )
+          return
+        }
       }
 
       //playImg upload
@@ -193,39 +208,66 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         let vodName = ''
 
         if (vodUrlInput && vodUrlInput?.files && vodUrlInput?.files[0] instanceof File) {
-          //playingImgName
-          introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
-          }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.jpg`
+          //vod 및 이미지의 확장자 확인
+          if (!vodUrlInput.files[0].type.includes('mp4')) {
+            toast.error(
+              locale === 'ko' ? 'VOD의 확장자를 확인해주세요.' : 'Please check the VOD extension.',
+              {
+                theme: localStorage.theme || 'light',
+                onOpen: () => setUploading(false),
+              }
+            )
+            return
+          }
 
-          vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
-          }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
+          if (
+            vodInfoArr[i].fileInfo.type.includes('jpg') ||
+            vodInfoArr[i].fileInfo.type.includes('jpeg') ||
+            vodInfoArr[i].fileInfo.type.includes('png')
+          ) {
+            //playingImgName
+            introImageName = `${
+              process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+            }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.jpg`
 
-          process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
-            (await S3.upload({
-              Bucket: process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME,
-              Key: vodName,
-              Body: vodUrlInput.files[0],
-              ACL: 'bucket-owner-read',
-            }).promise())
-          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-            (await S3.upload({
-              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-              Key: introImageName,
-              Body: vodInfoArr[i].fileInfo,
-              ACL: 'bucket-owner-read',
-            }).promise())
+            vodName = `${
+              process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+            }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
 
-          introImageName = `${id}_intro_${i + 1}_${nowDate}.jpg`
+            process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
+              (await S3.upload({
+                Bucket: process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME,
+                Key: vodName,
+                Body: vodUrlInput.files[0],
+                ACL: 'bucket-owner-read',
+              }).promise())
+            process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+              (await S3.upload({
+                Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+                Key: introImageName,
+                Body: vodInfoArr[i].fileInfo,
+                ACL: 'bucket-owner-read',
+              }).promise())
 
-          vodName = `${id}_${i + 1}_${nowDate}.mp4`
+            introImageName = `${id}_intro_${i + 1}_${nowDate}.jpg`
 
-          vodLinkArr.push({
-            listingOrder: i + 1,
-            linkPath: vodName || '',
-            introImageName: introImageName,
-          })
+            vodName = `${id}_${i + 1}_${nowDate}.mp4`
+
+            vodLinkArr.push({
+              listingOrder: i + 1,
+              linkPath: vodName || '',
+              introImageName: introImageName,
+            })
+          }
+        } else {
+          toast.error(
+            locale === 'ko' ? '이미지의 확장자를 확인해주세요.' : 'Please check the Img extension.',
+            {
+              theme: localStorage.theme || 'light',
+              onOpen: () => setUploading(false),
+            }
+          )
+          return
         }
       }
 
@@ -554,6 +596,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             className="input"
                             type={'file'}
                             name={`vodFile_${index}`}
+                            accept=".mp4"
                             placeholder="Please upload the video.(only mp4)"
                             //disabled={isAuto === 'Auto' ? true : false}
                           />
