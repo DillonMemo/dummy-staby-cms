@@ -387,6 +387,10 @@ export const GlobalStyles = createGlobalStyle`
         }
       }
 
+      .ant-radio-wrapper {
+        color: ${({ theme }) => theme.text};
+      }
+
       .ant-radio-button-wrapper-disabled{
         background-color:#666;
         color: ${({ theme }) => theme.disable};
@@ -624,15 +628,33 @@ export const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr;
 
+  .mt-1 {
+    margin-top: 1rem;
+  }
+  .mt-2 {
+    margin-top: 2rem;
+  }
+  .form-grid {
+    display: grid;
+
+    &.col-2 {
+      grid-template-columns: 1fr 1fr;
+
+      ${md} {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &.gap-1 {
+      gap: 1rem;
+    }
+  }
+
   .form-item {
     color: ${({ theme }) => theme.text};
 
-    &:not(:first-child) {
-      margin-top: 1rem;
-    }
-
     select,
-    .input:not(.ant-input-disabled),
+    .input:not(.ant-input-disabled, .ant-input-affix-wrapper-disabled),
     .ant-select-selector {
       height: 2.714rem;
       align-items: center;
@@ -642,27 +664,49 @@ export const Form = styled.form`
       border-radius: ${({ theme }) => theme.card_radius};
     }
 
-    .ant-input-affix-wrapper > input.ant-input {
-      background-color: ${({ theme }) => theme.card};
-      color: ${({ theme }) => theme.text};
+    .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled) {
+      > input.ant-input {
+        background-color: ${({ theme }) => theme.card};
+        color: ${({ theme }) => theme.text};
+      }
     }
+
     .ant-select-arrow,
     .ant-input-suffix svg {
       color: ${({ theme }) => theme.text};
     }
 
     .ant-input[disabled],
-    .ant-select-disabled .ant-select-selector {
+    .ant-select-disabled .ant-select-selector,
+    .ant-input-affix-wrapper-disabled {
       height: 2.714rem;
       border: 1px solid ${({ theme }) => theme.border};
       border-radius: ${({ theme }) => theme.card_radius};
       background-color: ${({ theme }) => theme.body};
       color: ${({ theme }) => theme.text};
     }
+    .ant-input-affix-wrapper-disabled {
+      > .ant-input.ant-input-disabled {
+        height: 2rem;
+        border: none;
+      }
+    }
 
     *::placeholder,
     .ant-select-selection-placeholder {
       color: ${({ theme }) => `${theme.text}75`}!important;
+    }
+
+    .ant-radio-group {
+      height: 2.714rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 3rem;
+
+      ${md} {
+        justify-content: center;
+      }
     }
 
     .form-group {
