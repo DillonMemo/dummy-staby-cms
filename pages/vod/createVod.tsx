@@ -220,54 +220,61 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
             return
           }
 
-          if (
-            vodInfoArr[i].fileInfo.type.includes('jpg') ||
-            vodInfoArr[i].fileInfo.type.includes('jpeg') ||
-            vodInfoArr[i].fileInfo.type.includes('png')
-          ) {
-            //playingImgName
-            introImageName = `${
-              process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
-            }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.jpg`
+          //playingImgName
+          introImageName = `${
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.jpg`
 
-            vodName = `${
-              process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
-            }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
+          vodName = `${
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
 
-            process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
-              (await S3.upload({
-                Bucket: process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME,
-                Key: vodName,
-                Body: vodUrlInput.files[0],
-                ACL: 'bucket-owner-read',
-              }).promise())
-            process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-              (await S3.upload({
-                Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-                Key: introImageName,
-                Body: vodInfoArr[i].fileInfo,
-                ACL: 'bucket-owner-read',
-              }).promise())
+          process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
+            (await S3.upload({
+              Bucket: process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME,
+              Key: vodName,
+              Body: vodUrlInput.files[0],
+              ACL: 'bucket-owner-read',
+            }).promise())
 
-            introImageName = `${id}_intro_${i + 1}_${nowDate}.jpg`
+          //이미지 확장자체크
 
-            vodName = `${id}_${i + 1}_${nowDate}.mp4`
-
-            vodLinkArr.push({
-              listingOrder: i + 1,
-              linkPath: vodName || '',
-              introImageName: introImageName,
-            })
-          }
-        } else {
-          toast.error(
-            locale === 'ko' ? '이미지의 확장자를 확인해주세요.' : 'Please check the Img extension.',
-            {
-              theme: localStorage.theme || 'light',
-              onOpen: () => setUploading(false),
+          if (vodInfoArr[i] && vodInfoArr[i].fileInfo && vodInfoArr[i].fileInfo.type) {
+            if (
+              vodInfoArr[i].fileInfo.type.includes('jpg') ||
+              vodInfoArr[i].fileInfo.type.includes('jpeg') ||
+              vodInfoArr[i].fileInfo.type.includes('png')
+            ) {
+              process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+                (await S3.upload({
+                  Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+                  Key: introImageName,
+                  Body: vodInfoArr[i].fileInfo,
+                  ACL: 'bucket-owner-read',
+                }).promise())
+            } else {
+              toast.error(
+                locale === 'ko'
+                  ? '이미지의 확장자를 확인해주세요.'
+                  : 'Please check the Img extension.',
+                {
+                  theme: localStorage.theme || 'light',
+                  onOpen: () => setUploading(false),
+                }
+              )
+              return
             }
-          )
-          return
+          }
+
+          introImageName = `${id}_intro_${i + 1}_${nowDate}.jpg`
+
+          vodName = `${id}_${i + 1}_${nowDate}.mp4`
+
+          vodLinkArr.push({
+            listingOrder: i + 1,
+            linkPath: vodName || '',
+            introImageName: introImageName,
+          })
         }
       }
 
