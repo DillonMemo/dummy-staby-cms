@@ -241,7 +241,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       const nowDate = nowDateStr
 
       //vodStatus 가 Fail 상태이며 transcodeStatus 가 fail인 경우에만 vod 수정이 가능하다.
-      if (vodData?.findVodById.vod && vodData?.findVodById.vod.vodStatus === 'FAIL') {
+      if (vodData?.findVodById.vod) {
         for (let i = 0; i < vodInfoArr.length; i++) {
           //linkPathName
           const vodUrlInput: HTMLInputElement | null = document.querySelector(
