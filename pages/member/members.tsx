@@ -35,6 +35,7 @@ interface Filters {
 /** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
 interface Options extends Filters {
   page: number
+  pageSize: number
   nickName: string
 }
 /** 필터 드롭다운 Visible 옵션 */
@@ -44,6 +45,11 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale } = useRouter()
   /** Table component에 들어가는 column 데이터 정보 입니다. */
   const columns: ColumnsType<any> = [
+    {
+      title: 'No.',
+      dataIndex: 'index',
+      key: 'index',
+    },
     {
       title: locale === 'ko' ? '이메일' : 'email',
       dataIndex: 'email',
@@ -56,21 +62,16 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       key: 'nickName',
     },
     {
-      title: locale === 'ko' ? '활동정보' : 'status',
-      dataIndex: 'memberStatus',
-      key: 'memberStatus',
-      responsive: ['md'],
-    },
-    {
-      title: locale === 'ko' ? '회원유형' : 'type',
+      title: locale === 'ko' ? '권한' : 'type',
       dataIndex: 'memberType',
       key: 'memberType',
       responsive: ['md'],
     },
     {
-      title: locale === 'ko' ? '포인트' : 'point',
-      dataIndex: 'totalPoint',
-      key: 'point',
+      title: locale === 'ko' ? '상태' : 'status',
+      dataIndex: 'memberStatus',
+      key: 'memberStatus',
+      responsive: ['md'],
     },
     {
       title: locale === 'ko' ? '활동이력' : 'history',
@@ -88,12 +89,14 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       ),
     },
   ]
-  const [{ page, memberType, memberStatus, nickName }, setFilterOptions] = useState<Options>({
-    page: 1,
-    memberType: 'All',
-    memberStatus: 'All',
-    nickName: '',
-  })
+  const [{ page, pageSize, memberType, memberStatus, nickName }, setFilterOptions] =
+    useState<Options>({
+      page: 1,
+      pageSize: 20,
+      memberType: 'All',
+      memberStatus: 'All',
+      nickName: '',
+    })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
     memberType: false,
     memberStatus: false,
@@ -102,7 +105,6 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
     MembersMutation,
     MembersMutationVariables
   >(MEMBERS_MUTATION)
-
   /**
    * pagination 클릭 이벤트 핸들러 입니다.
    * @param {Number} page 이동할 페이지 번호
@@ -243,11 +245,29 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Dropdown
                     overlay={
                       <Menu onClick={onMemberTypeMenuClick}>
-                        <Menu.Item key="All">All</Menu.Item>
-                        {Object.keys(MemberType).map((type) => (
-                          //@ts-expect-error
-                          <Menu.Item key={MemberType[type]}>{type}</Menu.Item>
-                        ))}
+                        <Menu.Item key="All">{locale === 'ko' ? '전체' : 'All'}</Menu.Item>
+                        {Object.keys(MemberType).map((type) => {
+                          const memberTypeValue =
+                            locale === 'ko'
+                              ? type === 'Normal'
+                                ? '일반'
+                                : type === 'Business'
+                                ? '기업'
+                                : type === 'Contents'
+                                ? '컨텐츠관리자'
+                                : type === 'Cx'
+                                ? 'CX관리자'
+                                : type === 'Service'
+                                ? '서비스관리자'
+                                : type === 'System'
+                                ? '시스템관리자'
+                                : type
+                              : type
+                          return (
+                            //@ts-expect-error
+                            <Menu.Item key={MemberType[type]}>{memberTypeValue}</Menu.Item>
+                          )
+                        })}
                       </Menu>
                     }
                     onVisibleChange={(visible) =>
@@ -255,9 +275,26 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                     }
                     visible={visibleOptions.memberType}>
                     <div className="dropdown">
-                      <span className="title">{locale === 'ko' ? '회원유형' : 'Type'}</span>
+                      <span className="title">{locale === 'ko' ? '권한' : 'Type'}</span>
                       <Button className="dropdown-btn" onClick={(e) => e.preventDefault()}>
-                        {memberType}&nbsp;
+                        {locale === 'ko'
+                          ? memberType === 'All'
+                            ? '전체'
+                            : memberType === 'NORMAL'
+                            ? '일반'
+                            : memberType === 'BUSINESS'
+                            ? '기업'
+                            : memberType === 'CONTENTS'
+                            ? '컨텐츠관리자'
+                            : memberType === 'CX'
+                            ? 'CX관리자'
+                            : memberType === 'SERVICE'
+                            ? '서비스관리자'
+                            : memberType === 'SYSTEM'
+                            ? '시스템관리자'
+                            : memberType
+                          : memberType}
+                        &nbsp;
                         {membersLoading && <LoadingOutlined style={{ fontSize: '12px' }} />}
                       </Button>
                     </div>
@@ -265,11 +302,23 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Dropdown
                     overlay={
                       <Menu onClick={onMemberStatusMenuClick}>
-                        <Menu.Item key="All">All</Menu.Item>
-                        {Object.keys(MemberStatus).map((status) => (
-                          //@ts-expect-error
-                          <Menu.Item key={MemberStatus[status]}>{status}</Menu.Item>
-                        ))}
+                        <Menu.Item key="All">{locale === 'ko' ? '전체' : 'All'}</Menu.Item>
+                        {Object.keys(MemberStatus).map((status) => {
+                          const memberStatusValue =
+                            locale === 'ko'
+                              ? status === 'Active'
+                                ? '활성'
+                                : status === 'RemoveStandby'
+                                ? '탈퇴 접수'
+                                : status === 'Removed'
+                                ? '탈퇴'
+                                : status
+                              : status
+                          return (
+                            //@ts-expect-error
+                            <Menu.Item key={MemberStatus[status]}>{memberStatusValue}</Menu.Item>
+                          )
+                        })}
                       </Menu>
                     }
                     onVisibleChange={(visible) =>
@@ -277,9 +326,20 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                     }
                     visible={visibleOptions.memberStatus}>
                     <div className="dropdown">
-                      <span className="title">{locale === 'ko' ? '활동정보' : 'Status'}</span>
+                      <span className="title">{locale === 'ko' ? '상태' : 'Status'}</span>
                       <Button onClick={(e) => e.preventDefault()}>
-                        {memberStatus}&nbsp;
+                        {locale === 'ko'
+                          ? memberStatus === 'All'
+                            ? '전체'
+                            : memberStatus === 'ACTIVE'
+                            ? '활성'
+                            : memberStatus === 'REMOVE_STANDBY'
+                            ? '탈퇴 접수'
+                            : memberStatus === 'REMOVED'
+                            ? '탈퇴'
+                            : memberStatus
+                          : memberStatus}
+                        &nbsp;
                         {membersLoading && <LoadingOutlined style={{ fontSize: '12px' }} />}
                       </Button>
                     </div>
@@ -297,7 +357,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               {membersLoading ? (
                 <>
                   <div>
-                    <Skeleton active title={false} paragraph={{ rows: 20 }} />
+                    <Skeleton active title={false} paragraph={{ rows: pageSize }} />
                   </div>
                 </>
               ) : (
@@ -320,26 +380,59 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                       }}
                       dataSource={
                         membersData
-                          ? membersData.members.members?.map((member: any, index: number) => ({
-                              key: index,
-                              _id: member._id,
-                              email: member.email,
-                              nickName: member.nickName,
-                              memberStatus: member.memberStatus,
-                              memberType: member.memberType,
-                              totalPoint: member.point.totalPoint,
-                            }))
+                          ? membersData.members.members?.map(
+                              (
+                                { _id, email, nickName, memberStatus, memberType },
+                                index: number
+                              ) => {
+                                const memberStatusValue =
+                                  locale === 'ko'
+                                    ? memberStatus === 'ACTIVE'
+                                      ? '활성'
+                                      : memberStatus === 'REMOVE_STANDBY'
+                                      ? '탈퇴 접수'
+                                      : memberStatus === 'REMOVED'
+                                      ? '탈퇴'
+                                      : memberStatus
+                                    : memberStatus
+                                const memberTypeValue =
+                                  locale === 'ko'
+                                    ? memberType === 'NORMAL'
+                                      ? '일반'
+                                      : memberType === 'BUSINESS'
+                                      ? '기업'
+                                      : memberType === 'CONTENTS'
+                                      ? '컨텐츠관리자'
+                                      : memberType === 'CX'
+                                      ? 'CX관리자'
+                                      : memberType === 'SERVICE'
+                                      ? '서비스관리자'
+                                      : memberType === 'SYSTEM'
+                                      ? '시스템관리자'
+                                      : memberType
+                                    : memberType
+                                return {
+                                  index: index + 1 + pageSize * (page - 1),
+                                  key: index,
+                                  _id,
+                                  email,
+                                  nickName,
+                                  memberStatus: memberStatusValue,
+                                  memberType: memberTypeValue,
+                                }
+                              }
+                            )
                           : []
                       }
                       pagination={{
-                        pageSize: 20,
+                        pageSize: pageSize,
                         hideOnSinglePage: true,
                       }}
                     />
                   </div>
                   <div className="pagination-content">
                     <Pagination
-                      pageSize={20}
+                      pageSize={pageSize}
                       current={page}
                       total={membersData?.members.totalResults || undefined}
                       onChange={onPageChange}

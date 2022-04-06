@@ -1173,7 +1173,7 @@ export type MembersMutationVariables = Exact<{
 }>;
 
 
-export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null | undefined, totalPages?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number } }> | null | undefined } };
+export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null | undefined, totalPages?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType }> | null | undefined } };
 
 export type EditMemberByIdMutationVariables = Exact<{
   editMemberInput: EditMemberInput;
@@ -1593,11 +1593,6 @@ export const MembersDocument = gql`
       nickName
       memberStatus
       memberType
-      point {
-        totalPoint
-        paidPoint
-        freePoint
-      }
     }
   }
 }

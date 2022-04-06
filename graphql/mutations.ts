@@ -70,11 +70,6 @@ export const MEMBERS_MUTATION = gql`
         nickName
         memberStatus
         memberType
-        point {
-          totalPoint
-          paidPoint
-          freePoint
-        }
       }
     }
   }
