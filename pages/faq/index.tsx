@@ -240,6 +240,7 @@ const Faq: NextPage<Props> = (props) => {
                       total={faqsData?.faqs.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
+                      showSizeChanger={false}
                     />
                   </div>
                 </>

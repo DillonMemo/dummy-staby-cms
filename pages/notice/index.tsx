@@ -165,6 +165,7 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
                       total={noticesData?.notices.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
+                      showSizeChanger={false}
                     />
                   </div>
                 </>

@@ -2,12 +2,13 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, DatePicker, Input, notification, Popover, Radio, Select, Upload } from 'antd'
+import { Button, DatePicker, Input, Popover, Radio, Select, Upload } from 'antd'
 
 import { UploadChangeParam } from 'antd/lib/upload'
 import { UploadRequestOption } from 'rc-upload/lib/interface'
 
 import Link from 'next/link'
+import { toast } from 'react-toastify'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -82,7 +83,7 @@ const ImgUploadBtnWrap = styled.div`
 `
 
 const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale } = useRouter()
+  const { locale, push } = useRouter()
   const [liveInfoArr, setLiveInfoArr] = useState<Array<LiveInfoArr>>([
     { listingOrder: 0, linkPath: '' },
   ]) //링크 관리
@@ -92,14 +93,18 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
   ]) //지분 관리
   const [isAuto, setIsAuto] = useState('Auto') //라이브 링크 자동생성 수동생성
 
-  const [createLive] = useMutation<CreateLiveMutation, CreateLiveMutationVariables>(
-    CREATE_LIVE_MUTATION
-  )
+  const [createLive, { loading: isCreateLiveLoading }] = useMutation<
+    CreateLiveMutation,
+    CreateLiveMutationVariables
+  >(CREATE_LIVE_MUTATION)
 
   const [getMember, { data: memberData }] = useLazyQuery<
     FindMembersByTypeQuery,
     FindMembersByTypeQueryVariables
   >(FIND_MEMBERS_BY_TYPE_QUERY)
+
+  const requiredText =
+    locale === 'ko' ? '위 항목은 필수 항목입니다.' : 'The above items are mandatory.'
 
   const {
     getValues,
@@ -149,22 +154,35 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       //메인 이미지 s3 업로드
       //아이디 생성
       const id = new mongoose.Types.ObjectId() as any
-
       let mainImgFileName = '' //메인 썸네일
       const nowDate = `${id.toString()}_main_${nowDateStr}.png`
       //MainThumbnail upload
-      //cn
+      //이미지 확장자 체크
       if (mainImgInfo.fileInfo instanceof File) {
-        mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/live/${id.toString()}/main/${nowDate}`
-        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-          (await S3.upload({
-            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-            Key: mainImgFileName,
-            Body: mainImgInfo.fileInfo,
-            ACL: 'public-read',
-          }).promise())
+        if (
+          mainImgInfo.fileInfo.name.includes('jpg') ||
+          mainImgInfo.fileInfo.name.includes('png') ||
+          mainImgInfo.fileInfo.name.includes('jpeg')
+        ) {
+          mainImgFileName = `${
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+          }/going/live/${id.toString()}/main/${nowDate}`
+          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+            (await S3.upload({
+              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+              Key: mainImgFileName,
+              Body: mainImgInfo.fileInfo,
+              ACL: 'public-read',
+            }).promise())
+        } else {
+          toast.error(
+            locale === 'ko' ? '이미지의 확장자를 확인해주세요.' : 'Please check the Img extension.',
+            {
+              theme: localStorage.theme || 'light',
+            }
+          )
+          return
+        }
       }
       mainImgFileName = `${nowDate}`
 
@@ -204,18 +222,14 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
       if (!data?.createLive.ok) {
         const message = locale === 'ko' ? data?.createLive.error?.ko : data?.createLive.error?.en
-        notification.error({
-          message,
-        })
+        toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed',
+        toast.success(locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => push('/live/lives'),
         })
-
-        setTimeout(() => {
-          window.location.href = '/live/lives'
-        }, 500)
       }
     } catch (error) {
       console.error(error)
@@ -305,13 +319,20 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
   }
 
   useEffect(() => {
-    getMember({
-      variables: {
-        membersByTypeInput: {
-          memberType: MemberType.Business,
-        },
-      },
-    })
+    const fetch = async () => {
+      try {
+        await getMember({
+          variables: {
+            membersByTypeInput: {
+              memberType: MemberType.Business,
+            },
+          },
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    fetch()
   }, [memberData])
 
   return (
@@ -334,12 +355,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
             <Form name="createLiveForm" onSubmit={handleSubmit(onSubmit)}>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Title</span>
+                  <span>{locale === 'ko' ? '제목' : 'Title'} </span>
                   <Controller
                     control={control}
                     name="title"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -360,12 +381,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>HostName</span>
+                  <span>{locale === 'ko' ? '호스트' : 'HostName'}</span>
                   <Controller
                     control={control}
                     name="hostName"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -387,12 +408,26 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Price</span>
+                  <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                   <Controller
                     control={control}
                     name="paymentAmount"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: true,
+                      min: {
+                        value: 0,
+                        message:
+                          locale === 'ko'
+                            ? '0 ~ 65535까지 입력 가능합니다.'
+                            : 'You can enter from 0 to 65535.',
+                      },
+                      max: {
+                        value: 65535,
+                        message:
+                          locale === 'ko'
+                            ? '0 ~ 65535까지 입력 가능합니다.'
+                            : 'You can enter from 0 to 65535.',
+                      },
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -400,6 +435,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         className="input"
                         placeholder="Please enter the paymentAmount."
                         value={value}
+                        onKeyPress={(e) => {
+                          if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
+                            e.preventDefault()
+                            return false
+                          }
+                        }}
                         onChange={onChange}
                       />
                     )}
@@ -415,12 +456,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Estimated start date</span>
+                  <span>{locale === 'ko' ? 'Live 시작 예정 시간' : 'Estimated start date'}</span>
                   <Controller
                     control={control}
                     name="livePreviewDate"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <DatePicker
@@ -441,12 +482,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Set the purchase time</span>
+                  <span>{locale === 'ko' ? '시작 후 구매가능 시간' : 'Set the purchase time'}</span>
                   <Controller
                     control={control}
                     name="delayedEntryTime"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <>
@@ -455,17 +496,18 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                           onChange={onChange}
                           placeholder="라이브 시작 시간 이후">
                           <Select.Option value={0} key={9999}>
-                            구매불가
+                            {locale === 'ko' ? '구매불가' : 'Unable to purchase'}
                           </Select.Option>
                           {delayedEntryTimeArr.map((data, index) => {
                             return (
                               <Select.Option value={data} key={index}>
-                                {data}분
+                                {data}
+                                {locale === 'ko' ? '분' : 'min'}
                               </Select.Option>
                             )
                           })}
                           <Select.Option value={999} key={9999}>
-                            라이브 종료까지
+                            {locale === 'ko' ? '라이브 종료까지' : 'Until the end of the live'}
                           </Select.Option>
                         </Select>
                       </>
@@ -480,7 +522,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Live Thumbnail</span>
+                  <span>Live {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                   <Controller
                     control={control}
                     name="liveThumbnail"
@@ -510,15 +552,15 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     Live
                     <span style={{ color: '#ada7a7' }}>
                       {locale === 'ko'
-                        ? ' ※live는 최대 7개까지 추가할 수 있습니다. '
+                        ? ' ※live는 최대 8개까지 추가할 수 있습니다. '
                         : ' ※Up to eight live can be uploaded. '}
                     </span>
                     <Radio.Group defaultValue={'Auto'} buttonStyle="solid">
                       <Radio.Button value="Auto" onChange={() => setIsAuto('Auto')}>
-                        자동생성
+                        {locale === 'ko' ? '자동생성' : 'Automatic generation'}
                       </Radio.Button>
                       <Radio.Button value="Manual" onChange={() => setIsAuto('Manual')}>
-                        수동생성
+                        {locale === 'ko' ? '수동생성' : 'Manual generation'}
                       </Radio.Button>
                     </Radio.Group>
                   </span>
@@ -531,7 +573,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                             <Button
                               className="delectBtn"
                               onClick={() => onDeleteBtn(index, setLiveInfoArr, liveInfoArr)}>
-                              삭제
+                              {locale === 'ko' ? '삭제' : 'Delete'}
                             </Button>
                           )}
                         </div>
@@ -545,7 +587,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                       </div>
                     )
                   })}
-                  {liveInfoArr.length < 8 && (
+                  {liveInfoArr.length < 9 && (
                     <Button className="thumbnailAddBtn" onClick={() => onAddLive('live')}>
                       {locale === 'ko' ? '추가' : 'Add'}
                     </Button>
@@ -554,7 +596,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Content</span>
+                  <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                   <Controller
                     control={control}
                     name="content"
@@ -573,7 +615,9 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               <div className="form-item">
                 <div className="form-group">
                   {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                  <span>Share (회원, 우선분배 지분, 직분배 지분)</span>
+                  <span>
+                    {locale === 'ko' ? '지분' : 'Share'} (회원, 우선분배 지분, 직분배 지분)
+                  </span>
                   {memberShareInfo.map((data, index) => {
                     return (
                       <div key={index}>
@@ -585,7 +629,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                               onClick={() =>
                                 onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
                               }>
-                              삭제
+                              {locale === 'ko' ? '삭제' : 'Delete'}
                             </Button>
                           )}
                         </div>
@@ -668,7 +712,13 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="button-group">
-                  <Button type="primary" role="button" htmlType="submit" className="submit-button">
+                  <Button
+                    type="primary"
+                    role="button"
+                    htmlType="submit"
+                    className="submit-button"
+                    disabled={Object.keys(errors).includes('paymentAmount')}
+                    loading={isCreateLiveLoading}>
                     {locale === 'ko' ? '저장' : 'save'}
                   </Button>
                 </div>

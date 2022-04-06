@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
-import { Badge, Modal, notification, Select, Skeleton, Space } from 'antd'
+import { Badge, notification, Select, Skeleton, Space } from 'antd'
 import Icon, {
   ArrowRightOutlined,
   EllipsisOutlined,
@@ -35,12 +35,14 @@ import { useMutation, useQuery } from '@apollo/client'
 import { MY_QUERY } from '../graphql/queries'
 import { LogoutMutation, LogoutMutationVariables, MyQuery, MyQueryVariables } from '../generated'
 import { LOGOUT_MUTATION } from '../graphql/mutations'
+import useNetworkStatus from '../hooks/useNetworkStatus'
 
 type Props = styleMode
 
 const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   const { locale, push, pathname, query, asPath } = useRouter()
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false)
+  const { networkStatus } = useNetworkStatus()
   const hamburgerRef = React.useRef<HTMLDivElement>(null)
   const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
     fetchPolicy: 'network-only',
@@ -149,10 +151,10 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
         const localToken = authTokenVar() || localStorage.getItem(LOCALSTORAGE_TOKEN)
         if (data.my.refreshToken !== localToken) {
           localStorage.removeItem(LOCALSTORAGE_TOKEN)
-          Modal.info({
-            title: locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login',
-            okText: locale === 'ko' ? '로그인' : 'Login',
-            onOk: () => push('/login', '/login', { locale }),
+          toast.info(locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login', {
+            theme: localStorage.theme || 'light',
+            autoClose: 1000,
+            onClose: () => push('/login', '/login', { locale }),
           })
         }
       }
@@ -171,7 +173,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               <Link href="/">
                 <a>
                   <div className="status">
-                    <Badge status="success" />
+                    {networkStatus ? <Badge status="success" /> : <Badge status="error" />}
                   </div>
                   <div className="logo"></div>
                 </a>
@@ -216,7 +218,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </div>
               </ul>
             </li>
-            {(data?.my.memberType === 'ADMIN' || data?.my.memberType === 'SYSTEM') && (
+            {(data?.my.memberType === 'SERVICE' || data?.my.memberType === 'SYSTEM') && (
               <ul className="menu-content">
                 <li className="nav-item-header">
                   <EllipsisOutlined className="icon" />
@@ -495,9 +497,9 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <img
                   src={
                     data?.my.profileImageName
-                      ? `https://image.staby.co.kr/${
-                          data.my.profileImageName
-                        }?date=${moment().format('YYYYMMDDHHmmss')}`
+                      ? `https://image.staby.co.kr/${data.my.profileImageName}?v=${moment().format(
+                          'YYYYMMDDHHmmss'
+                        )}`
                       : '/static/img/none-profile.png'
                   }
                   alt="profile"
@@ -525,11 +527,25 @@ const statusIndicatorPulsePositive = keyframes`
     box-shadow: 0 0 0 0 var(--status-indicator-color-positive-transparent);
 }
 `
+const statusIndicatorPulseNegative = keyframes`
+0% {
+    box-shadow: 0 0 0 0 rgb(255 77 79 / 50%);
+    box-shadow: 0 0 0 0 var(--status-indicator-color-negative-semi);
+}
+70% {
+    box-shadow: 0 0 0 10px rgb(255 77 79 / 0%);
+    box-shadow: 0 0 0 var(--status-indicator-size) var(--status-indicator-color-negative-transparent);
+}
+100% {
+    box-shadow: 0 0 0 0 rgb(255 77 79 / 0%);
+    box-shadow: 0 0 0 0 var(--status-indicator-color-negative-transparent);
+}
+`
 
 const NavigatorWrapper = styled.div`
   color: ${({ theme }) => theme.text};
   background-color: ${({ theme }) => theme.card};
-  max-width: ${WIDTH};
+
   width: 100%;
   height: 100%;
   z-index: 999;
@@ -539,6 +555,10 @@ const NavigatorWrapper = styled.div`
 
   position: fixed;
   display: table-cell;
+
+  /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+  /* max-width: ${WIDTH}; */
+  max-width: ${EXPANDED_WIDTH};
 
   ${md} {
     max-width: ${EXPANDED_WIDTH};
@@ -608,14 +628,16 @@ const NavigatorWrapper = styled.div`
                 height: 100%;
                 border: 1px solid;
                 border-radius: 50%;
-                animation: ${statusIndicatorPulsePositive} 1s infinite ease-in-out !important;
+
                 content: '';
               }
               &.ant-badge-status-success:after {
                 border-color: #52c41a;
+                animation: ${statusIndicatorPulsePositive} 1s infinite ease-in-out !important;
               }
               &.ant-badge-status-error:after {
                 border-color: #ff4d4f;
+                animation: ${statusIndicatorPulseNegative} 1s infinite ease-in-out !important;
               }
             }
 
@@ -626,7 +648,9 @@ const NavigatorWrapper = styled.div`
 
           div.logo {
             height: 37%;
-            display: none;
+            /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+            /* display: none; */
+            display: inline;
             background: ${({ theme }) =>
               theme.mode === 'dark'
                 ? `url('/static/img/logo_staby_white.png') no-repeat center/contain`
@@ -661,7 +685,9 @@ const NavigatorWrapper = styled.div`
     height: calc(100% - 4.5rem);
     position: relative;
 
-    overflow: hidden;
+    /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+    /* overflow: hidden; */
+    overflow: auto;
     overflow-anchor: none;
     touch-action: auto;
 
@@ -694,21 +720,28 @@ const NavigatorWrapper = styled.div`
         font-weight: 500;
 
         display: flex;
-        justify-content: center;
+        /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+        /* justify-content: center; */
+        justify-content: flex-start;
 
         ${md} {
           font-size: 1rem;
         }
 
         .text {
-          display: none !important;
+          /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+          /* display: none !important; */
+          display: block !important;
         }
 
         .icon {
           width: 1.125rem;
           height: 1.125rem;
-          display: block;
           font-size: 1.285rem;
+
+          /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+          /* display: block; */
+          display: none;
         }
       }
 
@@ -786,8 +819,13 @@ const NavigatorWrapper = styled.div`
         }
 
         button.logout {
+          /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+          margin: 0 auto;
+          padding-right: 2rem;
           .text {
-            display: none;
+            /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
+            /* display: none; */
+            display: flex;
           }
         }
 
@@ -907,7 +945,8 @@ const HeaderWrapper = styled.header`
   z-index: 12;
   box-shadow: 0 4px 24px 0 rgb(34 41 47 / 10%);
 
-  width: calc(100% - 4.4rem - 74px);
+  /* width: calc(100% - 4.4rem - 74px); */
+  width: calc(100% - 15.4rem - 74px);
   min-height: ${WIDTH};
 
   padding: 0.8rem 1rem;

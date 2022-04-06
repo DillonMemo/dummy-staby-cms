@@ -368,6 +368,7 @@ const Inquiry: NextPage<Props> = (props) => {
                       total={inquiriesData?.inquiries.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
+                      showSizeChanger={false}
                     />
                   </div>
                 </>

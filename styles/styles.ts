@@ -156,15 +156,15 @@ export const GlobalStyles = createGlobalStyle`
       }
     }
     .ant-btn {
-      background: ${({ theme }) => theme.body};
-      color: ${({ theme }) => theme.text};
+      background: ${({ theme }) => theme.body} !important;
+      color: ${({ theme }) => theme.text} !important;
 
       border: none;
       outline: none;
 
       &:hover, &:focus  {
-        background: ${({ theme }) => `${theme.body}`};
-        color: ${({ theme }) => theme.text_hover};
+        background: ${({ theme }) => `${theme.body}`} !important;
+        color: ${({ theme }) => theme.text_hover} !important;
       }
 
       &[disabled] {
@@ -254,6 +254,7 @@ export const GlobalStyles = createGlobalStyle`
       .ant-table-tbody {
         >tr {
           &.ant-table-row {
+            cursor: pointer;
             &:hover {
               > td {
                 background: ${({ theme }) => theme.body} !important;
@@ -361,6 +362,45 @@ export const GlobalStyles = createGlobalStyle`
       }
     }
 
+    .ant-tabs {
+      color: ${({ theme }) =>
+        theme.mode === 'dark' ? `rgba(255, 255, 255, 0.85)` : `rgba(0, 0, 0, 0.85)`};
+
+        .ant-tabs-nav {
+          &:before {
+            border-bottom: none !important;
+          }
+        }
+        .ant-tabs-tab {
+          color: ${({ theme }) => theme.text} !important;
+        }
+    }
+
+    .ant-radio-group {
+      .ant-radio-button-wrapper {
+        color: ${({ theme }) => theme.text};
+        background: ${({ theme }) => theme.body};
+        border: 1px solid ${({ theme }) => theme.border};
+
+        &:not(:first-child)::before {
+          background-color: ${({ theme }) => theme.body};
+        }
+      }
+
+      .ant-radio-wrapper {
+        color: ${({ theme }) => theme.text};
+      }
+
+      .ant-radio-button-wrapper-disabled{
+        background-color:#666;
+        color: ${({ theme }) => theme.disable};
+      }
+      
+      .ant-radio-button-wrapper-checked{
+        background: #1890ff!important;
+      }
+    }
+
     .mrT5{
       margin-top:5px;
     }
@@ -382,6 +422,109 @@ export const GlobalStyles = createGlobalStyle`
       outline: none;
 
     }
+    /** odometer */
+    .odometer.odometer-auto-theme,
+    .odometer.odometer-theme-minimal {
+      display: inline-block;
+      vertical-align: middle;
+      *vertical-align: auto;
+      *zoom: 1;
+      *display: inline;
+      position: relative;
+    }
+    .odometer.odometer-auto-theme .odometer-digit,
+    .odometer.odometer-theme-minimal .odometer-digit {
+      display: inline-block;
+      vertical-align: middle;
+      *vertical-align: auto;
+      *zoom: 1;
+      *display: inline;
+      position: relative;
+    }
+    .odometer.odometer-auto-theme .odometer-digit .odometer-digit-spacer,
+    .odometer.odometer-theme-minimal .odometer-digit .odometer-digit-spacer {
+      display: inline-block;
+      vertical-align: middle;
+      *vertical-align: auto;
+      *zoom: 1;
+      *display: inline;
+      visibility: hidden;
+    }
+    .odometer.odometer-auto-theme .odometer-digit .odometer-digit-inner,
+    .odometer.odometer-theme-minimal .odometer-digit .odometer-digit-inner {
+      text-align: left;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
+    .odometer.odometer-auto-theme .odometer-digit .odometer-ribbon,
+    .odometer.odometer-theme-minimal .odometer-digit .odometer-ribbon {
+      display: block;
+    }
+    .odometer.odometer-auto-theme .odometer-digit .odometer-ribbon-inner,
+    .odometer.odometer-theme-minimal .odometer-digit .odometer-ribbon-inner {
+      display: block;
+      /* -webkit-backface-visibility: hidden; */
+    }
+    .odometer.odometer-auto-theme .odometer-digit .odometer-value,
+    .odometer.odometer-theme-minimal .odometer-digit .odometer-value {
+      display: block;
+      /* -webkit-transform: translateZ(0); */
+    }
+    .odometer.odometer-auto-theme
+      .odometer-digit
+      .odometer-value.odometer-last-value,
+    .odometer.odometer-theme-minimal
+      .odometer-digit
+      .odometer-value.odometer-last-value {
+      position: absolute;
+    }
+    .odometer.odometer-auto-theme.odometer-animating-up .odometer-ribbon-inner,
+    .odometer.odometer-theme-minimal.odometer-animating-up .odometer-ribbon-inner {
+      -webkit-transition: -webkit-transform 2s;
+      -moz-transition: -moz-transform 2s;
+      -ms-transition: -ms-transform 2s;
+      -o-transition: -o-transform 2s;
+      transition: transform 2s;
+    }
+    .odometer.odometer-auto-theme.odometer-animating-up.odometer-animating
+      .odometer-ribbon-inner,
+    .odometer.odometer-theme-minimal.odometer-animating-up.odometer-animating
+      .odometer-ribbon-inner {
+      -webkit-transform: translateY(-100%);
+      -moz-transform: translateY(-100%);
+      -ms-transform: translateY(-100%);
+      -o-transform: translateY(-100%);
+      transform: translateY(-100%);
+    }
+    .odometer.odometer-auto-theme.odometer-animating-down .odometer-ribbon-inner,
+    .odometer.odometer-theme-minimal.odometer-animating-down
+      .odometer-ribbon-inner {
+      -webkit-transform: translateY(-100%);
+      -moz-transform: translateY(-100%);
+      -ms-transform: translateY(-100%);
+      -o-transform: translateY(-100%);
+      transform: translateY(-100%);
+    }
+    .odometer.odometer-auto-theme.odometer-animating-down.odometer-animating
+      .odometer-ribbon-inner,
+    .odometer.odometer-theme-minimal.odometer-animating-down.odometer-animating
+      .odometer-ribbon-inner {
+      -webkit-transition: -webkit-transform 2s;
+      -moz-transition: -moz-transform 2s;
+      -ms-transition: -ms-transform 2s;
+      -o-transition: -o-transform 2s;
+      transition: transform 2s;
+      -webkit-transform: translateY(0);
+      -moz-transform: translateY(0);
+      -ms-transform: translateY(0);
+      -o-transform: translateY(0);
+      transform: translateY(0);
+    }
 `
 
 const FadeIn = keyframes`
@@ -396,7 +539,8 @@ const FadeIn = keyframes`
 
 export const MainWrapper = styled.main`
   min-height: 100vh;
-  margin-left: 5rem;
+  /* margin-left: 5rem; */
+  margin-left: 16rem;
   padding: 7.75rem 2rem 0;
   background-color: ${({ theme }) => theme.body};
 
@@ -484,10 +628,33 @@ export const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr;
 
+  .mt-1 {
+    margin-top: 1rem;
+  }
+  .mt-2 {
+    margin-top: 2rem;
+  }
+  .form-grid {
+    display: grid;
+
+    &.col-2 {
+      grid-template-columns: 1fr 1fr;
+
+      ${md} {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &.gap-1 {
+      gap: 1rem;
+    }
+  }
+
   .form-item {
     color: ${({ theme }) => theme.text};
+
     select,
-    .input:not(.ant-input-disabled),
+    .input:not(.ant-input-disabled, .ant-input-affix-wrapper-disabled),
     .ant-select-selector {
       height: 2.714rem;
       align-items: center;
@@ -497,27 +664,49 @@ export const Form = styled.form`
       border-radius: ${({ theme }) => theme.card_radius};
     }
 
-    .ant-input-affix-wrapper > input.ant-input {
-      background-color: ${({ theme }) => theme.card};
-      color: ${({ theme }) => theme.text};
+    .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled) {
+      > input.ant-input {
+        background-color: ${({ theme }) => theme.card};
+        color: ${({ theme }) => theme.text};
+      }
     }
+
     .ant-select-arrow,
     .ant-input-suffix svg {
       color: ${({ theme }) => theme.text};
     }
 
     .ant-input[disabled],
-    .ant-select-disabled .ant-select-selector {
+    .ant-select-disabled .ant-select-selector,
+    .ant-input-affix-wrapper-disabled {
       height: 2.714rem;
       border: 1px solid ${({ theme }) => theme.border};
       border-radius: ${({ theme }) => theme.card_radius};
       background-color: ${({ theme }) => theme.body};
       color: ${({ theme }) => theme.text};
     }
+    .ant-input-affix-wrapper-disabled {
+      > .ant-input.ant-input-disabled {
+        height: 2rem;
+        border: none;
+      }
+    }
 
     *::placeholder,
     .ant-select-selection-placeholder {
       color: ${({ theme }) => `${theme.text}75`}!important;
+    }
+
+    .ant-radio-group {
+      height: 2.714rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 3rem;
+
+      ${md} {
+        justify-content: center;
+      }
     }
 
     .form-group {
@@ -533,6 +722,7 @@ export const Form = styled.form`
     .button-group {
       display: flex;
       justify-content: flex-end;
+      margin-top: 2rem;
 
       &.add-write {
         padding: 0 1.5rem;

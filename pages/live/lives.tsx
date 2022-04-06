@@ -265,6 +265,7 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                       total={livesData?.lives.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
+                      showSizeChanger={false}
                     />
                   </div>
                 </>

@@ -2,7 +2,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, DatePicker, Input, notification, Popover, Radio, Select, Upload } from 'antd'
+import { Button, DatePicker, Input, Popover, Radio, Select, Upload } from 'antd'
 
 import { UploadChangeParam } from 'antd/lib/upload'
 import { UploadRequestOption } from 'rc-upload/lib/interface'
@@ -43,6 +43,7 @@ import {
 } from '../../Common/commonFn'
 import { omit } from 'lodash'
 import { CopyOutlined } from '@ant-design/icons'
+import { toast } from 'react-toastify'
 
 type Props = styleMode
 
@@ -94,8 +95,7 @@ const ImgUploadBtnWrap = styled.div`
 `
 
 const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const router = useRouter()
-  const { locale } = useRouter()
+  const { locale, reload, query, push } = useRouter()
   const [liveInfoArr, setLiveInfoArr] = useState<Array<LiveInfoArr>>([
     { listingOrder: 0, linkPath: '' },
   ]) //링크 관리
@@ -116,7 +116,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const liveStatus = ['Hide', 'Display', 'Active', 'Finish'] //라이브 상태
 
   //현재 라이브 아이디
-  const liveId = router.query.id ? router.query.id?.toString() : ''
+  const liveId = query.id ? query.id?.toString() : ''
 
   //지분 설정을 위한 멤버 쿼리
   const [getMember, { data: memberData }] = useLazyQuery<
@@ -128,12 +128,32 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [getLive, { data: liveData, refetch: refreshMe }] = useLazyQuery<
     FindLiveByIdQuery,
     FindLiveByIdQueryVariables
-  >(LIVE_QUERY)
+  >(LIVE_QUERY, {
+    onCompleted: (data: FindLiveByIdQuery) => {
+      if (data.findLiveById.ok) {
+        const infoResult = liveData?.findLiveById.live?.liveLinkInfo.map((data) => {
+          return omit(data, ['playingImageName', '__typename'])
+        }) //liveInfoArr result
+        const result = liveData?.findLiveById.live?.liveShareInfo.memberShareInfo.map((data) => {
+          return omit(data, ['__typename'])
+        }) //memberShareInfo result
+
+        setMainImgInfo({
+          ...mainImgInfo,
+          mainImg: liveData?.findLiveById.live?.mainImageName,
+        })
+        setLiveInfoArr(infoResult as any)
+        setMemberShareInfo(result as any)
+        setIsInputDisabled(liveData?.findLiveById.live?.liveStatus !== 'HIDE' && true)
+        setStatusRadio(
+          liveData?.findLiveById.live?.liveStatus ? liveData?.findLiveById.live?.liveStatus : 'HIDE'
+        )
+      }
+    },
+  })
 
   //라이브 상태
-  const [statusRadio, setStatusRadio] = useState(
-    liveData?.findLiveById.live ? liveData?.findLiveById.live.liveStatus : 'Hide'
-  )
+  const [statusRadio, setStatusRadio] = useState('')
 
   //인풋 상태
   const [isInputDisabled, setIsInputDisabled] = useState(false)
@@ -157,6 +177,9 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     DELETE_LIVE_MUTATION
   )
 
+  const requiredText =
+    locale === 'ko' ? '위 항목은 필수 항목입니다.' : 'The above items are mandatory.'
+
   //라이브 삭제
   const liveDelete = async () => {
     const { data } = await deleteLive({
@@ -169,18 +192,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
     if (!data?.deleteLive.ok) {
       const message = locale === 'ko' ? data?.deleteLive.error?.ko : data?.deleteLive.error?.en
-      notification.error({
-        message,
-      })
+      toast.error(message, { theme: localStorage.theme || 'light' })
       throw new Error(message)
     } else {
-      notification.success({
-        message: locale === 'ko' ? '삭제가 완료 되었습니다.' : 'Has been completed',
+      toast.success(locale === 'ko' ? '삭제가 완료 되었습니다.' : 'Has been completed', {
+        theme: localStorage.theme || 'light',
+        autoClose: 500,
+        onClose: () => push('/live/lives'),
       })
-
-      setTimeout(() => {
-        window.location.href = '/live/lives'
-      }, 500)
     }
   }
 
@@ -230,17 +249,33 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       }/going/live/${id.toString()}/main/${nowDate}`
 
       //MainThumbnail upload
+      //이미지 확장자 체크
       if (mainImgInfo.fileInfo instanceof File) {
-        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-          (await S3.upload({
-            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-            Key: mainImgFileName,
-            Body: mainImgInfo.fileInfo,
-            ACL: 'public-read',
-          }).promise())
+        if (
+          mainImgInfo.fileInfo.name.includes('jpg') ||
+          mainImgInfo.fileInfo.name.includes('png') ||
+          mainImgInfo.fileInfo.name.includes('jpeg')
+        ) {
+          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+            (await S3.upload({
+              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+              Key: mainImgFileName,
+              Body: mainImgInfo.fileInfo,
+              ACL: 'public-read',
+            }).promise())
 
-        mainImgFileName = nowDate
+          mainImgFileName = nowDate
+        } else {
+          toast.error(
+            locale === 'ko' ? '이미지의 확장자를 확인해주세요.' : 'Please check the Img extension.',
+            {
+              theme: localStorage.theme || 'light',
+            }
+          )
+          return
+        }
       } else {
+        //mainImgInfo.fileInfo 이 file이 아닌경우
         mainImgFileName = `${liveData?.findLiveById.live?.mainImageName}`
       }
 
@@ -257,13 +292,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           })
         }
       }
-
       const { data } = await editLive({
         variables: {
           editLiveInput: {
             _id: id,
             mainImageName: mainImgFileName,
-            liveStatus: (LiveStatus as any)[statusRadio],
+            liveStatus: (LiveStatus as any)[statusRadio]
+              ? (LiveStatus as any)[statusRadio]
+              : liveData?.findLiveById.live?.liveStatus,
             delayedEntryTime,
             hostName,
             liveLinkInfo: liveLinkArr,
@@ -282,17 +318,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
       if (!data?.editLive.ok) {
         const message = locale === 'ko' ? data?.editLive.error?.ko : data?.editLive.error?.en
-        notification.error({
-          message,
-        })
+        toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
+        toast.success(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 500,
+          onClose: () => reload(),
         })
-        setTimeout(() => {
-          location.reload()
-        }, 500)
       }
     } catch (error) {
       console.error(error)
@@ -403,44 +436,38 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   }
 
   useEffect(() => {
-    getMember({
-      variables: {
-        membersByTypeInput: {
-          memberType: MemberType.Business,
-        },
-      },
-    })
+    const fetch = async () => {
+      try {
+        await getMember({
+          variables: {
+            membersByTypeInput: {
+              memberType: MemberType.Business,
+            },
+          },
+        })
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    fetch()
   }, [memberData])
 
   useEffect(() => {
-    getLive({
-      variables: {
-        liveInput: {
-          liveId,
-        },
-      },
-    })
-
-    if (
-      liveData?.findLiveById.ok &&
-      liveData?.findLiveById.live?.liveLinkInfo &&
-      liveData?.findLiveById.live?.liveShareInfo.memberShareInfo
-    ) {
-      const infoResult = liveData?.findLiveById.live?.liveLinkInfo.map((data) => {
-        return omit(data, ['playingImageName', '__typename'])
-      }) //liveInfoArr result
-      const result = liveData?.findLiveById.live?.liveShareInfo.memberShareInfo.map((data) => {
-        return omit(data, ['__typename'])
-      }) //memberShareInfo result
-
-      setMainImgInfo({
-        ...mainImgInfo,
-        mainImg: liveData?.findLiveById.live?.mainImageName,
-      })
-      setLiveInfoArr(infoResult)
-      setMemberShareInfo(result)
-      setIsInputDisabled(liveData?.findLiveById.live?.liveStatus !== 'HIDE' && true)
+    const fetch = async () => {
+      try {
+        getLive({
+          variables: {
+            liveInput: {
+              liveId,
+            },
+          },
+        })
+      } catch (e) {
+        console.error(e)
+      }
     }
+
+    fetch()
   }, [liveData])
 
   return (
@@ -473,7 +500,10 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       key={i}
                       value={data}
                       onChange={() => setStatusRadio(data)}
-                      disabled={data === 'Hide' && isInputDisabled}>
+                      disabled={
+                        (data === 'Hide' && isInputDisabled) ||
+                        liveData?.findLiveById.live?.liveStatus === 'FINISH'
+                      }>
                       {data}
                     </Radio.Button>
                   )
@@ -481,14 +511,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </Radio.Group>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Title</span>
+                  <span>{locale === 'ko' ? '제목' : 'Title'} </span>
                   <Controller
                     key={liveData?.findLiveById.live?.title}
                     defaultValue={liveData?.findLiveById.live?.title}
                     control={control}
                     name="title"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -510,14 +540,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>HostName</span>
+                  <span>{locale === 'ko' ? '호스트' : 'HostName'}</span>
                   <Controller
                     key={liveData?.findLiveById.live?.hostName}
                     defaultValue={liveData?.findLiveById.live?.hostName}
                     control={control}
                     name="hostName"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -540,14 +570,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Price</span>
+                  <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                   <Controller
                     key={liveData?.findLiveById.live?.paymentAmount}
                     defaultValue={liveData?.findLiveById.live?.paymentAmount}
                     control={control}
                     name="paymentAmount"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -555,6 +585,12 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         className="input"
                         placeholder="Please enter the paymentAmount."
                         value={value}
+                        onKeyPress={(e) => {
+                          if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
+                            e.preventDefault()
+                            return false
+                          }
+                        }}
                         onChange={onChange}
                         disabled={isInputDisabled}
                       />
@@ -571,13 +607,13 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Estimated start date</span>
+                  <span>{locale === 'ko' ? 'Live 시작 예정 시간' : 'Estimated start date'}</span>
                   <Controller
                     control={control}
                     name="livePreviewDate"
                     key={liveData?.findLiveById.live?.livePreviewDate}
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <DatePicker
@@ -606,14 +642,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Set the purchase time</span>
+                  <span>{locale === 'ko' ? '시작 후 구매가능 시간' : 'Set the purchase time'}</span>
                   <Controller
                     control={control}
                     name="delayedEntryTime"
                     key={liveData?.findLiveById.live?.delayedEntryTime}
                     defaultValue={liveData?.findLiveById.live?.delayedEntryTime}
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { value, onChange } }) => (
                       <>
@@ -621,19 +657,22 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                           value={value}
                           onChange={onChange}
                           disabled={isInputDisabled}
-                          placeholder="라이브 시작 시간 이후">
+                          placeholder={
+                            locale === 'ko' ? '시작 후 구매가능 시간' : 'Set the purchase time'
+                          }>
                           <Select.Option value={0} key={0}>
-                            구매불가
+                            {locale === 'ko' ? '구매불가' : 'Unable to purchase'}
                           </Select.Option>
                           {delayedEntryTimeArr.map((data, index) => {
                             return (
                               <Select.Option value={data} key={index}>
-                                {data}분
+                                {data}
+                                {locale === 'ko' ? '분' : 'min'}
                               </Select.Option>
                             )
                           })}
                           <Select.Option value={999} key={999}>
-                            라이브 종료까지
+                            {locale === 'ko' ? '라이브 종료까지' : 'Until the end of the live'}
                           </Select.Option>
                         </Select>
                       </>
@@ -648,14 +687,14 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Live Thumbnail</span>
+                  <span>Live {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                   <Controller
                     key={liveData?.findLiveById.live?.mainImageName}
                     defaultValue={liveData?.findLiveById.live?.mainImageName?.toString()}
                     control={control}
                     name="liveThumbnail"
                     rules={{
-                      required: '위 항목은 필수 항목입니다.',
+                      required: requiredText,
                     }}
                     render={({ field: { onChange } }) => (
                       <ImgUploadBtnWrap className="profile-edit">
@@ -689,7 +728,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     Live
                     <span style={{ color: '#ada7a7' }}>
                       {locale === 'ko'
-                        ? ' ※live는 최대 7개까지 추가할 수 있습니다. '
+                        ? ' ※live는 최대 8개까지 추가할 수 있습니다. '
                         : ' ※Up to eight live can be uploaded. '}
                     </span>
                     <Radio.Group
@@ -697,10 +736,10 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       buttonStyle="solid"
                       disabled={isInputDisabled}>
                       <Radio.Button value="Auto" onChange={() => setIsAuto('Auto')}>
-                        자동생성
+                        {locale === 'ko' ? '자동생성' : 'Automatic generation'}
                       </Radio.Button>
                       <Radio.Button value="Manual" onChange={() => setIsAuto('Manual')}>
-                        수동생성
+                        {locale === 'ko' ? '수동생성' : 'Manual generation'}
                       </Radio.Button>
                     </Radio.Group>
                   </span>
@@ -721,7 +760,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                             <Button
                               className="delectBtn"
                               onClick={() => onDeleteBtn(index, setLiveInfoArr, liveInfoArr)}>
-                              삭제
+                              {locale === 'ko' ? '삭제' : 'Delete'}
                             </Button>
                           )}
                         </div>
@@ -736,7 +775,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       </div>
                     )
                   })}
-                  {liveInfoArr.length < 7 && (
+                  {liveInfoArr.length < 9 && (
                     <Button
                       className="thumbnailAddBtn"
                       onClick={() => onAddLive('live')}
@@ -748,7 +787,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Content</span>
+                  <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                   <Controller
                     control={control}
                     name="content"
@@ -771,8 +810,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                  <span>Share</span>
+                  {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정.  */}
+                  <span>{locale === 'ko' ? '지분' : 'Share'}</span>
                   {memberShareInfo.map((data, index) => {
                     return (
                       <div key={index}>
@@ -784,7 +823,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                               onClick={() =>
                                 onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
                               }>
-                              삭제
+                              {locale === 'ko' ? '삭제' : 'Delete'}
                             </Button>
                           )}
                         </div>
@@ -793,7 +832,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                             control={control}
                             name="share"
                             rules={{
-                              required: '위 항목은 필수 항목입니다.',
+                              required: requiredText,
                             }}
                             render={() => (
                               <>

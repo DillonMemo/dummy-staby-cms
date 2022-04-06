@@ -142,7 +142,6 @@ const Ads: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         },
       })
-
       if (!data?.changeAdvertisementStatus.ok) {
         const message =
           locale === 'ko'
@@ -226,7 +225,13 @@ const Ads: NextPage<Props> = ({ toggleStyle, theme }) => {
                     columns={columns}
                     onRow={(column) => {
                       return {
-                        onClick: () => {
+                        onClick: (e) => {
+                          if (
+                            e.target === e.currentTarget.querySelector('.adStatusBtn') ||
+                            e.target === e.currentTarget.querySelector('.adStatusBtn span')
+                          ) {
+                            return
+                          }
                           router.push({
                             pathname: '/ad/[id]',
                             query: {
@@ -244,7 +249,9 @@ const Ads: NextPage<Props> = ({ toggleStyle, theme }) => {
                             title: ad.title,
                             type: ad.displayType,
                             adStatus: (
-                              <Button onClick={() => onStatusChange(ad._id, ad.advertiseStatus)}>
+                              <Button
+                                onClick={() => onStatusChange(ad._id, ad.advertiseStatus)}
+                                className="adStatusBtn">
                                 {locale === 'ko'
                                   ? ad.advertiseStatus === 'WAIT'
                                     ? '비노출'
@@ -269,6 +276,7 @@ const Ads: NextPage<Props> = ({ toggleStyle, theme }) => {
                     total={adsData?.advertisements.totalResults || undefined}
                     onChange={onPageChange}
                     responsive
+                    showSizeChanger={false}
                   />
                 </div>
               </>

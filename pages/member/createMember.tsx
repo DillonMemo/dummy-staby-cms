@@ -1,9 +1,10 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { Button, Input, notification, Select } from 'antd'
+import { Button, Input, Select } from 'antd'
 import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { useMutation } from '@apollo/client'
+import { toast } from 'react-toastify'
 
 /** styles */
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
@@ -12,6 +13,8 @@ import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
 import { CreateAccountMutation, CreateAccountMutationVariables, MemberType } from '../../generated'
 import Layout from '../../components/Layout'
 import { CREATE_ACCOUNT_MUTATION } from '../../graphql/mutations'
+import { useState } from 'react'
+import { bankList } from '../../Common/commonFn'
 
 type Props = styleMode
 
@@ -26,10 +29,14 @@ export interface MemberCreateForm {
   freePoint?: number
   memberStatus?: string
   createDate: string
+  depositor?: string
+  bankName?: string
+  accountNumber?: string
 }
 
 const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale } = useRouter()
+  const { locale, reload } = useRouter()
+  const [accountInfo, setAccountInfo] = useState<MemberType>(MemberType.Normal)
   const {
     getValues,
     handleSubmit,
@@ -45,27 +52,34 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
   >(CREATE_ACCOUNT_MUTATION)
   const onSubmit = async () => {
     try {
-      const { email, password, nickName, memberType } = getValues()
+      const { email, password, nickName, depositor, bankName, accountNumber } = getValues()
       const { data } = await createMember({
         variables: {
           createMemberInput: {
             email,
             password,
             nickName,
-            memberType,
+            memberType: accountInfo,
+            ...(accountInfo === MemberType.Business && {
+              accountInfo: {
+                depositor: depositor || '',
+                bankName: bankName || '',
+                accountNumber: accountNumber || '',
+              },
+            }),
           },
         },
       })
       if (!data?.createAccount.ok) {
         const message =
           locale === 'ko' ? data?.createAccount.error?.ko : data?.createAccount.error?.en
-        notification.error({
-          message,
-        })
+        toast.error(message, { theme: localStorage.theme || 'light' })
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '추가되었습니다.' : 'Has been completed',
+        toast.success(locale === 'ko' ? '추가되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => reload(),
         })
       }
     } catch (e) {
@@ -93,12 +107,15 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
             <Form onSubmit={handleSubmit(onSubmit)}>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Member Type</span>
+                  <span>{locale === 'ko' ? '멤버타입' : 'Member Type'}</span>
                   <Controller
                     control={control}
                     name="memberType"
-                    render={({ field: { value, onChange } }) => (
-                      <Select value={value} defaultValue={MemberType.Normal} onChange={onChange}>
+                    render={({ field: { value } }) => (
+                      <Select
+                        value={value}
+                        defaultValue={MemberType.Normal}
+                        onChange={(e) => setAccountInfo(e)}>
                         {Object.keys(MemberType).map((data, index) => (
                           <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
                             {data}
@@ -111,7 +128,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Email</span>
+                  <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
                   <Controller
                     name="email"
                     control={control}
@@ -141,7 +158,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Password</span>
+                  <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
                   <Controller
                     control={control}
                     name="password"
@@ -169,12 +186,17 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Nickname</span>
+                  <span>{locale === 'ko' ? '닉네임' : 'Nickname'}</span>
                   <Controller
                     control={control}
                     name="nickName"
                     rules={{
                       required: '닉네임 입력은 필수입니다',
+                      pattern: {
+                        value:
+                          /^((((?=.[가-힣A-Za-z])(?=.\d)))|((?=.*[가-힣A-Za-z])))[가-힣A-Za-z\d]{1,12}$/,
+                        message: '닉네임 형식이 아닙니다.',
+                      },
                     }}
                     render={({ field: { value, onChange } }) => (
                       <Input
@@ -193,6 +215,74 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
+
+              {/* 계좌정보 (멤버타입이 BUSINESS 인 경우에만) */}
+              {accountInfo === MemberType.Business && (
+                <>
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '은행' : 'BankName'}</span>
+                      <Controller
+                        control={control}
+                        name="bankName"
+                        defaultValue={bankList[0]}
+                        render={({ field: { value, onChange } }) => (
+                          <Select value={value} onChange={onChange}>
+                            {bankList.map((data, index) => (
+                              <Select.Option value={data} key={`type-${index}`}>
+                                {data}
+                              </Select.Option>
+                            ))}
+                          </Select>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '예금주' : 'Depositor'}</span>
+                      <Controller
+                        control={control}
+                        name="depositor"
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            className="input"
+                            placeholder="depositor"
+                            value={value}
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '계좌번호' : 'AccountNumber'}</span>
+                      <Controller
+                        control={control}
+                        name="accountNumber"
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            className="input"
+                            type="number"
+                            placeholder="accountNumber"
+                            value={value}
+                            onKeyPress={({ key, preventDefault }) => {
+                              if (key === '.' || key === 'e' || key === '+' || key === '-') {
+                                preventDefault()
+                                return false
+                              }
+                            }}
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
               <div className="form-item">
                 <div className="button-group">
                   <Button

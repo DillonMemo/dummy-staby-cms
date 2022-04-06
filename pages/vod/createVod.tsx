@@ -2,10 +2,11 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, Input, notification, Popover, Select, Upload } from 'antd'
+import { Button, Input, Popover, Select, Upload } from 'antd'
 
 import { UploadChangeParam } from 'antd/lib/upload'
 import { UploadRequestOption } from 'rc-upload/lib/interface'
+import { toast } from 'react-toastify'
 
 import Link from 'next/link'
 
@@ -53,13 +54,13 @@ export type ShareInfo = {
 }
 
 export type MainImgInfo = {
-  fileInfo: Blob | string
+  fileInfo: any
   mainImg?: string
 }
 
 export type VodInfoArr = {
   playingImg?: string
-  fileInfo: Blob | string
+  fileInfo: any
 }
 
 const ShareWrap = styled.div`
@@ -82,7 +83,7 @@ const ImgUploadBtnWrap = styled.div`
 `
 
 const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale } = useRouter()
+  const { locale, push } = useRouter()
   const [vodInfoArr, setVodInfoArr] = useState<Array<VodInfoArr>>([
     { playingImg: '', fileInfo: '' },
   ]) //링크, playing 이미지 관리
@@ -106,6 +107,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [getLives, { data: livesData }] = useMutation<LivesMutation, LivesMutationVariables>(
     LIVES_MUTATION
   )
+
+  const requiredText =
+    locale === 'ko' ? '위 항목은 필수 항목입니다.' : 'The above items are mandatory.'
 
   const {
     getValues,
@@ -144,13 +148,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const onSubmit = async () => {
     setUploading(true)
+
     try {
       const { title, paymentAmount, content, liveId } = getValues()
-
       const vodLinkArr = [] //라이브 채널 링크 배열
 
       //memberShareData 유효성 확인, 100이 되야한다.
       if (!shareCheck(memberShareInfo, locale)) {
+        setUploading(false)
         return
       }
 
@@ -163,18 +168,33 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
       //MainThumbnail upload
       if (mainImgInfo.fileInfo instanceof File) {
-        mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/vod/${id.toString()}/vod/${id.toString()}_main_${nowDate}.jpg`
-        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-          (await S3.upload({
-            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-            Key: mainImgFileName,
-            Body: mainImgInfo.fileInfo,
-            ACL: 'public-read',
-          }).promise())
+        if (
+          mainImgInfo.fileInfo.type.includes('jpg') ||
+          mainImgInfo.fileInfo.type.includes('jpeg') ||
+          mainImgInfo.fileInfo.type.includes('png')
+        ) {
+          mainImgFileName = `${
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+          }/going/vod/${id.toString()}/main/${id.toString()}_main_${nowDate}.jpg`
+          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+            (await S3.upload({
+              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+              Key: mainImgFileName,
+              Body: mainImgInfo.fileInfo,
+              ACL: 'public-read',
+            }).promise())
 
-        mainImgFileName = `${id.toString()}_main_${nowDate}.jpg`
+          mainImgFileName = `${id.toString()}_main_${nowDate}.jpg`
+        } else {
+          toast.error(
+            locale === 'ko' ? 'Img의 확장자를 확인해주세요.' : 'Please check the Img extension.',
+            {
+              theme: localStorage.theme || 'light',
+              onOpen: () => setUploading(false),
+            }
+          )
+          return
+        }
       }
 
       //playImg upload
@@ -188,13 +208,25 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         let vodName = ''
 
         if (vodUrlInput && vodUrlInput?.files && vodUrlInput?.files[0] instanceof File) {
+          //vod 및 이미지의 확장자 확인
+          if (!vodUrlInput.files[0].type.includes('mp4')) {
+            toast.error(
+              locale === 'ko' ? 'VOD의 확장자를 확인해주세요.' : 'Please check the VOD extension.',
+              {
+                theme: localStorage.theme || 'light',
+                onOpen: () => setUploading(false),
+              }
+            )
+            return
+          }
+
           //playingImgName
           introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${id}/intro/${id}__intro_${i + 1}_${nowDate}.jpg`
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+          }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.jpg`
 
           vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
           }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
 
           process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
@@ -205,15 +237,36 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               ACL: 'bucket-owner-read',
             }).promise())
 
-          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-            (await S3.upload({
-              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-              Key: introImageName,
-              Body: vodInfoArr[i].playingImg,
-              ACL: 'bucket-owner-read',
-            }).promise())
+          //이미지 확장자체크
 
-          introImageName = `${id}__intro_${i + 1}_${nowDate}.jpg`
+          if (vodInfoArr[i] && vodInfoArr[i].fileInfo && vodInfoArr[i].fileInfo.type) {
+            if (
+              vodInfoArr[i].fileInfo.type.includes('jpg') ||
+              vodInfoArr[i].fileInfo.type.includes('jpeg') ||
+              vodInfoArr[i].fileInfo.type.includes('png')
+            ) {
+              process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+                (await S3.upload({
+                  Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+                  Key: introImageName,
+                  Body: vodInfoArr[i].fileInfo,
+                  ACL: 'bucket-owner-read',
+                }).promise())
+            } else {
+              toast.error(
+                locale === 'ko'
+                  ? '이미지의 확장자를 확인해주세요.'
+                  : 'Please check the Img extension.',
+                {
+                  theme: localStorage.theme || 'light',
+                  onOpen: () => setUploading(false),
+                }
+              )
+              return
+            }
+          }
+
+          introImageName = `${id}_intro_${i + 1}_${nowDate}.jpg`
 
           vodName = `${id}_${i + 1}_${nowDate}.mp4`
 
@@ -244,19 +297,17 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
       if (!data?.createVod.ok) {
         const message = locale === 'ko' ? data?.createVod.error?.ko : data?.createVod.error?.en
-        notification.error({
-          message,
+        toast.error(message, {
+          theme: localStorage.theme || 'light',
+          onOpen: () => setUploading(false),
         })
-        setUploading(false)
         throw new Error(message)
       } else {
-        notification.success({
-          message: locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed',
+        toast.success(locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => push('/vod/vods'),
         })
-
-        setTimeout(() => {
-          window.location.href = '/vod/vods'
-        }, 500)
       }
     } catch (error) {
       setUploading(false)
@@ -388,6 +439,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(error)
       }
     }
+
     fetch()
   }, [])
 
@@ -403,6 +455,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(error)
       }
     }
+
     fetch()
   }, [])
 
@@ -428,12 +481,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               <Form name="createLiveForm" onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Title</span>
+                    <span>{locale === 'ko' ? '제목' : 'Title'}</span>
                     <Controller
                       control={control}
                       name="title"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { value, onChange } }) => (
                         <Input
@@ -455,12 +508,26 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Price</span>
+                    <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                     <Controller
                       control={control}
                       name="paymentAmount"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: true,
+                        min: {
+                          value: 0,
+                          message:
+                            locale === 'ko'
+                              ? '0 ~ 65535까지 입력 가능합니다.'
+                              : 'You can enter from 0 to 65535.',
+                        },
+                        max: {
+                          value: 65535,
+                          message:
+                            locale === 'ko'
+                              ? '0 ~ 65535까지 입력 가능합니다.'
+                              : 'You can enter from 0 to 65535.',
+                        },
                       }}
                       render={({ field: { value, onChange } }) => (
                         <Input
@@ -469,6 +536,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                           placeholder="Please enter the paymentAmount."
                           value={value}
                           onChange={onChange}
+                          min={0}
+                          max={65535}
                         />
                       )}
                     />
@@ -483,7 +552,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Main Thumbnail</span>
+                    <span>Main {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                     <Controller
                       control={control}
                       name="mainThumbnail"
@@ -526,7 +595,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               <Button
                                 className="delectBtn"
                                 onClick={() => onDeleteBtn(index, setVodInfoArr, vodInfoArr)}>
-                                삭제
+                                {locale === 'ko' ? '삭제' : 'Delete'}
                               </Button>
                             )}
                           </div>
@@ -534,6 +603,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             className="input"
                             type={'file'}
                             name={`vodFile_${index}`}
+                            accept=".mp4"
                             placeholder="Please upload the video.(only mp4)"
                             //disabled={isAuto === 'Auto' ? true : false}
                           />
@@ -563,12 +633,12 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Content</span>
+                    <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                     <Controller
                       control={control}
                       name="content"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { value, onChange } }) => (
                         <TextArea
@@ -613,8 +683,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                    <span>Share</span>
+                    {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정.*/}
+                    <span>{locale === 'ko' ? '지분' : 'Share'}</span>
                     {memberShareInfo.map((data, index) => {
                       return (
                         <div key={index}>
@@ -626,7 +696,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                                 onClick={() =>
                                   onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
                                 }>
-                                삭제
+                                {locale === 'ko' ? '삭제' : 'Delete'}
                               </Button>
                             )}
                           </div>
@@ -635,7 +705,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               control={control}
                               name="share"
                               rules={{
-                                required: '위 항목은 필수 항목입니다.',
+                                required: requiredText,
                               }}
                               render={() => (
                                 <>
@@ -722,7 +792,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       role="button"
                       //htmlType="submit"
                       className="submit-button"
-                      onClick={onSubmit}>
+                      onClick={onSubmit}
+                      disabled={Object.keys(errors).includes('paymentAmount')}>
                       {locale === 'ko' ? '저장' : 'save'}
                     </Button>
                   </div>

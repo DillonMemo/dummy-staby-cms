@@ -249,6 +249,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                       total={vodsData?.vods.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
+                      showSizeChanger={false}
                     />
                   </div>
                 </>

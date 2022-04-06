@@ -30,6 +30,7 @@ import {
   LivesMutation,
   LivesMutationVariables,
   MemberType,
+  TranscodeStatus,
   VodStatus,
 } from '../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY, VOD_QUERY } from '../../graphql/queries'
@@ -39,6 +40,7 @@ import { S3 } from '../../lib/awsClient'
 import { nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
 import Spinner from '../../components/Spinner'
 import { omit } from 'lodash'
+import { toast } from 'react-toastify'
 
 type Props = styleMode
 
@@ -68,6 +70,7 @@ export type VodInfoArr = {
   linkPath: string
   introImageName: string
   listingOrder?: number
+  transcodeStatus: TranscodeStatus
 }
 
 const ShareWrap = styled.div`
@@ -93,14 +96,20 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const router = useRouter()
   const { locale } = useRouter()
   const [vodInfoArr, setVodInfoArr] = useState<Array<VodInfoArr>>([
-    { introImageName: '', fileInfo: '', linkPath: '', listingOrder: 0 },
+    {
+      introImageName: '',
+      fileInfo: '',
+      linkPath: '',
+      listingOrder: 0,
+      transcodeStatus: TranscodeStatus['Wait'],
+    },
   ]) //링크, playing 이미지 관리
   const [mainImgInfo, setMainImgInfo] = useState<MainImgInfo>({ mainImg: '', fileInfo: '' }) //mainImg 관리
   const [memberShareInfo, setMemberShareInfo] = useState<Array<ShareInfo>>([
     { memberId: '', nickName: '', priorityShare: 0, directShare: 0 },
   ]) //지분 관리
   const [upLoading, setUploading] = useState(false) //데이터 업로딩 중 로딩 아이콘
-  const [isInputDisabled, setIsInputDisabled] = useState(false)
+  //const [isInputDisabled, setIsInputDisabled] = useState(false)
 
   const vodStatus = ['Wait', 'Available', 'Active', 'Fail'] //vodStatus
 
@@ -127,6 +136,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [lives, { data: livesData }] = useMutation<LivesMutation, LivesMutationVariables>(
     LIVES_MUTATION
   )
+
+  const requiredText =
+    locale === 'ko' ? '위 항목은 필수 항목입니다.' : 'The above items are mandatory.'
 
   const onCompleted = async (data: EditVodMutation) => {
     const {
@@ -191,6 +203,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         fileInfo: '',
         linkPath: '',
         listingOrder: 0,
+        transcodeStatus: TranscodeStatus['Wait'],
       }
       if (vodInfoArr.length < 8) {
         setVodInfoArr(() => vodInfoArr.concat(vod))
@@ -220,78 +233,122 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
       //memberShareData 유효성 확인, 100이 되야한다.
       if (!shareCheck(memberShareInfo, locale)) {
+        setUploading(false)
         return
       }
 
-      //메인 이미지 s3 업로드
-      //아이디 생성
-      let mainImgFileName = '' //메인 썸네일
+      const mainImgFileName = mainImgInfo.mainImg || '' //메인 썸네일
       const nowDate = nowDateStr
-      //MainThumbnail upload
-      if (mainImgInfo.fileInfo instanceof File) {
-        mainImgFileName = `${
-          process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-        }/going/vod/${vodId.toString()}/vod/${vodId.toString()}_main_${nowDate}.jpg`
-        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-          (await S3.upload({
-            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-            Key: mainImgFileName,
-            Body: mainImgInfo.fileInfo,
-            ACL: 'public-read',
-          }).promise())
-      }
 
-      mainImgFileName = `${vodId.toString()}_main_${nowDate}.jpg`
+      //vodStatus 가 Fail 상태이며 transcodeStatus 가 fail인 경우에만 vod 수정이 가능하다.
+      if (vodData?.findVodById.vod && vodData?.findVodById.vod.vodStatus === 'FAIL') {
+        for (let i = 0; i < vodInfoArr.length; i++) {
+          //linkPathName
+          const vodUrlInput: HTMLInputElement | null = document.querySelector(
+            `input[name=vodFile_${i}]`
+          )
 
-      //playImg upload
-      for (let i = 0; i < vodInfoArr.length; i++) {
-        //linkPathName
-        const vodUrlInput: HTMLInputElement | null = document.querySelector(
-          `input[name=vodFile_${i}]`
-        )
+          let introImageName = ''
+          let vodName = ''
+          //let vodUrlInputFilesName = ''
+          if (vodUrlInput) {
+            if (vodUrlInput?.files && vodUrlInput?.files[0] instanceof File) {
+              //vod 확장자 체크
+              if (!vodUrlInput.files[0].type.includes('mp4')) {
+                toast.error(
+                  locale === 'ko'
+                    ? 'VOD의 확장자를 확인해주세요.'
+                    : 'Please check the VOD extension.',
+                  {
+                    theme: localStorage.theme || 'light',
+                    onOpen: () => setUploading(false),
+                  }
+                )
+                return
+              }
 
-        let introImageName = ''
-        let vodName = ''
-        //let vodUrlInputFilesName = ''
+              vodName = `${
+                process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+              }/going/vod/${vodId}/${vodId}_${i + 1}_${nowDate}.mp4`
 
-        if (vodUrlInput) {
-          //introImgNameName
-          introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${vodId}/intro/${vodId}__intro_${i + 1}_${nowDate}.jpg`
-          vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${vodId}/${vodId}_${i + 1}_${nowDate}.mp4`
+              process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
+                (await S3.upload({
+                  Bucket: process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME,
+                  Key: vodName,
+                  Body: vodUrlInput.files[0],
+                  ACL: 'bucket-owner-read',
+                }).promise())
+              vodName = `${vodId}_${i + 1}_${nowDate}.mp4`
+            }
+            //처음 받아왔던 데이터의 introImgName 과 현재의 introImgName이 다르다면 업로드
+            if (
+              vodData?.findVodById.vod?.vodLinkInfo[i] &&
+              vodInfoArr[i].introImageName !==
+                vodData?.findVodById.vod?.vodLinkInfo[i].introImageName
+            ) {
+              //img 확장자 체크
+              if (
+                vodInfoArr[i].introImageName.includes('jpg') ||
+                vodInfoArr[i].introImageName.includes('jpeg') ||
+                vodInfoArr[i].introImageName.includes('png')
+              ) {
+                //introImgNameName
+                introImageName = `${
+                  process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+                }/going/vod/${vodId}/intro/${vodId}_intro_${i + 1}_${nowDate}.jpg`
+                process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+                  (await S3.upload({
+                    Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+                    Key: introImageName,
+                    Body: vodInfoArr[i].introImageName,
+                    ACL: 'bucket-owner-read',
+                  }).promise())
 
-          if (vodUrlInput?.files && vodUrlInput?.files[0] instanceof File) {
-            process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
-              (await S3.upload({
-                Bucket: process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME,
-                Key: vodName,
-                Body: vodUrlInput.files[0],
-                ACL: 'bucket-owner-read',
-              }).promise())
-
-            process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-              (await S3.upload({
-                Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-                Key: introImageName,
-                Body: vodInfoArr[0].introImageName,
-                ACL: 'bucket-owner-read',
-              }).promise())
-
-            introImageName = `${vodId}__intro_${i + 1}_${nowDate}.jpg`
-            //vodUrlInputFilesName = vodUrlInput?.files[0].name
-            vodName = `${vodId}_${i + 1}_${nowDate}.mp4`
+                introImageName = `${vodId}_intro_$i + 1}_${nowDate}.jpg`
+                //vodUrlInputFilesName = vodUrlInput?.files[0].name
+              } else {
+                toast.error(
+                  locale === 'ko'
+                    ? '이미지의 확장자를 확인해주세요.'
+                    : 'Please check the Img extension.',
+                  {
+                    theme: localStorage.theme || 'light',
+                    onOpen: () => setUploading(false),
+                  }
+                )
+                return
+              }
+            }
           }
 
           vodLinkArr.push({
             listingOrder: i + 1,
-            linkPath: vodName || vodInfoArr[i].linkPath || '',
-            introImageName: introImageName,
+            linkPath: vodName === '' ? vodInfoArr[i].linkPath : vodName,
+            introImageName: introImageName === '' ? vodInfoArr[i].introImageName : introImageName,
+            transcodeStatus: vodInfoArr[i].transcodeStatus,
           })
         }
       }
+
+      //메인 이미지 s3 업로드
+      //아이디 생성
+      // let mainImgFileName = mainImgInfo.mainImg //메인 썸네일
+      // //MainThumbnail upload
+      // if (mainImgInfo.fileInfo instanceof File) {
+      //   mainImgFileName = `${
+      //     process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+      //   }/going/vod/${vodId.toString()}/main/${vodId.toString()}_main_${nowDate}.jpg`
+      //   process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+      //     (await S3.upload({
+      //       Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+      //       Key: mainImgFileName,
+      //       Body: mainImgInfo.fileInfo,
+      //       ACL: 'public-read',
+      //     }).promise())
+      //   mainImgFileName = `${vodId.toString()}_main_${nowDate}.jpg`
+      // }
+
+      //playImg upload
 
       const { data } = await editVod({
         variables: {
@@ -301,7 +358,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               mainImgFileName === '' && vodData?.findVodById.vod?.mainImageName
                 ? vodData?.findVodById.vod?.mainImageName
                 : mainImgFileName,
-            vodStatus: (VodStatus as any)[statusRadio],
+            vodStatus:
+              //현재 vodStatus가 fail 이면 wait 로 변경.
+              vodData?.findVodById.vod?.vodStatus === 'FAIL'
+                ? (VodStatus as any)['wait']
+                : (VodStatus as any)[statusRadio],
             vodLinkInfo: vodLinkArr,
             vodShareInfo: {
               vodId: vodId,
@@ -319,8 +380,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         notification.error({
           message,
         })
+
         throw new Error(message)
-        setUploading(false)
       } else {
         notification.success({
           message: locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed',
@@ -331,6 +392,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         }, 500)
       }
     } catch (error) {
+      setUploading(false)
       console.error(error)
     }
   }
@@ -504,13 +566,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       }
     }
     fetch()
+
     if (
       vodData?.findVodById.ok &&
       vodData?.findVodById.vod?.vodLinkInfo &&
       vodData?.findVodById.vod?.vodShareInfo.memberShareInfo
     ) {
       const infoResult = vodData?.findVodById.vod?.vodLinkInfo.map((data) => {
-        return omit(data, ['__typename', 'playingImageName', 'transcodeStatus'])
+        return omit(data, ['__typename', 'playingImageName'])
       }) //liveInfoArr result
       const result = vodData?.findVodById.vod?.vodShareInfo.memberShareInfo.map((data) => {
         return omit(data, ['__typename'])
@@ -522,7 +585,10 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
       setVodInfoArr(infoResult)
       setMemberShareInfo(result)
-      setIsInputDisabled(vodData?.findVodById.vod?.vodStatus === 'WAIT')
+      // setIsInputDisabled(
+      //   vodData?.findVodById.vod?.vodStatus === 'WAIT' ||
+      //     vodData?.findVodById.vod?.vodStatus === 'FAIL'
+      // )
     }
   }, [vodData])
 
@@ -557,9 +623,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Radio.Button
                         key={i}
                         value={data}
-                        style={{ color: data === 'Fail' ? '#c00' : '' }}
                         onChange={() => setStatusRadio(data)}
-                        disabled={data === 'Fail' || data === 'Wait' || isInputDisabled}>
+                        disabled={data === 'Fail' || data === 'Wait'}>
                         {data}
                       </Radio.Button>
                     )
@@ -567,14 +632,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </Radio.Group>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Title</span>
+                    <span>{locale === 'ko' ? '제목' : 'Title'}</span>
                     <Controller
                       key={vodData?.findVodById.vod?.title}
                       defaultValue={vodData?.findVodById.vod?.title}
                       control={control}
                       name="title"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { value, onChange } }) => (
                         <Input
@@ -582,9 +647,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                           placeholder="Please enter the title."
                           value={value}
                           onChange={onChange}
-                          disabled={
-                            isInputDisabled || vodData?.findVodById.vod?.vodStatus === 'ACTIVE'
-                          }
+                          disabled={vodData?.findVodById.vod?.vodStatus === 'ACTIVE'}
                           maxLength={100}
                         />
                       )}
@@ -599,14 +662,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Price</span>
+                    <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                     <Controller
                       key={vodData?.findVodById.vod?.paymentAmount}
                       defaultValue={vodData?.findVodById.vod?.paymentAmount}
                       control={control}
                       name="paymentAmount"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { value, onChange } }) => (
                         <Input
@@ -615,9 +678,13 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                           placeholder="Please enter the paymentAmount."
                           value={value}
                           onChange={onChange}
-                          disabled={
-                            isInputDisabled || vodData?.findVodById.vod?.vodStatus === 'ACTIVE'
-                          }
+                          onKeyPress={(e) => {
+                            if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
+                              e.preventDefault()
+                              return false
+                            }
+                          }}
+                          disabled={vodData?.findVodById.vod?.vodStatus === 'ACTIVE'}
                         />
                       )}
                     />
@@ -632,14 +699,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Main Thumbnail</span>
+                    <span>Main {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                     <Controller
                       key={vodData?.findVodById.vod?.mainImageName}
                       defaultValue={vodData?.findVodById.vod?.mainImageName?.toString()}
                       control={control}
                       name="mainThumbnail"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { onChange } }) => (
                         <Input
@@ -673,25 +740,29 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       return (
                         <div key={index}>
                           <div>
-                            <em className="fontSize12 mrT5">Ch{index + 1}</em>
-                            {index >= 1 && (
-                              <Button
-                                className="delectBtn"
-                                disabled={
-                                  isInputDisabled || vodData?.findVodById.vod?.vodStatus !== 'FAIL'
-                                }
-                                onClick={() => onDeleteBtn(index, setVodInfoArr, vodInfoArr)}>
-                                삭제
-                              </Button>
-                            )}
+                            <em className="fontSize12 mrT5">
+                              Ch{index + 1}
+                              {data.transcodeStatus === 'FAIL' ? (
+                                <span style={{ color: 'red', marginLeft: '3px' }}>
+                                  {locale === 'ko' ? '인코딩 실패' : 'fail'}
+                                </span>
+                              ) : null}
+                            </em>
+                            {index >= 1 ||
+                              (vodData?.findVodById.vod?.vodStatus === 'FAIL' && (
+                                <Button
+                                  className="delectBtn"
+                                  disabled={vodData?.findVodById.vod?.vodStatus !== 'FAIL'}
+                                  onClick={() => onDeleteBtn(index, setVodInfoArr, vodInfoArr)}>
+                                  {locale === 'ko' ? '삭제' : 'Delete'}
+                                </Button>
+                              ))}
                           </div>
                           <Input
                             className="input"
                             type={'file'}
                             name={`vodFile_${index}`}
-                            disabled={
-                              isInputDisabled || vodData?.findVodById.vod?.vodStatus !== 'FAIL'
-                            }
+                            disabled={vodData?.findVodById.vod?.vodStatus !== 'FAIL'}
                             placeholder="Please upload the video.(only mp4)"
                           />
                           {vodInfoArr[index].linkPath && (
@@ -710,9 +781,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             <Popover
                               className="profile-edit-popover uploadBtn"
                               content={() =>
-                                !(
-                                  isInputDisabled || vodData?.findVodById.vod?.vodStatus !== 'FAIL'
-                                ) && renderPopoverContent('playing', index)
+                                !(vodData?.findVodById.vod?.vodStatus !== 'FAIL') &&
+                                renderPopoverContent('playing', index)
                               }
                               trigger="click"
                               placement="bottomRight"
@@ -721,9 +791,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               className="input mrT5"
                               name={`introImgUrl_${index}`}
                               placeholder="Please upload playingThumnail img. only png or jpg"
-                              disabled={
-                                isInputDisabled || vodData?.findVodById.vod?.vodStatus !== 'FAIL'
-                              }
+                              disabled={vodData?.findVodById.vod?.vodStatus !== 'FAIL'}
                               value={vodInfoArr[index].introImageName}
                             />
                           </ImgUploadBtnWrap>
@@ -734,9 +802,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Button
                         className="thumbnailAddBtn"
                         onClick={() => onAddLive('live')}
-                        disabled={
-                          isInputDisabled || vodData?.findVodById.vod?.vodStatus !== 'FAIL'
-                        }>
+                        disabled={vodData?.findVodById.vod?.vodStatus !== 'FAIL'}>
                         {locale === 'ko' ? '추가' : 'Add'}
                       </Button>
                     )}
@@ -744,14 +810,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>Content</span>
+                    <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                     <Controller
                       key={vodData?.findVodById.vod?.content}
                       defaultValue={vodData?.findVodById.vod?.content?.toString()}
                       control={control}
                       name="content"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { value, onChange } }) => (
                         <TextArea
@@ -781,7 +847,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       control={control}
                       name="liveId"
                       rules={{
-                        required: '위 항목은 필수 항목입니다.',
+                        required: requiredText,
                       }}
                       render={({ field: { value, onChange } }) => (
                         <>
@@ -808,7 +874,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <div className="form-item">
                   <div className="form-group">
                     {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                    <span>Share</span>
+                    <span>
+                      {locale === 'ko'
+                        ? '지분 - 우선환수, 직분배'
+                        : 'Share - priorityShare, directShare'}
+                    </span>
                     {memberShareInfo.map((data, index) => {
                       return (
                         <div key={index}>
@@ -817,11 +887,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             {index >= 1 && (
                               <Button
                                 className="delectBtn"
-                                disabled={isInputDisabled}
+                                //disabled={isInputDisabled}
                                 onClick={() =>
                                   onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
                                 }>
-                                삭제
+                                {locale === 'ko' ? '삭제' : 'Delete'}
                               </Button>
                             )}
                           </div>
@@ -830,14 +900,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               control={control}
                               name="share"
                               rules={{
-                                required: '위 항목은 필수 항목입니다.',
+                                required: requiredText,
                               }}
                               render={() => (
                                 <>
                                   <Select
                                     defaultValue={memberShareInfo[0].nickName}
                                     value={memberShareInfo[index].nickName}
-                                    disabled={isInputDisabled}
+                                    //disabled={isInputDisabled}
                                     onChange={(value) =>
                                       setMemberShareInfo(
                                         memberShareInfo.map((data, i) => {
@@ -868,7 +938,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                                     name={`priorityShare_${index}`}
                                     placeholder="priorityShare"
                                     value={memberShareInfo[index].priorityShare}
-                                    disabled={isInputDisabled}
+                                    //disabled={isInputDisabled}
                                     onChange={(e) =>
                                       setMemberShareInfo(
                                         memberShareInfo.map((data, i) => {
@@ -885,7 +955,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                                     name={`directShare_${index}`}
                                     placeholder="directShare"
                                     value={memberShareInfo[index].directShare}
-                                    disabled={isInputDisabled}
+                                    //disabled={isInputDisabled}
                                     onChange={(e) =>
                                       setMemberShareInfo(
                                         memberShareInfo.map((data, i) => {
@@ -906,7 +976,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <Button
                       className="thumbnailAddBtn"
                       onClick={() => onAddLive('member')}
-                      disabled={isInputDisabled}>
+                      //disabled={isInputDisabled}
+                    >
                       {locale === 'ko' ? '추가' : 'Add'}
                     </Button>
                   </div>
@@ -922,7 +993,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       type="primary"
                       role="button"
                       className="submit-button"
-                      disabled={isInputDisabled}
+                      //disabled={isInputDisabled || vodData?.findVodById.vod?.vodStatus === 'WAIT'}
                       loading={editLoading}
                       onClick={onSubmit}>
                       {locale === 'ko' ? '수정' : 'Edit'}

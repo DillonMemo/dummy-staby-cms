@@ -80,14 +80,62 @@ export const shareCheck = (shareArray: Array<any>, locale?: string) => {
     directShare += shareArray[i].directShare
   }
 
-  if (priorityShare > 100 || directShare !== 100) {
+  if (directShare === 100 && (priorityShare === 100 || priorityShare === 0)) {
+    return true
+  } else {
     notification.error({
       message:
         locale === 'ko'
-          ? '직분배의 총합은 100 이 되고 우선 환수지분의 총합은 100 이 넘으면 안됩니다.'
+          ? '직분배의 총합은 100 이 되고 우선 환수지분의 총합은 100 또는 0이어야 합니다.'
           : 'Has been completed',
     })
     return false
   }
-  return true
 }
+
+// 통화 변환
+export const currencyConvert = (currency: number) => {
+  const billion = 1000000000
+  const million = 1000000
+  const thousand = 1000
+  const calcCurrency =
+    currency / billion > 1
+      ? currency / billion
+      : currency / million > 1
+      ? currency / million
+      : currency / thousand > 1
+      ? currency / thousand
+      : currency
+  const symbol =
+    currency / billion > 1
+      ? 'B'
+      : currency / million > 1
+      ? 'M'
+      : currency / thousand > 1
+      ? 'K'
+      : currency
+
+  return {
+    currency: calcCurrency,
+    symbol,
+  }
+}
+
+//은행 배열
+export const bankList = [
+  'KB국민은행',
+  '신한은행',
+  '우리은행',
+  '하나은행',
+  '케이뱅크',
+  '카카오뱅크',
+  '토스뱅크',
+  'NH농협은행',
+  '수협은행',
+  '대구은행',
+  '부산은행',
+  '경남은행',
+  '광주은행',
+  '전북은행',
+  '제주은행',
+]

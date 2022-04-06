@@ -18,6 +18,19 @@ export type Scalars = {
   DateTime: any;
 };
 
+export type AccountInfo = {
+  __typename?: 'AccountInfo';
+  accountNumber: Scalars['String'];
+  bankName: Scalars['String'];
+  depositor: Scalars['String'];
+};
+
+export type AccountInfoInputType = {
+  accountNumber: Scalars['String'];
+  bankName: Scalars['String'];
+  depositor: Scalars['String'];
+};
+
 export enum AdvertiseStatus {
   Display = 'DISPLAY',
   Removed = 'REMOVED',
@@ -197,7 +210,9 @@ export type CreateLiveInput = {
   liveStatus?: Maybe<LiveStatus>;
   mainImageName: Scalars['String'];
   paymentAmount: Scalars['Float'];
+  storageTotalCount?: Maybe<Scalars['Float']>;
   title: Scalars['String'];
+  viewCount?: Maybe<Scalars['Float']>;
 };
 
 export type CreateLiveOutput = {
@@ -217,6 +232,7 @@ export type CreateMainBannerLiveOutput = {
 };
 
 export type CreateMemberInput = {
+  accountInfo?: Maybe<AccountInfoInputType>;
   email: Scalars['String'];
   memberType?: Maybe<MemberType>;
   nickName: Scalars['String'];
@@ -246,7 +262,9 @@ export type CreateVodInput = {
   liveId?: Maybe<Scalars['ID']>;
   mainImageName: Scalars['String'];
   paymentAmount: Scalars['Float'];
+  storageTotalCount?: Maybe<Scalars['Float']>;
   title: Scalars['String'];
+  viewCount?: Maybe<Scalars['Float']>;
   vodLinkInfo: Array<VodLinkInfoInputType>;
   vodShareInfo: VodShareInfoInputType;
   vodStatus?: Maybe<VodStatus>;
@@ -366,6 +384,7 @@ export type EditLiveOutput = {
 
 export type EditMemberInput = {
   _id?: Maybe<Scalars['ID']>;
+  accountInfo?: Maybe<AccountInfoInputType>;
   freePoint?: Maybe<Scalars['Int']>;
   memberStatus?: Maybe<MemberStatus>;
   memberType?: Maybe<MemberType>;
@@ -490,6 +509,22 @@ export type FindVodByTypesOutput = {
   vods: Array<Vod>;
 };
 
+export type GetGoingDashboardOutput = {
+  __typename?: 'GetGoingDashboardOutput';
+  dashboard?: Maybe<GoingDashboard>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type GoingDashboard = {
+  __typename?: 'GoingDashboard';
+  _id: Scalars['ID'];
+  createDate: Scalars['DateTime'];
+  loginCountByDate: Array<Scalars['Float']>;
+  totalMemberCount: Scalars['Float'];
+  updateDate: Scalars['DateTime'];
+};
+
 export type InquiriesInput = {
   boardStatus?: Maybe<BoardStatus>;
   page?: Maybe<Scalars['Int']>;
@@ -535,10 +570,11 @@ export type Live = {
   liveStatus: LiveStatus;
   mainImageName: Scalars['String'];
   paymentAmount: Scalars['Float'];
+  storageTotalCount: Scalars['Float'];
   title: Scalars['String'];
   updateDate: Scalars['DateTime'];
   updateMember: AuthMember;
-  viewCount?: Maybe<Scalars['Float']>;
+  viewCount: Scalars['Float'];
   vodId?: Maybe<Scalars['ID']>;
 };
 
@@ -653,6 +689,7 @@ export type MainBannerLiveOutput = {
 export type Member = {
   __typename?: 'Member';
   _id: Scalars['ID'];
+  accountInfo?: Maybe<AccountInfo>;
   createDate: Scalars['DateTime'];
   email: Scalars['String'];
   lastLoginDate?: Maybe<Scalars['DateTime']>;
@@ -699,9 +736,11 @@ export enum MemberStatus {
 }
 
 export enum MemberType {
-  Admin = 'ADMIN',
   Business = 'BUSINESS',
+  Contents = 'CONTENTS',
+  Cx = 'CX',
   Normal = 'NORMAL',
+  Service = 'SERVICE',
   System = 'SYSTEM'
 }
 
@@ -763,6 +802,7 @@ export type Mutation = {
   lives: LivesOutput;
   login: LoginOutput;
   logout: LogoutOutput;
+  masterCreateAccount: CreateMemberOutput;
   members: MembersOutput;
   notices: NoticesOutput;
   vods: VodsOutput;
@@ -904,6 +944,11 @@ export type MutationLoginArgs = {
 };
 
 
+export type MutationMasterCreateAccountArgs = {
+  input: CreateMemberInput;
+};
+
+
 export type MutationMembersArgs = {
   input: MembersInput;
 };
@@ -953,6 +998,7 @@ export type Query = {
   findMembersByType: MembersByTypeOutput;
   findVodById: FindVodByIdOutput;
   findVodByTypes: FindVodByTypesOutput;
+  getGoingDashboard: GetGoingDashboardOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
   my: Member;
 };
@@ -1026,10 +1072,10 @@ export type Vod = {
   liveId?: Maybe<Scalars['ID']>;
   mainImageName: Scalars['String'];
   paymentAmount: Scalars['Float'];
-  storageTotalCount?: Maybe<Scalars['Float']>;
+  storageTotalCount: Scalars['Float'];
   title: Scalars['String'];
   updateDate: Scalars['DateTime'];
-  viewCount?: Maybe<Scalars['Float']>;
+  viewCount: Scalars['Float'];
   vodLinkInfo: Array<VodLinkInfo>;
   vodShareInfo: VodShareInfo;
   vodStatus: VodStatus;
@@ -1127,7 +1173,7 @@ export type MembersMutationVariables = Exact<{
 }>;
 
 
-export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null | undefined, totalPages?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number } }> | null | undefined } };
+export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null | undefined, totalPages?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType }> | null | undefined } };
 
 export type EditMemberByIdMutationVariables = Exact<{
   editMemberInput: EditMemberInput;
@@ -1148,7 +1194,7 @@ export type LivesMutationVariables = Exact<{
 }>;
 
 
-export type LivesMutation = { __typename?: 'Mutation', lives: { __typename?: 'LivesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives?: Array<{ __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount?: number | null | undefined, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }> }> | null | undefined } };
+export type LivesMutation = { __typename?: 'Mutation', lives: { __typename?: 'LivesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives?: Array<{ __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }> }> | null | undefined } };
 
 export type EditLiveMutationVariables = Exact<{
   editLiveInput: EditLiveInput;
@@ -1176,7 +1222,7 @@ export type VodsMutationVariables = Exact<{
 }>;
 
 
-export type VodsMutation = { __typename?: 'Mutation', vods: { __typename?: 'VodsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods?: Array<{ __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, viewCount?: number | null | undefined, storageTotalCount?: number | null | undefined, mainImageName: string, liveId?: string | null | undefined, vodStatus: VodStatus }> | null | undefined } };
+export type VodsMutation = { __typename?: 'Mutation', vods: { __typename?: 'VodsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods?: Array<{ __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, viewCount: number, storageTotalCount: number, mainImageName: string, liveId?: string | null | undefined, vodStatus: VodStatus }> | null | undefined } };
 
 export type EditVodMutationVariables = Exact<{
   editVodInput: EditVodInput;
@@ -1314,14 +1360,14 @@ export type InquiriesMutation = { __typename?: 'Mutation', inquiries: { __typena
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MyQuery = { __typename?: 'Query', my: { __typename?: 'Member', _id: string, email: string, password: string, nickName: string, profileImageName?: string | null | undefined, memberStatus: MemberStatus, memberType: MemberType, refreshToken?: string | null | undefined, lastLoginDate?: any | null | undefined } };
+export type MyQuery = { __typename?: 'Query', my: { __typename?: 'Member', _id: string, email: string, password: string, nickName: string, profileImageName?: string | null | undefined, memberStatus: MemberStatus, memberType: MemberType, refreshToken?: string | null | undefined, lastLoginDate?: any | null | undefined, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined } };
 
 export type FindMemberByIdQueryVariables = Exact<{
   memberInput: MemberInput;
 }>;
 
 
-export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number } } | null | undefined } };
+export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined } | null | undefined } };
 
 export type FindMembersByTypeQueryVariables = Exact<{
   membersByTypeInput: MembersByTypeInput;
@@ -1335,14 +1381,14 @@ export type FindLiveByIdQueryVariables = Exact<{
 }>;
 
 
-export type FindLiveByIdQuery = { __typename?: 'Query', findLiveById: { __typename?: 'LiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, live?: { __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount?: number | null | undefined, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, createDate: any, updateDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }>, liveShareInfo: { __typename?: 'LiveShareInfo', shareApplyDate?: any | null | undefined, liveId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+export type FindLiveByIdQuery = { __typename?: 'Query', findLiveById: { __typename?: 'LiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, live?: { __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, createDate: any, updateDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }>, liveShareInfo: { __typename?: 'LiveShareInfo', shareApplyDate?: any | null | undefined, liveId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
 
 export type FindVodByIdQueryVariables = Exact<{
   vodInput: FindVodByIdInput;
 }>;
 
 
-export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, mainImageName: string, storageTotalCount?: number | null | undefined, vodStatus: VodStatus, liveId?: string | null | undefined, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null | undefined, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null | undefined, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, mainImageName: string, storageTotalCount: number, vodStatus: VodStatus, liveId?: string | null | undefined, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null | undefined, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null | undefined, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
 
 export type FindLiveByTypesQueryVariables = Exact<{
   findLiveByTypesInput: FindLiveByTypesInput;
@@ -1376,6 +1422,11 @@ export type FindBoardByIdQueryVariables = Exact<{
 
 
 export type FindBoardByIdQuery = { __typename?: 'Query', findBoardById: { __typename?: 'BoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, board?: { __typename?: 'Board', email?: string | null | undefined, title: string, content: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, faqType?: FaqType | null | undefined, createDate: any, uploadImageInfo?: Array<{ __typename?: 'UploadImageInfo', uploadImageName: string, displayOrder: number }> | null | undefined, answerInfo?: { __typename?: 'AnswerInfo', answer: string, createDate: any } | null | undefined } | null | undefined } };
+
+export type GetGoingDashboardQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetGoingDashboardQuery = { __typename?: 'Query', getGoingDashboard: { __typename?: 'GetGoingDashboardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, dashboard?: { __typename?: 'GoingDashboard', totalMemberCount: number, loginCountByDate: Array<number> } | null | undefined } };
 
 
 export const LoginDocument = gql`
@@ -1542,11 +1593,6 @@ export const MembersDocument = gql`
       nickName
       memberStatus
       memberType
-      point {
-        totalPoint
-        paidPoint
-        freePoint
-      }
     }
   }
 }
@@ -2639,6 +2685,11 @@ export const MyDocument = gql`
     memberType
     refreshToken
     lastLoginDate
+    accountInfo {
+      bankName
+      depositor
+      accountNumber
+    }
   }
 }
     `;
@@ -2688,6 +2739,11 @@ export const FindMemberByIdDocument = gql`
         freePoint
       }
       createDate
+      accountInfo {
+        bankName
+        depositor
+        accountNumber
+      }
     }
   }
 }
@@ -3142,3 +3198,45 @@ export function useFindBoardByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
 export type FindBoardByIdQueryHookResult = ReturnType<typeof useFindBoardByIdQuery>;
 export type FindBoardByIdLazyQueryHookResult = ReturnType<typeof useFindBoardByIdLazyQuery>;
 export type FindBoardByIdQueryResult = Apollo.QueryResult<FindBoardByIdQuery, FindBoardByIdQueryVariables>;
+export const GetGoingDashboardDocument = gql`
+    query GetGoingDashboard {
+  getGoingDashboard {
+    ok
+    error {
+      ko
+      en
+    }
+    dashboard {
+      totalMemberCount
+      loginCountByDate
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetGoingDashboardQuery__
+ *
+ * To run a query within a React component, call `useGetGoingDashboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGoingDashboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGoingDashboardQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetGoingDashboardQuery(baseOptions?: Apollo.QueryHookOptions<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>(GetGoingDashboardDocument, options);
+      }
+export function useGetGoingDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>(GetGoingDashboardDocument, options);
+        }
+export type GetGoingDashboardQueryHookResult = ReturnType<typeof useGetGoingDashboardQuery>;
+export type GetGoingDashboardLazyQueryHookResult = ReturnType<typeof useGetGoingDashboardLazyQuery>;
+export type GetGoingDashboardQueryResult = Apollo.QueryResult<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>;

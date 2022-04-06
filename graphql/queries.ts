@@ -12,6 +12,11 @@ export const MY_QUERY = gql`
       memberType
       refreshToken
       lastLoginDate
+      accountInfo {
+        bankName
+        depositor
+        accountNumber
+      }
     }
   }
 `
@@ -35,6 +40,11 @@ export const MEMBER_QUERY = gql`
           freePoint
         }
         createDate
+        accountInfo {
+          bankName
+          depositor
+          accountNumber
+        }
       }
     }
   }
@@ -263,6 +273,25 @@ export const FIND_BOARD_BY_ID_QUERY = gql`
           createDate
         }
         createDate
+      }
+    }
+  }
+`
+
+/**
+ * Going 대쉬보드 데이터를 가져옵니다
+ */
+export const GET_GOING_DASHBOARD = gql`
+  query GetGoingDashboard {
+    getGoingDashboard {
+      ok
+      error {
+        ko
+        en
+      }
+      dashboard {
+        totalMemberCount
+        loginCountByDate
       }
     }
   }
