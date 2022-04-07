@@ -401,6 +401,20 @@ export const GlobalStyles = createGlobalStyle`
       }
     }
 
+    .ant-input-number-input{
+      width:100%;
+    }
+
+    .ant-input-number{
+      width:100%;
+      box-sizing:content-box;
+      border: none!important;
+    }
+
+    textarea.ant-input {
+      min-height:150px;
+    }
+
     .mrT5{
       margin-top:5px;
     }
@@ -665,6 +679,7 @@ export const Form = styled.form`
     }
     select,
     .input:not(.ant-input-disabled, .ant-input-affix-wrapper-disabled),
+    .ant-input-number-input,
     .ant-select-selector {
       height: 2.714rem;
       align-items: center;

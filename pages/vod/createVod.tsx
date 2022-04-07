@@ -308,6 +308,10 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
           autoClose: 750,
           onClose: () => push('/vod/vods'),
         })
+
+        setTimeout(() => {
+          window.location.href = '/vod/vods'
+        }, 500)
       }
     } catch (error) {
       setUploading(false)

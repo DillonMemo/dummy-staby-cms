@@ -2,7 +2,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, DatePicker, Input, Popover, Radio, Select, Upload } from 'antd'
+import { Button, DatePicker, Input, InputNumber, Popover, Radio, Select, Upload } from 'antd'
 
 import { UploadChangeParam } from 'antd/lib/upload'
 import { UploadRequestOption } from 'rc-upload/lib/interface'
@@ -201,6 +201,9 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
           })
         }
       }
+
+      debugger
+
       const { data } = await createLive({
         variables: {
           createLiveInput: {
@@ -412,6 +415,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Controller
                     control={control}
                     name="paymentAmount"
+                    defaultValue={0}
                     rules={{
                       required: true,
                       min: {
@@ -430,11 +434,11 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                       },
                     }}
                     render={({ field: { value, onChange } }) => (
-                      <Input
-                        type="number"
+                      <InputNumber
                         className="input"
                         placeholder="Please enter the paymentAmount."
                         value={value}
+                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                         onKeyPress={(e) => {
                           if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
                             e.preventDefault()
