@@ -126,7 +126,75 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
                   />
                 </div>
               </div>
-              <div className="form-item">
+              {/* 계좌정보 (멤버타입이 BUSINESS 인 경우에만) */}
+              {accountInfo === MemberType.Business && (
+                <>
+                  <div className="form-item mt-1">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '은행' : 'BankName'}</span>
+                      <Controller
+                        control={control}
+                        name="bankName"
+                        defaultValue={bankList[0]}
+                        render={({ field: { value, onChange } }) => (
+                          <Select value={value} onChange={onChange}>
+                            {bankList.map((data, index) => (
+                              <Select.Option value={data} key={`type-${index}`}>
+                                {data}
+                              </Select.Option>
+                            ))}
+                          </Select>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-item mt-1">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '예금주' : 'Depositor'}</span>
+                      <Controller
+                        control={control}
+                        name="depositor"
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            className="input"
+                            placeholder="depositor"
+                            value={value}
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-item mt-1">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '계좌번호' : 'AccountNumber'}</span>
+                      <Controller
+                        control={control}
+                        name="accountNumber"
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            className="input"
+                            type="number"
+                            placeholder="accountNumber"
+                            value={value}
+                            onKeyPress={({ key, preventDefault }) => {
+                              if (key === '.' || key === 'e' || key === '+' || key === '-') {
+                                preventDefault()
+                                return false
+                              }
+                            }}
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="form-item mt-1">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
                   <Controller
@@ -156,7 +224,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item">
+              <div className="form-item mt-1">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
                   <Controller
@@ -184,7 +252,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item">
+              <div className="form-item mt-1">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '닉네임' : 'Nickname'}</span>
                   <Controller
@@ -216,73 +284,6 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              {/* 계좌정보 (멤버타입이 BUSINESS 인 경우에만) */}
-              {accountInfo === MemberType.Business && (
-                <>
-                  <div className="form-item">
-                    <div className="form-group">
-                      <span>{locale === 'ko' ? '은행' : 'BankName'}</span>
-                      <Controller
-                        control={control}
-                        name="bankName"
-                        defaultValue={bankList[0]}
-                        render={({ field: { value, onChange } }) => (
-                          <Select value={value} onChange={onChange}>
-                            {bankList.map((data, index) => (
-                              <Select.Option value={data} key={`type-${index}`}>
-                                {data}
-                              </Select.Option>
-                            ))}
-                          </Select>
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-item">
-                    <div className="form-group">
-                      <span>{locale === 'ko' ? '예금주' : 'Depositor'}</span>
-                      <Controller
-                        control={control}
-                        name="depositor"
-                        render={({ field: { value, onChange } }) => (
-                          <Input
-                            className="input"
-                            placeholder="depositor"
-                            value={value}
-                            onChange={onChange}
-                          />
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-item">
-                    <div className="form-group">
-                      <span>{locale === 'ko' ? '계좌번호' : 'AccountNumber'}</span>
-                      <Controller
-                        control={control}
-                        name="accountNumber"
-                        render={({ field: { value, onChange } }) => (
-                          <Input
-                            className="input"
-                            type="number"
-                            placeholder="accountNumber"
-                            value={value}
-                            onKeyPress={({ key, preventDefault }) => {
-                              if (key === '.' || key === 'e' || key === '+' || key === '-') {
-                                preventDefault()
-                                return false
-                              }
-                            }}
-                            onChange={onChange}
-                          />
-                        )}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
               <div className="form-item">
                 <div className="button-group">
                   <Button

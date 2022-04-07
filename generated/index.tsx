@@ -700,6 +700,7 @@ export type Member = {
   point: Point;
   profileImageName?: Maybe<Scalars['String']>;
   refreshToken?: Maybe<Scalars['String']>;
+  report: Report;
   updateDate: Scalars['DateTime'];
 };
 
@@ -713,6 +714,11 @@ export type MemberOutput = {
   member?: Maybe<Member>;
   ok: Scalars['Boolean'];
 };
+
+export enum MemberReportStatus {
+  None = 'NONE',
+  Reported = 'REPORTED'
+}
 
 export type MemberShareInfo = {
   __typename?: 'MemberShareInfo';
@@ -1051,6 +1057,18 @@ export enum QuestionType {
   Service = 'SERVICE'
 }
 
+export type Report = {
+  __typename?: 'Report';
+  _id: Scalars['ID'];
+  chatCount: Scalars['Float'];
+  commentCount: Scalars['Float'];
+  createDate: Scalars['DateTime'];
+  memberId: Scalars['ID'];
+  memberReportStatus: MemberReportStatus;
+  releaseDate?: Maybe<Scalars['DateTime']>;
+  updateDate: Scalars['DateTime'];
+};
+
 export enum TranscodeStatus {
   Fail = 'FAIL',
   Finish = 'FINISH',
@@ -1367,7 +1385,7 @@ export type FindMemberByIdQueryVariables = Exact<{
 }>;
 
 
-export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined } | null | undefined } };
+export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, lastLoginDate?: any | null | undefined, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, report: { __typename?: 'Report', memberReportStatus: MemberReportStatus }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined } | null | undefined } };
 
 export type FindMembersByTypeQueryVariables = Exact<{
   membersByTypeInput: MembersByTypeInput;
@@ -2738,7 +2756,11 @@ export const FindMemberByIdDocument = gql`
         paidPoint
         freePoint
       }
+      report {
+        memberReportStatus
+      }
       createDate
+      lastLoginDate
       accountInfo {
         bankName
         depositor

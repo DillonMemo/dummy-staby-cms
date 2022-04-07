@@ -341,6 +341,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                         defaultValue={false}
                         render={({ field: { value, onChange } }) => (
                           <Radio.Group
+                            className="gap-3"
                             onChange={({ target: { value } }) => {
                               if (!value) {
                                 setValue('password', '')

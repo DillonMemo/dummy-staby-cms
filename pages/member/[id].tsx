@@ -6,11 +6,12 @@ import {
   EditMemberByIdMutationVariables,
   FindMemberByIdQuery,
   FindMemberByIdQueryVariables,
+  MemberReportStatus,
   MemberType,
 } from '../../generated'
 import { MEMBER_QUERY } from '../../graphql/queries'
-import { defaultPalette, Form, MainWrapper, md, styleMode } from '../../styles/styles'
-import { Button, Input, Select } from 'antd'
+import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
+import { Button, Input, Select, Skeleton } from 'antd'
 import { toast } from 'react-toastify'
 
 import Link from 'next/link'
@@ -24,6 +25,7 @@ import { EDIT_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
 
 /** util */
 import { bankList } from '../../Common/commonFn'
+import moment from 'moment'
 
 type Props = styleMode
 
@@ -157,26 +159,250 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         <div className="main-content">
           <Edit className="card">
             <Form onSubmit={handleSubmit(onSubmit)}>
-              <div className="form-item">
-                <div className="form-group">
-                  <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
-                  <Controller
-                    key={memberData?.findMemberById.member?.email}
-                    control={control}
-                    name="email"
-                    defaultValue={memberData?.findMemberById.member?.email}
-                    render={({ field: { value, onChange } }) => (
-                      <Input
-                        className="input"
-                        placeholder="Email"
-                        value={value}
-                        onChange={onChange}
-                        disabled
-                      />
-                    )}
-                  />
+              <div className="form-grid col-2 gap-1">
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '회원유형' : 'Member Type'}</span>
+                    <Controller
+                      key={memberData?.findMemberById.member?.memberType}
+                      control={control}
+                      defaultValue={memberData?.findMemberById.member?.memberType}
+                      name="memberType"
+                      render={({ field: { value, onChange } }) => (
+                        <Select
+                          defaultValue={memberData?.findMemberById.member?.memberType}
+                          value={value}
+                          onChange={onChange}>
+                          {(Object.values(MemberType) as string[]).map((data, index) => (
+                            <Select.Option value={data} key={`type-${index}`}>
+                              {data}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-item">
+                  <span>{locale === 'ko' ? '회원번호' : 'Member Number'}</span>
+                  <p>{router.query.id}</p>
                 </div>
               </div>
+
+              <div className="form-grid col-2 gap-1">
+                <div
+                  className={[
+                    'collapse',
+                    watchMemberType === MemberType.Business ? 'open' : undefined,
+                  ].join(' ')}>
+                  {watchMemberType === MemberType.Business && (
+                    <>
+                      <div className="form-item">
+                        <div className="form-group">
+                          <span>{locale === 'ko' ? '은행' : 'BankName'}</span>
+                          <Controller
+                            control={control}
+                            name="bankName"
+                            defaultValue={
+                              memberData?.findMemberById.member?.accountInfo?.bankName ||
+                              bankList[0]
+                            }
+                            render={({ field: { value, onChange } }) => (
+                              <Select value={value} onChange={onChange}>
+                                {bankList.map((bank, index) => (
+                                  <Select.Option value={bank} key={`type-${index}`}>
+                                    {bank}
+                                  </Select.Option>
+                                ))}
+                              </Select>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-item mt-1">
+                        <div className="form-group">
+                          <span>{locale === 'ko' ? '예금주' : 'Depositor'}</span>
+                          <Controller
+                            control={control}
+                            name="depositor"
+                            defaultValue={memberData?.findMemberById.member?.accountInfo?.depositor}
+                            render={({ field: { value, onChange } }) => (
+                              <Input
+                                className="input"
+                                placeholder={locale === 'ko' ? '예금주' : 'Depositor'}
+                                value={value}
+                                onChange={onChange}
+                              />
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-item mt-1">
+                        <div className="form-group">
+                          <span>{locale === 'ko' ? '계좌번호' : 'AccountNumber'}</span>
+                          <Controller
+                            control={control}
+                            name="accountNumber"
+                            defaultValue={
+                              memberData?.findMemberById.member?.accountInfo?.accountNumber
+                            }
+                            render={({ field: { value, onChange } }) => (
+                              <Input
+                                className="input"
+                                type="number"
+                                placeholder={locale === 'ko' ? '계좌번호' : 'AccountNumber'}
+                                value={value}
+                                onKeyPress={({ key, preventDefault }) => {
+                                  if (key === '.' || key === 'e' || key === '+' || key === '-') {
+                                    preventDefault()
+                                    return false
+                                  }
+                                }}
+                                onChange={onChange}
+                              />
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-grid col-2 gap-1 mt-1">
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '닉네임' : 'Nickname'}</span>
+                    <Controller
+                      key={memberData?.findMemberById.member?.nickName}
+                      control={control}
+                      name="nickName"
+                      defaultValue={memberData?.findMemberById.member?.nickName}
+                      render={({ field: { value, onChange } }) => (
+                        <Input
+                          className="input"
+                          placeholder="Nickname"
+                          value={value}
+                          onChange={onChange}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
+                    <Controller
+                      key={memberData?.findMemberById.member?.email}
+                      control={control}
+                      name="email"
+                      defaultValue={memberData?.findMemberById.member?.email}
+                      render={({ field: { value, onChange } }) => (
+                        <Input
+                          className="input"
+                          placeholder="Email"
+                          value={value}
+                          onChange={onChange}
+                          disabled
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-grid col-2 gap-1 mt-1">
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '활동상태' : 'Activities'}</span>
+                    <Controller
+                      key={memberData?.findMemberById.member?.memberStatus}
+                      control={control}
+                      name="memberStatus"
+                      render={({ field: { value, onChange } }) => (
+                        <Input
+                          className="input"
+                          placeholder="MemberStatus"
+                          defaultValue={memberData?.findMemberById.member?.memberStatus}
+                          value={value}
+                          onChange={onChange}
+                          disabled
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '등록일' : 'Registration Date'}</span>
+                    {memberData?.findMemberById.member?.createDate ? (
+                      <p>
+                        {moment(memberData?.findMemberById.member?.createDate).format(
+                          'YYYY.MM.DD hh:mm:ss'
+                        )}
+                      </p>
+                    ) : (
+                      <Skeleton.Input active style={{ width: '50%', margin: '4px 0' }} />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-grid col-2 gap-1 mt-1">
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '정지여부' : 'Suspension Status'}</span>
+                    {memberData?.findMemberById.member?.report.memberReportStatus ? (
+                      <div className="row">
+                        <p>
+                          {locale === 'ko'
+                            ? memberData.findMemberById.member.report.memberReportStatus ===
+                              MemberReportStatus.None
+                              ? '정상'
+                              : '차단'
+                            : memberData.findMemberById.member.report.memberReportStatus ===
+                              MemberReportStatus.None
+                            ? 'NONE'
+                            : 'BLOCK'}
+                        </p>
+                        <Button type="primary" role="button" htmlType="button">
+                          {locale === 'ko' ? '이용 정지' : 'Suspension of use'}
+                        </Button>
+                      </div>
+                    ) : (
+                      <Skeleton.Input active style={{ width: '100%', margin: '4px 0' }} />
+                    )}
+                  </div>
+                </div>
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '최근접속일시' : 'Last login date'}</span>
+                    {memberData?.findMemberById.member?.lastLoginDate ? (
+                      <p>
+                        {moment(memberData?.findMemberById.member?.lastLoginDate).format(
+                          'YYYY.MM.DD hh:mm:ss'
+                        )}
+                      </p>
+                    ) : (
+                      <Skeleton.Input active style={{ width: '50%', margin: '4px 0' }} />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-grid col-2 gap-1 mt-1">
+                <div className="form-group">
+                  <span>{locale === 'ko' ? '푸시수신여부' : 'Push received'}</span>
+                </div>
+
+                <div className="form-group">
+                  <span>{locale === 'ko' ? '신고이력' : 'Report'}</span>
+                </div>
+              </div>
+
               <div className="form-item">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
@@ -194,150 +420,10 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                   />
                 </div>
               </div>
-              <div className="form-item">
-                <div className="form-group">
-                  <span>{locale === 'ko' ? '닉네임' : 'Nickname'}</span>
-                  <Controller
-                    key={memberData?.findMemberById.member?.nickName}
-                    control={control}
-                    name="nickName"
-                    defaultValue={memberData?.findMemberById.member?.nickName}
-                    render={({ field: { value, onChange } }) => (
-                      <Input
-                        className="input"
-                        placeholder="Nickname"
-                        value={value}
-                        onChange={onChange}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-              <div className="form-item">
-                <div className="form-group">
-                  <span>{locale === 'ko' ? '회원유형' : 'Member Type'}</span>
-                  <Controller
-                    key={memberData?.findMemberById.member?.memberType}
-                    control={control}
-                    defaultValue={memberData?.findMemberById.member?.memberType}
-                    name="memberType"
-                    render={({ field: { value, onChange } }) => (
-                      <Select
-                        defaultValue={memberData?.findMemberById.member?.memberType}
-                        value={value}
-                        onChange={onChange}>
-                        {(Object.values(MemberType) as string[]).map((data, index) => (
-                          <Select.Option value={data} key={`type-${index}`}>
-                            {data}
-                          </Select.Option>
-                        ))}
-                      </Select>
-                    )}
-                  />
-                </div>
-              </div>
-              <div
-                className={[
-                  'collapse',
-                  watchMemberType === MemberType.Business ? 'open' : undefined,
-                ].join(' ')}>
-                {watchMemberType === MemberType.Business && (
-                  <>
-                    <div className="form-item">
-                      <div className="form-group">
-                        <span>{locale === 'ko' ? '은행' : 'BankName'}</span>
-                        <Controller
-                          control={control}
-                          name="bankName"
-                          defaultValue={
-                            memberData?.findMemberById.member?.accountInfo?.bankName || bankList[0]
-                          }
-                          render={({ field: { value, onChange } }) => (
-                            <Select value={value} onChange={onChange}>
-                              {bankList.map((bank, index) => (
-                                <Select.Option value={bank} key={`type-${index}`}>
-                                  {bank}
-                                </Select.Option>
-                              ))}
-                            </Select>
-                          )}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-item">
-                      <div className="form-group">
-                        <span>{locale === 'ko' ? '예금주' : 'Depositor'}</span>
-                        <Controller
-                          control={control}
-                          name="depositor"
-                          defaultValue={memberData?.findMemberById.member?.accountInfo?.depositor}
-                          render={({ field: { value, onChange } }) => (
-                            <Input
-                              className="input"
-                              placeholder={locale === 'ko' ? '예금주' : 'Depositor'}
-                              value={value}
-                              onChange={onChange}
-                            />
-                          )}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-item">
-                      <div className="form-group">
-                        <span>{locale === 'ko' ? '계좌번호' : 'AccountNumber'}</span>
-                        <Controller
-                          control={control}
-                          name="accountNumber"
-                          defaultValue={
-                            memberData?.findMemberById.member?.accountInfo?.accountNumber
-                          }
-                          render={({ field: { value, onChange } }) => (
-                            <Input
-                              className="input"
-                              type="number"
-                              placeholder={locale === 'ko' ? '계좌번호' : 'AccountNumber'}
-                              value={value}
-                              onKeyPress={({ key, preventDefault }) => {
-                                if (key === '.' || key === 'e' || key === '+' || key === '-') {
-                                  preventDefault()
-                                  return false
-                                }
-                              }}
-                              onChange={onChange}
-                            />
-                          )}
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
 
               <div className="form-item">
                 <div className="form-group">
-                  <span>Activities</span>
-                  <Controller
-                    key={memberData?.findMemberById.member?.memberStatus}
-                    control={control}
-                    name="memberStatus"
-                    render={({ field: { value, onChange } }) => (
-                      <Input
-                        className="input"
-                        placeholder="MemberStatus"
-                        defaultValue={memberData?.findMemberById.member?.memberStatus}
-                        value={value}
-                        onChange={onChange}
-                        disabled
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-              <div className="form-item">
-                <div className="form-group">
-                  <span>Total Point</span>
+                  <span>{locale === 'ko' ? '총 포인트' : 'Total Point'}</span>
                   <Controller
                     key={memberData?.findMemberById.member?.point.totalPoint}
                     control={control}
@@ -357,7 +443,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Paid Point</span>
+                  <span>{locale === 'ko' ? '유료 포인트' : 'Paid Point'}</span>
                   <Controller
                     key={memberData?.findMemberById.member?.point.paidPoint}
                     control={control}
@@ -377,7 +463,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
               <div className="form-item">
                 <div className="form-group">
-                  <span>Free Point</span>
+                  <span>{locale === 'ko' ? '무료 포인트' : 'Free Point'}</span>
                   <Controller
                     key={memberData?.findMemberById.member?.point.freePoint}
                     control={control}
@@ -390,26 +476,6 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         type="number"
                         value={value}
                         onChange={onChange}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-              <div className="form-item">
-                <div className="form-group">
-                  <span>RegistrationDate</span>
-                  <Controller
-                    key={memberData?.findMemberById.member?.createDate.split('T')[0]}
-                    control={control}
-                    name="createDate"
-                    defaultValue={memberData?.findMemberById.member?.createDate.split('T')[0]}
-                    render={({ field: { value, onChange } }) => (
-                      <Input
-                        className="input"
-                        placeholder="MemberStatus"
-                        value={value}
-                        onChange={onChange}
-                        disabled
                       />
                     )}
                   />
@@ -439,11 +505,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 export default MemberDetail
 
 const Edit = styled.div`
-  width: 50%;
-
-  ${md} {
-    width: 100%;
-  }
+  width: 100%;
 
   .profile-img-container {
     cursor: pointer;
