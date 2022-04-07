@@ -653,6 +653,16 @@ export const Form = styled.form`
   .form-item {
     color: ${({ theme }) => theme.text};
 
+    p {
+      display: flex;
+      height: 2.714rem;
+      align-items: center;
+      padding: 0 0.6875rem;
+
+      ${md} {
+        padding: 0;
+      }
+    }
     select,
     .input:not(.ant-input-disabled, .ant-input-affix-wrapper-disabled),
     .ant-select-selector {
@@ -702,10 +712,13 @@ export const Form = styled.form`
       display: inline-flex;
       align-items: center;
       justify-content: flex-start;
-      gap: 3rem;
 
       ${md} {
         justify-content: center;
+      }
+
+      &.gap-3 {
+        gap: 3rem;
       }
     }
 
@@ -716,6 +729,12 @@ export const Form = styled.form`
       .form-message {
         color: red;
         font-size: 0.75rem;
+      }
+
+      .row {
+        display: inline-flex;
+        justify-content: space-between;
+        align-items: center;
       }
     }
 
