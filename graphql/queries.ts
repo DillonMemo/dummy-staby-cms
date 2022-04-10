@@ -51,6 +51,10 @@ export const MEMBER_QUERY = gql`
           depositor
           accountNumber
         }
+        pushInfo {
+          pushType
+          notificationFlag
+        }
       }
     }
   }

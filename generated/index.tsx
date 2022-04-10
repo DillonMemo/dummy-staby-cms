@@ -699,6 +699,7 @@ export type Member = {
   password: Scalars['String'];
   point: Point;
   profileImageName?: Maybe<Scalars['String']>;
+  pushInfo: Array<PushInfo>;
   refreshToken?: Maybe<Scalars['String']>;
   report: Report;
   updateDate: Scalars['DateTime'];
@@ -993,6 +994,16 @@ export type Point = {
   totalPoint: Scalars['Int'];
   updateDate: Scalars['DateTime'];
 };
+
+export type PushInfo = {
+  __typename?: 'PushInfo';
+  notificationFlag: Scalars['Boolean'];
+  pushType: PushType;
+};
+
+export enum PushType {
+  All = 'ALL'
+}
 
 export type Query = {
   __typename?: 'Query';
@@ -1385,7 +1396,7 @@ export type FindMemberByIdQueryVariables = Exact<{
 }>;
 
 
-export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, lastLoginDate?: any | null | undefined, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, report: { __typename?: 'Report', memberReportStatus: MemberReportStatus }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined } | null | undefined } };
+export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, lastLoginDate?: any | null | undefined, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, report: { __typename?: 'Report', memberReportStatus: MemberReportStatus, chatCount: number, commentCount: number }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined, pushInfo: Array<{ __typename?: 'PushInfo', pushType: PushType, notificationFlag: boolean }> } | null | undefined } };
 
 export type FindMembersByTypeQueryVariables = Exact<{
   membersByTypeInput: MembersByTypeInput;
@@ -2758,6 +2769,8 @@ export const FindMemberByIdDocument = gql`
       }
       report {
         memberReportStatus
+        chatCount
+        commentCount
       }
       createDate
       lastLoginDate
@@ -2765,6 +2778,10 @@ export const FindMemberByIdDocument = gql`
         bankName
         depositor
         accountNumber
+      }
+      pushInfo {
+        pushType
+        notificationFlag
       }
     }
   }

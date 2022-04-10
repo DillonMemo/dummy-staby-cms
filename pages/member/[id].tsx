@@ -11,7 +11,7 @@ import {
 } from '../../generated'
 import { MEMBER_QUERY } from '../../graphql/queries'
 import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, Input, Select, Skeleton } from 'antd'
+import { Button, Input, Radio, Select, Skeleton } from 'antd'
 import { toast } from 'react-toastify'
 
 import Link from 'next/link'
@@ -31,6 +31,7 @@ type Props = styleMode
 
 export interface MemberEditForm {
   email: string
+  checkPassword: boolean
   password: string
   nickName: string
   memberType: MemberType
@@ -48,7 +49,14 @@ export interface MemberEditForm {
 const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const router = useRouter()
   const { locale } = useRouter()
-  const { getValues, handleSubmit, control, watch } = useForm<MemberEditForm>({
+  const {
+    getValues,
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<MemberEditForm>({
     mode: 'onChange',
   })
 
@@ -59,6 +67,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     FindMemberByIdQueryVariables
   >(MEMBER_QUERY)
   const watchMemberType = watch('memberType')
+  const watchCheckPassword = watch('checkPassword')
 
   const onCompleted = async (data: EditMemberByIdMutation) => {
     const {
@@ -368,9 +377,24 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                             ? 'NONE'
                             : 'BLOCK'}
                         </p>
-                        <Button type="primary" role="button" htmlType="button">
-                          {locale === 'ko' ? '이용 정지' : 'Suspension of use'}
-                        </Button>
+                        {memberData.findMemberById.member.report.memberReportStatus ===
+                        MemberReportStatus.None ? (
+                          <Button
+                            type="primary"
+                            role="button"
+                            htmlType="button"
+                            onClick={() => console.log('이용정지 클릭')}>
+                            {locale === 'ko' ? '이용 정지' : 'Suspend'}
+                          </Button>
+                        ) : (
+                          <Button
+                            type="primary"
+                            role="button"
+                            htmlType="button"
+                            onClick={() => console.log('정지해제 클릭')}>
+                            {locale === 'ko' ? '정지 해제' : 'Continue'}
+                          </Button>
+                        )}
                       </div>
                     ) : (
                       <Skeleton.Input active style={{ width: '100%', margin: '4px 0' }} />
@@ -394,34 +418,94 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
 
               <div className="form-grid col-2 gap-1 mt-1">
-                <div className="form-group">
-                  <span>{locale === 'ko' ? '푸시수신여부' : 'Push received'}</span>
-                </div>
-
-                <div className="form-group">
-                  <span>{locale === 'ko' ? '신고이력' : 'Report'}</span>
-                </div>
-              </div>
-
-              <div className="form-item">
-                <div className="form-group">
-                  <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
-                  <Controller
-                    control={control}
-                    name="password"
-                    render={({ field: { value, onChange } }) => (
-                      <Input.Password
-                        className="input"
-                        placeholder="password"
-                        value={value}
-                        onChange={onChange}
-                      />
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '푸시수신여부' : 'Push received'}</span>
+                    {memberData?.findMemberById.member?.pushInfo[0] ? (
+                      <p>
+                        {memberData.findMemberById.member.pushInfo[0].notificationFlag
+                          ? '동의'
+                          : '거부'}
+                      </p>
+                    ) : (
+                      <Skeleton.Input active style={{ width: '30%', margin: '4px 0' }} />
                     )}
-                  />
+                  </div>
+                </div>
+
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '신고이력' : 'Report'}</span>
+                    {memberData?.findMemberById.member?.report ? (
+                      <p>
+                        {memberData.findMemberById.member.report.chatCount +
+                          memberData.findMemberById.member.report.commentCount}
+                      </p>
+                    ) : (
+                      <Skeleton.Input active style={{ width: '30%', margin: '4px 0' }} />
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="form-item">
+              <div className="form-grid col-2 gap-1 mt-1">
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '비밀번호 변경' : 'Change Password'}</span>
+                    <Controller
+                      control={control}
+                      name="checkPassword"
+                      defaultValue={false}
+                      render={({ field: { value, onChange } }) => (
+                        <Radio.Group
+                          className="gap-3"
+                          onChange={({ target: { value } }) => {
+                            if (!value) {
+                              setValue('password', '')
+                            }
+                            onChange(value)
+                          }}
+                          value={value}>
+                          <Radio value={false}>{locale === 'ko' ? '미변경' : 'be unchanged'}</Radio>
+                          <Radio value={true}>{locale === 'ko' ? '변경' : 'be changed'}</Radio>
+                        </Radio.Group>
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="form-item">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
+                    <Controller
+                      control={control}
+                      name="password"
+                      rules={{
+                        required: {
+                          value: watchCheckPassword,
+                          message:
+                            locale === 'ko' ? '필수 입력 입니다.' : 'It is a required input.',
+                        },
+                      }}
+                      render={({ field: { value, onChange } }) => (
+                        <Input.Password
+                          className="input"
+                          placeholder="password"
+                          disabled={!watchCheckPassword}
+                          value={value}
+                          onChange={onChange}
+                        />
+                      )}
+                    />
+                  </div>
+                  {errors.password?.message && (
+                    <div className="form-message">
+                      <span>{errors.password.message}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* <div className="form-item">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '총 포인트' : 'Total Point'}</span>
                   <Controller
@@ -480,7 +564,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     )}
                   />
                 </div>
-              </div>
+              </div> */}
 
               <div className="form-item">
                 <div className="button-group">
