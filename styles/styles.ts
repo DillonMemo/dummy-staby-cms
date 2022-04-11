@@ -642,6 +642,9 @@ export const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr;
 
+  .mt-harf {
+    margin-top: 0.5rem;
+  }
   .mt-1 {
     margin-top: 1rem;
   }
