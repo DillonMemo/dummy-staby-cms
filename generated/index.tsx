@@ -447,7 +447,10 @@ export type EventsOutput = {
 export enum FaqType {
   Content = 'CONTENT',
   Etc = 'ETC',
-  Payment = 'PAYMENT'
+  Member = 'MEMBER',
+  Payment = 'PAYMENT',
+  Play = 'PLAY',
+  Service = 'SERVICE'
 }
 
 export type FaqsInput = {
