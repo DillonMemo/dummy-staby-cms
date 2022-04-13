@@ -220,8 +220,25 @@ export const GlobalStyles = createGlobalStyle`
         .ant-modal-body {
           background: ${({ theme }) => theme.body};
 
-          .ant-modal-confirm-title {
+          .ant-modal-confirm-title,
+          .ant-modal-confirm-content {
             color: ${({ theme }) => theme.text};
+
+          }
+          .ant-select {
+            width: 100%;
+            margin-top: 1rem;
+            .ant-select-selector {
+              height: 2rem;
+              align-items: center;
+              background-color: ${({ theme }) => theme.card};
+              color: ${({ theme }) => theme.text};
+              border: 1px solid ${({ theme }) => theme.border};
+              border-radius: ${({ theme }) => theme.card_radius};
+            }
+            .ant-select-arrow {
+              color: ${({ theme }) => theme.text};
+            }
           }
         }
 
@@ -361,6 +378,7 @@ export const GlobalStyles = createGlobalStyle`
         background-color: ${({ theme }) => `${theme.disable}`};
       }
     }
+    
 
     .ant-tabs {
       color: ${({ theme }) =>
@@ -650,6 +668,9 @@ export const Form = styled.form`
   }
   .mt-2 {
     margin-top: 2rem;
+  }
+  .ml-harf {
+    margin-left: 0.5rem;
   }
   .form-grid {
     display: grid;

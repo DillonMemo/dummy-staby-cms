@@ -8,20 +8,21 @@ import {
   FindMemberByIdQueryVariables,
   MemberReportStatus,
   MemberType,
+  SuspendMemberByIdMutation,
+  SuspendMemberByIdMutationVariables,
 } from '../../generated'
 import { MEMBER_QUERY } from '../../graphql/queries'
 import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, Input, Radio, Select, Skeleton } from 'antd'
+import { Button, Input, Modal, Radio, Select, Skeleton } from 'antd'
 import { toast } from 'react-toastify'
-
+import { useEffect, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import styled from 'styled-components'
 
 /** components */
 import Layout from '../../components/Layout'
-import { useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { EDIT_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
+import { EDIT_MEMBER_BY_ID_MUTATION, SUSPEND_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
 
 /** util */
 import { bankList } from '../../Common/commonFn'
@@ -49,6 +50,16 @@ export interface MemberEditForm {
 const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const router = useRouter()
   const { locale } = useRouter()
+  const [suspendModal, setSuspendModal] = useState({
+    isVisible: false,
+    isConfirmVisible: false,
+    isLoading: false,
+    value: 1,
+  })
+  const [releaseModal, setReleaseModal] = useState({
+    isVisible: false,
+  })
+
   const {
     getValues,
     handleSubmit,
@@ -66,8 +77,16 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     FindMemberByIdQuery,
     FindMemberByIdQueryVariables
   >(MEMBER_QUERY)
+  const [suspendMember, { loading: isSuspendMemberLoading }] = useMutation<
+    SuspendMemberByIdMutation,
+    SuspendMemberByIdMutationVariables
+  >(SUSPEND_MEMBER_BY_ID_MUTATION)
   const watchMemberType = watch('memberType')
   const watchCheckPassword = watch('checkPassword')
+  const modalConfig = {
+    okText: locale === 'ko' ? '확인' : 'OK',
+    cancelText: locale === 'ko' ? '취소' : 'Cancel',
+  }
 
   const onCompleted = async (data: EditMemberByIdMutation) => {
     const {
@@ -126,7 +145,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       } else {
         toast.success(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
           theme: localStorage.theme || 'light',
-          autoClose: 750,
+          autoClose: 1000,
           onClose: () => router.push('/member/members', '/member/members', { locale }),
         })
       }
@@ -350,7 +369,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     {memberData?.findMemberById.member?.createDate ? (
                       <p>
                         {moment(memberData?.findMemberById.member?.createDate).format(
-                          'YYYY.MM.DD hh:mm:ss'
+                          'YYYY.MM.DD HH:mm:ss'
                         )}
                       </p>
                     ) : (
@@ -371,11 +390,15 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                             ? memberData.findMemberById.member.report.memberReportStatus ===
                               MemberReportStatus.None
                               ? '정상'
-                              : '차단'
+                              : `차단 (정지 해제 : ${moment(
+                                  memberData.findMemberById.member.report.releaseDate
+                                ).format('YYYY.MM.DD 00:00')})`
                             : memberData.findMemberById.member.report.memberReportStatus ===
                               MemberReportStatus.None
                             ? 'NONE'
-                            : 'BLOCK'}
+                            : `BLOCK (release of suspension : ${moment(
+                                memberData.findMemberById.member.report.releaseDate
+                              ).format('YYYY.MM.DD 00:00')})`}
                         </p>
                         {memberData.findMemberById.member.report.memberReportStatus ===
                         MemberReportStatus.None ? (
@@ -383,7 +406,9 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                             type="primary"
                             role="button"
                             htmlType="button"
-                            onClick={() => console.log('이용정지 클릭')}>
+                            onClick={() =>
+                              setSuspendModal((prev) => ({ ...prev, isVisible: true }))
+                            }>
                             {locale === 'ko' ? '이용 정지' : 'Suspend'}
                           </Button>
                         ) : (
@@ -391,7 +416,9 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                             type="primary"
                             role="button"
                             htmlType="button"
-                            onClick={() => console.log('정지해제 클릭')}>
+                            onClick={() =>
+                              setReleaseModal((prev) => ({ ...prev, isVisible: !prev.isVisible }))
+                            }>
                             {locale === 'ko' ? '정지 해제' : 'Continue'}
                           </Button>
                         )}
@@ -407,7 +434,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     {memberData?.findMemberById.member?.lastLoginDate ? (
                       <p>
                         {moment(memberData?.findMemberById.member?.lastLoginDate).format(
-                          'YYYY.MM.DD hh:mm:ss'
+                          'YYYY.MM.DD HH:mm:ss'
                         )}
                       </p>
                     ) : (
@@ -424,8 +451,12 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     {memberData?.findMemberById.member?.pushInfo[0] ? (
                       <p>
                         {memberData.findMemberById.member.pushInfo[0].notificationFlag
-                          ? '동의'
-                          : '거부'}
+                          ? locale === 'ko'
+                            ? '동의'
+                            : 'agree'
+                          : locale === 'ko'
+                          ? '거부'
+                          : 'disagree'}
                       </p>
                     ) : (
                       <Skeleton.Input active style={{ width: '30%', margin: '4px 0' }} />
@@ -582,6 +613,134 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           </Edit>
         </div>
       </MainWrapper>
+
+      <Modal
+        {...modalConfig}
+        title={locale === 'ko' ? '이용 정지' : 'Suspend'}
+        visible={suspendModal.isVisible}
+        confirmLoading={suspendModal.isLoading}
+        maskClosable={false}
+        onOk={() =>
+          setSuspendModal((prev) => ({
+            ...prev,
+            isLoading: !prev.isLoading,
+            isConfirmVisible: !prev.isConfirmVisible,
+          }))
+        }
+        onCancel={() => setSuspendModal((prev) => ({ ...prev, isVisible: !prev.isVisible }))}>
+        <div>
+          <p>{locale === 'ko' ? '정지 기간을 선택해주세요.' : 'Please select a suspend period.'}</p>
+          <Select
+            defaultValue={suspendModal.value}
+            onChange={(value) => setSuspendModal((prev) => ({ ...prev, value }))}>
+            {[1, 3, 5, 7, 15].map((day, index) => (
+              <Select.Option value={day} key={index}>
+                {day}일
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+      </Modal>
+      <Modal
+        {...modalConfig}
+        title={locale === 'ko' ? '이용 정지' : 'Suspend'}
+        visible={suspendModal.isConfirmVisible}
+        confirmLoading={isSuspendMemberLoading}
+        onOk={async () => {
+          const { data } = await suspendMember({
+            variables: {
+              memberSuspendInput: {
+                memberId: (router.query.id as string) || '',
+                increase: suspendModal.value,
+              },
+            },
+          })
+
+          if (data?.suspendMemberById.ok) {
+            toast.success(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
+              theme: localStorage.theme || 'light',
+              autoClose: 1000,
+              onClose: () => router.reload(),
+            })
+          } else {
+            toast.error(
+              locale === 'ko'
+                ? '회원 정지중 오류가 발생했습니다.'
+                : 'An error occurred while suspending member',
+              {
+                theme: localStorage.theme || 'light',
+                autoClose: 1000,
+                onClose: () =>
+                  setSuspendModal((prev) => ({
+                    ...prev,
+                    isConfirmVisible: !prev.isConfirmVisible,
+                    isLoading: !prev.isLoading,
+                    isVisible: !prev.isVisible,
+                  })),
+              }
+            )
+          }
+        }}
+        onCancel={() =>
+          setSuspendModal((prev) => ({
+            ...prev,
+            isVisible: !prev.isVisible,
+            isConfirmVisible: !prev.isConfirmVisible,
+            isLoading: !prev.isLoading,
+          }))
+        }>
+        <p>
+          {locale === 'ko'
+            ? `해당 회원을 ${suspendModal.value}일 정지 처리 하시겠습니까?`
+            : `Would you like to suspend the member for ${suspendModal.value} days?`}
+        </p>
+      </Modal>
+      <Modal
+        {...modalConfig}
+        title={locale === 'ko' ? '정지해제' : 'release of suspension'}
+        visible={releaseModal.isVisible}
+        confirmLoading={isSuspendMemberLoading}
+        onOk={async () => {
+          const { data } = await suspendMember({
+            variables: {
+              memberSuspendInput: {
+                memberId: (router.query.id as string) || '',
+              },
+            },
+          })
+
+          if (data?.suspendMemberById.ok) {
+            toast.success(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
+              theme: localStorage.theme || 'light',
+              autoClose: 1000,
+              onClose: () => router.reload(),
+            })
+          } else {
+            toast.error(
+              locale === 'ko'
+                ? '회원 정지중 오류가 발생했습니다.'
+                : 'An error occurred while suspending member',
+              {
+                theme: localStorage.theme || 'light',
+                autoClose: 1000,
+                onClose: () =>
+                  setSuspendModal((prev) => ({
+                    ...prev,
+                    isConfirmVisible: !prev.isConfirmVisible,
+                    isLoading: !prev.isLoading,
+                    isVisible: !prev.isVisible,
+                  })),
+              }
+            )
+          }
+        }}
+        onCancel={() => setReleaseModal((prev) => ({ ...prev, isVisible: !prev.isVisible }))}>
+        <p>
+          {locale === 'ko'
+            ? '해당 회원을 정지 해제 하시겠습니까?'
+            : 'Are you sure you want to release of suspension the member?'}
+        </p>
+      </Modal>
     </Layout>
   )
 }

@@ -99,7 +99,7 @@ const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <Skeleton.Button active />
                   </div>
                 </>
-              ) : (
+              ) : goingData ? (
                 <>
                   <div className="col-4 gap">
                     <div className="grid col-2 gap">
@@ -201,6 +201,23 @@ const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
                       </div>
                     </div>
                     <div className="card">{locale === 'ko' ? '준비중 입니다' : 'Comming soon'}</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3>
+                    {locale === 'ko'
+                      ? '해당 권한은 대시보드 이용이 불가능 합니다.'
+                      : 'This permission is not available on the dashboard.'}
+                  </h3>
+                  <div className="col-4 gap">
+                    <div className="grid col-2 gap">
+                      <Skeleton.Button active />
+                      <Skeleton.Button active />
+                    </div>
+                    <Skeleton.Button active />
+                    <Skeleton.Button active />
+                    <Skeleton.Button active />
                   </div>
                 </>
               )}

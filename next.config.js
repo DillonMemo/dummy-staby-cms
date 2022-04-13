@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   i18n: {
     // ISO Language code -> http://www.lingoes.net/en/translator/langcode.htm
     // These are all the locales you want to support in

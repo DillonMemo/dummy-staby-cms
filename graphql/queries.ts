@@ -43,6 +43,7 @@ export const MEMBER_QUERY = gql`
           memberReportStatus
           chatCount
           commentCount
+          releaseDate
         }
         createDate
         lastLoginDate
