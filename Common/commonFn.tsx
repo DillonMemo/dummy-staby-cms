@@ -1,6 +1,8 @@
 import { Dispatch, SetStateAction } from 'react'
 import { styleMode } from '../styles/styles'
 import { notification } from 'antd'
+import { S3 } from '../lib/awsClient'
+import { toast } from 'react-toastify'
 
 export type Props = styleMode
 
@@ -139,3 +141,46 @@ export const bankList = [
   '전북은행',
   '제주은행',
 ]
+
+//라이브 이미지 확장자 체크 및 s3업로드
+export const liveImgCheckExtension = async (
+  inputElement: HTMLInputElement | null,
+  id: string,
+  nowDate: string,
+  locale: string | undefined
+) => {
+  let mainImgFileName = '' //메인 썸네일
+
+  if (inputElement && inputElement?.files && inputElement?.files[0] instanceof File) {
+    if (
+      inputElement.files[0].type.includes('jpg') ||
+      inputElement.files[0].type.includes('png') ||
+      inputElement.files[0].type.includes('jpeg')
+    ) {
+      mainImgFileName = `${
+        process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+      }/going/live/${id.toString()}/main/${nowDate}`
+      process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+        (await S3.upload({
+          Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+          Key: mainImgFileName,
+          Body: inputElement.files[0],
+          ACL: 'public-read',
+        }).promise())
+
+      return true
+    } else {
+      toast.error(
+        locale && locale === 'ko'
+          ? '이미지의 확장자를 확인해주세요.'
+          : 'Please check the Img extension.',
+        {
+          theme: localStorage.theme || 'light',
+        }
+      )
+      return false
+    }
+  }
+
+  return true
+}
