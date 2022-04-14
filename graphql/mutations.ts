@@ -629,3 +629,22 @@ export const INQUIRIES_MUTATION = gql`
     }
   }
 `
+
+/**
+ * 회원 정지를 요청 합니다.
+ * @example {input: {
+ *  memberId: <ObjectId>
+ *  increase: <Number>
+ * }}
+ */
+export const SUSPEND_MEMBER_BY_ID_MUTATION = gql`
+  mutation SuspendMemberById($memberSuspendInput: MemberSuspendInput!) {
+    suspendMemberById(input: $memberSuspendInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`

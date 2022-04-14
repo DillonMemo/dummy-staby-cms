@@ -39,11 +39,22 @@ export const MEMBER_QUERY = gql`
           paidPoint
           freePoint
         }
+        report {
+          memberReportStatus
+          chatCount
+          commentCount
+          releaseDate
+        }
         createDate
+        lastLoginDate
         accountInfo {
           bankName
           depositor
           accountNumber
+        }
+        pushInfo {
+          pushType
+          notificationFlag
         }
       }
     }

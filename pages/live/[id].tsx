@@ -2,10 +2,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, DatePicker, Input, Popover, Radio, Select, Upload } from 'antd'
-
-import { UploadChangeParam } from 'antd/lib/upload'
-import { UploadRequestOption } from 'rc-upload/lib/interface'
+import { Button, DatePicker, Input, Radio, Select } from 'antd'
 
 import Link from 'next/link'
 
@@ -16,7 +13,6 @@ import TextArea from 'rc-textarea'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import ImgCrop from 'antd-img-crop'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { DELETE_LIVE_MUTATION, EDIT_LIVE_MUTATION } from '../../graphql/mutations'
 import {
@@ -33,10 +29,10 @@ import {
 } from '../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY, LIVE_QUERY } from '../../graphql/queries'
 
-import { S3 } from '../../lib/awsClient'
 import {
   DATE_FORMAT,
   delayedEntryTimeArr,
+  liveImgCheckExtension,
   nowDateStr,
   onDeleteBtn,
   shareCheck,
@@ -56,6 +52,7 @@ export interface LiveCreateForm {
   delayedEntryTime: number
   content?: string
   share: ShareInfo
+  liveThumnailRemove: boolean
 }
 
 export type ShareInfo = {
@@ -81,16 +78,25 @@ const ShareWrap = styled.div`
   gap: 5px;
 `
 
-const ImgUploadBtnWrap = styled.div`
+const ImgInputWrap = styled.div`
   position: relative;
 
-  .uploadBtn {
+  .delectBtn {
     position: absolute;
-    width: 100%;
-    height: 2.714rem;
-    top: 5px;
-    right: 0px;
-    z-index: 2;
+    width: 50px;
+    height: 30px;
+    line-height: 30px;
+    margin: 0;
+    top: 50%;
+    right: 7px;
+    transform: translateY(-50%);
+    background-color: #bbbbbb !important;
+  }
+
+  .hidden {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
   }
 `
 
@@ -100,6 +106,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     { listingOrder: 0, linkPath: '' },
   ]) //링크 관리
   const [mainImgInfo, setMainImgInfo] = useState<MainImgInfo>({ mainImg: '', fileInfo: '' }) //mainImg 관리
+
   const [memberShareInfo, setMemberShareInfo] = useState<Array<ShareInfo>>([
     { memberId: '', nickName: '', priorityShare: 0, directShare: 0 },
   ]) //지분 관리
@@ -107,12 +114,15 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const {
     getValues,
+    watch,
+    register,
     formState: { errors },
     control,
   } = useForm<LiveCreateForm>({
     mode: 'onChange',
   })
 
+  const watchLiveThumnailRemove = watch('liveThumnailRemove', false)
   const liveStatus = ['Hide', 'Display', 'Active', 'Finish'] //라이브 상태
 
   //현재 라이브 아이디
@@ -182,24 +192,26 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   //라이브 삭제
   const liveDelete = async () => {
-    const { data } = await deleteLive({
-      variables: {
-        deleteLiveInput: {
-          liveId,
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      const { data } = await deleteLive({
+        variables: {
+          deleteLiveInput: {
+            liveId,
+          },
         },
-      },
-    })
-
-    if (!data?.deleteLive.ok) {
-      const message = locale === 'ko' ? data?.deleteLive.error?.ko : data?.deleteLive.error?.en
-      toast.error(message, { theme: localStorage.theme || 'light' })
-      throw new Error(message)
-    } else {
-      toast.success(locale === 'ko' ? '삭제가 완료 되었습니다.' : 'Has been completed', {
-        theme: localStorage.theme || 'light',
-        autoClose: 500,
-        onClose: () => push('/live/lives'),
       })
+
+      if (!data?.deleteLive.ok) {
+        const message = locale === 'ko' ? data?.deleteLive.error?.ko : data?.deleteLive.error?.en
+        toast.error(message, { theme: localStorage.theme || 'light' })
+        throw new Error(message)
+      } else {
+        toast.success(locale === 'ko' ? '삭제가 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 500,
+          onClose: () => push('/live/lives'),
+        })
+      }
     }
   }
 
@@ -244,36 +256,19 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       let mainImgFileName = '' //메인 썸네일
       const nowDate = `${id.toString()}_main_${nowDateStr}.png`
 
-      mainImgFileName = `${
-        process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-      }/going/live/${id.toString()}/main/${nowDate}`
+      const liveImgInput: HTMLInputElement | null =
+        document.querySelector(`input[name=liveThumbnail]`)
 
       //MainThumbnail upload
       //이미지 확장자 체크
-      if (mainImgInfo.fileInfo instanceof File) {
-        if (
-          mainImgInfo.fileInfo.name.includes('jpg') ||
-          mainImgInfo.fileInfo.name.includes('png') ||
-          mainImgInfo.fileInfo.name.includes('jpeg')
-        ) {
-          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-            (await S3.upload({
-              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-              Key: mainImgFileName,
-              Body: mainImgInfo.fileInfo,
-              ACL: 'public-read',
-            }).promise())
+      if (liveImgInput && liveImgInput?.files && liveImgInput?.files[0] instanceof File) {
+        const imgCheck = await liveImgCheckExtension(liveImgInput, id, nowDate, locale)
 
-          mainImgFileName = nowDate
-        } else {
-          toast.error(
-            locale === 'ko' ? '이미지의 확장자를 확인해주세요.' : 'Please check the Img extension.',
-            {
-              theme: localStorage.theme || 'light',
-            }
-          )
+        if (!imgCheck) {
           return
         }
+
+        mainImgFileName = nowDate
       } else {
         //mainImgInfo.fileInfo 이 file이 아닌경우
         mainImgFileName = `${liveData?.findLiveById.live?.mainImageName}`
@@ -333,95 +328,6 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   }
 
   /**
-   * @returns {Promise<void>} JSX element를 리턴 합니다.
-   */
-  const renderPopoverContent = () => {
-    const Wrapper = styled.div`
-      display: inline-flex;
-      button {
-        border: 1px solid ${({ theme }) => theme.border};
-      }
-    `
-    /**
-     * upload file change 이전에 해당 함수를 실행합니다.
-     * @param {UploadRequestOption} params 커스텀 요청 옵션
-     */
-
-    const customRequest = async ({ file, onError, onSuccess }: UploadRequestOption) => {
-      try {
-        const defineOnSuccess = onSuccess as any
-        if (file instanceof File) {
-          const src: string = await new Promise((resolve) => {
-            const reader = new FileReader()
-            reader.readAsDataURL(file as Blob)
-            reader.onload = () => resolve(reader.result as string)
-          })
-          //const profileNode: HTMLElement | null = dom
-
-          if (src) {
-            //profileNode.src = src
-            defineOnSuccess(file)
-          } else {
-            throw new Error('not found profileNode or src or originFileObj')
-          }
-        } else {
-          throw new Error('not found file')
-        }
-      } catch (error: any) {
-        console.error(error)
-        onError && onError(error)
-      }
-    }
-
-    /**
-     * upload > customRequest > onProfileChange 순서의 함수 로직입니다.
-     * @param {UploadChangeParam} params file Obj를 가져옵니다.
-     */
-    const onProfileChange = ({ file }: UploadChangeParam) => {
-      const fileInput: HTMLInputElement | null = document.querySelector('input[name=mainImgInput]')
-
-      if (file.originFileObj && fileInput) {
-        setMainImgInfo({ fileInfo: file.originFileObj, mainImg: file.originFileObj.name })
-        fileInput.value = file.originFileObj.name
-      }
-    }
-    /**
-     * profile을 비우는 클릭 이벤트 핸들러 입니다.
-     */
-    const onRemoveProfileClick = () => {
-      const fileInput: HTMLInputElement | null = document.querySelector('input[name=mainImgInput]')
-
-      if (fileInput) {
-        setMainImgInfo({ fileInfo: '', mainImg: '' })
-        fileInput.value = ''
-      }
-    }
-
-    return (
-      <Wrapper>
-        <ImgCrop
-          shape="rect"
-          modalTitle={locale === 'ko' ? '이미지 편집' : 'Edit image'}
-          modalOk={locale === 'ko' ? '확인' : 'OK'}
-          modalCancel={locale === 'ko' ? '취소' : 'Cancel'}
-          aspect={1 / 1.25}>
-          <Upload
-            accept="image/*"
-            multiple={false}
-            customRequest={customRequest}
-            onChange={onProfileChange}
-            showUploadList={false}>
-            <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
-          </Upload>
-        </ImgCrop>
-        <Button onClick={onRemoveProfileClick}>
-          {locale === 'ko' ? '사진 삭제' : 'Remove photo'}
-        </Button>
-      </Wrapper>
-    )
-  }
-
-  /**
    * 라이브 주소 복사
    */
 
@@ -435,8 +341,33 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     })
   }
 
+  /**
+   * statusRadio Btn disabled 처리
+   */
+  const inputDisabled = (liveStatus: string, radioData: string) => {
+    switch (liveStatus) {
+      case 'HIDE':
+        if (radioData === 'Finish') return true
+        break
+      case 'DISPLAY':
+        if (radioData === 'Finish' || radioData === 'Hide') return true
+        break
+      case 'ACTIVE':
+        if (radioData === 'Display' || radioData === 'Hide') return true
+        break
+      case 'FINISH':
+        return true
+        break
+      default:
+        return false
+        break
+    }
+  }
+
+  //useEffect(() => {}, [memberData])
+
   useEffect(() => {
-    const fetch = async () => {
+    const memberFetch = async () => {
       try {
         await getMember({
           variables: {
@@ -449,13 +380,10 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(e)
       }
     }
-    fetch()
-  }, [memberData])
 
-  useEffect(() => {
-    const fetch = async () => {
+    const liveFetch = async () => {
       try {
-        getLive({
+        await getLive({
           variables: {
             liveInput: {
               liveId,
@@ -466,9 +394,17 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(e)
       }
     }
+    liveFetch()
+    memberFetch()
+  }, [liveData, memberData])
 
-    fetch()
-  }, [liveData])
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    const subscription = watch(() => {
+      return
+    })
+    return () => subscription.unsubscribe()
+  }, [watch])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
@@ -500,10 +436,10 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       key={i}
                       value={data}
                       onChange={() => setStatusRadio(data)}
-                      disabled={
-                        (data === 'Hide' && isInputDisabled) ||
-                        liveData?.findLiveById.live?.liveStatus === 'FINISH'
-                      }>
+                      disabled={inputDisabled(
+                        liveData?.findLiveById.live?.liveStatus || 'HIDE',
+                        data
+                      )}>
                       {data}
                     </Radio.Button>
                   )
@@ -538,7 +474,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '호스트' : 'HostName'}</span>
                   <Controller
@@ -568,7 +504,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                   <Controller
@@ -605,7 +541,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? 'Live 시작 예정 시간' : 'Estimated start date'}</span>
                   <Controller
@@ -640,7 +576,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '시작 후 구매가능 시간' : 'Set the purchase time'}</span>
                   <Controller
@@ -665,7 +601,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                           </Select.Option>
                           {delayedEntryTimeArr.map((data, index) => {
                             return (
-                              <Select.Option value={data} key={index}>
+                              <Select.Option value={data} key={index + 1}>
                                 {data}
                                 {locale === 'ko' ? '분' : 'min'}
                               </Select.Option>
@@ -685,9 +621,10 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>Live {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
+
                   <Controller
                     key={liveData?.findLiveById.live?.mainImageName}
                     defaultValue={liveData?.findLiveById.live?.mainImageName?.toString()}
@@ -697,22 +634,34 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       required: requiredText,
                     }}
                     render={({ field: { onChange } }) => (
-                      <ImgUploadBtnWrap className="profile-edit">
-                        <Popover
-                          className="profile-edit-popover uploadBtn"
-                          content={renderPopoverContent}
-                          trigger="click"
-                          placement="bottomRight"
+                      <ImgInputWrap>
+                        {watchLiveThumnailRemove ? (
+                          <Input
+                            className="input"
+                            type="file"
+                            name="liveThumbnail"
+                            placeholder="Please upload img. only png or jpg"
+                            onChange={onChange}
+                          />
+                        ) : (
+                          <Input
+                            className="input"
+                            name="mainImgInput"
+                            value={mainImgInfo.mainImg}
+                            disabled={true}
+                          />
+                        )}
+
+                        <input
+                          type="checkbox"
+                          id="liveThumnailRemove"
+                          className="delectBtn hidden"
+                          {...register('liveThumnailRemove')}
                         />
-                        <Input
-                          className="input"
-                          name="mainImgInput"
-                          placeholder="Please upload img. only png or jpg"
-                          value={mainImgInfo.mainImg}
-                          onChange={onChange}
-                          disabled={isInputDisabled}
-                        />
-                      </ImgUploadBtnWrap>
+                        <label className="delectBtn" htmlFor="liveThumnailRemove">
+                          {watchLiveThumnailRemove ? '취소' : '변경'}
+                        </label>
+                      </ImgInputWrap>
                     )}
                   />
                 </div>
@@ -722,7 +671,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>
                     Live
@@ -759,7 +708,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                           {index >= 1 && (
                             <Button
                               className="delectBtn"
-                              onClick={() => onDeleteBtn(index, setLiveInfoArr, liveInfoArr)}>
+                              onClick={() => onDeleteBtn(index, setLiveInfoArr, liveInfoArr)}
+                              disabled={isInputDisabled}>
                               {locale === 'ko' ? '삭제' : 'Delete'}
                             </Button>
                           )}
@@ -785,7 +735,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                   )}
                 </div>
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                   <Controller
@@ -808,10 +758,10 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                   />
                 </div>
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정.  */}
-                  <span>{locale === 'ko' ? '지분' : 'Share'}</span>
+                  <span>{locale === 'ko' ? '지분 - 우선환수, 직분배' : 'Share'}</span>
                   {memberShareInfo.map((data, index) => {
                     return (
                       <div key={index}>
@@ -918,12 +868,19 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </Button>
                 </div>
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="button-group">
+                  <Link href="/live/lives">
+                    <a>
+                      <Button className="submit-button" type="primary" role="button">
+                        목록
+                      </Button>
+                    </a>
+                  </Link>
                   <Button
                     type="primary"
                     role="button"
-                    className="submit-button"
+                    className="submit-button ml-harf"
                     loading={editLoading}
                     onClick={onSubmit}>
                     {locale === 'ko' ? '수정' : 'Edit'}

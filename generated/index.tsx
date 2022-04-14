@@ -447,7 +447,10 @@ export type EventsOutput = {
 export enum FaqType {
   Content = 'CONTENT',
   Etc = 'ETC',
-  Payment = 'PAYMENT'
+  Member = 'MEMBER',
+  Payment = 'PAYMENT',
+  Play = 'PLAY',
+  Service = 'SERVICE'
 }
 
 export type FaqsInput = {
@@ -513,6 +516,7 @@ export type GetGoingDashboardOutput = {
   __typename?: 'GetGoingDashboardOutput';
   dashboard?: Maybe<GoingDashboard>;
   error?: Maybe<LangErrorMessage>;
+  memberType: MemberType;
   ok: Scalars['Boolean'];
 };
 
@@ -699,7 +703,9 @@ export type Member = {
   password: Scalars['String'];
   point: Point;
   profileImageName?: Maybe<Scalars['String']>;
+  pushInfo: Array<PushInfo>;
   refreshToken?: Maybe<Scalars['String']>;
+  report: Report;
   updateDate: Scalars['DateTime'];
 };
 
@@ -713,6 +719,11 @@ export type MemberOutput = {
   member?: Maybe<Member>;
   ok: Scalars['Boolean'];
 };
+
+export enum MemberReportStatus {
+  None = 'NONE',
+  Reported = 'REPORTED'
+}
 
 export type MemberShareInfo = {
   __typename?: 'MemberShareInfo';
@@ -735,6 +746,17 @@ export enum MemberStatus {
   RemoveStandby = 'REMOVE_STANDBY'
 }
 
+export type MemberSuspendInput = {
+  increase?: Maybe<Scalars['Float']>;
+  memberId: Scalars['ID'];
+};
+
+export type MemberSuspendOutput = {
+  __typename?: 'MemberSuspendOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export enum MemberType {
   Business = 'BUSINESS',
   Contents = 'CONTENTS',
@@ -756,6 +778,7 @@ export type MembersByTypeOutput = {
 };
 
 export type MembersInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
   memberStatus?: Maybe<MemberStatus>;
   memberType?: Maybe<MemberType>;
   nickName?: Maybe<Scalars['String']>;
@@ -805,6 +828,7 @@ export type Mutation = {
   masterCreateAccount: CreateMemberOutput;
   members: MembersOutput;
   notices: NoticesOutput;
+  suspendMemberById: MemberSuspendOutput;
   vods: VodsOutput;
 };
 
@@ -959,6 +983,11 @@ export type MutationNoticesArgs = {
 };
 
 
+export type MutationSuspendMemberByIdArgs = {
+  input: MemberSuspendInput;
+};
+
+
 export type MutationVodsArgs = {
   input: VodsInput;
 };
@@ -987,6 +1016,16 @@ export type Point = {
   totalPoint: Scalars['Int'];
   updateDate: Scalars['DateTime'];
 };
+
+export type PushInfo = {
+  __typename?: 'PushInfo';
+  notificationFlag: Scalars['Boolean'];
+  pushType: PushType;
+};
+
+export enum PushType {
+  All = 'ALL'
+}
 
 export type Query = {
   __typename?: 'Query';
@@ -1050,6 +1089,18 @@ export enum QuestionType {
   Play = 'PLAY',
   Service = 'SERVICE'
 }
+
+export type Report = {
+  __typename?: 'Report';
+  _id: Scalars['ID'];
+  chatCount: Scalars['Float'];
+  commentCount: Scalars['Float'];
+  createDate: Scalars['DateTime'];
+  memberId: Scalars['ID'];
+  memberReportStatus: MemberReportStatus;
+  releaseDate?: Maybe<Scalars['DateTime']>;
+  updateDate: Scalars['DateTime'];
+};
 
 export enum TranscodeStatus {
   Fail = 'FAIL',
@@ -1357,6 +1408,13 @@ export type InquiriesMutationVariables = Exact<{
 
 export type InquiriesMutation = { __typename?: 'Mutation', inquiries: { __typename?: 'InquiriesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, inquiries?: Array<{ __typename?: 'Board', _id: string, email?: string | null | undefined, title: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, createDate: any }> | null | undefined } };
 
+export type SuspendMemberByIdMutationVariables = Exact<{
+  memberSuspendInput: MemberSuspendInput;
+}>;
+
+
+export type SuspendMemberByIdMutation = { __typename?: 'Mutation', suspendMemberById: { __typename?: 'MemberSuspendOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1367,7 +1425,7 @@ export type FindMemberByIdQueryVariables = Exact<{
 }>;
 
 
-export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined } | null | undefined } };
+export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, lastLoginDate?: any | null | undefined, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, report: { __typename?: 'Report', memberReportStatus: MemberReportStatus, chatCount: number, commentCount: number, releaseDate?: any | null | undefined }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined, pushInfo: Array<{ __typename?: 'PushInfo', pushType: PushType, notificationFlag: boolean }> } | null | undefined } };
 
 export type FindMembersByTypeQueryVariables = Exact<{
   membersByTypeInput: MembersByTypeInput;
@@ -2673,6 +2731,43 @@ export function useInquiriesMutation(baseOptions?: Apollo.MutationHookOptions<In
 export type InquiriesMutationHookResult = ReturnType<typeof useInquiriesMutation>;
 export type InquiriesMutationResult = Apollo.MutationResult<InquiriesMutation>;
 export type InquiriesMutationOptions = Apollo.BaseMutationOptions<InquiriesMutation, InquiriesMutationVariables>;
+export const SuspendMemberByIdDocument = gql`
+    mutation SuspendMemberById($memberSuspendInput: MemberSuspendInput!) {
+  suspendMemberById(input: $memberSuspendInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type SuspendMemberByIdMutationFn = Apollo.MutationFunction<SuspendMemberByIdMutation, SuspendMemberByIdMutationVariables>;
+
+/**
+ * __useSuspendMemberByIdMutation__
+ *
+ * To run a mutation, you first call `useSuspendMemberByIdMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSuspendMemberByIdMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [suspendMemberByIdMutation, { data, loading, error }] = useSuspendMemberByIdMutation({
+ *   variables: {
+ *      memberSuspendInput: // value for 'memberSuspendInput'
+ *   },
+ * });
+ */
+export function useSuspendMemberByIdMutation(baseOptions?: Apollo.MutationHookOptions<SuspendMemberByIdMutation, SuspendMemberByIdMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SuspendMemberByIdMutation, SuspendMemberByIdMutationVariables>(SuspendMemberByIdDocument, options);
+      }
+export type SuspendMemberByIdMutationHookResult = ReturnType<typeof useSuspendMemberByIdMutation>;
+export type SuspendMemberByIdMutationResult = Apollo.MutationResult<SuspendMemberByIdMutation>;
+export type SuspendMemberByIdMutationOptions = Apollo.BaseMutationOptions<SuspendMemberByIdMutation, SuspendMemberByIdMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {
@@ -2738,11 +2833,22 @@ export const FindMemberByIdDocument = gql`
         paidPoint
         freePoint
       }
+      report {
+        memberReportStatus
+        chatCount
+        commentCount
+        releaseDate
+      }
       createDate
+      lastLoginDate
       accountInfo {
         bankName
         depositor
         accountNumber
+      }
+      pushInfo {
+        pushType
+        notificationFlag
       }
     }
   }

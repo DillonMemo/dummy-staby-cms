@@ -2,10 +2,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, DatePicker, Input, Popover, Radio, Select, Upload } from 'antd'
-
-import { UploadChangeParam } from 'antd/lib/upload'
-import { UploadRequestOption } from 'rc-upload/lib/interface'
+import { Button, DatePicker, Input, InputNumber, Radio, Select } from 'antd'
 
 import Link from 'next/link'
 import { toast } from 'react-toastify'
@@ -29,9 +26,14 @@ import {
 import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 
 /** utils */
-import { S3 } from '../../lib/awsClient'
 import * as mongoose from 'mongoose'
-import { delayedEntryTimeArr, nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
+import {
+  delayedEntryTimeArr,
+  liveImgCheckExtension,
+  nowDateStr,
+  onDeleteBtn,
+  shareCheck,
+} from '../../Common/commonFn'
 
 type Props = styleMode
 
@@ -69,25 +71,12 @@ const ShareWrap = styled.div`
   gap: 5px;
 `
 
-const ImgUploadBtnWrap = styled.div`
-  position: relative;
-
-  .uploadBtn {
-    position: absolute;
-    width: 100%;
-    height: 2.714rem;
-    top: 5px;
-    right: 0px;
-    z-index: 2;
-  }
-`
-
 const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale, push } = useRouter()
   const [liveInfoArr, setLiveInfoArr] = useState<Array<LiveInfoArr>>([
     { listingOrder: 0, linkPath: '' },
   ]) //링크 관리
-  const [mainImgInfo, setMainImgInfo] = useState<MainImgInfo>({ mainImg: '', fileInfo: '' }) //mainImg 관리
+
   const [memberShareInfo, setMemberShareInfo] = useState<Array<ShareInfo>>([
     { memberId: '', nickName: '', priorityShare: 0, directShare: 0 },
   ]) //지분 관리
@@ -156,34 +145,17 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       const id = new mongoose.Types.ObjectId() as any
       let mainImgFileName = '' //메인 썸네일
       const nowDate = `${id.toString()}_main_${nowDateStr}.png`
-      //MainThumbnail upload
+
       //이미지 확장자 체크
-      if (mainImgInfo.fileInfo instanceof File) {
-        if (
-          mainImgInfo.fileInfo.name.includes('jpg') ||
-          mainImgInfo.fileInfo.name.includes('png') ||
-          mainImgInfo.fileInfo.name.includes('jpeg')
-        ) {
-          mainImgFileName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/live/${id.toString()}/main/${nowDate}`
-          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-            (await S3.upload({
-              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-              Key: mainImgFileName,
-              Body: mainImgInfo.fileInfo,
-              ACL: 'public-read',
-            }).promise())
-        } else {
-          toast.error(
-            locale === 'ko' ? '이미지의 확장자를 확인해주세요.' : 'Please check the Img extension.',
-            {
-              theme: localStorage.theme || 'light',
-            }
-          )
-          return
-        }
+
+      const liveImgInput: HTMLInputElement | null =
+        document.querySelector(`input[name=liveThumbnail]`)
+      const imgCheck = await liveImgCheckExtension(liveImgInput, id, nowDate, locale)
+
+      if (!imgCheck) {
+        return
       }
+
       mainImgFileName = `${nowDate}`
 
       //라이브 채널 링크 배열
@@ -201,6 +173,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
           })
         }
       }
+
       const { data } = await createLive({
         variables: {
           createLiveInput: {
@@ -234,88 +207,6 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
     } catch (error) {
       console.error(error)
     }
-  }
-
-  /**
-   * @returns {Promise<void>} JSX element를 리턴 합니다.
-   */
-  const renderPopoverContent = () => {
-    const Wrapper = styled.div`
-      display: inline-flex;
-      button {
-        border: 1px solid ${({ theme }) => theme.border};
-      }
-    `
-    /**
-     * upload file change 이전에 해당 함수를 실행합니다.
-     * @param {UploadRequestOption} params 커스텀 요청 옵션
-     */
-
-    const customRequest = async ({ file, onError, onSuccess }: UploadRequestOption) => {
-      try {
-        const defineOnSuccess = onSuccess as any
-        if (file instanceof File) {
-          const src: string = await new Promise((resolve) => {
-            const reader = new FileReader()
-            reader.readAsDataURL(file as Blob)
-            reader.onload = () => resolve(reader.result as string)
-          })
-          //const profileNode: HTMLElement | null = dom
-
-          if (src) {
-            //profileNode.src = src
-            defineOnSuccess(file)
-          } else {
-            throw new Error('not found profileNode or src or originFileObj')
-          }
-        } else {
-          throw new Error('not found file')
-        }
-      } catch (error: any) {
-        console.error(error)
-        onError && onError(error)
-      }
-    }
-
-    /**
-     * upload > customRequest > onProfileChange 순서의 함수 로직입니다.
-     * @param {UploadChangeParam} params file Obj를 가져옵니다.
-     */
-    const onProfileChange = ({ file }: UploadChangeParam) => {
-      const fileInput: HTMLInputElement | null = document.querySelector('input[name=mainImgInput]')
-
-      if (file.originFileObj && fileInput) {
-        setMainImgInfo({ fileInfo: file.originFileObj, mainImg: file.originFileObj.name })
-        fileInput.value = file.originFileObj.name
-      }
-    }
-    /**
-     * profile을 비우는 클릭 이벤트 핸들러 입니다.
-     */
-    const onRemoveProfileClick = () => {
-      const fileInput: HTMLInputElement | null = document.querySelector('input[name=mainImgInput]')
-
-      if (fileInput) {
-        setMainImgInfo({ fileInfo: '', mainImg: '' })
-        fileInput.value = ''
-      }
-    }
-
-    return (
-      <Wrapper>
-        <Upload
-          accept="image/*"
-          multiple={false}
-          customRequest={customRequest}
-          onChange={onProfileChange}
-          showUploadList={false}>
-          <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
-        </Upload>
-        <Button onClick={onRemoveProfileClick}>
-          {locale === 'ko' ? '사진 삭제' : 'Remove photo'}
-        </Button>
-      </Wrapper>
-    )
   }
 
   useEffect(() => {
@@ -379,7 +270,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '호스트' : 'HostName'}</span>
                   <Controller
@@ -406,12 +297,13 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                   <Controller
                     control={control}
                     name="paymentAmount"
+                    defaultValue={0}
                     rules={{
                       required: true,
                       min: {
@@ -430,11 +322,11 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                       },
                     }}
                     render={({ field: { value, onChange } }) => (
-                      <Input
-                        type="number"
+                      <InputNumber
                         className="input"
                         placeholder="Please enter the paymentAmount."
                         value={value}
+                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                         onKeyPress={(e) => {
                           if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
                             e.preventDefault()
@@ -454,7 +346,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? 'Live 시작 예정 시간' : 'Estimated start date'}</span>
                   <Controller
@@ -480,7 +372,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '시작 후 구매가능 시간' : 'Set the purchase time'}</span>
                   <Controller
@@ -520,33 +412,35 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>Live {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                   <Controller
                     control={control}
                     name="liveThumbnail"
-                    render={({ field: { onChange } }) => (
-                      <ImgUploadBtnWrap className="profile-edit">
-                        <Popover
-                          className="profile-edit-popover uploadBtn"
-                          content={renderPopoverContent}
-                          trigger="click"
-                          placement="bottomRight"
-                        />
-                        <Input
-                          className="input"
-                          name="mainImgInput"
-                          placeholder="Please upload img. only png or jpg"
-                          value={mainImgInfo.mainImg}
-                          onChange={onChange}
-                        />
-                      </ImgUploadBtnWrap>
+                    rules={{
+                      required: requiredText,
+                    }}
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        className="input"
+                        type="file"
+                        value={value}
+                        name="liveThumbnail"
+                        placeholder="Please upload img. only png or jpg"
+                        onChange={onChange}
+                      />
                     )}
                   />
                 </div>
+
+                {errors.liveThumbnail?.message && (
+                  <div className="form-message">
+                    <span>{errors.liveThumbnail.message}</span>
+                  </div>
+                )}
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>
                     Live
@@ -594,7 +488,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   )}
                 </div>
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                   <Controller
@@ -612,12 +506,10 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   />
                 </div>
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                  <span>
-                    {locale === 'ko' ? '지분' : 'Share'} (회원, 우선분배 지분, 직분배 지분)
-                  </span>
+                  <span>{locale === 'ko' ? '지분 - 우선환수, 직분배' : 'Share'}</span>
                   {memberShareInfo.map((data, index) => {
                     return (
                       <div key={index}>
@@ -710,13 +602,20 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </Button>
                 </div>
               </div>
-              <div className="form-item">
+              <div className="form-item mt-harf">
                 <div className="button-group">
+                  <Link href="/live/lives">
+                    <a>
+                      <Button className="submit-button" type="primary" role="button">
+                        목록
+                      </Button>
+                    </a>
+                  </Link>
                   <Button
                     type="primary"
                     role="button"
                     htmlType="submit"
-                    className="submit-button"
+                    className="submit-button ml-harf"
                     disabled={Object.keys(errors).includes('paymentAmount')}
                     loading={isCreateLiveLoading}>
                     {locale === 'ko' ? '저장' : 'save'}

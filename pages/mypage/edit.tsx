@@ -94,6 +94,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
       } = getValues()
       let saveFileName = ''
       if (profileImageName instanceof File) {
+        console.log('node_env :', process.env.NODE_ENV)
         // const lastIndexOf: number = profileImageName.name.lastIndexOf('.')
         saveFileName =
           process.env.NODE_ENV === 'development'
@@ -341,6 +342,7 @@ const MypageEdit: NextPage<Props> = ({ toggleStyle, theme }) => {
                         defaultValue={false}
                         render={({ field: { value, onChange } }) => (
                           <Radio.Group
+                            className="gap-3"
                             onChange={({ target: { value } }) => {
                               if (!value) {
                                 setValue('password', '')

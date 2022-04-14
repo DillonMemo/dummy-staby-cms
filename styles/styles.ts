@@ -155,6 +155,9 @@ export const GlobalStyles = createGlobalStyle`
         }
       }
     }
+    .ant-input-group-compact {
+      display: inline-flex !important;
+    }
     .ant-btn {
       background: ${({ theme }) => theme.body} !important;
       color: ${({ theme }) => theme.text} !important;
@@ -175,6 +178,36 @@ export const GlobalStyles = createGlobalStyle`
         }
       }
     }
+    .ant-picker {
+      background-color: ${({ theme }) => theme.body} !important;
+      border: 1px solid ${({ theme }) => theme.body} !important;
+
+      .ant-picker-input {
+        > input {
+          color: ${({ theme }) => theme.text} !important;
+        }
+      }
+      .ant-picker-range-separator {
+        span {
+          color: ${({ theme }) => theme.text};
+        }
+      }
+      .ant-picker-suffix { 
+        color: ${({ theme }) => theme.text};
+      }
+      .ant-picker-clear {
+        background: ${({ theme }) => theme.body};
+      }
+    }
+    .ant-picker-dropdown {
+      .ant-picker-panels {
+        ${md} {
+          display: grid;
+          grid-template-columns: 1fr;
+        }
+      }
+    }
+
     .ant-popover {
       z-index: 999;
       .ant-popover-arrow {
@@ -220,8 +253,25 @@ export const GlobalStyles = createGlobalStyle`
         .ant-modal-body {
           background: ${({ theme }) => theme.body};
 
-          .ant-modal-confirm-title {
+          .ant-modal-confirm-title,
+          .ant-modal-confirm-content {
             color: ${({ theme }) => theme.text};
+
+          }
+          .ant-select {
+            width: 100%;
+            margin-top: 1rem;
+            .ant-select-selector {
+              height: 2rem;
+              align-items: center;
+              background-color: ${({ theme }) => theme.card};
+              color: ${({ theme }) => theme.text};
+              border: 1px solid ${({ theme }) => theme.border};
+              border-radius: ${({ theme }) => theme.card_radius};
+            }
+            .ant-select-arrow {
+              color: ${({ theme }) => theme.text};
+            }
           }
         }
 
@@ -361,6 +411,7 @@ export const GlobalStyles = createGlobalStyle`
         background-color: ${({ theme }) => `${theme.disable}`};
       }
     }
+    
 
     .ant-tabs {
       color: ${({ theme }) =>
@@ -399,6 +450,20 @@ export const GlobalStyles = createGlobalStyle`
       .ant-radio-button-wrapper-checked{
         background: #1890ff!important;
       }
+    }
+
+    .ant-input-number-input{
+      width:100%;
+    }
+
+    .ant-input-number{
+      width:100%;
+      box-sizing:content-box;
+      border: none!important;
+    }
+
+    textarea.ant-input {
+      min-height:150px;
     }
 
     .mrT5{
@@ -628,11 +693,17 @@ export const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr;
 
+  .mt-harf {
+    margin-top: 0.5rem;
+  }
   .mt-1 {
     margin-top: 1rem;
   }
   .mt-2 {
     margin-top: 2rem;
+  }
+  .ml-harf {
+    margin-left: 0.5rem;
   }
   .form-grid {
     display: grid;
@@ -653,8 +724,19 @@ export const Form = styled.form`
   .form-item {
     color: ${({ theme }) => theme.text};
 
+    p {
+      display: flex;
+      height: 2.714rem;
+      align-items: center;
+      padding: 0 0.6875rem;
+
+      ${md} {
+        padding: 0;
+      }
+    }
     select,
     .input:not(.ant-input-disabled, .ant-input-affix-wrapper-disabled),
+    .ant-input-number-input,
     .ant-select-selector {
       height: 2.714rem;
       align-items: center;
@@ -702,10 +784,13 @@ export const Form = styled.form`
       display: inline-flex;
       align-items: center;
       justify-content: flex-start;
-      gap: 3rem;
 
       ${md} {
         justify-content: center;
+      }
+
+      &.gap-3 {
+        gap: 3rem;
       }
     }
 
@@ -716,6 +801,12 @@ export const Form = styled.form`
       .form-message {
         color: red;
         font-size: 0.75rem;
+      }
+
+      .row {
+        display: inline-flex;
+        justify-content: space-between;
+        align-items: center;
       }
     }
 
@@ -829,7 +920,22 @@ export const ManagementWrapper = styled.div`
       justify-content: space-between;
       align-items: flex-end;
 
+      ${md} {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
       .dropdown {
+        display: inline-flex;
+        flex-flow: column nowrap;
+
+        span.title {
+          font-size: 0.625rem;
+          line-height: 1;
+        }
+      }
+      .range-picker {
         display: inline-flex;
         flex-flow: column nowrap;
 

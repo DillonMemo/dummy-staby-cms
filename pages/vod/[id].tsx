@@ -241,7 +241,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       const nowDate = nowDateStr
 
       //vodStatus 가 Fail 상태이며 transcodeStatus 가 fail인 경우에만 vod 수정이 가능하다.
-      if (vodData?.findVodById.vod && vodData?.findVodById.vod.vodStatus === 'FAIL') {
+      if (vodData?.findVodById.vod) {
         for (let i = 0; i < vodInfoArr.length; i++) {
           //linkPathName
           const vodUrlInput: HTMLInputElement | null = document.querySelector(
@@ -294,7 +294,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               ) {
                 //introImgNameName
                 introImageName = `${
-                  process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+                  process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
                 }/going/vod/${vodId}/intro/${vodId}_intro_${i + 1}_${nowDate}.jpg`
                 process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
                   (await S3.upload({
@@ -732,8 +732,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       Vod
                       <span style={{ color: '#ada7a7' }}>
                         {locale === 'ko'
-                          ? ' ※vod 최대 7개까지 추가할 수 있습니다. '
-                          : ' ※Up to seven vod can be uploaded. '}
+                          ? ' ※vod 최대 8개까지 추가할 수 있습니다. '
+                          : ' ※Up to eight vod can be uploaded. '}
                       </span>
                     </span>
                     {vodInfoArr.map((data, index) => {

@@ -127,7 +127,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         fileInfo: '',
         playingImg: '',
       }
-      if (vodInfoArr.length < 7) {
+      if (vodInfoArr.length < 8) {
         setVodInfoArr(() => vodInfoArr.concat(live))
       }
       return
@@ -222,11 +222,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
           //playingImgName
           introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
           }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.jpg`
 
           vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
           }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
 
           process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
@@ -582,7 +582,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       Vod
                       <span style={{ color: '#ada7a7' }}>
                         {locale === 'ko'
-                          ? ' ※vod 최대 7개까지 추가할 수 있습니다. '
+                          ? ' ※vod 최대 8개까지 추가할 수 있습니다. '
                           : ' ※Up to eight live can be uploaded. '}
                       </span>
                     </span>
