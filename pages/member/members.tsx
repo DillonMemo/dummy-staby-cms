@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import router, { useRouter } from 'next/router'
-import { Button, Dropdown, Input, Menu, Pagination, Skeleton, Space, Table } from 'antd'
+import { Button, Dropdown, Input, Menu, Pagination, Select, Skeleton, Space, Table } from 'antd'
 import { ColumnsType } from 'antd/lib/table'
 import { MenuInfo } from 'rc-menu/lib/interface'
 import { debounce } from 'lodash'
+import moment from 'moment'
+import { RangeValue } from 'rc-picker/lib/interface'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -24,6 +26,7 @@ import {
 } from '../../generated'
 import { MEMBERS_MUTATION } from '../../graphql/mutations'
 import { Maybe } from 'graphql/jsutils/Maybe'
+import RangePicker from '../../components/RangePicker'
 
 type Props = styleMode
 
@@ -37,6 +40,7 @@ interface Options extends Filters {
   page: number
   pageSize: number
   nickName: string
+  dates: moment.Moment[]
 }
 /** 필터 드롭다운 Visible 옵션 */
 type Visible = Record<keyof Filters, boolean>
@@ -89,12 +93,13 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       ),
     },
   ]
-  const [{ page, pageSize, memberType, memberStatus, nickName }, setFilterOptions] =
+  const [{ page, pageSize, memberType, memberStatus, dates, nickName }, setFilterOptions] =
     useState<Options>({
       page: 1,
       pageSize: 20,
       memberType: 'All',
       memberStatus: 'All',
+      dates: [],
       nickName: '',
     })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
@@ -137,6 +142,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               page,
               memberType: key !== 'All' ? (key as Maybe<MemberType>) : undefined,
               memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
+              dates: dates.length > 0 ? dates : undefined,
               nickName,
             },
           },
@@ -165,6 +171,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               page,
               memberType: memberType !== 'All' ? memberType : undefined,
               memberStatus: key !== 'All' ? (key as Maybe<MemberStatus>) : undefined,
+              dates: dates.length > 0 ? dates : undefined,
               nickName,
             },
           },
@@ -179,6 +186,34 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
   }
 
   /**
+   * datepicker가 열릴 때 실행 이벤트 핸들러 입니다.
+   * @param {boolean} open 달력 오픈 여부
+   */
+  const onPickerOpen = (open: boolean) => {
+    if (open) {
+      setFilterOptions((prev) => ({ ...prev, dates: [] }))
+    }
+  }
+
+  /**
+   * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
+   * @param value
+   */
+  const onPickerChange = async (value: RangeValue<moment.Moment>) => {
+    await members({
+      variables: {
+        membersInput: {
+          page,
+          memberType: memberType !== 'All' ? memberType : undefined,
+          memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
+          dates: value || undefined,
+          nickName,
+        },
+      },
+    })
+  }
+
+  /**
    * 닉네임 변경 이벤트 핸들러 입니다.
    */
   const onNickNameChange = useCallback(
@@ -190,6 +225,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               page,
               memberType: memberType !== 'All' ? memberType : undefined,
               memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
+              dates: dates.length > 0 ? dates : undefined,
               nickName: value,
             },
           },
@@ -202,18 +238,22 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(error)
       }
     }, 1000),
-    [page, memberType, memberStatus, nickName]
+    [page, memberType, memberStatus, nickName, dates]
   )
 
   useEffect(() => {
     const fetch = async () => {
       try {
-        await members({
+        const { data } = await members({
           variables: {
             //현재 상태가 acrive 상태인 멤버들만 보여준다.
             membersInput: { memberStatus: MemberStatus['Active'] },
           },
         })
+
+        if (data?.members.ok) {
+          setFilterOptions((prev) => ({ ...prev, memberStatus: MemberStatus.Active }))
+        }
       } catch (error) {
         console.error(error)
       }
@@ -344,13 +384,33 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                       </Button>
                     </div>
                   </Dropdown>
+                  <RangePicker
+                    locale={locale}
+                    title={locale === 'ko' ? '가입일' : 'Create Date'}
+                    value={dates}
+                    onCalendarChange={(value) =>
+                      setFilterOptions((prev) => ({ ...prev, dates: value as any }))
+                    }
+                    onPickerChange={onPickerChange}
+                    onPickerOpen={onPickerOpen}
+                  />
                 </Space>
                 <Space>
-                  <Input.Search
-                    placeholder={locale === 'ko' ? '닉네임' : 'Nickname'}
-                    loading={membersLoading}
-                    onChange={onNickNameChange}
-                  />
+                  <Input.Group compact>
+                    <Select defaultValue="Email">
+                      <Select.Option value="Email">
+                        {locale === 'ko' ? '이메일' : 'Email'}
+                      </Select.Option>
+                      <Select.Option value="Nickname">
+                        {locale === 'ko' ? '닉네임' : 'Nickname'}
+                      </Select.Option>
+                    </Select>
+                    <Input.Search
+                      placeholder={locale === 'ko' ? '닉네임' : 'Nickname'}
+                      loading={membersLoading}
+                      onChange={onNickNameChange}
+                    />
+                  </Input.Group>
                 </Space>
               </div>
 

@@ -155,6 +155,9 @@ export const GlobalStyles = createGlobalStyle`
         }
       }
     }
+    .ant-input-group-compact {
+      display: inline-flex !important;
+    }
     .ant-btn {
       background: ${({ theme }) => theme.body} !important;
       color: ${({ theme }) => theme.text} !important;
@@ -175,6 +178,36 @@ export const GlobalStyles = createGlobalStyle`
         }
       }
     }
+    .ant-picker {
+      background-color: ${({ theme }) => theme.body} !important;
+      border: 1px solid ${({ theme }) => theme.body} !important;
+
+      .ant-picker-input {
+        > input {
+          color: ${({ theme }) => theme.text} !important;
+        }
+      }
+      .ant-picker-range-separator {
+        span {
+          color: ${({ theme }) => theme.text};
+        }
+      }
+      .ant-picker-suffix { 
+        color: ${({ theme }) => theme.text};
+      }
+      .ant-picker-clear {
+        background: ${({ theme }) => theme.body};
+      }
+    }
+    .ant-picker-dropdown {
+      .ant-picker-panels {
+        ${md} {
+          display: grid;
+          grid-template-columns: 1fr;
+        }
+      }
+    }
+
     .ant-popover {
       z-index: 999;
       .ant-popover-arrow {
@@ -887,7 +920,22 @@ export const ManagementWrapper = styled.div`
       justify-content: space-between;
       align-items: flex-end;
 
+      ${md} {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
       .dropdown {
+        display: inline-flex;
+        flex-flow: column nowrap;
+
+        span.title {
+          font-size: 0.625rem;
+          line-height: 1;
+        }
+      }
+      .range-picker {
         display: inline-flex;
         flex-flow: column nowrap;
 

@@ -222,11 +222,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
           //playingImgName
           introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
           }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.jpg`
 
           vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
           }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
 
           process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&

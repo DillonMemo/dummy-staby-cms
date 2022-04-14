@@ -778,6 +778,7 @@ export type MembersByTypeOutput = {
 };
 
 export type MembersInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
   memberStatus?: Maybe<MemberStatus>;
   memberType?: Maybe<MemberType>;
   nickName?: Maybe<Scalars['String']>;

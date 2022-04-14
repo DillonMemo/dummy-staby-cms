@@ -294,7 +294,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               ) {
                 //introImgNameName
                 introImageName = `${
-                  process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+                  process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
                 }/going/vod/${vodId}/intro/${vodId}_intro_${i + 1}_${nowDate}.jpg`
                 process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
                   (await S3.upload({

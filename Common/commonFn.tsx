@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction } from 'react'
 import { styleMode } from '../styles/styles'
-import { notification } from 'antd'
 import { S3 } from '../lib/awsClient'
 import { toast } from 'react-toastify'
 
@@ -85,12 +84,16 @@ export const shareCheck = (shareArray: Array<any>, locale?: string) => {
   if (directShare === 100 && (priorityShare === 100 || priorityShare === 0)) {
     return true
   } else {
-    notification.error({
-      message:
-        locale === 'ko'
-          ? '직분배의 총합은 100 이 되고 우선 환수지분의 총합은 100 또는 0이어야 합니다.'
-          : 'Has been completed',
-    })
+    toast.error(
+      locale === 'ko'
+        ? '직분배의 총합은 100 이 되고 우선 환수지분의 총합은 100 또는 0이어야 합니다.'
+        : 'Has been completed',
+      {
+        theme: localStorage.theme || 'light',
+        autoClose: 1000,
+      }
+    )
+
     return false
   }
 }
@@ -158,7 +161,7 @@ export const liveImgCheckExtension = async (
       inputElement.files[0].type.includes('jpeg')
     ) {
       mainImgFileName = `${
-        process.env.NODE_ENV === 'development' ? 'dev' : 'dev'
+        process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
       }/going/live/${id.toString()}/main/${nowDate}`
       process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
         (await S3.upload({
