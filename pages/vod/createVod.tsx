@@ -127,7 +127,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         fileInfo: '',
         playingImg: '',
       }
-      if (vodInfoArr.length < 7) {
+      if (vodInfoArr.length < 8) {
         setVodInfoArr(() => vodInfoArr.concat(live))
       }
       return
@@ -308,10 +308,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
           autoClose: 750,
           onClose: () => push('/vod/vods'),
         })
-
-        setTimeout(() => {
-          window.location.href = '/vod/vods'
-        }, 500)
       }
     } catch (error) {
       setUploading(false)
@@ -586,7 +582,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       Vod
                       <span style={{ color: '#ada7a7' }}>
                         {locale === 'ko'
-                          ? ' ※vod 최대 7개까지 추가할 수 있습니다. '
+                          ? ' ※vod 최대 8개까지 추가할 수 있습니다. '
                           : ' ※Up to eight live can be uploaded. '}
                       </span>
                     </span>

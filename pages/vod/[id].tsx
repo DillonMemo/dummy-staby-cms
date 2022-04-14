@@ -732,8 +732,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       Vod
                       <span style={{ color: '#ada7a7' }}>
                         {locale === 'ko'
-                          ? ' ※vod 최대 7개까지 추가할 수 있습니다. '
-                          : ' ※Up to seven vod can be uploaded. '}
+                          ? ' ※vod 최대 8개까지 추가할 수 있습니다. '
+                          : ' ※Up to eight vod can be uploaded. '}
                       </span>
                     </span>
                     {vodInfoArr.map((data, index) => {
