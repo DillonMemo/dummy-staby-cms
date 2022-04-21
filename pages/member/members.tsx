@@ -8,6 +8,7 @@ import { MenuInfo } from 'rc-menu/lib/interface'
 import { debounce } from 'lodash'
 import moment from 'moment'
 import { RangeValue } from 'rc-picker/lib/interface'
+import { toast } from 'react-toastify'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -39,7 +40,8 @@ interface Filters {
 interface Options extends Filters {
   page: number
   pageSize: number
-  nickName: string
+  searchSelect: 'Email' | 'NickName'
+  searchText: string
   dates: moment.Moment[]
 }
 /** 필터 드롭다운 Visible 옵션 */
@@ -69,7 +71,6 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       title: locale === 'ko' ? '권한' : 'type',
       dataIndex: 'memberType',
       key: 'memberType',
-      responsive: ['md'],
     },
     {
       title: locale === 'ko' ? '상태' : 'status',
@@ -78,30 +79,24 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       responsive: ['md'],
     },
     {
-      title: locale === 'ko' ? '활동이력' : 'history',
-      key: 'history',
-      width: 100,
-      fixed: 'right',
-      render: () => (
-        <Button
-          onClick={(e) => {
-            e.stopPropagation()
-            alert('comming soon')
-          }}>
-          history
-        </Button>
-      ),
+      title: locale === 'ko' ? '가입일' : 'date created',
+      dataIndex: 'createDate',
+      key: 'createDate',
+      responsive: ['md'],
     },
   ]
-  const [{ page, pageSize, memberType, memberStatus, dates, nickName }, setFilterOptions] =
-    useState<Options>({
-      page: 1,
-      pageSize: 20,
-      memberType: 'All',
-      memberStatus: 'All',
-      dates: [],
-      nickName: '',
-    })
+  const [
+    { page, pageSize, memberType, memberStatus, dates, searchSelect, searchText },
+    setFilterOptions,
+  ] = useState<Options>({
+    page: 1,
+    pageSize: 20,
+    memberType: 'All',
+    memberStatus: 'All',
+    dates: [],
+    searchSelect: 'Email',
+    searchText: '',
+  })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
     memberType: false,
     memberStatus: false,
@@ -113,17 +108,28 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
   /**
    * pagination 클릭 이벤트 핸들러 입니다.
    * @param {Number} page 이동할 페이지 번호
-   * @param {Number} _pageSize 페이지당 리스트 개수 `default: 20`
+   * @param {Number} pageSize 페이지당 리스트 개수 `default: 20`
    */
-  const onPageChange = async (page: number, _pageSize?: number) => {
+  const onPageChange = async (page: number, pageSize?: number) => {
     try {
       await members({
         variables: {
-          membersInput: { page },
+          membersInput: {
+            page,
+            pageView: pageSize,
+            memberType: memberType !== 'All' ? memberType : undefined,
+            memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
+            ...(dates && dates.length > 0 && { dates }),
+            ...(searchSelect === 'Email'
+              ? { email: searchText }
+              : searchSelect === 'NickName'
+              ? { nickName: searchText }
+              : {}),
+          },
         },
       })
 
-      setFilterOptions((prev) => ({ ...prev, page }))
+      setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
     } catch (error) {
       console.error(error)
     }
@@ -140,10 +146,15 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
           variables: {
             membersInput: {
               page,
+              pageView: pageSize,
               memberType: key !== 'All' ? (key as Maybe<MemberType>) : undefined,
               memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
-              dates: dates.length > 0 ? dates : undefined,
-              nickName,
+              ...(dates && dates.length > 0 && { dates }),
+              ...(searchSelect === 'Email'
+                ? { email: searchText }
+                : searchSelect === 'NickName'
+                ? { nickName: searchText }
+                : {}),
             },
           },
         })
@@ -169,10 +180,15 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
           variables: {
             membersInput: {
               page,
+              pageView: pageSize,
               memberType: memberType !== 'All' ? memberType : undefined,
               memberStatus: key !== 'All' ? (key as Maybe<MemberStatus>) : undefined,
-              dates: dates.length > 0 ? dates : undefined,
-              nickName,
+              ...(dates && dates.length > 0 && { dates }),
+              ...(searchSelect === 'Email'
+                ? { email: searchText }
+                : searchSelect === 'NickName'
+                ? { nickName: searchText }
+                : {}),
             },
           },
         })
@@ -197,17 +213,22 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   /**
    * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
-   * @param value
+   * @param {RangeValue<moment.Moment>} value 날짜 결과 option
    */
   const onPickerChange = async (value: RangeValue<moment.Moment>) => {
     await members({
       variables: {
         membersInput: {
           page,
+          pageView: pageSize,
           memberType: memberType !== 'All' ? memberType : undefined,
           memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
-          dates: value || undefined,
-          nickName,
+          ...(value && value.length > 0 && { dates: value }),
+          ...(searchSelect === 'Email'
+            ? { email: searchText }
+            : searchSelect === 'NickName'
+            ? { nickName: searchText }
+            : {}),
         },
       },
     })
@@ -223,23 +244,50 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
           variables: {
             membersInput: {
               page,
+              pageView: pageSize,
               memberType: memberType !== 'All' ? memberType : undefined,
               memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
-              dates: dates.length > 0 ? dates : undefined,
-              nickName: value,
+              ...(dates && dates.length > 0 && { dates }),
+              ...(searchSelect === 'Email'
+                ? { email: value }
+                : searchSelect === 'NickName'
+                ? { nickName: value }
+                : {}),
             },
           },
         })
 
         if (data?.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, nickName: value }))
+          setFilterOptions((prev) => ({ ...prev, searchText: value }))
         }
       } catch (error) {
         console.error(error)
       }
     }, 1000),
-    [page, memberType, memberStatus, nickName, dates]
+    [page, memberType, memberStatus, searchText, dates, searchSelect]
   )
+
+  /**
+   * 엑셀 다운로드 버튼 이벤트 핸들러 입니다.
+   */
+  const onExcelExport = async () => {
+    try {
+      const link = process.env.NEXT_PUBLIC_APOLLO_LINK as string
+      const param = []
+      memberType !== 'All' && param.push(`memberType=${memberType}`)
+      memberStatus !== 'All' && param.push(`memberStatus=${memberStatus}`)
+      dates && dates.length > 0 && param.push(`dates=${JSON.stringify(dates)}`)
+      if (searchSelect === 'Email') searchText && param.push(`email=${searchText}`)
+      else if (searchSelect === 'NickName') searchText && param.push(`nickName=${searchText}`)
+
+      router.push(`${link.substring(0, link.length - 7)}download/members?${param.join('&')}`)
+    } catch (error) {
+      toast.error(locale === 'ko' ? '오류가 발생 하였습니다' : 'an error', {
+        theme: localStorage.theme || 'light',
+      })
+      console.error(error)
+    }
+  }
 
   useEffect(() => {
     const fetch = async () => {
@@ -280,6 +328,20 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         <div className="main-content">
           <ManagementWrapper className="card">
             <div className="table-wrapper">
+              <div className="extension-container">
+                <Space>
+                  <div></div>
+                </Space>
+                <Space>
+                  <Button
+                    type="primary"
+                    role="button"
+                    className="export-button"
+                    onClick={onExcelExport}>
+                    Excel
+                  </Button>
+                </Space>
+              </div>
               <div className="filter-container">
                 <Space>
                   <Dropdown
@@ -397,16 +459,31 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </Space>
                 <Space>
                   <Input.Group compact>
-                    <Select defaultValue="Email">
+                    <Select
+                      defaultValue={searchSelect}
+                      onChange={(value) =>
+                        setFilterOptions((prev) => ({ ...prev, searchSelect: value }))
+                      }>
                       <Select.Option value="Email">
                         {locale === 'ko' ? '이메일' : 'Email'}
                       </Select.Option>
-                      <Select.Option value="Nickname">
-                        {locale === 'ko' ? '닉네임' : 'Nickname'}
+                      <Select.Option value="NickName">
+                        {locale === 'ko' ? '닉네임' : 'NickName'}
                       </Select.Option>
                     </Select>
                     <Input.Search
-                      placeholder={locale === 'ko' ? '닉네임' : 'Nickname'}
+                      name="searchText"
+                      placeholder={
+                        searchSelect === 'Email'
+                          ? locale === 'ko'
+                            ? '이메일'
+                            : 'Email'
+                          : searchSelect === 'NickName'
+                          ? locale === 'ko'
+                            ? '닉네임'
+                            : 'NickName'
+                          : searchSelect
+                      }
                       loading={membersLoading}
                       onChange={onNickNameChange}
                     />
@@ -442,7 +519,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                         membersData
                           ? membersData.members.members?.map(
                               (
-                                { _id, email, nickName, memberStatus, memberType },
+                                { _id, email, nickName, memberStatus, memberType, createDate },
                                 index: number
                               ) => {
                                 const memberStatusValue =
@@ -479,6 +556,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                                   nickName,
                                   memberStatus: memberStatusValue,
                                   memberType: memberTypeValue,
+                                  createDate: moment(createDate).format('YYYY.MM.DD'),
                                 }
                               }
                             )
@@ -491,13 +569,17 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                     />
                   </div>
                   <div className="pagination-content">
+                    <span>
+                      <b>Total</b> {membersData?.members.totalResults?.toLocaleString()}
+                    </span>
                     <Pagination
                       pageSize={pageSize}
                       current={page}
                       total={membersData?.members.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
-                      showSizeChanger={false}
+                      showSizeChanger
+                      pageSizeOptions={['10', '20', '30', '40', '50']}
                     />
                   </div>
                 </>

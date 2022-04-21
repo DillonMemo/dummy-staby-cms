@@ -27,7 +27,7 @@ const RangePicker: React.FC<Props> = ({
       <span className="title">{title}</span>
       <ConfigProvider locale={locale === 'ko' ? ko_KR : en_US}>
         <DatePicker.RangePicker
-          value={value ? [value[0], value[1]] : null}
+          value={value ? [value[0], value[1]] : undefined}
           format={'YYYY.MM.DD'}
           onCalendarChange={onCalendarChange}
           onChange={onPickerChange}

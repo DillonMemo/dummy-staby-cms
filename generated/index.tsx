@@ -779,6 +779,7 @@ export type MembersByTypeOutput = {
 
 export type MembersInput = {
   dates?: Maybe<Array<Scalars['DateTime']>>;
+  email?: Maybe<Scalars['String']>;
   memberStatus?: Maybe<MemberStatus>;
   memberType?: Maybe<MemberType>;
   nickName?: Maybe<Scalars['String']>;
@@ -1224,7 +1225,7 @@ export type MembersMutationVariables = Exact<{
 }>;
 
 
-export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null | undefined, totalPages?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType }> | null | undefined } };
+export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null | undefined, totalPages?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any }> | null | undefined } };
 
 export type EditMemberByIdMutationVariables = Exact<{
   editMemberInput: EditMemberInput;
@@ -1651,6 +1652,7 @@ export const MembersDocument = gql`
       nickName
       memberStatus
       memberType
+      createDate
     }
   }
 }

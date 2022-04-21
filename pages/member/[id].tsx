@@ -13,7 +13,7 @@ import {
 } from '../../generated'
 import { MEMBER_QUERY } from '../../graphql/queries'
 import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, Input, Modal, Radio, Select, Skeleton } from 'antd'
+import { Button, Input, Modal, Radio, Select, Skeleton, Tabs } from 'antd'
 import { toast } from 'react-toastify'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -176,11 +176,15 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           <h2>{locale === 'ko' ? '회원 관리' : 'Member Settings'}</h2>
           <ol>
             <li>
-              <Link href="/">
+              <Link href="/" locale={locale}>
                 <a>{locale === 'ko' ? '홈' : 'Home'}</a>
               </Link>
             </li>
-            <li>{locale === 'ko' ? '멤버' : 'Member'}</li>
+            <li>
+              <Link href="/member/members" locale={locale}>
+                <a>{locale === 'ko' ? '멤버' : 'Member'}</a>
+              </Link>
+            </li>
             <li>{locale === 'ko' ? '회원관리' : 'Member Settings'}</li>
           </ol>
         </div>
@@ -611,6 +615,20 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
             </Form>
           </Edit>
+
+          <div className="tab-container card mt-1">
+            <Tabs className="default" defaultActiveKey="1" type="card">
+              <Tabs.TabPane tab={locale === 'ko' ? '활동이력' : 'active history'} key="1">
+                <h1>개발 진행 중...</h1>
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={locale === 'ko' ? '댓글이력' : 'comment history'} key="2">
+                <h1>개발 진행 중...</h1>
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={locale === 'ko' ? '포인트이력' : 'point history'} key="3">
+                <h1>개발 진행 중...</h1>
+              </Tabs.TabPane>
+            </Tabs>
+          </div>
         </div>
       </MainWrapper>
 
