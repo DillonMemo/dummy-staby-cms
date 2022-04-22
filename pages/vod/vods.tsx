@@ -312,6 +312,9 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                     />
                   </div>
                   <div className="pagination-content">
+                    <span>
+                      <b>Total</b> {vodsData?.vods.totalResults?.toLocaleString()}
+                    </span>
                     <Pagination
                       pageSize={pageSize}
                       current={page}
