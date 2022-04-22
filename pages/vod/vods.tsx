@@ -7,6 +7,8 @@ import { Button, Dropdown, Input, Menu, Pagination, Skeleton, Space, Table } fro
 import { ColumnsType } from 'antd/lib/table'
 import { debounce } from 'lodash'
 import { MenuInfo } from 'rc-menu/lib/interface'
+import { RangeValue } from 'rc-picker/lib/interface'
+import moment from 'moment'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -17,6 +19,8 @@ import { useMutation } from '@apollo/client'
 import { VodsMutation, VodsMutationVariables, VodStatus } from '../../generated'
 import { VODS_MUTATION } from '../../graphql/mutations'
 import { Maybe } from 'graphql/jsutils/Maybe'
+import { DATE_FORMAT } from '../../Common/commonFn'
+import RangePicker from '../../components/RangePicker'
 
 type Props = styleMode
 
@@ -27,7 +31,9 @@ interface Filters {
 /** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
 interface Options extends Filters {
   page: number
-  title: string
+  pageSize: number
+  searchText: string
+  dates: moment.Moment[]
 }
 /** 필터 드롭다운 Visible 옵션 */
 type Visible = Record<keyof Filters, boolean>
@@ -36,6 +42,11 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale } = useRouter()
   /** Table component에 들어가는 column 데이터 정보 입니다. */
   const columns: ColumnsType<any> = [
+    {
+      title: 'No',
+      dataIndex: 'index',
+      key: 'index',
+    },
     {
       title: locale === 'ko' ? '상태' : 'Status',
       dataIndex: 'vodStatus',
@@ -48,16 +59,25 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
       key: 'title',
     },
     {
-      title: locale === 'ko' ? '가격' : 'price',
+      title: locale === 'ko' ? '가격' : 'Price',
       dataIndex: 'paymentAmount',
       key: 'paymentAmount',
       responsive: ['md'],
     },
+
+    {
+      title: locale === 'ko' ? '등록일' : 'CreateDate',
+      dataIndex: 'createDate',
+      key: 'createDate',
+      responsive: ['md'],
+    },
   ]
-  const [{ page, vodStatus, title }, setFilterOptions] = useState<Options>({
+  const [{ page, pageSize, dates, vodStatus, searchText }, setFilterOptions] = useState<Options>({
     page: 1,
+    pageSize: 20,
+    dates: [],
     vodStatus: 'All',
-    title: '',
+    searchText: '',
   })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
     vodStatus: false,
@@ -70,17 +90,22 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
   /**
    * pagination 클릭 이벤트 핸들러 입니다.
    * @param {Number} page 이동할 페이지 번호
-   * @param {Number} _pageSize 페이지당 리스트 개수 `default: 20`
+   * @param {Number} pageSize 페이지당 리스트 개수 `default: 20`
    */
-  const onPageChange = async (page: number, _pageSize?: number) => {
+  const onPageChange = async (page: number, pageSize?: number) => {
     try {
       await vods({
         variables: {
-          vodsInput: { page },
+          vodsInput: {
+            page,
+            pageView: pageSize,
+            vodStatus: vodStatus !== 'All' ? vodStatus : undefined,
+            title: searchText,
+          },
         },
       })
 
-      setFilterOptions((prev) => ({ ...prev, page }))
+      setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
     } catch (error) {
       console.error(error)
     }
@@ -96,7 +121,9 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
           variables: {
             vodsInput: {
               page,
+              pageView: pageSize,
               vodStatus: key !== 'All' ? (key as Maybe<VodStatus>) : undefined,
+              title: searchText,
             },
           },
         })
@@ -119,20 +146,49 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
           variables: {
             vodsInput: {
               page,
+              pageView: pageSize,
               vodStatus: vodStatus !== 'All' ? vodStatus : undefined,
               title: value,
             },
           },
         })
         if (data?.vods.ok) {
-          setFilterOptions((prev) => ({ ...prev, title: value }))
+          setFilterOptions((prev) => ({ ...prev, searchText: value }))
         }
       } catch (error) {
         console.error(error)
       }
     }, 1000),
-    [page, vodStatus, title]
+    [page, vodStatus, searchText, dates]
   )
+
+  /**
+   * datepicker가 열릴 때 실행 이벤트 핸들러 입니다.
+   * @param {boolean} open 달력 오픈 여부
+   */
+  const onPickerOpen = (open: boolean) => {
+    if (open) {
+      setFilterOptions((prev) => ({ ...prev, dates: [] }))
+    }
+  }
+
+  /**
+   * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
+   * @param {RangeValue<moment.Moment>} value 날짜 결과 option
+   */
+  const onPickerChange = async (value: RangeValue<moment.Moment>) => {
+    await vods({
+      variables: {
+        vodsInput: {
+          page,
+          pageView: pageSize,
+          vodStatus: vodStatus !== 'All' ? vodStatus : undefined,
+          title: '',
+          ...(value && value.length > 0 && { dates: value }),
+        },
+      },
+    })
+  }
 
   useEffect(() => {
     const fetch = async () => {
@@ -191,9 +247,20 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                       </Button>
                     </div>
                   </Dropdown>
+                  <RangePicker
+                    locale={locale}
+                    title={locale === 'ko' ? '가입일' : 'Create Date'}
+                    value={dates}
+                    onCalendarChange={(value) =>
+                      setFilterOptions((prev) => ({ ...prev, dates: value as any }))
+                    }
+                    onPickerChange={onPickerChange}
+                    onPickerOpen={onPickerOpen}
+                  />
                 </Space>
                 <Space>
                   <Input.Search
+                    name="searchText"
                     placeholder={locale === 'ko' ? '타이틀' : 'Title'}
                     loading={vodsLoading}
                     onChange={onTitleChange}
@@ -204,7 +271,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
               {vodsLoading ? (
                 <>
                   <div>
-                    <Skeleton active title={false} paragraph={{ rows: 20 }} />
+                    <Skeleton active title={false} paragraph={{ rows: pageSize }} />
                   </div>
                 </>
               ) : (
@@ -229,27 +296,30 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                         vodsData
                           ? vodsData.vods.vods?.map((vod: any, index: number) => ({
                               key: index,
+                              index: index + 1 + pageSize * (page - 1),
                               _id: vod._id,
                               vodStatus: vod.vodStatus,
                               title: vod.title,
                               paymentAmount: vod.paymentAmount + ' G',
+                              createDate: DATE_FORMAT('YYYY-MM-DD', vod.createDate),
                             }))
                           : []
                       }
                       pagination={{
-                        pageSize: 20,
+                        pageSize: pageSize,
                         hideOnSinglePage: true,
                       }}
                     />
                   </div>
                   <div className="pagination-content">
                     <Pagination
-                      pageSize={20}
+                      pageSize={pageSize}
                       current={page}
                       total={vodsData?.vods.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
-                      showSizeChanger={false}
+                      showSizeChanger
+                      pageSizeOptions={['10', '20', '30', '40', '50']}
                     />
                   </div>
                 </>
