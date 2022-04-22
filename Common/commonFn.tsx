@@ -90,7 +90,7 @@ export const shareCheck = (shareArray: Array<any>, locale?: string) => {
         : 'Has been completed',
       {
         theme: localStorage.theme || 'light',
-        autoClose: 1000,
+        autoClose: 5000,
       }
     )
 
@@ -146,11 +146,20 @@ export const bankList = [
 ]
 
 //라이브 이미지 확장자 체크 및 s3업로드
+/**
+ *
+ * @param inputElement img input
+ * @param id objID
+ * @param nowDate s3, db 에 등록되는 img file name. - `{id}_main_{data}.확장자` 의 형식을 가진다.
+ * @param locale 언어설정
+ * @param playType "vod","live"
+ * @returns
+ */
 export const liveImgCheckExtension = async (
   inputElement: HTMLInputElement | null,
   id: string,
-  nowDate: string,
-  locale: string | undefined
+  locale: string | undefined,
+  playType: string
 ) => {
   let mainImgFileName = '' //메인 썸네일
 
@@ -160,9 +169,13 @@ export const liveImgCheckExtension = async (
       inputElement.files[0].type.includes('png') ||
       inputElement.files[0].type.includes('jpeg')
     ) {
+      const fileExtension =
+        inputElement.files[0].name.split('.')[inputElement.files[0].name.split('.').length - 1]
+      const fileName = `${id.toString()}_main_${nowDateStr}.${fileExtension}`
+
       mainImgFileName = `${
         process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-      }/going/live/${id.toString()}/main/${nowDate}`
+      }/going/${playType}/${id.toString()}/main/${fileName}`
       process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
         (await S3.upload({
           Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
@@ -171,7 +184,7 @@ export const liveImgCheckExtension = async (
           ACL: 'public-read',
         }).promise())
 
-      return true
+      return fileName
     } else {
       toast.error(
         locale && locale === 'ko'
@@ -185,5 +198,5 @@ export const liveImgCheckExtension = async (
     }
   }
 
-  return true
+  return false
 }

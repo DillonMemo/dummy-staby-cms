@@ -133,6 +133,7 @@ export const LIVES_MUTATION = gql`
         likeCount # 좋아요 수
         liveStatus # 라이브상태
         vodId # VOD 고유식별 ID (종료 후 등록된 VOD)
+        createDate # 등록일
       }
     }
   }
@@ -198,6 +199,7 @@ export const VODS_MUTATION = gql`
         mainImageName # VOD메인이미지
         liveId # LIVE 고유식별 ID (선택한 LIVE)
         vodStatus # VOD 상태
+        createDate # 등록일
       }
     }
   }

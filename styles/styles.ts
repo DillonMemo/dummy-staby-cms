@@ -770,6 +770,11 @@ export const Form = styled.form`
   .mt-1 {
     margin-top: 1rem;
   }
+
+  .mt-15 {
+    margin-top: 1.5rem;
+  }
+
   .mt-2 {
     margin-top: 2rem;
   }
