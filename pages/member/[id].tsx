@@ -1,4 +1,4 @@
-import { useLazyQuery, useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import {
@@ -6,12 +6,14 @@ import {
   EditMemberByIdMutationVariables,
   FindMemberByIdQuery,
   FindMemberByIdQueryVariables,
+  HistoriesByMemberIdQuery,
+  HistoriesByMemberIdQueryVariables,
   MemberReportStatus,
   MemberType,
   SuspendMemberByIdMutation,
   SuspendMemberByIdMutationVariables,
 } from '../../generated'
-import { MEMBER_QUERY } from '../../graphql/queries'
+import { HISTORIES_BY_MEMBER_ID, MEMBER_QUERY } from '../../graphql/queries'
 import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
 import { Button, Input, Modal, Radio, Select, Skeleton, Tabs } from 'antd'
 import { toast } from 'react-toastify'
@@ -77,6 +79,17 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     FindMemberByIdQuery,
     FindMemberByIdQueryVariables
   >(MEMBER_QUERY)
+  const { data: testData } = useQuery<HistoriesByMemberIdQuery, HistoriesByMemberIdQueryVariables>(
+    HISTORIES_BY_MEMBER_ID,
+    {
+      variables: {
+        historiesByMemberIdInput: {
+          memberId: router.query.id as string,
+        },
+      },
+    }
+  )
+  console.log(testData)
   const [suspendMember, { loading: isSuspendMemberLoading }] = useMutation<
     SuspendMemberByIdMutation,
     SuspendMemberByIdMutationVariables
@@ -87,7 +100,6 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     okText: locale === 'ko' ? '확인' : 'OK',
     cancelText: locale === 'ko' ? '취소' : 'Cancel',
   }
-
   const onCompleted = async (data: EditMemberByIdMutation) => {
     const {
       editMemberById: { ok },

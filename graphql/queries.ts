@@ -307,3 +307,18 @@ export const GET_GOING_DASHBOARD = gql`
     }
   }
 `
+
+/**
+ * 특정 회원의 로그 이력 데이터를 가져옵니다
+ */
+export const HISTORIES_BY_MEMBER_ID = gql`
+  query HistoriesByMemberId($historiesByMemberIdInput: HistoriesByMemberIdInput!) {
+    historiesByMemberId(input: $historiesByMemberIdInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`

@@ -31,6 +31,19 @@ export type AccountInfoInputType = {
   depositor: Scalars['String'];
 };
 
+export enum ActiveType {
+  Away = 'AWAY',
+  Charge = 'CHARGE',
+  Delete = 'DELETE',
+  Login = 'LOGIN',
+  Logout = 'LOGOUT',
+  Modify = 'MODIFY',
+  New = 'NEW',
+  Payment = 'PAYMENT',
+  Refund = 'REFUND',
+  View = 'VIEW'
+}
+
 export enum AdvertiseStatus {
   Display = 'DISPLAY',
   Removed = 'REMOVED',
@@ -132,6 +145,21 @@ export enum BoardStatus {
   Delete = 'DELETE',
   Display = 'DISPLAY',
   Wait = 'WAIT'
+}
+
+export enum CategoryType {
+  Comment = 'COMMENT',
+  Event = 'EVENT',
+  Faq = 'FAQ',
+  Live = 'LIVE',
+  Livefavorite = 'LIVEFAVORITE',
+  Member = 'MEMBER',
+  Notice = 'NOTICE',
+  Payment = 'PAYMENT',
+  Qna = 'QNA',
+  Report = 'REPORT',
+  Vod = 'VOD',
+  Vodfavorite = 'VODFAVORITE'
 }
 
 export type ChangeAdvertisementStatusInput = {
@@ -520,6 +548,23 @@ export type GetGoingDashboardOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type GoingActiveLog = {
+  __typename?: 'GoingActiveLog';
+  _id: Scalars['ID'];
+  activeType: ActiveType;
+  amount: Scalars['Float'];
+  categoryType: CategoryType;
+  content: Scalars['String'];
+  createDate: Scalars['DateTime'];
+  ip: Scalars['String'];
+  member: Member;
+  memberId: Scalars['ID'];
+  memberType: MemberType;
+  serviceType: ServiceType;
+  targetId: Scalars['ID'];
+  updateDate: Scalars['DateTime'];
+};
+
 export type GoingDashboard = {
   __typename?: 'GoingDashboard';
   _id: Scalars['ID'];
@@ -527,6 +572,21 @@ export type GoingDashboard = {
   loginCountByDate: Array<Scalars['Float']>;
   totalMemberCount: Scalars['Float'];
   updateDate: Scalars['DateTime'];
+};
+
+export type HistoriesByMemberIdInput = {
+  memberId: Scalars['ID'];
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+};
+
+export type HistoriesByMemberIdOutput = {
+  __typename?: 'HistoriesByMemberIdOutput';
+  error?: Maybe<LangErrorMessage>;
+  goingActiveLog?: Maybe<Array<GoingActiveLog>>;
+  ok: Scalars['Boolean'];
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
 };
 
 export type InquiriesInput = {
@@ -1039,6 +1099,7 @@ export type Query = {
   findVodById: FindVodByIdOutput;
   findVodByTypes: FindVodByTypesOutput;
   getGoingDashboard: GetGoingDashboardOutput;
+  historiesByMemberId: HistoriesByMemberIdOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
   my: Member;
 };
@@ -1083,6 +1144,11 @@ export type QueryFindVodByTypesArgs = {
   input: FindVodByTypesInput;
 };
 
+
+export type QueryHistoriesByMemberIdArgs = {
+  input: HistoriesByMemberIdInput;
+};
+
 export enum QuestionType {
   Etc = 'ETC',
   Event = 'EVENT',
@@ -1102,6 +1168,11 @@ export type Report = {
   releaseDate?: Maybe<Scalars['DateTime']>;
   updateDate: Scalars['DateTime'];
 };
+
+export enum ServiceType {
+  Cms = 'CMS',
+  Service = 'SERVICE'
+}
 
 export enum TranscodeStatus {
   Fail = 'FAIL',
@@ -1246,7 +1317,7 @@ export type LivesMutationVariables = Exact<{
 }>;
 
 
-export type LivesMutation = { __typename?: 'Mutation', lives: { __typename?: 'LivesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives?: Array<{ __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }> }> | null | undefined } };
+export type LivesMutation = { __typename?: 'Mutation', lives: { __typename?: 'LivesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives?: Array<{ __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, createDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }> }> | null | undefined } };
 
 export type EditLiveMutationVariables = Exact<{
   editLiveInput: EditLiveInput;
@@ -1274,7 +1345,7 @@ export type VodsMutationVariables = Exact<{
 }>;
 
 
-export type VodsMutation = { __typename?: 'Mutation', vods: { __typename?: 'VodsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods?: Array<{ __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, viewCount: number, storageTotalCount: number, mainImageName: string, liveId?: string | null | undefined, vodStatus: VodStatus }> | null | undefined } };
+export type VodsMutation = { __typename?: 'Mutation', vods: { __typename?: 'VodsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods?: Array<{ __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, viewCount: number, storageTotalCount: number, mainImageName: string, liveId?: string | null | undefined, vodStatus: VodStatus, createDate: any }> | null | undefined } };
 
 export type EditVodMutationVariables = Exact<{
   editVodInput: EditVodInput;
@@ -1486,6 +1557,13 @@ export type GetGoingDashboardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetGoingDashboardQuery = { __typename?: 'Query', getGoingDashboard: { __typename?: 'GetGoingDashboardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, dashboard?: { __typename?: 'GoingDashboard', totalMemberCount: number, loginCountByDate: Array<number> } | null | undefined } };
+
+export type HistoriesByMemberIdQueryVariables = Exact<{
+  historiesByMemberIdInput: HistoriesByMemberIdInput;
+}>;
+
+
+export type HistoriesByMemberIdQuery = { __typename?: 'Query', historiesByMemberId: { __typename?: 'HistoriesByMemberIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
 
 
 export const LoginDocument = gql`
@@ -1787,6 +1865,7 @@ export const LivesDocument = gql`
       likeCount
       liveStatus
       vodId
+      createDate
     }
   }
 }
@@ -1948,6 +2027,7 @@ export const VodsDocument = gql`
       mainImageName
       liveId
       vodStatus
+      createDate
     }
   }
 }
@@ -3348,3 +3428,42 @@ export function useGetGoingDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHook
 export type GetGoingDashboardQueryHookResult = ReturnType<typeof useGetGoingDashboardQuery>;
 export type GetGoingDashboardLazyQueryHookResult = ReturnType<typeof useGetGoingDashboardLazyQuery>;
 export type GetGoingDashboardQueryResult = Apollo.QueryResult<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>;
+export const HistoriesByMemberIdDocument = gql`
+    query HistoriesByMemberId($historiesByMemberIdInput: HistoriesByMemberIdInput!) {
+  historiesByMemberId(input: $historiesByMemberIdInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+
+/**
+ * __useHistoriesByMemberIdQuery__
+ *
+ * To run a query within a React component, call `useHistoriesByMemberIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHistoriesByMemberIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHistoriesByMemberIdQuery({
+ *   variables: {
+ *      historiesByMemberIdInput: // value for 'historiesByMemberIdInput'
+ *   },
+ * });
+ */
+export function useHistoriesByMemberIdQuery(baseOptions: Apollo.QueryHookOptions<HistoriesByMemberIdQuery, HistoriesByMemberIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HistoriesByMemberIdQuery, HistoriesByMemberIdQueryVariables>(HistoriesByMemberIdDocument, options);
+      }
+export function useHistoriesByMemberIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HistoriesByMemberIdQuery, HistoriesByMemberIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HistoriesByMemberIdQuery, HistoriesByMemberIdQueryVariables>(HistoriesByMemberIdDocument, options);
+        }
+export type HistoriesByMemberIdQueryHookResult = ReturnType<typeof useHistoriesByMemberIdQuery>;
+export type HistoriesByMemberIdLazyQueryHookResult = ReturnType<typeof useHistoriesByMemberIdLazyQuery>;
+export type HistoriesByMemberIdQueryResult = Apollo.QueryResult<HistoriesByMemberIdQuery, HistoriesByMemberIdQueryVariables>;
