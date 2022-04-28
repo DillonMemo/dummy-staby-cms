@@ -288,6 +288,7 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                     onPickerChange={onPickerChange}
                     onPickerOpen={onPickerOpen}
                   />
+                  <span>기간은 현재 개발 진행중</span>
                 </Space>
                 <Space>
                   <Input.Group compact>

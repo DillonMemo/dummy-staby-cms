@@ -5,7 +5,8 @@ import ko_KR from 'antd/lib/locale/ko_KR'
 import en_US from 'antd/lib/locale/en_US'
 import { RangeValue } from 'rc-picker/lib/interface'
 
-interface Props {
+type Element = React.HTMLAttributes<HTMLDivElement>
+interface Props extends Element {
   locale?: string
   title: string
   value: moment.Moment[]
@@ -21,9 +22,10 @@ const RangePicker: React.FC<Props> = ({
   onCalendarChange,
   onPickerChange,
   onPickerOpen,
+  className,
 }) => {
   return (
-    <div className="range-picker">
+    <div className={`range-picker ${className}`}>
       <span className="title">{title}</span>
       <ConfigProvider locale={locale === 'ko' ? ko_KR : en_US}>
         <DatePicker.RangePicker

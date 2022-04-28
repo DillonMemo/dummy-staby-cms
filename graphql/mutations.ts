@@ -651,3 +651,67 @@ export const SUSPEND_MEMBER_BY_ID_MUTATION = gql`
     }
   }
 `
+
+/**
+ * 특정 회원의 로그 이력 데이터를 가져옵니다
+ * @example {input: {
+ *  memberId: <ObjectId>
+ *  serviceType: <Enum>
+ *  activeType: <Enum>
+ *  dates: <Date[]>
+ * }}
+ */
+export const ACTIVE_HISTORIES_BY_MEMBER_ID_MUTATION = gql`
+  mutation ActiveHistoriesByMemberId(
+    $activeHistoriesByMemberIdInput: ActiveHistoriesByMemberIdInput!
+  ) {
+    activeHistoriesByMemberId(input: $activeHistoriesByMemberIdInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      goingActiveLog {
+        memberType
+        categoryType
+        activeType
+        serviceType
+        content
+        createDate
+      }
+    }
+  }
+`
+
+/**
+ * 특정 회원의 포인트 사용, 충전 이력 데이터를 가져옵니다
+ * @example {input: {
+ *  memberId: <ObjectId>
+ *  pointPayStatus: <Enum>
+ *  dates: <Date[]>
+ * }}
+ */
+export const POINT_HISTORIES_BY_MEMBER_ID_MUTATION = gql`
+  mutation PointHistoriesByMemberId(
+    $pointHistoriesByMemberIdInput: PointHistoriesByMemberIdInput!
+  ) {
+    pointHistoriesByMemberId(input: $pointHistoriesByMemberIdInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      pointPayHistoryView {
+        pointPayType
+        pointPayStatus
+        amount
+        content
+        createDate
+      }
+    }
+  }
+`

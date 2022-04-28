@@ -160,7 +160,6 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
 
         if (data?.members.ok) {
-          //@ts-expect-error
           setFilterOptions((prev) => ({ ...prev, memberType: key as Maybe<MemberType> }))
         }
       }
@@ -365,10 +364,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                                 ? '시스템관리자'
                                 : type
                               : type
-                          return (
-                            //@ts-expect-error
-                            <Menu.Item key={MemberType[type]}>{memberTypeValue}</Menu.Item>
-                          )
+                          return <Menu.Item key={MemberType[type]}>{memberTypeValue}</Menu.Item>
                         })}
                       </Menu>
                     }
@@ -417,7 +413,6 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                                 : status
                               : status
                           return (
-                            //@ts-expect-error
                             <Menu.Item key={MemberStatus[status]}>{memberStatusValue}</Menu.Item>
                           )
                         })}
@@ -524,27 +519,27 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                               ) => {
                                 const memberStatusValue =
                                   locale === 'ko'
-                                    ? memberStatus === 'ACTIVE'
+                                    ? memberStatus === MemberStatus.Active
                                       ? '활성'
-                                      : memberStatus === 'REMOVE_STANDBY'
+                                      : memberStatus === MemberStatus.RemoveStandby
                                       ? '탈퇴 접수'
-                                      : memberStatus === 'REMOVED'
+                                      : memberStatus === MemberStatus.Removed
                                       ? '탈퇴'
                                       : memberStatus
                                     : memberStatus
                                 const memberTypeValue =
                                   locale === 'ko'
-                                    ? memberType === 'NORMAL'
+                                    ? memberType === MemberType.Normal
                                       ? '일반'
-                                      : memberType === 'BUSINESS'
+                                      : memberType === MemberType.Business
                                       ? '기업'
-                                      : memberType === 'CONTENTS'
+                                      : memberType === MemberType.Contents
                                       ? '컨텐츠관리자'
-                                      : memberType === 'CX'
+                                      : memberType === MemberType.Cx
                                       ? 'CX관리자'
-                                      : memberType === 'SERVICE'
+                                      : memberType === MemberType.Service
                                       ? '서비스관리자'
-                                      : memberType === 'SYSTEM'
+                                      : memberType === MemberType.System
                                       ? '시스템관리자'
                                       : memberType
                                     : memberType
@@ -563,7 +558,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                           : []
                       }
                       pagination={{
-                        pageSize: pageSize,
+                        pageSize,
                         hideOnSinglePage: true,
                       }}
                     />

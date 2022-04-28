@@ -1,4 +1,4 @@
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import {
@@ -6,29 +6,28 @@ import {
   EditMemberByIdMutationVariables,
   FindMemberByIdQuery,
   FindMemberByIdQueryVariables,
-  HistoriesByMemberIdQuery,
-  HistoriesByMemberIdQueryVariables,
   MemberReportStatus,
   MemberType,
   SuspendMemberByIdMutation,
   SuspendMemberByIdMutationVariables,
 } from '../../generated'
-import { HISTORIES_BY_MEMBER_ID, MEMBER_QUERY } from '../../graphql/queries'
+import { MEMBER_QUERY } from '../../graphql/queries'
+import { EDIT_MEMBER_BY_ID_MUTATION, SUSPEND_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
 import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, Input, Modal, Radio, Select, Skeleton, Tabs } from 'antd'
+import { Button, Input, Modal, Radio, Select, Skeleton } from 'antd'
 import { toast } from 'react-toastify'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import styled from 'styled-components'
+import moment from 'moment'
 
 /** components */
 import Layout from '../../components/Layout'
-import { EDIT_MEMBER_BY_ID_MUTATION, SUSPEND_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
+import HistoryTabs from '../../components/member/historyTabs'
 
 /** util */
 import { bankList } from '../../Common/commonFn'
-import moment from 'moment'
 
 type Props = styleMode
 
@@ -52,6 +51,7 @@ export interface MemberEditForm {
 const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const router = useRouter()
   const { locale } = useRouter()
+
   const [suspendModal, setSuspendModal] = useState({
     isVisible: false,
     isConfirmVisible: false,
@@ -79,17 +79,6 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     FindMemberByIdQuery,
     FindMemberByIdQueryVariables
   >(MEMBER_QUERY)
-  const { data: testData } = useQuery<HistoriesByMemberIdQuery, HistoriesByMemberIdQueryVariables>(
-    HISTORIES_BY_MEMBER_ID,
-    {
-      variables: {
-        historiesByMemberIdInput: {
-          memberId: router.query.id as string,
-        },
-      },
-    }
-  )
-  console.log(testData)
   const [suspendMember, { loading: isSuspendMemberLoading }] = useMutation<
     SuspendMemberByIdMutation,
     SuspendMemberByIdMutationVariables
@@ -175,11 +164,6 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       },
     })
   }, [memberData])
-
-  // useEffect(() => {
-  //   debugger
-  //   console.log(getValues('memberType'))
-  // }, [getValues('memberType')])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
@@ -628,19 +612,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
             </Form>
           </Edit>
 
-          <div className="tab-container card mt-1">
-            <Tabs className="default" defaultActiveKey="1" type="card">
-              <Tabs.TabPane tab={locale === 'ko' ? '활동이력' : 'active history'} key="1">
-                <h1>개발 진행 중...</h1>
-              </Tabs.TabPane>
-              <Tabs.TabPane tab={locale === 'ko' ? '댓글이력' : 'comment history'} key="2">
-                <h1>개발 진행 중...</h1>
-              </Tabs.TabPane>
-              <Tabs.TabPane tab={locale === 'ko' ? '포인트이력' : 'point history'} key="3">
-                <h1>개발 진행 중...</h1>
-              </Tabs.TabPane>
-            </Tabs>
-          </div>
+          <HistoryTabs memberId={memberId} />
         </div>
       </MainWrapper>
 

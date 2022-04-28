@@ -476,7 +476,11 @@ export const GlobalStyles = createGlobalStyle`
         }
 
         .ant-tabs-content-holder {
-          padding: 0 1rem;
+          .ant-tabs-content {
+            .table-tab-container {
+              min-height: 13.875rem;
+            }
+          }
         }
       }
       &.custom-dashboard {
