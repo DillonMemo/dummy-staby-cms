@@ -26,15 +26,14 @@ import {
   MemberType,
 } from '../../generated'
 import { MEMBERS_MUTATION } from '../../graphql/mutations'
-import { Maybe } from 'graphql/jsutils/Maybe'
 import RangePicker from '../../components/RangePicker'
 
 type Props = styleMode
 
 /** filter 옵션 인터페이스 */
 interface Filters {
-  memberType: MemberType | 'All'
-  memberStatus: MemberStatus | 'All'
+  memberType: keyof typeof MemberType | 'All'
+  memberStatus: keyof typeof MemberStatus | 'All'
 }
 /** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
 interface Options extends Filters {
@@ -117,8 +116,8 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
           membersInput: {
             page,
             pageView: pageSize,
-            memberType: memberType !== 'All' ? memberType : undefined,
-            memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
+            memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
+            memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
             ...(dates && dates.length > 0 && { dates }),
             ...(searchSelect === 'Email'
               ? { email: searchText }
@@ -147,8 +146,8 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
             membersInput: {
               page,
               pageView: pageSize,
-              memberType: key !== 'All' ? (key as Maybe<MemberType>) : undefined,
-              memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
+              memberType: key !== 'All' ? (key as MemberType) : undefined,
+              memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: searchText }
@@ -160,7 +159,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
 
         if (data?.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, memberType: key as Maybe<MemberType> }))
+          setFilterOptions((prev) => ({ ...prev, memberType: key as any }))
         }
       }
     } catch (error) {
@@ -180,8 +179,8 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
             membersInput: {
               page,
               pageView: pageSize,
-              memberType: memberType !== 'All' ? memberType : undefined,
-              memberStatus: key !== 'All' ? (key as Maybe<MemberStatus>) : undefined,
+              memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
+              memberStatus: key !== 'All' ? (key as MemberStatus) : undefined,
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: searchText }
@@ -192,7 +191,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         })
         if (data?.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, memberStatus: key as any }))
+          setFilterOptions((prev) => ({ ...prev, memberStatus: key as keyof typeof MemberStatus }))
         }
       }
     } catch (error) {
@@ -220,8 +219,8 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         membersInput: {
           page,
           pageView: pageSize,
-          memberType: memberType !== 'All' ? memberType : undefined,
-          memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
+          memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
+          memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
           ...(value && value.length > 0 && { dates: value }),
           ...(searchSelect === 'Email'
             ? { email: searchText }
@@ -244,8 +243,8 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
             membersInput: {
               page,
               pageView: pageSize,
-              memberType: memberType !== 'All' ? memberType : undefined,
-              memberStatus: memberStatus !== 'All' ? memberStatus : undefined,
+              memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
+              memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: value }
@@ -299,7 +298,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
 
         if (data?.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, memberStatus: MemberStatus.Active }))
+          setFilterOptions((prev) => ({ ...prev, memberStatus: MemberStatus.Active as any }))
         }
       } catch (error) {
         console.error(error)
@@ -350,21 +349,25 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                         {Object.keys(MemberType).map((type) => {
                           const memberTypeValue =
                             locale === 'ko'
-                              ? type === 'Normal'
+                              ? (type as MemberType) === MemberType.Normal
                                 ? '일반'
-                                : type === 'Business'
+                                : (type as MemberType) === MemberType.Business
                                 ? '기업'
-                                : type === 'Contents'
+                                : (type as MemberType) === MemberType.Contents
                                 ? '컨텐츠관리자'
-                                : type === 'Cx'
+                                : (type as MemberType) === MemberType.Cx
                                 ? 'CX관리자'
-                                : type === 'Service'
+                                : (type as MemberType) === MemberType.Service
                                 ? '서비스관리자'
-                                : type === 'System'
+                                : (type as MemberType) === MemberType.System
                                 ? '시스템관리자'
                                 : type
                               : type
-                          return <Menu.Item key={MemberType[type]}>{memberTypeValue}</Menu.Item>
+                          return (
+                            <Menu.Item key={MemberType[type as keyof typeof MemberType]}>
+                              {memberTypeValue}
+                            </Menu.Item>
+                          )
                         })}
                       </Menu>
                     }
@@ -378,17 +381,17 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                         {locale === 'ko'
                           ? memberType === 'All'
                             ? '전체'
-                            : memberType === 'NORMAL'
+                            : (memberType as MemberType) === MemberType.Normal
                             ? '일반'
-                            : memberType === 'BUSINESS'
+                            : (memberType as MemberType) === MemberType.Business
                             ? '기업'
-                            : memberType === 'CONTENTS'
+                            : (memberType as MemberType) === MemberType.Contents
                             ? '컨텐츠관리자'
-                            : memberType === 'CX'
+                            : (memberType as MemberType) === MemberType.Cx
                             ? 'CX관리자'
-                            : memberType === 'SERVICE'
+                            : (memberType as MemberType) === MemberType.Service
                             ? '서비스관리자'
-                            : memberType === 'SYSTEM'
+                            : (memberType as MemberType) === MemberType.System
                             ? '시스템관리자'
                             : memberType
                           : memberType}
@@ -413,7 +416,9 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                                 : status
                               : status
                           return (
-                            <Menu.Item key={MemberStatus[status]}>{memberStatusValue}</Menu.Item>
+                            <Menu.Item key={MemberStatus[status as keyof typeof MemberStatus]}>
+                              {memberStatusValue}
+                            </Menu.Item>
                           )
                         })}
                       </Menu>
@@ -428,11 +433,11 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                         {locale === 'ko'
                           ? memberStatus === 'All'
                             ? '전체'
-                            : memberStatus === 'ACTIVE'
+                            : (memberStatus as MemberStatus) === MemberStatus.Active
                             ? '활성'
-                            : memberStatus === 'REMOVE_STANDBY'
+                            : (memberStatus as MemberStatus) === MemberStatus.RemoveStandby
                             ? '탈퇴 접수'
-                            : memberStatus === 'REMOVED'
+                            : (memberStatus as MemberStatus) === MemberStatus.Removed
                             ? '탈퇴'
                             : memberStatus
                           : memberStatus}
