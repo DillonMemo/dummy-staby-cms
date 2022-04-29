@@ -84,7 +84,7 @@ const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
       <MainWrapper>
-        <Tabs defaultActiveKey={Dashboard.GOING}>
+        <Tabs className="custom-dashboard" defaultActiveKey={Dashboard.GOING}>
           <Tabs.TabPane tab="Going" key={Dashboard.GOING}>
             <ContentWrapper className="main-content">
               {isGoingLoading ? (

@@ -2,10 +2,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, Input, Popover, Select, Upload } from 'antd'
-
-import { UploadChangeParam } from 'antd/lib/upload'
-import { UploadRequestOption } from 'rc-upload/lib/interface'
+import { Button, Input, InputNumber, Select } from 'antd'
 import { toast } from 'react-toastify'
 
 import Link from 'next/link'
@@ -32,7 +29,7 @@ import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 /** utils */
 import { S3 } from '../../lib/awsClient'
 import * as mongoose from 'mongoose'
-import { nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
+import { liveImgCheckExtension, nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
 import Spinner from '../../components/Spinner'
 
 type Props = styleMode
@@ -69,25 +66,13 @@ const ShareWrap = styled.div`
   gap: 5px;
 `
 
-const ImgUploadBtnWrap = styled.div`
-  position: relative;
-
-  .uploadBtn {
-    position: absolute;
-    width: 100%;
-    height: 2.714rem;
-    top: 5px;
-    right: 0px;
-    z-index: 2;
-  }
-`
-
 const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale, push } = useRouter()
+  const { Option } = Select
   const [vodInfoArr, setVodInfoArr] = useState<Array<VodInfoArr>>([
     { playingImg: '', fileInfo: '' },
   ]) //링크, playing 이미지 관리
-  const [mainImgInfo, setMainImgInfo] = useState<MainImgInfo>({ mainImg: '', fileInfo: '' }) //mainImg 관리
+
   const [memberShareInfo, setMemberShareInfo] = useState<Array<ShareInfo>>([
     { memberId: '', nickName: '', priorityShare: 0, directShare: 0 },
   ]) //지분 관리
@@ -167,34 +152,16 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       const nowDate = nowDateStr
 
       //MainThumbnail upload
-      if (mainImgInfo.fileInfo instanceof File) {
-        if (
-          mainImgInfo.fileInfo.type.includes('jpg') ||
-          mainImgInfo.fileInfo.type.includes('jpeg') ||
-          mainImgInfo.fileInfo.type.includes('png')
-        ) {
-          mainImgFileName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${id.toString()}/main/${id.toString()}_main_${nowDate}.jpg`
-          process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-            (await S3.upload({
-              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-              Key: mainImgFileName,
-              Body: mainImgInfo.fileInfo,
-              ACL: 'public-read',
-            }).promise())
+      const mainImgInput: HTMLInputElement | null =
+        document.querySelector(`input[name=mainThumbnail]`)
 
-          mainImgFileName = `${id.toString()}_main_${nowDate}.jpg`
-        } else {
-          toast.error(
-            locale === 'ko' ? 'Img의 확장자를 확인해주세요.' : 'Please check the Img extension.',
-            {
-              theme: localStorage.theme || 'light',
-              onOpen: () => setUploading(false),
-            }
-          )
-          return
-        }
+      const imgCheck = await liveImgCheckExtension(mainImgInput, id, locale, 'vod')
+
+      if (!imgCheck) {
+        setUploading(false)
+        return
+      } else {
+        mainImgFileName = `${imgCheck}`
       }
 
       //playImg upload
@@ -202,6 +169,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         //linkPathName
         const vodUrlInput: HTMLInputElement | null = document.querySelector(
           `input[name=vodFile_${i}]`
+        )
+        const introImgInput: HTMLInputElement | null = document.querySelector(
+          `input[name=playImgUrl_${i}]`
         )
 
         let introImageName = ''
@@ -220,11 +190,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
             return
           }
 
-          //playingImgName
-          introImageName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.jpg`
-
+          //vodName
           vodName = `${
             process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
           }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
@@ -239,17 +205,30 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
           //이미지 확장자체크
 
-          if (vodInfoArr[i] && vodInfoArr[i].fileInfo && vodInfoArr[i].fileInfo.type) {
+          let fileExtension = ''
+
+          if (introImgInput && introImgInput?.files && introImgInput?.files[0] instanceof File) {
             if (
-              vodInfoArr[i].fileInfo.type.includes('jpg') ||
-              vodInfoArr[i].fileInfo.type.includes('jpeg') ||
-              vodInfoArr[i].fileInfo.type.includes('png')
+              introImgInput.files[0].type.includes('jpg') ||
+              introImgInput.files[0].type.includes('png') ||
+              introImgInput.files[0].type.includes('jpeg')
             ) {
+              //이미지 확장자 추출
+              fileExtension =
+                introImgInput.files[0].name.split('.')[
+                  introImgInput.files[0].name.split('.').length - 1
+                ]
+
+              //playingImgName
+              introImageName = `${
+                process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+              }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.${fileExtension}`
+
               process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
                 (await S3.upload({
                   Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
                   Key: introImageName,
-                  Body: vodInfoArr[i].fileInfo,
+                  Body: introImgInput.files[0],
                   ACL: 'bucket-owner-read',
                 }).promise())
             } else {
@@ -264,9 +243,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               )
               return
             }
+          } else {
+            toast.error(locale === 'ko' ? '이미지를 확인해 주세요.' : 'Please check the Img.', {
+              theme: localStorage.theme || 'light',
+              onOpen: () => setUploading(false),
+            })
           }
 
-          introImageName = `${id}_intro_${i + 1}_${nowDate}.jpg`
+          introImageName = `${id}_intro_${i + 1}_${nowDate}.${fileExtension}`
 
           vodName = `${id}_${i + 1}_${nowDate}.mp4`
 
@@ -313,116 +297,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       setUploading(false)
       console.error(error)
     }
-  }
-
-  /**
-   * @returns {Promise<void>} JSX element를 리턴 합니다.
-   */
-  const renderPopoverContent = (type: string, index?: number) => {
-    const Wrapper = styled.div`
-      display: inline-flex;
-      button {
-        border: 1px solid ${({ theme }) => theme.border};
-      }
-    `
-    /**
-     * upload file change 이전에 해당 함수를 실행합니다.
-     * @param {UploadRequestOption} params 커스텀 요청 옵션
-     */
-
-    const customRequest = async ({ file, onError, onSuccess }: UploadRequestOption) => {
-      try {
-        const defineOnSuccess = onSuccess as any
-        if (file instanceof File) {
-          const src: string = await new Promise((resolve) => {
-            const reader = new FileReader()
-            reader.readAsDataURL(file as Blob)
-            reader.onload = () => resolve(reader.result as string)
-          })
-          //const profileNode: HTMLElement | null = dom
-
-          if (src) {
-            //profileNode.src = src
-            defineOnSuccess(file)
-          } else {
-            throw new Error('not found profileNode or src or originFileObj')
-          }
-        } else {
-          throw new Error('not found file')
-        }
-      } catch (error: any) {
-        console.error(error)
-        onError && onError(error)
-      }
-    }
-
-    /**
-     * upload > customRequest > onProfileChange 순서의 함수 로직입니다.
-     * @param {UploadChangeParam} params file Obj를 가져옵니다.
-     */
-    const onProfileChange = ({ file }: UploadChangeParam) => {
-      const fileInput: HTMLInputElement | null = document.querySelector(
-        type === 'playing' ? `input[name=playImgUrl_${index}]` : 'input[name=mainImgInput]'
-      )
-
-      if (file.originFileObj && fileInput) {
-        //playing img 인 경우와 mainImg인 경우 로직 따로 처리
-        if (type === 'playing') {
-          setVodInfoArr(
-            vodInfoArr.map((data, i) => {
-              return i === index && file.originFileObj
-                ? { ...data, fileInfo: file.originFileObj, playingImg: file.originFileObj.name }
-                : data
-            })
-          )
-        }
-
-        if (type === 'main') {
-          setMainImgInfo({ fileInfo: file.originFileObj, mainImg: file.originFileObj.name })
-        }
-
-        fileInput.value = file.originFileObj.name
-      }
-    }
-    /**
-     * profile을 비우는 클릭 이벤트 핸들러 입니다.
-     */
-    const onRemoveProfileClick = () => {
-      const fileInput: HTMLInputElement | null = document.querySelector(
-        type === 'playing' ? `input[name=playImgUrl_${index}]` : 'input[name=mainImgInput]'
-      )
-
-      if (fileInput) {
-        if (type === 'playing') {
-          setVodInfoArr(
-            vodInfoArr.map((data, i) => {
-              return i === index ? { ...data, fileInfo: '', playingImg: '' } : data
-            })
-          )
-        }
-
-        if (type === 'main') {
-          setMainImgInfo({ fileInfo: '', mainImg: '' })
-        }
-        fileInput.value = ''
-      }
-    }
-
-    return (
-      <Wrapper>
-        <Upload
-          accept="image/*"
-          multiple={false}
-          customRequest={customRequest}
-          onChange={onProfileChange}
-          showUploadList={false}>
-          <Button>{locale === 'ko' ? '사진 업로드' : 'Upload a photo'}</Button>
-        </Upload>
-        <Button onClick={onRemoveProfileClick}>
-          {locale === 'ko' ? '사진 삭제' : 'Remove photo'}
-        </Button>
-      </Wrapper>
-    )
   }
 
   useEffect(() => {
@@ -506,14 +380,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                   )}
                 </div>
 
-                <div className="form-item">
+                <div className="form-item mt-harf">
                   <div className="form-group">
                     <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                     <Controller
                       control={control}
                       name="paymentAmount"
                       rules={{
-                        required: true,
+                        required: requiredText,
                         min: {
                           value: 0,
                           message:
@@ -530,14 +404,19 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                         },
                       }}
                       render={({ field: { value, onChange } }) => (
-                        <Input
-                          type="number"
+                        <InputNumber
                           className="input"
                           placeholder="Please enter the paymentAmount."
                           value={value}
-                          onChange={onChange}
-                          min={0}
                           max={65535}
+                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                          onKeyPress={(e) => {
+                            if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
+                              e.preventDefault()
+                              return false
+                            }
+                          }}
+                          onChange={onChange}
                         />
                       )}
                     />
@@ -550,33 +429,35 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                   )}
                 </div>
 
-                <div className="form-item">
+                <div className="form-item mt-harf">
                   <div className="form-group">
                     <span>Main {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                     <Controller
                       control={control}
                       name="mainThumbnail"
-                      render={({ field: { onChange } }) => (
-                        <ImgUploadBtnWrap className="profile-edit">
-                          <Popover
-                            className="profile-edit-popover uploadBtn"
-                            content={() => renderPopoverContent('main')}
-                            trigger="click"
-                            placement="bottomRight"
-                          />
-                          <Input
-                            className="input"
-                            name="mainImgInput"
-                            placeholder="Please upload img. only png or jpg"
-                            value={mainImgInfo.mainImg}
-                            onChange={onChange}
-                          />
-                        </ImgUploadBtnWrap>
+                      rules={{
+                        required: requiredText,
+                      }}
+                      render={({ field: { onChange, value } }) => (
+                        <Input
+                          className="input"
+                          type="file"
+                          value={value}
+                          name="mainThumbnail"
+                          placeholder="Please upload img. only png or jpg"
+                          onChange={onChange}
+                        />
                       )}
                     />
                   </div>
+
+                  {errors.mainThumbnail?.message && (
+                    <div className="form-message">
+                      <span>{errors.mainThumbnail.message}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="form-item">
+                <div className="form-item mt-harf">
                   <div className="form-group">
                     <span>
                       Vod
@@ -588,9 +469,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     </span>
                     {vodInfoArr.map((data, index) => {
                       return (
-                        <div key={index}>
+                        <div key={index} className="mt-15">
                           <div>
-                            <em className="fontSize12 mrT5">Ch{index + 1}</em>
+                            <em className="fontSize12 mrT5">Ch{index + 1}_Vod</em>
                             {index >= 1 && (
                               <Button
                                 className="delectBtn"
@@ -605,22 +486,15 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             name={`vodFile_${index}`}
                             accept=".mp4"
                             placeholder="Please upload the video.(only mp4)"
-                            //disabled={isAuto === 'Auto' ? true : false}
                           />
-                          <ImgUploadBtnWrap className="profile-edit">
-                            <Popover
-                              className="profile-edit-popover uploadBtn"
-                              content={() => renderPopoverContent('playing', index)}
-                              trigger="click"
-                              placement="bottomRight"
-                            />
-                            <Input
-                              className="input mrT5"
-                              name={`playImgUrl_${index}`}
-                              placeholder="Please upload playingThumnail img. only png or jpg"
-                              value={vodInfoArr[index].playingImg}
-                            />
-                          </ImgUploadBtnWrap>
+                          <em className="fontSize12 mrT5">Ch{index + 1}_Img</em>
+
+                          <Input
+                            type="file"
+                            className="input mrT5"
+                            name={`playImgUrl_${index}`}
+                            placeholder="Please upload playingThumnail img. only png or jpg"
+                          />
                         </div>
                       )
                     })}
@@ -631,7 +505,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     )}
                   </div>
                 </div>
-                <div className="form-item">
+                <div className="form-item mt-harf">
                   <div className="form-group">
                     <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                     <Controller
@@ -658,21 +532,28 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                   )}
                 </div>
 
-                <div className="form-item">
+                <div className="form-item mt-harf">
                   <div className="form-group">
                     <span>Live</span>
                     <Controller
                       control={control}
                       name="liveId"
+                      rules={{
+                        required: requiredText,
+                      }}
                       render={({ field: { value, onChange } }) => (
                         <>
-                          <Select value={value} onChange={onChange}>
+                          <Select
+                            showSearch
+                            optionFilterProp="children"
+                            value={value}
+                            onChange={onChange}>
                             {livesData?.lives.lives &&
                               livesData?.lives.lives.map((data, i) => {
                                 return (
-                                  <Select.Option key={i} value={data._id}>
+                                  <Option key={i} value={data._id}>
                                     {data.title}
-                                  </Select.Option>
+                                  </Option>
                                 )
                               })}
                           </Select>
@@ -680,11 +561,16 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       )}
                     />
                   </div>
+                  {errors.liveId?.message && (
+                    <div className="form-message">
+                      <span>{errors.liveId.message}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="form-item">
+                <div className="form-item mt-harf">
                   <div className="form-group">
                     {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정.*/}
-                    <span>{locale === 'ko' ? '지분' : 'Share'}</span>
+                    <span>{locale === 'ko' ? '지분 - 우선환수, 직분배' : 'Share'}</span>
                     {memberShareInfo.map((data, index) => {
                       return (
                         <div key={index}>
@@ -775,23 +661,31 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                         </div>
                       )
                     })}
+
                     <Button className="thumbnailAddBtn" onClick={() => onAddLive('member')}>
                       {locale === 'ko' ? '추가' : 'Add'}
                     </Button>
                   </div>
-                  {/* {errors.share?.message && (
+                  {errors.share && (
                     <div className="form-message">
-                      <span>{errors.share.message}</span>
+                      <span>{requiredText}</span>
                     </div>
-                  )} */}
+                  )}
                 </div>
-                <div className="form-item">
+                <div className="form-item mt-harf">
                   <div className="button-group">
+                    <Link href="/vod/vods">
+                      <a>
+                        <Button className="submit-button" type="primary" role="button">
+                          목록
+                        </Button>
+                      </a>
+                    </Link>
                     <Button
                       type="primary"
                       role="button"
-                      //htmlType="submit"
-                      className="submit-button"
+                      htmlType="submit"
+                      className="submit-button ml-harf"
                       onClick={onSubmit}
                       disabled={Object.keys(errors).includes('paymentAmount')}>
                       {locale === 'ko' ? '저장' : 'save'}

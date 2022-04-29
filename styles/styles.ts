@@ -141,6 +141,17 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     /** antd custom */
+    .ant-skeleton {
+      &.ant-skeleton-active {
+        .ant-skeleton-input {
+          background: ${({ theme }) =>
+            theme.mode === 'light'
+              ? 'linear-gradient(90deg, rgba(190, 190, 190, 0.2) 25%, rgba(129, 129, 129, 0.24) 37%, rgba(190, 190, 190, 0.2) 63%)'
+              : 'linear-gradient(90deg, rgba(255, 255, 254, 0.3) 25%, rgba(190, 190, 190, 0.54) 37%, rgba(255, 255, 256, 0.3) 63%)'};
+              background-size: 400% 100%;
+        }
+      }
+    }
     .ant-input-search {
       .ant-input-group {
         .ant-input-group-addon {
@@ -374,6 +385,20 @@ export const GlobalStyles = createGlobalStyle`
           color: #1890ff !important;
         }
       }
+
+      .ant-pagination-options {
+        .ant-select {
+          color: ${({ theme }) => theme.text};
+
+          .ant-select-selector {
+            background-color: ${({ theme }) => theme.body};
+            border-color: ${({ theme }) => theme.border};
+          }
+          .ant-select-arrow {
+            color: ${({ theme }) => theme.text};
+          }
+        }
+      }
     }
 
     .ant-dropdown {
@@ -407,24 +432,70 @@ export const GlobalStyles = createGlobalStyle`
       }
       .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
         transition: .3s ease;
-        color: ${({ theme }) => `${theme.text}${opacityHex._40}`};
+        /* color: ${({ theme }) => `${theme.text}${opacityHex._40}`}; */
+        color: ${({ theme }) => theme.text};
         background-color: ${({ theme }) => `${theme.disable}`};
       }
     }
+    /* .ant-select {
+      &:not(.ant-select-customize-input) {
+        .ant-select-selector {
+          background-color: ${({ theme }) => theme.body};
+          color: ${({ theme }) => theme.text};
+          border-color: ${({ theme }) => theme.border};
+        }
+      }
+
+      .ant-select-arrow {
+        color: ${({ theme }) => theme.text};
+      }
+    } */
     
 
     .ant-tabs {
-      color: ${({ theme }) =>
-        theme.mode === 'dark' ? `rgba(255, 255, 255, 0.85)` : `rgba(0, 0, 0, 0.85)`};
-
-        .ant-tabs-nav {
-          &:before {
-            border-bottom: none !important;
+      color: ${({ theme }) => theme.text};
+      &.ant-tabs-top {
+        > .ant-tabs-nav {
+          &::before {
+            border-bottom-color: ${({ theme }) => theme.border};
+          }
+        }
+      }
+      &.ant-tabs-card {
+        &.ant-tabs-top {
+          > .ant-tabs-nav {
+            .ant-tabs-tab-active {
+              border-bottom-color: ${({ theme }) => theme.card};
+              background: ${({ theme }) => theme.card};
+            }
           }
         }
         .ant-tabs-tab {
-          color: ${({ theme }) => theme.text} !important;
+          background: ${({ theme }) => theme.body};
+          border-color: ${({ theme }) => theme.border};
         }
+
+        .ant-tabs-content-holder {
+          .ant-tabs-content {
+            .table-tab-container {
+              min-height: 13.875rem;
+            }
+          }
+        }
+      }
+      &.custom-dashboard {
+        color: ${({ theme }) =>
+          theme.mode === 'dark' ? `rgba(255, 255, 255, 0.85)` : `rgba(0, 0, 0, 0.85)`};
+  
+          .ant-tabs-nav {
+            &:before {
+              border-bottom: none !important;
+            }
+          }
+          .ant-tabs-tab {
+            color: ${({ theme }) => theme.text} !important;
+          }
+      }
     }
 
     .ant-radio-group {
@@ -682,6 +753,10 @@ export const MainWrapper = styled.main`
       background-color: ${({ theme }) => theme.card};
       border-radius: ${({ theme }) => theme.card_radius};
       padding: 1rem;
+
+      & + .card.mt-1 {
+        margin-top: 1rem;
+      }
     }
 
     .form-message {
@@ -699,6 +774,11 @@ export const Form = styled.form`
   .mt-1 {
     margin-top: 1rem;
   }
+
+  .mt-15 {
+    margin-top: 1.5rem;
+  }
+
   .mt-2 {
     margin-top: 2rem;
   }
@@ -908,13 +988,10 @@ export const ManagementWrapper = styled.div`
   .table-wrapper {
     display: flex;
     flex-flow: column nowrap;
-    gap: 2rem;
+    gap: 1rem;
 
-    ${md} {
-      gap: 1rem;
-    }
-
-    .filter-container {
+    .filter-container,
+    .extension-container {
       display: inline-flex;
       flex-flow: row nowrap;
       justify-content: space-between;
@@ -944,11 +1021,16 @@ export const ManagementWrapper = styled.div`
           line-height: 1;
         }
       }
+
+      .export-button {
+        min-width: 6rem;
+      }
     }
 
     .pagination-content {
       display: inline-flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      padding: 0 1rem;
     }
 
     .responsive-cell {

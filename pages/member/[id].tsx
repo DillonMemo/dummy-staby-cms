@@ -12,6 +12,7 @@ import {
   SuspendMemberByIdMutationVariables,
 } from '../../generated'
 import { MEMBER_QUERY } from '../../graphql/queries'
+import { EDIT_MEMBER_BY_ID_MUTATION, SUSPEND_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
 import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
 import { Button, Input, Modal, Radio, Select, Skeleton } from 'antd'
 import { toast } from 'react-toastify'
@@ -19,14 +20,14 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import styled from 'styled-components'
+import moment from 'moment'
 
 /** components */
 import Layout from '../../components/Layout'
-import { EDIT_MEMBER_BY_ID_MUTATION, SUSPEND_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
+import HistoryTabs from '../../components/member/historyTabs'
 
 /** util */
 import { bankList } from '../../Common/commonFn'
-import moment from 'moment'
 
 type Props = styleMode
 
@@ -50,6 +51,7 @@ export interface MemberEditForm {
 const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const router = useRouter()
   const { locale } = useRouter()
+
   const [suspendModal, setSuspendModal] = useState({
     isVisible: false,
     isConfirmVisible: false,
@@ -87,7 +89,6 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     okText: locale === 'ko' ? '확인' : 'OK',
     cancelText: locale === 'ko' ? '취소' : 'Cancel',
   }
-
   const onCompleted = async (data: EditMemberByIdMutation) => {
     const {
       editMemberById: { ok },
@@ -164,11 +165,6 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     })
   }, [memberData])
 
-  // useEffect(() => {
-  //   debugger
-  //   console.log(getValues('memberType'))
-  // }, [getValues('memberType')])
-
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
       <MainWrapper>
@@ -176,11 +172,15 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           <h2>{locale === 'ko' ? '회원 관리' : 'Member Settings'}</h2>
           <ol>
             <li>
-              <Link href="/">
+              <Link href="/" locale={locale}>
                 <a>{locale === 'ko' ? '홈' : 'Home'}</a>
               </Link>
             </li>
-            <li>{locale === 'ko' ? '멤버' : 'Member'}</li>
+            <li>
+              <Link href="/member/members" locale={locale}>
+                <a>{locale === 'ko' ? '멤버' : 'Member'}</a>
+              </Link>
+            </li>
             <li>{locale === 'ko' ? '회원관리' : 'Member Settings'}</li>
           </ol>
         </div>
@@ -611,6 +611,8 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </div>
             </Form>
           </Edit>
+
+          <HistoryTabs memberId={memberId} />
         </div>
       </MainWrapper>
 

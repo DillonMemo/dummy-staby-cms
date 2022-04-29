@@ -20,6 +20,8 @@ import { useEffect, useState } from 'react'
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client'
 import { FIND_LIVD_BY_TYPES_QUERY, MAIN_BANNER_LIVE_CONTENTS_QUERY } from '../../graphql/queries'
 import { omit } from 'lodash'
+import ReactDragListView from 'react-drag-listview'
+import Spinner from '../../components/Spinner'
 
 export interface ContentsInfo {
   liveId: string
@@ -28,7 +30,7 @@ export interface ContentsInfo {
 
 const Contents: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale } = useRouter()
-
+  const [upLoading, setUploading] = useState(false) //스피너
   //라이브 Data
   const [getLives, { data: livesData }] = useLazyQuery<
     FindLiveByTypesQuery,
@@ -49,6 +51,16 @@ const Contents: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const [contentsInfo, setContentsInfo] = useState<Array<ContentsInfo>>([])
 
+  const onDragEnd = (fromIndex: any, toIndex: any) => {
+    if (toIndex < 0) return // Ignores if outside designated area
+
+    const items = [...contentsInfo]
+    const item = items.splice(fromIndex, 1)[0]
+    items.splice(toIndex, 0, item)
+
+    setContentsInfo(items)
+  }
+
   const {
     formState: { errors },
     control,
@@ -58,6 +70,7 @@ const Contents: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const onSubmit = async () => {
     const mainBannerLive = []
+    setUploading(true)
 
     for (let i = 0; i < contentsInfo.length; i++) {
       mainBannerLive.push({
@@ -122,102 +135,109 @@ const Contents: NextPage<Props> = ({ toggleStyle, theme }) => {
   }, [contentsData])
 
   return (
-    <Layout toggleStyle={toggleStyle} theme={theme}>
-      <MainWrapper>
-        <div className="main-header">
-          <h2>Contents</h2>
-          <ol>
-            <li>
-              <Link href="/">
-                <a>{locale === 'ko' ? '홈' : 'Home'}</a>
-              </Link>
-            </li>
-            <li>Contents</li>
-            <li>{locale === 'ko' ? 'Contents 관리' : 'Contents Edit'}</li>
-          </ol>
-        </div>
-        <div className="main-content">
-          <Edit className="card">
-            <Form>
-              <div className="form-item">
-                <div className="form-group">
-                  <span>Contents</span>
-                  <Controller
-                    control={control}
-                    name="live"
-                    render={({ field: { value } }) => (
-                      <>
-                        <Select
-                          id="liveSelect"
-                          value={value}
-                          onChange={(value) => {
-                            contentsInfo.length < 10 &&
-                              setContentsInfo(
-                                contentsInfo.concat({
-                                  liveId: value?.split('/')[0],
-                                  title: value?.split('/')[1],
-                                })
-                              )
-                          }}
-                          placeholder="라이브선택">
-                          {livesData &&
-                            livesData?.findLiveByTypes &&
-                            livesData?.findLiveByTypes.lives?.map((data, index) => {
-                              return (
-                                <Select.Option value={`${data._id}/${data.title}`} key={index}>
-                                  {data.title}
-                                </Select.Option>
-                              )
-                            })}
-                        </Select>
-                      </>
-                    )}
-                  />
-                </div>
+    <>
+      {upLoading && <Spinner />}
+      <Layout toggleStyle={toggleStyle} theme={theme}>
+        <MainWrapper>
+          <div className="main-header">
+            <h2>Contents</h2>
+            <ol>
+              <li>
+                <Link href="/">
+                  <a>{locale === 'ko' ? '홈' : 'Home'}</a>
+                </Link>
+              </li>
+              <li>Contents</li>
+              <li>{locale === 'ko' ? 'Contents 관리' : 'Contents Edit'}</li>
+            </ol>
+          </div>
+          <div className="main-content">
+            <Edit className="card">
+              <Form>
                 <div className="form-item">
-                  {contentsInfo.map((data, index) => {
-                    return (
-                      <div key={index}>
-                        <div>
-                          <em className="fontSize12 mrT5">{index + 1}</em>
-                          <Button
-                            className="delectBtn"
-                            onClick={() => onDeleteBtn(index, setContentsInfo, contentsInfo)}>
-                            삭제
-                          </Button>
-                        </div>
-                        <Input
-                          className="input"
-                          name={`contents_${index}`}
-                          value={data.title !== null ? data.title : data.liveId}
-                          readOnly
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-                {errors.live?.message && (
-                  <div className="form-message">
-                    <span>{errors.live.message}</span>
+                  <div className="form-group">
+                    <span>Contents</span>
+                    <Controller
+                      control={control}
+                      name="live"
+                      render={({ field: { value } }) => (
+                        <>
+                          <Select
+                            id="liveSelect"
+                            value={value}
+                            onChange={(value) => {
+                              contentsInfo.length < 10 &&
+                                setContentsInfo(
+                                  contentsInfo.concat({
+                                    liveId: value?.split('/')[0],
+                                    title: value?.split('/')[1],
+                                  })
+                                )
+                            }}
+                            placeholder="라이브선택">
+                            {livesData &&
+                              livesData?.findLiveByTypes &&
+                              livesData?.findLiveByTypes.lives?.map((data, index) => {
+                                return (
+                                  <Select.Option value={`${data._id}/${data.title}`} key={index}>
+                                    {data.title}
+                                  </Select.Option>
+                                )
+                              })}
+                          </Select>
+                        </>
+                      )}
+                    />
                   </div>
-                )}
-                <div className="form-item mrT5">
-                  <div className="button-group">
-                    <Button
-                      type="primary"
-                      role="button"
-                      onClick={onSubmit}
-                      className="submit-button">
-                      {locale === 'ko' ? '저장' : 'save'}
-                    </Button>
+
+                  <div className="form-item">
+                    <ReactDragListView nodeSelector=".contentsInfo" onDragEnd={onDragEnd}>
+                      {contentsInfo.map((data, index) => {
+                        return (
+                          <div key={index} className="contentsInfo">
+                            <div>
+                              <em className="fontSize12 mrT5">{index + 1}</em>
+                              <Button
+                                className="delectBtn"
+                                onClick={() => onDeleteBtn(index, setContentsInfo, contentsInfo)}>
+                                삭제
+                              </Button>
+                            </div>
+
+                            <Input
+                              className="input"
+                              name={`contents_${index}`}
+                              value={data.title !== null ? data.title : data.liveId}
+                              readOnly
+                            />
+                          </div>
+                        )
+                      })}
+                    </ReactDragListView>
+                  </div>
+                  {errors.live?.message && (
+                    <div className="form-message">
+                      <span>{errors.live.message}</span>
+                    </div>
+                  )}
+                  <div className="form-item mrT5">
+                    <div className="button-group">
+                      <Button
+                        type="primary"
+                        role="button"
+                        onClick={onSubmit}
+                        className="submit-button">
+                        {locale === 'ko' ? '저장' : 'save'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Form>
-          </Edit>
-        </div>
-      </MainWrapper>
-    </Layout>
+              </Form>
+            </Edit>
+          </div>
+        </MainWrapper>
+      </Layout>
+    </>
   )
 }
 

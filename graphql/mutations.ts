@@ -70,6 +70,7 @@ export const MEMBERS_MUTATION = gql`
         nickName
         memberStatus
         memberType
+        createDate
       }
     }
   }
@@ -132,6 +133,7 @@ export const LIVES_MUTATION = gql`
         likeCount # 좋아요 수
         liveStatus # 라이브상태
         vodId # VOD 고유식별 ID (종료 후 등록된 VOD)
+        createDate # 등록일
       }
     }
   }
@@ -197,6 +199,7 @@ export const VODS_MUTATION = gql`
         mainImageName # VOD메인이미지
         liveId # LIVE 고유식별 ID (선택한 LIVE)
         vodStatus # VOD 상태
+        createDate # 등록일
       }
     }
   }
@@ -644,6 +647,70 @@ export const SUSPEND_MEMBER_BY_ID_MUTATION = gql`
       error {
         ko
         en
+      }
+    }
+  }
+`
+
+/**
+ * 특정 회원의 로그 이력 데이터를 가져옵니다
+ * @example {input: {
+ *  memberId: <ObjectId>
+ *  serviceType: <Enum>
+ *  activeType: <Enum>
+ *  dates: <Date[]>
+ * }}
+ */
+export const ACTIVE_HISTORIES_BY_MEMBER_ID_MUTATION = gql`
+  mutation ActiveHistoriesByMemberId(
+    $activeHistoriesByMemberIdInput: ActiveHistoriesByMemberIdInput!
+  ) {
+    activeHistoriesByMemberId(input: $activeHistoriesByMemberIdInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      goingActiveLog {
+        memberType
+        categoryType
+        activeType
+        serviceType
+        content
+        createDate
+      }
+    }
+  }
+`
+
+/**
+ * 특정 회원의 포인트 사용, 충전 이력 데이터를 가져옵니다
+ * @example {input: {
+ *  memberId: <ObjectId>
+ *  pointPayStatus: <Enum>
+ *  dates: <Date[]>
+ * }}
+ */
+export const POINT_HISTORIES_BY_MEMBER_ID_MUTATION = gql`
+  mutation PointHistoriesByMemberId(
+    $pointHistoriesByMemberIdInput: PointHistoriesByMemberIdInput!
+  ) {
+    pointHistoriesByMemberId(input: $pointHistoriesByMemberIdInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      pointPayHistoryView {
+        pointPayType
+        pointPayStatus
+        amount
+        content
+        createDate
       }
     }
   }

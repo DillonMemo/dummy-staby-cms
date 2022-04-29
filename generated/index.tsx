@@ -31,6 +31,37 @@ export type AccountInfoInputType = {
   depositor: Scalars['String'];
 };
 
+export type ActiveHistoriesByMemberIdInput = {
+  activeType?: Maybe<ActiveType>;
+  dates?: Maybe<Array<Scalars['DateTime']>>;
+  memberId: Scalars['ID'];
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+  serviceType?: Maybe<ServiceType>;
+};
+
+export type ActiveHistoriesByMemberIdOutput = {
+  __typename?: 'ActiveHistoriesByMemberIdOutput';
+  error?: Maybe<LangErrorMessage>;
+  goingActiveLog?: Maybe<Array<GoingActiveLog>>;
+  ok: Scalars['Boolean'];
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
+};
+
+export enum ActiveType {
+  Away = 'AWAY',
+  Charge = 'CHARGE',
+  Delete = 'DELETE',
+  Login = 'LOGIN',
+  Logout = 'LOGOUT',
+  Modify = 'MODIFY',
+  New = 'NEW',
+  Payment = 'PAYMENT',
+  Refund = 'REFUND',
+  View = 'VIEW'
+}
+
 export enum AdvertiseStatus {
   Display = 'DISPLAY',
   Removed = 'REMOVED',
@@ -132,6 +163,21 @@ export enum BoardStatus {
   Delete = 'DELETE',
   Display = 'DISPLAY',
   Wait = 'WAIT'
+}
+
+export enum CategoryType {
+  Comment = 'COMMENT',
+  Event = 'EVENT',
+  Faq = 'FAQ',
+  Live = 'LIVE',
+  Livefavorite = 'LIVEFAVORITE',
+  Member = 'MEMBER',
+  Notice = 'NOTICE',
+  Payment = 'PAYMENT',
+  Qna = 'QNA',
+  Report = 'REPORT',
+  Vod = 'VOD',
+  Vodfavorite = 'VODFAVORITE'
 }
 
 export type ChangeAdvertisementStatusInput = {
@@ -520,6 +566,23 @@ export type GetGoingDashboardOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type GoingActiveLog = {
+  __typename?: 'GoingActiveLog';
+  _id: Scalars['ID'];
+  activeType: ActiveType;
+  amount?: Maybe<Scalars['Float']>;
+  categoryType: CategoryType;
+  content: Scalars['String'];
+  createDate: Scalars['DateTime'];
+  ip: Scalars['String'];
+  member?: Maybe<Member>;
+  memberId: Scalars['ID'];
+  memberType: MemberType;
+  serviceType: ServiceType;
+  targetId: Scalars['ID'];
+  updateDate: Scalars['DateTime'];
+};
+
 export type GoingDashboard = {
   __typename?: 'GoingDashboard';
   _id: Scalars['ID'];
@@ -779,6 +842,7 @@ export type MembersByTypeOutput = {
 
 export type MembersInput = {
   dates?: Maybe<Array<Scalars['DateTime']>>;
+  email?: Maybe<Scalars['String']>;
   memberStatus?: Maybe<MemberStatus>;
   memberType?: Maybe<MemberType>;
   nickName?: Maybe<Scalars['String']>;
@@ -797,6 +861,7 @@ export type MembersOutput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  activeHistoriesByMemberId: ActiveHistoriesByMemberIdOutput;
   advertisements: AdvertisementsOutput;
   changeAdvertisementStatus: ChangeAdvertisementStatusOutput;
   createAccount: CreateMemberOutput;
@@ -828,8 +893,14 @@ export type Mutation = {
   masterCreateAccount: CreateMemberOutput;
   members: MembersOutput;
   notices: NoticesOutput;
+  pointHistoriesByMemberId: PointHistoriesByMemberIdOutput;
   suspendMemberById: MemberSuspendOutput;
   vods: VodsOutput;
+};
+
+
+export type MutationActiveHistoriesByMemberIdArgs = {
+  input: ActiveHistoriesByMemberIdInput;
 };
 
 
@@ -983,6 +1054,11 @@ export type MutationNoticesArgs = {
 };
 
 
+export type MutationPointHistoriesByMemberIdArgs = {
+  input: PointHistoriesByMemberIdInput;
+};
+
+
 export type MutationSuspendMemberByIdArgs = {
   input: MemberSuspendInput;
 };
@@ -1016,6 +1092,59 @@ export type Point = {
   totalPoint: Scalars['Int'];
   updateDate: Scalars['DateTime'];
 };
+
+export type PointHistoriesByMemberIdInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
+  memberId: Scalars['ID'];
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+  pointPayStatus?: Maybe<PointPayStatus>;
+};
+
+export type PointHistoriesByMemberIdOutput = {
+  __typename?: 'PointHistoriesByMemberIdOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+  pointPayHistoryView?: Maybe<Array<PointPayHistoryView>>;
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
+};
+
+export type PointPayHistoryView = {
+  __typename?: 'PointPayHistoryView';
+  _id: Scalars['ID'];
+  amount: Scalars['Float'];
+  content: Scalars['String'];
+  createDate: Scalars['DateTime'];
+  expireDate: Scalars['DateTime'];
+  liveId: Scalars['ID'];
+  liveStatus: LiveStatus;
+  memberId: Scalars['ID'];
+  payOrderId: Scalars['String'];
+  pointPayStatus: PointPayStatus;
+  pointPayType: PointPayType;
+  refundHistoryId: Scalars['ID'];
+  updateDate: Scalars['DateTime'];
+  useFreeAmount: Scalars['Float'];
+  usePaidAmount: Scalars['Float'];
+  vodId: Scalars['ID'];
+  vodStatus: VodStatus;
+};
+
+export enum PointPayStatus {
+  Charge = 'CHARGE',
+  Pass = 'PASS',
+  Payment = 'PAYMENT',
+  Refund = 'REFUND',
+  Rental = 'RENTAL'
+}
+
+export enum PointPayType {
+  Coupon = 'COUPON',
+  Live = 'LIVE',
+  Point = 'POINT',
+  Vod = 'VOD'
+}
 
 export type PushInfo = {
   __typename?: 'PushInfo';
@@ -1101,6 +1230,11 @@ export type Report = {
   releaseDate?: Maybe<Scalars['DateTime']>;
   updateDate: Scalars['DateTime'];
 };
+
+export enum ServiceType {
+  Cms = 'CMS',
+  Service = 'SERVICE'
+}
 
 export enum TranscodeStatus {
   Fail = 'FAIL',
@@ -1224,7 +1358,7 @@ export type MembersMutationVariables = Exact<{
 }>;
 
 
-export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null | undefined, totalPages?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType }> | null | undefined } };
+export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null | undefined, totalPages?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any }> | null | undefined } };
 
 export type EditMemberByIdMutationVariables = Exact<{
   editMemberInput: EditMemberInput;
@@ -1245,7 +1379,7 @@ export type LivesMutationVariables = Exact<{
 }>;
 
 
-export type LivesMutation = { __typename?: 'Mutation', lives: { __typename?: 'LivesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives?: Array<{ __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }> }> | null | undefined } };
+export type LivesMutation = { __typename?: 'Mutation', lives: { __typename?: 'LivesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives?: Array<{ __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, createDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }> }> | null | undefined } };
 
 export type EditLiveMutationVariables = Exact<{
   editLiveInput: EditLiveInput;
@@ -1273,7 +1407,7 @@ export type VodsMutationVariables = Exact<{
 }>;
 
 
-export type VodsMutation = { __typename?: 'Mutation', vods: { __typename?: 'VodsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods?: Array<{ __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, viewCount: number, storageTotalCount: number, mainImageName: string, liveId?: string | null | undefined, vodStatus: VodStatus }> | null | undefined } };
+export type VodsMutation = { __typename?: 'Mutation', vods: { __typename?: 'VodsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods?: Array<{ __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, viewCount: number, storageTotalCount: number, mainImageName: string, liveId?: string | null | undefined, vodStatus: VodStatus, createDate: any }> | null | undefined } };
 
 export type EditVodMutationVariables = Exact<{
   editVodInput: EditVodInput;
@@ -1414,6 +1548,20 @@ export type SuspendMemberByIdMutationVariables = Exact<{
 
 
 export type SuspendMemberByIdMutation = { __typename?: 'Mutation', suspendMemberById: { __typename?: 'MemberSuspendOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type ActiveHistoriesByMemberIdMutationVariables = Exact<{
+  activeHistoriesByMemberIdInput: ActiveHistoriesByMemberIdInput;
+}>;
+
+
+export type ActiveHistoriesByMemberIdMutation = { __typename?: 'Mutation', activeHistoriesByMemberId: { __typename?: 'ActiveHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, goingActiveLog?: Array<{ __typename?: 'GoingActiveLog', memberType: MemberType, categoryType: CategoryType, activeType: ActiveType, serviceType: ServiceType, content: string, createDate: any }> | null | undefined } };
+
+export type PointHistoriesByMemberIdMutationVariables = Exact<{
+  pointHistoriesByMemberIdInput: PointHistoriesByMemberIdInput;
+}>;
+
+
+export type PointHistoriesByMemberIdMutation = { __typename?: 'Mutation', pointHistoriesByMemberId: { __typename?: 'PointHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, pointPayHistoryView?: Array<{ __typename?: 'PointPayHistoryView', pointPayType: PointPayType, pointPayStatus: PointPayStatus, amount: number, content: string, createDate: any }> | null | undefined } };
 
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1651,6 +1799,7 @@ export const MembersDocument = gql`
       nickName
       memberStatus
       memberType
+      createDate
     }
   }
 }
@@ -1785,6 +1934,7 @@ export const LivesDocument = gql`
       likeCount
       liveStatus
       vodId
+      createDate
     }
   }
 }
@@ -1946,6 +2096,7 @@ export const VodsDocument = gql`
       mainImageName
       liveId
       vodStatus
+      createDate
     }
   }
 }
@@ -2768,6 +2919,99 @@ export function useSuspendMemberByIdMutation(baseOptions?: Apollo.MutationHookOp
 export type SuspendMemberByIdMutationHookResult = ReturnType<typeof useSuspendMemberByIdMutation>;
 export type SuspendMemberByIdMutationResult = Apollo.MutationResult<SuspendMemberByIdMutation>;
 export type SuspendMemberByIdMutationOptions = Apollo.BaseMutationOptions<SuspendMemberByIdMutation, SuspendMemberByIdMutationVariables>;
+export const ActiveHistoriesByMemberIdDocument = gql`
+    mutation ActiveHistoriesByMemberId($activeHistoriesByMemberIdInput: ActiveHistoriesByMemberIdInput!) {
+  activeHistoriesByMemberId(input: $activeHistoriesByMemberIdInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    totalPages
+    totalResults
+    goingActiveLog {
+      memberType
+      categoryType
+      activeType
+      serviceType
+      content
+      createDate
+    }
+  }
+}
+    `;
+export type ActiveHistoriesByMemberIdMutationFn = Apollo.MutationFunction<ActiveHistoriesByMemberIdMutation, ActiveHistoriesByMemberIdMutationVariables>;
+
+/**
+ * __useActiveHistoriesByMemberIdMutation__
+ *
+ * To run a mutation, you first call `useActiveHistoriesByMemberIdMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useActiveHistoriesByMemberIdMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [activeHistoriesByMemberIdMutation, { data, loading, error }] = useActiveHistoriesByMemberIdMutation({
+ *   variables: {
+ *      activeHistoriesByMemberIdInput: // value for 'activeHistoriesByMemberIdInput'
+ *   },
+ * });
+ */
+export function useActiveHistoriesByMemberIdMutation(baseOptions?: Apollo.MutationHookOptions<ActiveHistoriesByMemberIdMutation, ActiveHistoriesByMemberIdMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ActiveHistoriesByMemberIdMutation, ActiveHistoriesByMemberIdMutationVariables>(ActiveHistoriesByMemberIdDocument, options);
+      }
+export type ActiveHistoriesByMemberIdMutationHookResult = ReturnType<typeof useActiveHistoriesByMemberIdMutation>;
+export type ActiveHistoriesByMemberIdMutationResult = Apollo.MutationResult<ActiveHistoriesByMemberIdMutation>;
+export type ActiveHistoriesByMemberIdMutationOptions = Apollo.BaseMutationOptions<ActiveHistoriesByMemberIdMutation, ActiveHistoriesByMemberIdMutationVariables>;
+export const PointHistoriesByMemberIdDocument = gql`
+    mutation PointHistoriesByMemberId($pointHistoriesByMemberIdInput: PointHistoriesByMemberIdInput!) {
+  pointHistoriesByMemberId(input: $pointHistoriesByMemberIdInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    totalPages
+    totalResults
+    pointPayHistoryView {
+      pointPayType
+      pointPayStatus
+      amount
+      content
+      createDate
+    }
+  }
+}
+    `;
+export type PointHistoriesByMemberIdMutationFn = Apollo.MutationFunction<PointHistoriesByMemberIdMutation, PointHistoriesByMemberIdMutationVariables>;
+
+/**
+ * __usePointHistoriesByMemberIdMutation__
+ *
+ * To run a mutation, you first call `usePointHistoriesByMemberIdMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePointHistoriesByMemberIdMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [pointHistoriesByMemberIdMutation, { data, loading, error }] = usePointHistoriesByMemberIdMutation({
+ *   variables: {
+ *      pointHistoriesByMemberIdInput: // value for 'pointHistoriesByMemberIdInput'
+ *   },
+ * });
+ */
+export function usePointHistoriesByMemberIdMutation(baseOptions?: Apollo.MutationHookOptions<PointHistoriesByMemberIdMutation, PointHistoriesByMemberIdMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PointHistoriesByMemberIdMutation, PointHistoriesByMemberIdMutationVariables>(PointHistoriesByMemberIdDocument, options);
+      }
+export type PointHistoriesByMemberIdMutationHookResult = ReturnType<typeof usePointHistoriesByMemberIdMutation>;
+export type PointHistoriesByMemberIdMutationResult = Apollo.MutationResult<PointHistoriesByMemberIdMutation>;
+export type PointHistoriesByMemberIdMutationOptions = Apollo.BaseMutationOptions<PointHistoriesByMemberIdMutation, PointHistoriesByMemberIdMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {

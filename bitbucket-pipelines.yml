@@ -14,7 +14,7 @@ pipelines:
             - echo 'main'
             - export DIPLOY_COMMAND="cd app&&rm -rf "$BITBUCKET_REPO_SLUG"&&git clone -b "$BITBUCKET_BRANCH" --single-branch "$BITBUCKET_GIT_SSH_ORIGIN"&&cd "$BITBUCKET_REPO_SLUG"&&source deploy-prod.sh;"
             - ssh -i ~/.ssh/config $USER_NAME@$PROD_ADDRESS -p $PORT $DIPLOY_COMMAND
-    dev:
+    development:
       - step:
           name: 'Test Deployment'
           deployment: staging

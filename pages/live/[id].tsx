@@ -33,7 +33,6 @@ import {
   DATE_FORMAT,
   delayedEntryTimeArr,
   liveImgCheckExtension,
-  nowDateStr,
   onDeleteBtn,
   shareCheck,
 } from '../../Common/commonFn'
@@ -254,7 +253,6 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       //메인 이미지 s3 업로드
       const id = liveData?.findLiveById.live ? liveData?.findLiveById.live?._id : ''
       let mainImgFileName = '' //메인 썸네일
-      const nowDate = `${id.toString()}_main_${nowDateStr}.png`
 
       const liveImgInput: HTMLInputElement | null =
         document.querySelector(`input[name=liveThumbnail]`)
@@ -262,13 +260,13 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
       //MainThumbnail upload
       //이미지 확장자 체크
       if (liveImgInput && liveImgInput?.files && liveImgInput?.files[0] instanceof File) {
-        const imgCheck = await liveImgCheckExtension(liveImgInput, id, nowDate, locale)
+        const imgCheck = await liveImgCheckExtension(liveImgInput, id, locale, 'live')
 
         if (!imgCheck) {
           return
+        } else {
+          mainImgFileName = imgCheck
         }
-
-        mainImgFileName = nowDate
       } else {
         //mainImgInfo.fileInfo 이 file이 아닌경우
         mainImgFileName = `${liveData?.findLiveById.live?.mainImageName}`

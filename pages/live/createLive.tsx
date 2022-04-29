@@ -30,7 +30,6 @@ import * as mongoose from 'mongoose'
 import {
   delayedEntryTimeArr,
   liveImgCheckExtension,
-  nowDateStr,
   onDeleteBtn,
   shareCheck,
 } from '../../Common/commonFn'
@@ -144,19 +143,18 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       //아이디 생성
       const id = new mongoose.Types.ObjectId() as any
       let mainImgFileName = '' //메인 썸네일
-      const nowDate = `${id.toString()}_main_${nowDateStr}.png`
 
       //이미지 확장자 체크
 
       const liveImgInput: HTMLInputElement | null =
         document.querySelector(`input[name=liveThumbnail]`)
-      const imgCheck = await liveImgCheckExtension(liveImgInput, id, nowDate, locale)
+      const imgCheck = await liveImgCheckExtension(liveImgInput, id, locale, 'live')
 
       if (!imgCheck) {
         return
+      } else {
+        mainImgFileName = `${imgCheck}`
       }
-
-      mainImgFileName = `${nowDate}`
 
       //라이브 채널 링크 배열
       const liveLinkArr = []
@@ -326,6 +324,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         className="input"
                         placeholder="Please enter the paymentAmount."
                         value={value}
+                        max={65535}
                         formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                         onKeyPress={(e) => {
                           if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
