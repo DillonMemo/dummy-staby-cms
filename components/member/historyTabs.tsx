@@ -14,6 +14,8 @@ import {
   ActiveHistoriesByMemberIdMutation,
   ActiveHistoriesByMemberIdMutationVariables,
   ActiveType,
+  CommentHistoriesByMemberIdMutation,
+  CommentHistoriesByMemberIdMutationVariables,
   PointHistoriesByMemberIdMutation,
   PointHistoriesByMemberIdMutationVariables,
   PointPayStatus,
@@ -21,6 +23,7 @@ import {
 } from '../../generated'
 import {
   ACTIVE_HISTORIES_BY_MEMBER_ID_MUTATION,
+  COMMENT_HISTORIES_BY_MEMBER_ID_MUTATION,
   POINT_HISTORIES_BY_MEMBER_ID_MUTATION,
 } from '../../graphql/mutations'
 import styled from 'styled-components'
@@ -84,6 +87,26 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
       key: 'content',
     },
   ]
+  const commentColumns: ColumnsType<any> = [
+    {
+      title: locale === 'ko' ? '시간' : 'Date',
+      dataIndex: 'createDate',
+      key: 'createDate',
+    },
+    {
+      title: locale === 'ko' ? 'VOD명' : 'Title',
+      dataIndex: 'title',
+      key: 'title',
+    },
+    {
+      title: locale === 'ko' ? '댓글' : 'Comment',
+      dataIndex: 'content',
+      key: 'content',
+      render: (value) => {
+        return <div className="text-shorten">{value}</div>
+      },
+    },
+  ]
   const pointColumns: ColumnsType<any> = [
     {
       title: locale === 'ko' ? '시간' : 'Date',
@@ -132,6 +155,11 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
       activeType: 'All',
       dates: [],
     })
+  const [commentFilterOptions, setCommentFilterOptions] = useState<Options>({
+    page: 1,
+    pageSize: 10,
+    dates: [],
+  })
   const [pointFilterOptions, setPointFilterOptions] = useState<PointOptions>({
     page: 1,
     pageSize: 10,
@@ -151,6 +179,12 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
     useMutation<ActiveHistoriesByMemberIdMutation, ActiveHistoriesByMemberIdMutationVariables>(
       ACTIVE_HISTORIES_BY_MEMBER_ID_MUTATION
     )
+  const [
+    commentHistoriesByMemberId,
+    { data: commentHistoriesData, loading: isCommentHistoryLoading },
+  ] = useMutation<CommentHistoriesByMemberIdMutation, CommentHistoriesByMemberIdMutationVariables>(
+    COMMENT_HISTORIES_BY_MEMBER_ID_MUTATION
+  )
   const [pointHistoriesByMemberId, { data: pointHistoriesData, loading: isPointHistoryLoading }] =
     useMutation<PointHistoriesByMemberIdMutation, PointHistoriesByMemberIdMutationVariables>(
       POINT_HISTORIES_BY_MEMBER_ID_MUTATION
@@ -176,6 +210,30 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
       })
 
       setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const onCommentPageChange = async (page: number, pageSize?: number) => {
+    try {
+      await commentHistoriesByMemberId({
+        variables: {
+          commentHistoriesByMemberIdInput: {
+            page,
+            pageView: pageSize,
+            memberId,
+            ...(commentFilterOptions.dates &&
+              commentFilterOptions.dates.length > 0 && { dates: commentFilterOptions.dates }),
+          },
+        },
+      })
+
+      setCommentFilterOptions((prev) => ({
+        ...prev,
+        page,
+        ...(pageSize !== undefined && { pageSize }),
+      }))
     } catch (error) {
       console.error(error)
     }
@@ -213,16 +271,13 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
    * datepicker가 열릴 때 실행 이벤트 핸들러 입니다.
    * @param {boolean} open 달력 오픈 여부
    */
-  const onPickerOpen = (open: boolean) => {
-    if (open) {
-      setFilterOptions((prev) => ({ ...prev, dates: [] }))
-    }
-  }
-  const onPointPickerOpen = (open: boolean) => {
-    if (open) {
-      setPointFilterOptions((prev) => ({ ...prev, dates: [] }))
-    }
-  }
+  const onPickerOpen = (open: boolean) =>
+    open && setFilterOptions((prev) => ({ ...prev, dates: [] }))
+  const onCommentPickerOpen = (open: boolean) =>
+    open && setCommentFilterOptions((prev) => ({ ...prev, dates: [] }))
+  const onPointPickerOpen = (open: boolean) =>
+    open && setPointFilterOptions((prev) => ({ ...prev, dates: [] }))
+
   /**
    * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
    * @param {RangeValue<moment.Moment>} value 날짜 결과 option
@@ -236,6 +291,18 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
           memberId,
           serviceType: serviceType !== 'All' ? (serviceType as ServiceType) : undefined,
           activeType: activeType !== 'All' ? (activeType as ActiveType) : undefined,
+          ...(value && value.length > 0 && { dates: value }),
+        },
+      },
+    })
+  }
+  const onCommentPickerChange = async (value: RangeValue<moment.Moment>) => {
+    await commentHistoriesByMemberId({
+      variables: {
+        commentHistoriesByMemberIdInput: {
+          page: commentFilterOptions.page,
+          pageView: commentFilterOptions.pageSize,
+          memberId,
           ...(value && value.length > 0 && { dates: value }),
         },
       },
@@ -342,6 +409,7 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
       console.error(error)
     }
   }
+
   useEffect(() => {
     const onActiveFetch = async () =>
       await activeHistoriesByMemberId({
@@ -353,6 +421,19 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
             serviceType: serviceType !== 'All' ? (serviceType as ServiceType) : undefined,
             activeType: activeType !== 'All' ? (activeType as ActiveType) : undefined,
             ...(dates && dates.length > 0 && { dates }),
+          },
+        },
+      })
+
+    const onCommentFatch = async () =>
+      await commentHistoriesByMemberId({
+        variables: {
+          commentHistoriesByMemberIdInput: {
+            page: commentFilterOptions.page,
+            pageView: commentFilterOptions.pageSize,
+            memberId,
+            ...(commentFilterOptions.dates &&
+              commentFilterOptions.dates.length > 0 && { dates: commentFilterOptions.dates }),
           },
         },
       })
@@ -378,7 +459,7 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
       if (activeTab === ActiveTab.ACTIVE) {
         onActiveFetch()
       } else if (activeTab === ActiveTab.COMMENT) {
-        // console.log('comment tab')
+        onCommentFatch()
       } else if (activeTab === ActiveTab.POINT) {
         onPointFetch()
       }
@@ -601,7 +682,89 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
           className="table-tab-container"
           tab={locale === 'ko' ? '댓글이력' : 'comment history'}
           key={ActiveTab.COMMENT}>
-          <h1>개발 진행 중...</h1>
+          {isCommentHistoryLoading ? (
+            <div>
+              <Skeleton active title={false} paragraph={{ rows: commentFilterOptions.pageSize }} />
+            </div>
+          ) : (
+            <>
+              <div className="filter-container">
+                <Space size={12}>
+                  <RangePicker
+                    className="filter-align"
+                    locale={locale}
+                    title={locale === 'ko' ? '기간' : 'Dates'}
+                    value={commentFilterOptions.dates}
+                    onCalendarChange={(value) =>
+                      setCommentFilterOptions((prev) => ({
+                        ...prev,
+                        dates: value as moment.Moment[],
+                      }))
+                    }
+                    onPickerChange={onCommentPickerChange}
+                    onPickerOpen={onCommentPickerOpen}
+                  />
+                </Space>
+              </div>
+              <div>
+                <Table
+                  style={{ width: '100%' }}
+                  columns={commentColumns}
+                  expandable={{
+                    expandedRowRender: (record) => (
+                      <div className="expandable-container">
+                        <p style={{ margin: 0 }}>{record.content}</p>
+                        <div className="button-content">
+                          <Button
+                            type="primary"
+                            htmlType="button"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              alert('준비중 입니다')
+                            }}>
+                            {locale === 'ko' ? '삭제' : 'Delete'}
+                          </Button>
+                        </div>
+                      </div>
+                    ),
+                  }}
+                  dataSource={
+                    commentHistoriesData
+                      ? commentHistoriesData.commentHistoriesByMemberId.commentHistoryView?.map(
+                          ({ title, content, createDate }, index) => {
+                            return {
+                              key: index,
+                              createDate: moment(createDate).format('YYYY.MM.DD HH:mm:ss'),
+                              title,
+                              content,
+                            }
+                          }
+                        )
+                      : []
+                  }
+                  pagination={{
+                    pageSize: commentFilterOptions.pageSize,
+                    hideOnSinglePage: true,
+                  }}
+                />
+              </div>
+              <div className="pagination-content">
+                <span>
+                  <b>Total</b>{' '}
+                  {commentHistoriesData?.commentHistoriesByMemberId.totalResults?.toLocaleString()}
+                </span>
+                <Pagination
+                  pageSize={commentFilterOptions.pageSize}
+                  current={commentFilterOptions.page}
+                  total={commentHistoriesData?.commentHistoriesByMemberId.totalResults || undefined}
+                  onChange={onCommentPageChange}
+                  responsive
+                  showSizeChanger
+                  pageSizeOptions={['10', '20', '30', '40', '50']}
+                />
+              </div>
+            </>
+          )}
         </Tabs.TabPane>
         <Tabs.TabPane
           className="table-tab-container"
@@ -621,7 +784,10 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
                     title={locale === 'ko' ? '기간' : 'Dates'}
                     value={pointFilterOptions.dates}
                     onCalendarChange={(value) =>
-                      setPointFilterOptions((prev) => ({ ...prev, dates: value as any }))
+                      setPointFilterOptions((prev) => ({
+                        ...prev,
+                        dates: value as moment.Moment[],
+                      }))
                     }
                     onPickerChange={onPointPickerChange}
                     onPickerOpen={onPointPickerOpen}

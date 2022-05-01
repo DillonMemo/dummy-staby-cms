@@ -715,3 +715,34 @@ export const POINT_HISTORIES_BY_MEMBER_ID_MUTATION = gql`
     }
   }
 `
+
+/**
+ * 특정 회원의 댓글 이력 데이터를 가져옵니다
+ * @example {input: {
+ *  memberId: <ObjectId>
+ *  dates: <Date[]>
+ * }}
+ */
+export const COMMENT_HISTORIES_BY_MEMBER_ID_MUTATION = gql`
+  mutation CommentHistoriesByMemberId(
+    $commentHistoriesByMemberIdInput: CommentHistoriesByMemberIdInput!
+  ) {
+    commentHistoriesByMemberId(input: $commentHistoriesByMemberIdInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      totalPages
+      totalResults
+      commentHistoryView {
+        title
+        content
+        vodCommentStatus
+        reportCount
+        nickName
+        createDate
+      }
+    }
+  }
+`

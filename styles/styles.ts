@@ -763,6 +763,23 @@ export const MainWrapper = styled.main`
       color: red;
     }
   }
+
+  .text-shorten {
+    max-width: 25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    ${md} {
+      max-width: 5rem;
+    }
+  }
+  .expandable-container {
+    .button-content {
+      margin-top: 1rem;
+      text-align: center;
+    }
+  }
 `
 export const Form = styled.form`
   display: grid;

@@ -191,6 +191,38 @@ export type ChangeAdvertisementStatusOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type CommentHistoriesByMemberIdInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
+  memberId: Scalars['ID'];
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+};
+
+export type CommentHistoriesByMemberIdOutput = {
+  __typename?: 'CommentHistoriesByMemberIdOutput';
+  commentHistoryView?: Maybe<Array<CommentHistoryView>>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
+};
+
+export type CommentHistoryView = {
+  __typename?: 'CommentHistoryView';
+  _id: Scalars['ID'];
+  content: Scalars['String'];
+  createDate: Scalars['DateTime'];
+  createMember: AuthMember;
+  memberId: Scalars['ID'];
+  nickName: Scalars['String'];
+  reportCount: Scalars['Float'];
+  title: Scalars['String'];
+  updateDate: Scalars['DateTime'];
+  updateMember: AuthMember;
+  vodCommentStatus: VodCommentStatus;
+  vodId: Scalars['ID'];
+};
+
 export type CreateAdvertisementInput = {
   advertiseStatus?: Maybe<AdvertiseStatus>;
   displayDeviceType: DisplayDeviceType;
@@ -864,6 +896,7 @@ export type Mutation = {
   activeHistoriesByMemberId: ActiveHistoriesByMemberIdOutput;
   advertisements: AdvertisementsOutput;
   changeAdvertisementStatus: ChangeAdvertisementStatusOutput;
+  commentHistoriesByMemberId: CommentHistoriesByMemberIdOutput;
   createAccount: CreateMemberOutput;
   createAdvertisement: CreateAdvertisementOutput;
   createAnswer: CreateAnswerOutput;
@@ -911,6 +944,11 @@ export type MutationAdvertisementsArgs = {
 
 export type MutationChangeAdvertisementStatusArgs = {
   input: ChangeAdvertisementStatusInput;
+};
+
+
+export type MutationCommentHistoriesByMemberIdArgs = {
+  input: CommentHistoriesByMemberIdInput;
 };
 
 
@@ -1266,6 +1304,12 @@ export type Vod = {
   vodStatus: VodStatus;
 };
 
+export enum VodCommentStatus {
+  Active = 'ACTIVE',
+  Blind = 'BLIND',
+  Delete = 'DELETE'
+}
+
 export type VodLinkInfo = {
   __typename?: 'VodLinkInfo';
   introImageName: Scalars['String'];
@@ -1562,6 +1606,13 @@ export type PointHistoriesByMemberIdMutationVariables = Exact<{
 
 
 export type PointHistoriesByMemberIdMutation = { __typename?: 'Mutation', pointHistoriesByMemberId: { __typename?: 'PointHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, pointPayHistoryView?: Array<{ __typename?: 'PointPayHistoryView', pointPayType: PointPayType, pointPayStatus: PointPayStatus, amount: number, content: string, createDate: any }> | null | undefined } };
+
+export type CommentHistoriesByMemberIdMutationVariables = Exact<{
+  commentHistoriesByMemberIdInput: CommentHistoriesByMemberIdInput;
+}>;
+
+
+export type CommentHistoriesByMemberIdMutation = { __typename?: 'Mutation', commentHistoriesByMemberId: { __typename?: 'CommentHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, commentHistoryView?: Array<{ __typename?: 'CommentHistoryView', title: string, content: string, vodCommentStatus: VodCommentStatus, reportCount: number, nickName: string, createDate: any }> | null | undefined } };
 
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3012,6 +3063,53 @@ export function usePointHistoriesByMemberIdMutation(baseOptions?: Apollo.Mutatio
 export type PointHistoriesByMemberIdMutationHookResult = ReturnType<typeof usePointHistoriesByMemberIdMutation>;
 export type PointHistoriesByMemberIdMutationResult = Apollo.MutationResult<PointHistoriesByMemberIdMutation>;
 export type PointHistoriesByMemberIdMutationOptions = Apollo.BaseMutationOptions<PointHistoriesByMemberIdMutation, PointHistoriesByMemberIdMutationVariables>;
+export const CommentHistoriesByMemberIdDocument = gql`
+    mutation CommentHistoriesByMemberId($commentHistoriesByMemberIdInput: CommentHistoriesByMemberIdInput!) {
+  commentHistoriesByMemberId(input: $commentHistoriesByMemberIdInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    totalPages
+    totalResults
+    commentHistoryView {
+      title
+      content
+      vodCommentStatus
+      reportCount
+      nickName
+      createDate
+    }
+  }
+}
+    `;
+export type CommentHistoriesByMemberIdMutationFn = Apollo.MutationFunction<CommentHistoriesByMemberIdMutation, CommentHistoriesByMemberIdMutationVariables>;
+
+/**
+ * __useCommentHistoriesByMemberIdMutation__
+ *
+ * To run a mutation, you first call `useCommentHistoriesByMemberIdMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCommentHistoriesByMemberIdMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [commentHistoriesByMemberIdMutation, { data, loading, error }] = useCommentHistoriesByMemberIdMutation({
+ *   variables: {
+ *      commentHistoriesByMemberIdInput: // value for 'commentHistoriesByMemberIdInput'
+ *   },
+ * });
+ */
+export function useCommentHistoriesByMemberIdMutation(baseOptions?: Apollo.MutationHookOptions<CommentHistoriesByMemberIdMutation, CommentHistoriesByMemberIdMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CommentHistoriesByMemberIdMutation, CommentHistoriesByMemberIdMutationVariables>(CommentHistoriesByMemberIdDocument, options);
+      }
+export type CommentHistoriesByMemberIdMutationHookResult = ReturnType<typeof useCommentHistoriesByMemberIdMutation>;
+export type CommentHistoriesByMemberIdMutationResult = Apollo.MutationResult<CommentHistoriesByMemberIdMutation>;
+export type CommentHistoriesByMemberIdMutationOptions = Apollo.BaseMutationOptions<CommentHistoriesByMemberIdMutation, CommentHistoriesByMemberIdMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {
