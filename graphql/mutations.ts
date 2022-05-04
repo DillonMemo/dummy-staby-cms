@@ -706,6 +706,7 @@ export const POINT_HISTORIES_BY_MEMBER_ID_MUTATION = gql`
       totalPages
       totalResults
       pointPayHistoryView {
+        _id
         pointPayType
         pointPayStatus
         amount
@@ -736,6 +737,7 @@ export const COMMENT_HISTORIES_BY_MEMBER_ID_MUTATION = gql`
       totalPages
       totalResults
       commentHistoryView {
+        _id
         title
         content
         vodCommentStatus
@@ -743,6 +745,57 @@ export const COMMENT_HISTORIES_BY_MEMBER_ID_MUTATION = gql`
         nickName
         createDate
       }
+    }
+  }
+`
+
+/**
+ * 특정 VOD 댓글을 삭제 합니다.
+ * @example {input: {
+ *  _id: <ObjectId>
+ * }}
+ */
+export const DELETE_VOD_COMMENT_MUTATION = gql`
+  mutation DeleteVodComment($deleteVodCommentInput: DeleteVodCommentInput!) {
+    deleteVodComment(input: $deleteVodCommentInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`
+
+/**
+ * 샌드버드 특정 회원의 메시지 내용을 가져옵니다
+ * @example {input: {
+ *  historyId: <ObjectId>
+ *  timestemp: <Number>
+ *  messages: <Message[]>
+ * }}
+ */
+export const LIST_SENDBIRD_MESSAGES = gql`
+  mutation ListSendBirdMessages(
+    $liveChatHistoriesByHistoryIdInput: LiveChatHistoriesByHistoryIdInput!
+  ) {
+    listSendbirdMessages(input: $liveChatHistoriesByHistoryIdInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      email
+      nickName
+      liveTitle
+      liveStartDate
+      messages {
+        message_id
+        type
+        message
+        created_at
+      }
+      isDisable
     }
   }
 `
