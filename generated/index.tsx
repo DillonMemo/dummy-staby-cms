@@ -191,6 +191,38 @@ export type ChangeAdvertisementStatusOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type CommentHistoriesByMemberIdInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
+  memberId: Scalars['ID'];
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+};
+
+export type CommentHistoriesByMemberIdOutput = {
+  __typename?: 'CommentHistoriesByMemberIdOutput';
+  commentHistoryView?: Maybe<Array<CommentHistoryView>>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
+};
+
+export type CommentHistoryView = {
+  __typename?: 'CommentHistoryView';
+  _id: Scalars['ID'];
+  content: Scalars['String'];
+  createDate: Scalars['DateTime'];
+  createMember: AuthMember;
+  memberId: Scalars['ID'];
+  nickName: Scalars['String'];
+  reportCount: Scalars['Float'];
+  title: Scalars['String'];
+  updateDate: Scalars['DateTime'];
+  updateMember: AuthMember;
+  vodCommentStatus: VodCommentStatus;
+  vodId: Scalars['ID'];
+};
+
 export type CreateAdvertisementInput = {
   advertiseStatus?: Maybe<AdvertiseStatus>;
   displayDeviceType: DisplayDeviceType;
@@ -338,6 +370,16 @@ export type DeleteLiveInput = {
 
 export type DeleteLiveOutput = {
   __typename?: 'DeleteLiveOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type DeleteVodCommentInput = {
+  _id: Scalars['ID'];
+};
+
+export type DeleteVodCommentOutput = {
+  __typename?: 'DeleteVodCommentOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
@@ -645,6 +687,28 @@ export type Live = {
   vodId?: Maybe<Scalars['ID']>;
 };
 
+export type LiveChatHistoriesByHistoryIdInput = {
+  historyId: Scalars['ID'];
+  messages?: Maybe<Array<MessageInputType>>;
+  page?: Maybe<Scalars['Int']>;
+  pageView?: Maybe<Scalars['Int']>;
+  timestemp?: Maybe<Scalars['Float']>;
+};
+
+export type LiveChatHistoriesByHistoryIdOutput = {
+  __typename?: 'LiveChatHistoriesByHistoryIdOutput';
+  email?: Maybe<Scalars['String']>;
+  error?: Maybe<LangErrorMessage>;
+  isDisable?: Maybe<Scalars['Boolean']>;
+  liveStartDate?: Maybe<Scalars['DateTime']>;
+  liveTitle?: Maybe<Scalars['String']>;
+  messages?: Maybe<Array<Message>>;
+  nickName?: Maybe<Scalars['String']>;
+  ok: Scalars['Boolean'];
+  totalPages?: Maybe<Scalars['Int']>;
+  totalResults?: Maybe<Scalars['Int']>;
+};
+
 export type LiveInput = {
   liveId: Scalars['ID'];
 };
@@ -859,11 +923,27 @@ export type MembersOutput = {
   totalResults?: Maybe<Scalars['Int']>;
 };
 
+export type Message = {
+  __typename?: 'Message';
+  created_at: Scalars['Float'];
+  message: Scalars['String'];
+  message_id: Scalars['Float'];
+  type: Scalars['String'];
+};
+
+export type MessageInputType = {
+  created_at: Scalars['Float'];
+  message: Scalars['String'];
+  message_id: Scalars['Float'];
+  type: Scalars['String'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   activeHistoriesByMemberId: ActiveHistoriesByMemberIdOutput;
   advertisements: AdvertisementsOutput;
   changeAdvertisementStatus: ChangeAdvertisementStatusOutput;
+  commentHistoriesByMemberId: CommentHistoriesByMemberIdOutput;
   createAccount: CreateMemberOutput;
   createAdvertisement: CreateAdvertisementOutput;
   createAnswer: CreateAnswerOutput;
@@ -876,6 +956,7 @@ export type Mutation = {
   deleteBoard: DeleteBoardOutput;
   deleteLive: DeleteLiveOutput;
   deleteVod: DeleteVodOutput;
+  deleteVodComment: DeleteVodCommentOutput;
   editAccount: EditMemberOutput;
   editAdvertisement: EditAdvertisementOutput;
   editEvent: EditEventOutput;
@@ -887,6 +968,7 @@ export type Mutation = {
   events: EventsOutput;
   faqs: FaqsOutput;
   inquiries: InquiriesOutput;
+  listSendbirdMessages: LiveChatHistoriesByHistoryIdOutput;
   lives: LivesOutput;
   login: LoginOutput;
   logout: LogoutOutput;
@@ -911,6 +993,11 @@ export type MutationAdvertisementsArgs = {
 
 export type MutationChangeAdvertisementStatusArgs = {
   input: ChangeAdvertisementStatusInput;
+};
+
+
+export type MutationCommentHistoriesByMemberIdArgs = {
+  input: CommentHistoriesByMemberIdInput;
 };
 
 
@@ -974,6 +1061,11 @@ export type MutationDeleteVodArgs = {
 };
 
 
+export type MutationDeleteVodCommentArgs = {
+  input: DeleteVodCommentInput;
+};
+
+
 export type MutationEditAccountArgs = {
   input: EditMemberInput;
 };
@@ -1026,6 +1118,11 @@ export type MutationFaqsArgs = {
 
 export type MutationInquiriesArgs = {
   input: InquiriesInput;
+};
+
+
+export type MutationListSendbirdMessagesArgs = {
+  input: LiveChatHistoriesByHistoryIdInput;
 };
 
 
@@ -1117,17 +1214,18 @@ export type PointPayHistoryView = {
   content: Scalars['String'];
   createDate: Scalars['DateTime'];
   expireDate: Scalars['DateTime'];
-  liveId: Scalars['ID'];
+  liveId?: Maybe<Scalars['ID']>;
+  liveStartDate?: Maybe<Scalars['DateTime']>;
   liveStatus: LiveStatus;
   memberId: Scalars['ID'];
-  payOrderId: Scalars['String'];
+  payOrderId?: Maybe<Scalars['String']>;
   pointPayStatus: PointPayStatus;
   pointPayType: PointPayType;
   refundHistoryId: Scalars['ID'];
   updateDate: Scalars['DateTime'];
   useFreeAmount: Scalars['Float'];
   usePaidAmount: Scalars['Float'];
-  vodId: Scalars['ID'];
+  vodId?: Maybe<Scalars['ID']>;
   vodStatus: VodStatus;
 };
 
@@ -1265,6 +1363,12 @@ export type Vod = {
   vodShareInfo: VodShareInfo;
   vodStatus: VodStatus;
 };
+
+export enum VodCommentStatus {
+  Active = 'ACTIVE',
+  Blind = 'BLIND',
+  Delete = 'DELETE'
+}
 
 export type VodLinkInfo = {
   __typename?: 'VodLinkInfo';
@@ -1561,7 +1665,28 @@ export type PointHistoriesByMemberIdMutationVariables = Exact<{
 }>;
 
 
-export type PointHistoriesByMemberIdMutation = { __typename?: 'Mutation', pointHistoriesByMemberId: { __typename?: 'PointHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, pointPayHistoryView?: Array<{ __typename?: 'PointPayHistoryView', pointPayType: PointPayType, pointPayStatus: PointPayStatus, amount: number, content: string, createDate: any }> | null | undefined } };
+export type PointHistoriesByMemberIdMutation = { __typename?: 'Mutation', pointHistoriesByMemberId: { __typename?: 'PointHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, pointPayHistoryView?: Array<{ __typename?: 'PointPayHistoryView', _id: string, pointPayType: PointPayType, pointPayStatus: PointPayStatus, amount: number, content: string, createDate: any }> | null | undefined } };
+
+export type CommentHistoriesByMemberIdMutationVariables = Exact<{
+  commentHistoriesByMemberIdInput: CommentHistoriesByMemberIdInput;
+}>;
+
+
+export type CommentHistoriesByMemberIdMutation = { __typename?: 'Mutation', commentHistoriesByMemberId: { __typename?: 'CommentHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, commentHistoryView?: Array<{ __typename?: 'CommentHistoryView', _id: string, title: string, content: string, vodCommentStatus: VodCommentStatus, reportCount: number, nickName: string, createDate: any }> | null | undefined } };
+
+export type DeleteVodCommentMutationVariables = Exact<{
+  deleteVodCommentInput: DeleteVodCommentInput;
+}>;
+
+
+export type DeleteVodCommentMutation = { __typename?: 'Mutation', deleteVodComment: { __typename?: 'DeleteVodCommentOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type ListSendBirdMessagesMutationVariables = Exact<{
+  liveChatHistoriesByHistoryIdInput: LiveChatHistoriesByHistoryIdInput;
+}>;
+
+
+export type ListSendBirdMessagesMutation = { __typename?: 'Mutation', listSendbirdMessages: { __typename?: 'LiveChatHistoriesByHistoryIdOutput', ok: boolean, email?: string | null | undefined, nickName?: string | null | undefined, liveTitle?: string | null | undefined, liveStartDate?: any | null | undefined, isDisable?: boolean | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, messages?: Array<{ __typename?: 'Message', message_id: number, type: string, message: string, created_at: number }> | null | undefined } };
 
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2977,6 +3102,7 @@ export const PointHistoriesByMemberIdDocument = gql`
     totalPages
     totalResults
     pointPayHistoryView {
+      _id
       pointPayType
       pointPayStatus
       amount
@@ -3012,6 +3138,139 @@ export function usePointHistoriesByMemberIdMutation(baseOptions?: Apollo.Mutatio
 export type PointHistoriesByMemberIdMutationHookResult = ReturnType<typeof usePointHistoriesByMemberIdMutation>;
 export type PointHistoriesByMemberIdMutationResult = Apollo.MutationResult<PointHistoriesByMemberIdMutation>;
 export type PointHistoriesByMemberIdMutationOptions = Apollo.BaseMutationOptions<PointHistoriesByMemberIdMutation, PointHistoriesByMemberIdMutationVariables>;
+export const CommentHistoriesByMemberIdDocument = gql`
+    mutation CommentHistoriesByMemberId($commentHistoriesByMemberIdInput: CommentHistoriesByMemberIdInput!) {
+  commentHistoriesByMemberId(input: $commentHistoriesByMemberIdInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    totalPages
+    totalResults
+    commentHistoryView {
+      _id
+      title
+      content
+      vodCommentStatus
+      reportCount
+      nickName
+      createDate
+    }
+  }
+}
+    `;
+export type CommentHistoriesByMemberIdMutationFn = Apollo.MutationFunction<CommentHistoriesByMemberIdMutation, CommentHistoriesByMemberIdMutationVariables>;
+
+/**
+ * __useCommentHistoriesByMemberIdMutation__
+ *
+ * To run a mutation, you first call `useCommentHistoriesByMemberIdMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCommentHistoriesByMemberIdMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [commentHistoriesByMemberIdMutation, { data, loading, error }] = useCommentHistoriesByMemberIdMutation({
+ *   variables: {
+ *      commentHistoriesByMemberIdInput: // value for 'commentHistoriesByMemberIdInput'
+ *   },
+ * });
+ */
+export function useCommentHistoriesByMemberIdMutation(baseOptions?: Apollo.MutationHookOptions<CommentHistoriesByMemberIdMutation, CommentHistoriesByMemberIdMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CommentHistoriesByMemberIdMutation, CommentHistoriesByMemberIdMutationVariables>(CommentHistoriesByMemberIdDocument, options);
+      }
+export type CommentHistoriesByMemberIdMutationHookResult = ReturnType<typeof useCommentHistoriesByMemberIdMutation>;
+export type CommentHistoriesByMemberIdMutationResult = Apollo.MutationResult<CommentHistoriesByMemberIdMutation>;
+export type CommentHistoriesByMemberIdMutationOptions = Apollo.BaseMutationOptions<CommentHistoriesByMemberIdMutation, CommentHistoriesByMemberIdMutationVariables>;
+export const DeleteVodCommentDocument = gql`
+    mutation DeleteVodComment($deleteVodCommentInput: DeleteVodCommentInput!) {
+  deleteVodComment(input: $deleteVodCommentInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type DeleteVodCommentMutationFn = Apollo.MutationFunction<DeleteVodCommentMutation, DeleteVodCommentMutationVariables>;
+
+/**
+ * __useDeleteVodCommentMutation__
+ *
+ * To run a mutation, you first call `useDeleteVodCommentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteVodCommentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteVodCommentMutation, { data, loading, error }] = useDeleteVodCommentMutation({
+ *   variables: {
+ *      deleteVodCommentInput: // value for 'deleteVodCommentInput'
+ *   },
+ * });
+ */
+export function useDeleteVodCommentMutation(baseOptions?: Apollo.MutationHookOptions<DeleteVodCommentMutation, DeleteVodCommentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteVodCommentMutation, DeleteVodCommentMutationVariables>(DeleteVodCommentDocument, options);
+      }
+export type DeleteVodCommentMutationHookResult = ReturnType<typeof useDeleteVodCommentMutation>;
+export type DeleteVodCommentMutationResult = Apollo.MutationResult<DeleteVodCommentMutation>;
+export type DeleteVodCommentMutationOptions = Apollo.BaseMutationOptions<DeleteVodCommentMutation, DeleteVodCommentMutationVariables>;
+export const ListSendBirdMessagesDocument = gql`
+    mutation ListSendBirdMessages($liveChatHistoriesByHistoryIdInput: LiveChatHistoriesByHistoryIdInput!) {
+  listSendbirdMessages(input: $liveChatHistoriesByHistoryIdInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    email
+    nickName
+    liveTitle
+    liveStartDate
+    messages {
+      message_id
+      type
+      message
+      created_at
+    }
+    isDisable
+  }
+}
+    `;
+export type ListSendBirdMessagesMutationFn = Apollo.MutationFunction<ListSendBirdMessagesMutation, ListSendBirdMessagesMutationVariables>;
+
+/**
+ * __useListSendBirdMessagesMutation__
+ *
+ * To run a mutation, you first call `useListSendBirdMessagesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useListSendBirdMessagesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [listSendBirdMessagesMutation, { data, loading, error }] = useListSendBirdMessagesMutation({
+ *   variables: {
+ *      liveChatHistoriesByHistoryIdInput: // value for 'liveChatHistoriesByHistoryIdInput'
+ *   },
+ * });
+ */
+export function useListSendBirdMessagesMutation(baseOptions?: Apollo.MutationHookOptions<ListSendBirdMessagesMutation, ListSendBirdMessagesMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ListSendBirdMessagesMutation, ListSendBirdMessagesMutationVariables>(ListSendBirdMessagesDocument, options);
+      }
+export type ListSendBirdMessagesMutationHookResult = ReturnType<typeof useListSendBirdMessagesMutation>;
+export type ListSendBirdMessagesMutationResult = Apollo.MutationResult<ListSendBirdMessagesMutation>;
+export type ListSendBirdMessagesMutationOptions = Apollo.BaseMutationOptions<ListSendBirdMessagesMutation, ListSendBirdMessagesMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {

@@ -37,8 +37,8 @@ const Create: NextPage<Props> = ({ toggleStyle, theme }) => {
       toast.success(locale === 'ko' ? '등록되었습니다' : 'Is registered', {
         autoClose: 1000,
         theme: localStorage.theme || 'light',
+        onClose: () => push('/event', '/event', { locale }),
       })
-      push('/event', '/event', { locale })
     }
   }
   const [createEvent] = useMutation<CreateEventMutation, CreateEventMutationVariables>(

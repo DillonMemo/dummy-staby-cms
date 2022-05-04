@@ -322,6 +322,15 @@ export const GlobalStyles = createGlobalStyle`
               }
             }
           }
+          &.ant-table-expanded-row {
+            > td {
+              background: ${({ theme }) => theme.body}!important;
+
+              .expandable-button {
+                background: ${({ theme }) => theme.card} !important;
+              }
+            }
+          }
           >td {
             border-bottom: 1px solid ${({ theme }) => theme.text_hover} !important;
           }
@@ -375,6 +384,10 @@ export const GlobalStyles = createGlobalStyle`
             color: #1890ff !important;
           }
         }
+      }
+
+      .ant-pagination-item-ellipsis {
+        color: ${({ theme }) => theme.text} !important;
       }
 
       .ant-pagination-item-active {
@@ -761,6 +774,23 @@ export const MainWrapper = styled.main`
 
     .form-message {
       color: red;
+    }
+  }
+
+  .text-shorten {
+    max-width: 25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    ${md} {
+      max-width: 5rem;
+    }
+  }
+  .expandable-container {
+    .button-content {
+      margin-top: 1rem;
+      text-align: center;
     }
   }
 `
