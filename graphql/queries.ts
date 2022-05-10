@@ -137,6 +137,7 @@ export const VOD_QUERY = gql`
         title
         content
         paymentAmount
+        vodRatioType
         mainImageName
         vodLinkInfo {
           linkPath

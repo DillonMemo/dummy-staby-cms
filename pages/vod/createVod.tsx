@@ -23,6 +23,7 @@ import {
   LivesMutation,
   LivesMutationVariables,
   MemberType,
+  VodRatioType,
 } from '../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 
@@ -37,6 +38,7 @@ type Props = styleMode
 export interface VodCreateForm {
   title: string
   paymentAmount: number
+  vodRatioType: VodRatioType
   mainThumbnail: string
   content: string
   share: ShareInfo
@@ -135,7 +137,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     setUploading(true)
 
     try {
-      const { title, paymentAmount, content, liveId } = getValues()
+      const { title, paymentAmount, content, liveId, vodRatioType } = getValues()
       const vodLinkArr = [] //라이브 채널 링크 배열
 
       //memberShareData 유효성 확인, 100이 되야한다.
@@ -276,6 +278,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
             content,
             paymentAmount: parseFloat(paymentAmount.toString()),
             title,
+            vodRatioType,
           },
         },
       })
@@ -431,6 +434,33 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
                 <div className="form-item mt-harf">
                   <div className="form-group">
+                    <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
+                    <Controller
+                      control={control}
+                      name="vodRatioType"
+                      rules={{
+                        required: requiredText,
+                      }}
+                      render={({ field: { onChange, value } }) => (
+                        <>
+                          <Select
+                            value={value}
+                            onChange={onChange}
+                            defaultValue={VodRatioType.Horizontal}>
+                            {Object.keys(VodRatioType).map((data, index) => (
+                              <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
+                                {data}
+                              </Select.Option>
+                            ))}
+                          </Select>
+                        </>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-item mt-harf">
+                  <div className="form-group">
                     <span>Main {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                     <Controller
                       control={control}
@@ -457,6 +487,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     </div>
                   )}
                 </div>
+
                 <div className="form-item mt-harf">
                   <div className="form-group">
                     <span>

@@ -27,6 +27,7 @@ import {
   LivesMutationVariables,
   MemberType,
   TranscodeStatus,
+  VodRatioType,
   VodStatus,
 } from '../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY, VOD_QUERY } from '../../graphql/queries'
@@ -43,6 +44,7 @@ type Props = styleMode
 export interface VodCreateForm {
   title: string
   paymentAmount: number
+  vodRatioType: VodRatioType
   mainThumbnail: string
   content: string
   share: ShareInfo
@@ -213,7 +215,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const onSubmit = async () => {
     setUploading(true)
     try {
-      const { title, paymentAmount, content, liveId } = getValues()
+      const { title, paymentAmount, content, liveId, vodRatioType } = getValues()
 
       const vodLinkArr = [] //라이브 채널 링크 배열
 
@@ -373,6 +375,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
             content,
             paymentAmount: parseFloat(paymentAmount.toString()),
             title,
+            vodRatioType,
           },
         },
       })
@@ -572,6 +575,33 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <span>{errors.paymentAmount.message}</span>
                     </div>
                   )}
+                </div>
+
+                <div className="form-item mt-harf">
+                  <div className="form-group">
+                    <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
+                    <Controller
+                      key={vodData?.findVodById.vod?.vodRatioType}
+                      control={control}
+                      name="vodRatioType"
+                      rules={{ required: requiredText }}
+                      defaultValue={vodData?.findVodById.vod?.vodRatioType}
+                      render={({ field: { onChange, value } }) => (
+                        <>
+                          <Select
+                            defaultValue={vodData?.findVodById.vod?.vodRatioType}
+                            value={value}
+                            onChange={onChange}>
+                            {Object.keys(VodRatioType).map((data, index) => (
+                              <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
+                                {data}
+                              </Select.Option>
+                            ))}
+                          </Select>
+                        </>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 <div className="form-item mt-harf">
