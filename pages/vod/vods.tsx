@@ -9,10 +9,11 @@ import { debounce } from 'lodash'
 import { MenuInfo } from 'rc-menu/lib/interface'
 import { RangeValue } from 'rc-picker/lib/interface'
 import moment from 'moment'
+import { toast } from 'react-toastify'
+import { LoadingOutlined } from '@ant-design/icons'
 
 /** components */
 import Layout from '../../components/Layout'
-import { LoadingOutlined } from '@ant-design/icons'
 
 /** graphql */
 import { useMutation } from '@apollo/client'
@@ -26,7 +27,7 @@ type Props = styleMode
 
 /** filter 옵션 인터페이스 */
 interface Filters {
-  vodStatus: VodStatus | 'All'
+  vodStatus: keyof typeof VodStatus | 'All'
 }
 /** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
 interface Options extends Filters {
@@ -99,8 +100,9 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
           vodsInput: {
             page,
             pageView: pageSize,
-            vodStatus: vodStatus !== 'All' ? vodStatus : undefined,
+            vodStatus: vodStatus !== 'All' ? (vodStatus as VodStatus) : undefined,
             title: searchText,
+            ...(dates && dates.length > 0 && { dates }),
           },
         },
       })
@@ -124,12 +126,12 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
               pageView: pageSize,
               vodStatus: key !== 'All' ? (key as Maybe<VodStatus>) : undefined,
               title: searchText,
+              ...(dates && dates.length > 0 && { dates }),
             },
           },
         })
         if (data?.vods.ok) {
-          //@ts-expect-error
-          setFilterOptions((prev) => ({ ...prev, vodStatus: key as Maybe<VodStatus> }))
+          setFilterOptions((prev) => ({ ...prev, vodStatus: key as keyof typeof VodStatus }))
         }
       }
     } catch (error) {
@@ -147,8 +149,9 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
             vodsInput: {
               page,
               pageView: pageSize,
-              vodStatus: vodStatus !== 'All' ? vodStatus : undefined,
+              vodStatus: vodStatus !== 'All' ? (vodStatus as VodStatus) : undefined,
               title: value,
+              ...(dates && dates.length > 0 && { dates }),
             },
           },
         })
@@ -177,17 +180,38 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
    * @param {RangeValue<moment.Moment>} value 날짜 결과 option
    */
   const onPickerChange = async (value: RangeValue<moment.Moment>) => {
-    await vods({
-      variables: {
-        vodsInput: {
-          page,
-          pageView: pageSize,
-          vodStatus: vodStatus !== 'All' ? vodStatus : undefined,
-          title: '',
-          ...(value && value.length > 0 && { dates: value }),
+    try {
+      await vods({
+        variables: {
+          vodsInput: {
+            page,
+            pageView: pageSize,
+            vodStatus: vodStatus !== 'All' ? (vodStatus as VodStatus) : undefined,
+            title: searchText,
+            ...(value && value.length > 0 && { dates: value }),
+          },
         },
-      },
-    })
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const onExcelExport = async () => {
+    try {
+      const link = process.env.NEXT_PUBLIC_APOLLO_LINK as string
+      const param = []
+      vodStatus !== 'All' && param.push(`vodStatus=${vodStatus}`)
+      dates && dates.length > 0 && param.push(`dates=${JSON.stringify(dates)}`)
+      searchText && param.push(`title=${searchText}`)
+
+      router.push(`${link.substring(0, link.length - 7)}download/vods?${param.join('&')}`)
+    } catch (error) {
+      toast.error(locale === 'ko' ? '오류가 발생 하였습니다' : 'an error', {
+        theme: localStorage.theme || 'light',
+      })
+      console.error(error)
+    }
   }
 
   useEffect(() => {
@@ -223,6 +247,20 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
         <div className="main-content">
           <ManagementWrapper className="card">
             <div className="table-wrapper">
+              <div className="extension-container">
+                <Space>
+                  <div></div>
+                </Space>
+                <Space>
+                  <Button
+                    type="primary"
+                    role="button"
+                    className="export-button"
+                    onClick={onExcelExport}>
+                    Excel
+                  </Button>
+                </Space>
+              </div>
               <div className="filter-container">
                 <Space>
                   <Dropdown
@@ -230,8 +268,9 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Menu onClick={onVodStatusMenuClick}>
                         <Menu.Item key="All">All</Menu.Item>
                         {Object.keys(VodStatus).map((status) => (
-                          //@ts-expect-error
-                          <Menu.Item key={VodStatus[status]}>{status}</Menu.Item>
+                          <Menu.Item key={VodStatus[status as keyof typeof VodStatus]}>
+                            {status}
+                          </Menu.Item>
                         ))}
                       </Menu>
                     }
@@ -249,7 +288,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </Dropdown>
                   <RangePicker
                     locale={locale}
-                    title={locale === 'ko' ? '가입일' : 'Create Date'}
+                    title={locale === 'ko' ? '등록일' : 'Create Date'}
                     value={dates}
                     onCalendarChange={(value) =>
                       setFilterOptions((prev) => ({ ...prev, dates: value as any }))
@@ -257,7 +296,6 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                     onPickerChange={onPickerChange}
                     onPickerOpen={onPickerOpen}
                   />
-                  <span>기간은 현재 개발 진행중</span>
                 </Space>
                 <Space>
                   <Input.Search

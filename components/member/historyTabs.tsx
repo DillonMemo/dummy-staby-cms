@@ -488,7 +488,7 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
           },
         },
       })
-      if (data.listSendbirdMessages?.ok) {
+      if (data?.listSendbirdMessages.ok) {
         setChatHistoryModal((prev) => ({
           ...prev,
           historyId: _id,
@@ -519,25 +519,22 @@ const HistoryTabs: React.FC<Props> = ({ memberId }) => {
 
         const calc = ((scrollTop + containerHeight) / scrollHeight) * 100
 
-        if (
-          calc >= 100 &&
-          listSendbirdMessagesData &&
-          listSendbirdMessagesData.listSendbirdMessages
-        ) {
-          const messages: Message[] = listSendbirdMessagesData.listSendbirdMessages.messages.map(
-            (message: Message) => omit(message, ['__typename'])
-          )
+        if (calc >= 100) {
+          if (listSendbirdMessagesData) {
+            const messages = listSendbirdMessagesData.listSendbirdMessages.messages?.map(
+              (message: Message) => omit(message, ['__typename'])
+            ) as Message[]
 
-          if (!listSendbirdMessagesData.listSendbirdMessages.isDisable) {
-            await listSendbirdMessages({
-              variables: {
-                liveChatHistoriesByHistoryIdInput: {
-                  historyId: chatHistoryModal.historyId,
-                  timestemp: messages[messages.length - 1].created_at,
-                  messages,
+            if (!listSendbirdMessagesData.listSendbirdMessages.isDisable)
+              await listSendbirdMessages({
+                variables: {
+                  liveChatHistoriesByHistoryIdInput: {
+                    historyId: chatHistoryModal.historyId,
+                    timestemp: messages[messages.length - 1].created_at,
+                    messages,
+                  },
                 },
-              },
-            })
+              })
           }
         }
       } catch (error) {
@@ -1208,7 +1205,7 @@ const HistoryModal = styled(Modal)`
     }
   }
   .modal-body {
-    max-height: 17.25rem;
+    max-height: 12.25rem;
 
     position: relative;
     overflow: hidden;

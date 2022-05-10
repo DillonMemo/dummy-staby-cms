@@ -214,22 +214,26 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
    * @param {RangeValue<moment.Moment>} value 날짜 결과 option
    */
   const onPickerChange = async (value: RangeValue<moment.Moment>) => {
-    await members({
-      variables: {
-        membersInput: {
-          page,
-          pageView: pageSize,
-          memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
-          memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
-          ...(value && value.length > 0 && { dates: value }),
-          ...(searchSelect === 'Email'
-            ? { email: searchText }
-            : searchSelect === 'NickName'
-            ? { nickName: searchText }
-            : {}),
+    try {
+      await members({
+        variables: {
+          membersInput: {
+            page,
+            pageView: pageSize,
+            memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
+            memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
+            ...(value && value.length > 0 && { dates: value }),
+            ...(searchSelect === 'Email'
+              ? { email: searchText }
+              : searchSelect === 'NickName'
+              ? { nickName: searchText }
+              : {}),
+          },
         },
-      },
-    })
+      })
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   /**
