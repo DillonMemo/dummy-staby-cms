@@ -344,6 +344,7 @@ export type CreateVodInput = {
   title: Scalars['String'];
   viewCount?: Maybe<Scalars['Float']>;
   vodLinkInfo: Array<VodLinkInfoInputType>;
+  vodRatio?: Maybe<VodRatio>;
   vodShareInfo: VodShareInfoInputType;
   vodStatus?: Maybe<VodStatus>;
 };
@@ -508,6 +509,7 @@ export type EditVodInput = {
   paymentAmount: Scalars['Float'];
   title: Scalars['String'];
   vodLinkInfo: Array<VodLinkInfoInputType>;
+  vodRatio?: Maybe<VodRatio>;
   vodShareInfo: VodShareInfoInputType;
   vodStatus?: Maybe<VodStatus>;
 };
@@ -1360,6 +1362,7 @@ export type Vod = {
   updateDate: Scalars['DateTime'];
   viewCount: Scalars['Float'];
   vodLinkInfo: Array<VodLinkInfo>;
+  vodRatio: VodRatio;
   vodShareInfo: VodShareInfo;
   vodStatus: VodStatus;
 };
@@ -1391,6 +1394,11 @@ export type VodLinkInfoInputType = {
   transcodeStatus?: Maybe<TranscodeStatus>;
 };
 
+export enum VodRatio {
+  Horizontal = 'HORIZONTAL',
+  Vertical = 'VERTICAL'
+}
+
 export type VodShareInfo = {
   __typename?: 'VodShareInfo';
   _id: Scalars['ID'];
@@ -1416,6 +1424,7 @@ export enum VodStatus {
 }
 
 export type VodsInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
   page?: Maybe<Scalars['Int']>;
   pageView?: Maybe<Scalars['Int']>;
   title?: Maybe<Scalars['String']>;
