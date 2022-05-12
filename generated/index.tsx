@@ -344,7 +344,7 @@ export type CreateVodInput = {
   title: Scalars['String'];
   viewCount?: Maybe<Scalars['Float']>;
   vodLinkInfo: Array<VodLinkInfoInputType>;
-  vodRatio?: Maybe<VodRatio>;
+  vodRatioType?: Maybe<VodRatioType>;
   vodShareInfo: VodShareInfoInputType;
   vodStatus?: Maybe<VodStatus>;
 };
@@ -509,7 +509,7 @@ export type EditVodInput = {
   paymentAmount: Scalars['Float'];
   title: Scalars['String'];
   vodLinkInfo: Array<VodLinkInfoInputType>;
-  vodRatio?: Maybe<VodRatio>;
+  vodRatioType?: Maybe<VodRatioType>;
   vodShareInfo: VodShareInfoInputType;
   vodStatus?: Maybe<VodStatus>;
 };
@@ -760,7 +760,9 @@ export enum LiveStatus {
 }
 
 export type LivesInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
   hostName?: Maybe<Scalars['String']>;
+  livePreviewDates?: Maybe<Array<Scalars['DateTime']>>;
   liveStatus?: Maybe<LiveStatus>;
   page?: Maybe<Scalars['Int']>;
   pageView?: Maybe<Scalars['Int']>;
@@ -1362,7 +1364,7 @@ export type Vod = {
   updateDate: Scalars['DateTime'];
   viewCount: Scalars['Float'];
   vodLinkInfo: Array<VodLinkInfo>;
-  vodRatio: VodRatio;
+  vodRatioType: VodRatioType;
   vodShareInfo: VodShareInfo;
   vodStatus: VodStatus;
 };
@@ -1394,7 +1396,7 @@ export type VodLinkInfoInputType = {
   transcodeStatus?: Maybe<TranscodeStatus>;
 };
 
-export enum VodRatio {
+export enum VodRatioType {
   Horizontal = 'HORIZONTAL',
   Vertical = 'VERTICAL'
 }
@@ -1728,7 +1730,7 @@ export type FindVodByIdQueryVariables = Exact<{
 }>;
 
 
-export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, mainImageName: string, storageTotalCount: number, vodStatus: VodStatus, liveId?: string | null | undefined, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null | undefined, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null | undefined, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, vodRatioType: VodRatioType, mainImageName: string, storageTotalCount: number, vodStatus: VodStatus, liveId?: string | null | undefined, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null | undefined, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null | undefined, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
 
 export type FindLiveByTypesQueryVariables = Exact<{
   findLiveByTypesInput: FindLiveByTypesInput;
@@ -3524,6 +3526,7 @@ export const FindVodByIdDocument = gql`
       title
       content
       paymentAmount
+      vodRatioType
       mainImageName
       vodLinkInfo {
         linkPath

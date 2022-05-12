@@ -284,7 +284,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
 
       router.push(`${link.substring(0, link.length - 7)}download/members?${param.join('&')}`)
     } catch (error) {
-      toast.error(locale === 'ko' ? '오류가 발생 하였습니다' : 'an error', {
+      toast.error(locale === 'ko' ? '오류가 발생 했습니다' : 'an error', {
         theme: localStorage.theme || 'light',
       })
       console.error(error)
