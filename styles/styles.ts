@@ -141,6 +141,14 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     /** antd custom */
+    .ant-space {
+      &.responsive-flex {
+        ${md} {
+          flex-flow: column nowrap;
+          align-items: flex-start;
+        }
+      }
+    }
     .ant-skeleton {
       &.ant-skeleton-active {
         .ant-skeleton-input {

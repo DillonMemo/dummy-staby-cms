@@ -13,20 +13,22 @@ import { RangeValue } from 'rc-picker/lib/interface'
 /** components */
 import Layout from '../../components/Layout'
 import { LoadingOutlined } from '@ant-design/icons'
+import RangePicker from '../../components/RangePicker'
 
 /** graphql */
 import { useMutation } from '@apollo/client'
 import { LivesMutation, LivesMutationVariables, LiveStatus } from '../../generated'
 import { LIVES_MUTATION } from '../../graphql/mutations'
-import { Maybe } from 'graphql/jsutils/Maybe'
+
+/** util */
 import { DATE_FORMAT } from '../../Common/commonFn'
-import RangePicker from '../../components/RangePicker'
+import { toast } from 'react-toastify'
 
 type Props = styleMode
 
 /** filter 옵션 인터페이스 */
 interface Filters {
-  liveStatus: LiveStatus | 'All'
+  liveStatus: keyof typeof LiveStatus | 'All'
 }
 /** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
 interface Options extends Filters {
@@ -35,6 +37,7 @@ interface Options extends Filters {
   searchSelect: 'Title' | 'MC'
   searchText: string
   dates: moment.Moment[]
+  livePreviewDates: moment.Moment[]
 }
 /** 필터 드롭다운 Visible 옵션 */
 type Visible = Record<keyof Filters, boolean>
@@ -82,17 +85,21 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
       dataIndex: 'createDate',
       key: 'createDate',
       fixed: 'right',
+      responsive: ['md'],
     },
   ]
-  const [{ page, pageSize, liveStatus, dates, searchSelect, searchText }, setFilterOptions] =
-    useState<Options>({
-      page: 1,
-      pageSize: 20,
-      liveStatus: 'All',
-      dates: [],
-      searchSelect: 'Title',
-      searchText: '',
-    })
+  const [
+    { page, pageSize, liveStatus, dates, livePreviewDates, searchSelect, searchText },
+    setFilterOptions,
+  ] = useState<Options>({
+    page: 1,
+    pageSize: 20,
+    liveStatus: 'All',
+    dates: [],
+    livePreviewDates: [],
+    searchSelect: 'Title',
+    searchText: '',
+  })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
     liveStatus: false,
   })
@@ -113,7 +120,9 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
           livesInput: {
             page,
             pageView: pageSize,
+            liveStatus: liveStatus !== 'All' ? (liveStatus as LiveStatus) : undefined,
             ...(dates && dates.length > 0 && { dates }),
+            ...(livePreviewDates && livePreviewDates.length > 0 && { livePreviewDates }),
             ...(searchSelect === 'Title'
               ? { title: searchText }
               : searchSelect === 'MC'
@@ -140,7 +149,9 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
             livesInput: {
               page,
               pageView: pageSize,
+              liveStatus: key !== 'All' ? (key as LiveStatus) : undefined,
               ...(dates && dates.length > 0 && { dates }),
+              ...(livePreviewDates && livePreviewDates.length > 0 && { livePreviewDates }),
               ...(searchSelect === 'Title'
                 ? { title: searchText }
                 : searchSelect === 'MC'
@@ -151,8 +162,7 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
 
         if (data?.lives.ok) {
-          //@ts-expect-error
-          setFilterOptions((prev) => ({ ...prev, liveStatus: key as Maybe<LiveStatus> }))
+          setFilterOptions((prev) => ({ ...prev, liveStatus: key as keyof typeof LiveStatus }))
         }
       }
     } catch (error) {
@@ -169,6 +179,9 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
       setFilterOptions((prev) => ({ ...prev, dates: [] }))
     }
   }
+  const onPreviewPickerOpen = (open: boolean) => {
+    if (open) setFilterOptions((prev) => ({ ...prev, livePreviewDates: [] }))
+  }
 
   /**
    * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
@@ -180,7 +193,27 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
         livesInput: {
           page,
           pageView: pageSize,
+          liveStatus: liveStatus !== 'All' ? (liveStatus as LiveStatus) : undefined,
           ...(value && value.length > 0 && { dates: value }),
+          ...(livePreviewDates && livePreviewDates.length > 0 && { livePreviewDates }),
+          ...(searchSelect === 'Title'
+            ? { title: searchText }
+            : searchSelect === 'MC'
+            ? { hostName: searchText }
+            : {}),
+        },
+      },
+    })
+  }
+  const onPreviewPickerChange = async (value: RangeValue<moment.Moment>) => {
+    await lives({
+      variables: {
+        livesInput: {
+          page,
+          pageView: pageSize,
+          liveStatus: liveStatus !== 'All' ? (liveStatus as LiveStatus) : undefined,
+          ...(dates && dates.length > 0 && { dates }),
+          ...(value && value.length > 0 && { livePreviewDates: value }),
           ...(searchSelect === 'Title'
             ? { title: searchText }
             : searchSelect === 'MC'
@@ -202,11 +235,13 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
             livesInput: {
               page,
               pageView: pageSize,
+              liveStatus: liveStatus !== 'All' ? (liveStatus as LiveStatus) : undefined,
               ...(dates && dates.length > 0 && { dates }),
+              ...(livePreviewDates && livePreviewDates.length > 0 && { livePreviewDates }),
               ...(searchSelect === 'Title'
-                ? { title: searchText }
+                ? { title: value }
                 : searchSelect === 'MC'
-                ? { hostName: searchText }
+                ? { hostName: value }
                 : {}),
             },
           },
@@ -218,8 +253,29 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(error)
       }
     }, 1000),
-    [page, liveStatus, searchText, dates, searchSelect]
+    [page, liveStatus, searchText, dates, livePreviewDates, searchSelect]
   )
+
+  const onExcelExport = async () => {
+    try {
+      const link = process.env.NEXT_PUBLIC_APOLLO_LINK as string
+      const param = []
+      liveStatus !== 'All' && param.push(`liveStatus=${liveStatus}`)
+      dates && dates.length > 0 && param.push(`dates=${JSON.stringify(dates)}`)
+      livePreviewDates &&
+        livePreviewDates.length > 0 &&
+        param.push(`livePreviewDates=${JSON.stringify(livePreviewDates)}`)
+      if (searchSelect === 'Title') searchText && param.push(`title=${searchText}`)
+      else if (searchSelect === 'MC') searchText && param.push(`hostName=${searchText}`)
+
+      router.push(`${link.substring(0, link.length - 7)}download/lives?${param.join('&')}`)
+    } catch (error) {
+      toast.error(locale === 'ko' ? '오류가 발생 했습니다' : 'an error', {
+        theme: localStorage.theme || 'light',
+      })
+      console.error(error)
+    }
+  }
 
   useEffect(() => {
     const fetch = async () => {
@@ -254,15 +310,30 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
         <div className="main-content">
           <ManagementWrapper className="card">
             <div className="table-wrapper">
-              <div className="filter-container">
+              <div className="extension-container">
                 <Space>
+                  <div></div>
+                </Space>
+                <Space>
+                  <Button
+                    type="primary"
+                    role="button"
+                    className="export-button"
+                    onClick={onExcelExport}>
+                    Excel
+                  </Button>
+                </Space>
+              </div>
+              <div className="filter-container">
+                <Space className="responsive-flex">
                   <Dropdown
                     overlay={
                       <Menu onClick={onLiveStatusMenuClick}>
                         <Menu.Item key="All">All</Menu.Item>
                         {Object.keys(LiveStatus).map((status) => (
-                          //@ts-expect-error
-                          <Menu.Item key={LiveStatus[status]}>{status}</Menu.Item>
+                          <Menu.Item key={LiveStatus[status as keyof typeof LiveStatus]}>
+                            {status}
+                          </Menu.Item>
                         ))}
                       </Menu>
                     }
@@ -280,6 +351,16 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </Dropdown>
                   <RangePicker
                     locale={locale}
+                    title={locale === 'ko' ? '시작예정일' : 'Live Priview Date'}
+                    value={livePreviewDates}
+                    onCalendarChange={(value) =>
+                      setFilterOptions((prev) => ({ ...prev, livePreviewDates: value as any }))
+                    }
+                    onPickerChange={onPreviewPickerChange}
+                    onPickerOpen={onPreviewPickerOpen}
+                  />
+                  <RangePicker
+                    locale={locale}
                     title={locale === 'ko' ? '등록일' : 'Create Date'}
                     value={dates}
                     onCalendarChange={(value) =>
@@ -288,7 +369,6 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                     onPickerChange={onPickerChange}
                     onPickerOpen={onPickerOpen}
                   />
-                  <span>기간은 현재 개발 진행중</span>
                 </Space>
                 <Space>
                   <Input.Group compact>

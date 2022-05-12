@@ -760,7 +760,9 @@ export enum LiveStatus {
 }
 
 export type LivesInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
   hostName?: Maybe<Scalars['String']>;
+  livePreviewDates?: Maybe<Array<Scalars['DateTime']>>;
   liveStatus?: Maybe<LiveStatus>;
   page?: Maybe<Scalars['Int']>;
   pageView?: Maybe<Scalars['Int']>;

@@ -151,7 +151,11 @@ const NoticeDetail: NextPage<Props> = (props) => {
               </Link>
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
-            <li>{locale === 'ko' ? '공지사항' : 'Notice'}</li>
+            <li>
+              <Link href="/notice">
+                <a>{locale === 'ko' ? '공지사항' : 'Notice'}</a>
+              </Link>
+            </li>
           </ol>
         </div>
         <div className="main-content">
