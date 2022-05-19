@@ -188,22 +188,26 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
    * @param {RangeValue<moment.Moment>} value 날짜 결과 option
    */
   const onPickerChange = async (value: RangeValue<moment.Moment>) => {
-    await lives({
-      variables: {
-        livesInput: {
-          page,
-          pageView: pageSize,
-          liveStatus: liveStatus !== 'All' ? (liveStatus as LiveStatus) : undefined,
-          ...(value && value.length > 0 && { dates: value }),
-          ...(livePreviewDates && livePreviewDates.length > 0 && { livePreviewDates }),
-          ...(searchSelect === 'Title'
-            ? { title: searchText }
-            : searchSelect === 'MC'
-            ? { hostName: searchText }
-            : {}),
+    try {
+      await lives({
+        variables: {
+          livesInput: {
+            page,
+            pageView: pageSize,
+            liveStatus: liveStatus !== 'All' ? (liveStatus as LiveStatus) : undefined,
+            ...(value && value.length > 0 && { dates: value }),
+            ...(livePreviewDates && livePreviewDates.length > 0 && { livePreviewDates }),
+            ...(searchSelect === 'Title'
+              ? { title: searchText }
+              : searchSelect === 'MC'
+              ? { hostName: searchText }
+              : {}),
+          },
         },
-      },
-    })
+      })
+    } catch (error) {
+      console.error(error)
+    }
   }
   const onPreviewPickerChange = async (value: RangeValue<moment.Moment>) => {
     await lives({

@@ -123,7 +123,11 @@ const InquiryDetail: NextPage<Props> = (props) => {
               </Link>
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
-            <li>{locale === 'ko' ? '문의' : 'Inquiry'}</li>
+            <li>
+              <Link href="/inquiry">
+                <a>{locale === 'ko' ? '문의' : 'Inquiry'}</a>
+              </Link>
+            </li>
           </ol>
         </div>
         <div className="main-content">

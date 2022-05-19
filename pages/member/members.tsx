@@ -159,7 +159,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
 
         if (data?.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, memberType: key as any }))
+          setFilterOptions((prev) => ({ ...prev, memberType: key as Filters['memberType'] }))
         }
       }
     } catch (error) {
@@ -266,7 +266,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(error)
       }
     }, 1000),
-    [page, memberType, memberStatus, searchText, dates, searchSelect]
+    [page, pageSize, memberType, memberStatus, searchText, dates, searchSelect]
   )
 
   /**

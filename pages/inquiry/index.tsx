@@ -1,13 +1,14 @@
 import { ColumnsType } from 'antd/lib/table'
-import { pick } from 'lodash'
+import { debounce, pick } from 'lodash'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { Button, Dropdown, Menu, Pagination, Skeleton, Space, Table } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Dropdown, Input, Menu, Pagination, Select, Skeleton, Space, Table } from 'antd'
 import { MenuInfo } from 'rc-menu/lib/interface'
 import { LoadingOutlined } from '@ant-design/icons'
 import moment from 'moment'
+import { RangeValue } from 'rc-picker/lib/interface'
 
 /** styles */
 import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
@@ -24,17 +25,20 @@ import {
 } from '../../generated'
 import { useMutation } from '@apollo/client'
 import { INQUIRIES_MUTATION } from '../../graphql/mutations'
-import { Maybe } from 'graphql/jsutils/Maybe'
+import RangePicker from '../../components/RangePicker'
 
 type Props = styleMode
-type QuestionTypeKey = keyof typeof QuestionType
 type BoardStatusKey = keyof Pick<typeof BoardStatus, 'Wait' | 'Completed'>
 interface Filters {
-  questionType: QuestionType | 'All'
+  questionType: keyof typeof QuestionType | 'All'
   boardStatus: BoardStatusKey | 'All'
 }
 interface Options extends Filters {
   page: number
+  pageSize: number
+  searchSelect: 'Email' | 'Title'
+  searchText: string
+  dates: moment.Moment[]
 }
 
 type Visible = Record<keyof Filters, boolean>
@@ -82,10 +86,17 @@ const Inquiry: NextPage<Props> = (props) => {
       responsive: ['md'],
     },
   ]
-  const [{ page, questionType, boardStatus }, setFilterOptions] = useState<Options>({
+  const [
+    { page, pageSize, questionType, boardStatus, dates, searchSelect, searchText },
+    setFilterOptions,
+  ] = useState<Options>({
     page: 1,
+    pageSize: 20,
     questionType: 'All',
     boardStatus: 'All',
+    dates: [],
+    searchSelect: 'Title',
+    searchText: '',
   })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
     questionType: false,
@@ -105,16 +116,31 @@ const Inquiry: NextPage<Props> = (props) => {
     try {
       await inquiries({
         variables: {
-          inquiriesInput: { page },
+          inquiriesInput: {
+            page,
+            pageView: pageSize,
+            questionType: questionType !== 'All' ? (questionType as QuestionType) : undefined,
+            boardStatus: boardStatus !== 'All' ? (boardStatus as BoardStatus) : undefined,
+            ...(dates && dates.length > 0 && { dates }),
+            ...(searchSelect === 'Email'
+              ? { email: searchText }
+              : searchSelect === 'Title'
+              ? { title: searchText }
+              : {}),
+          },
         },
       })
 
-      setFilterOptions((prev) => ({ ...prev, page }))
+      setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
     } catch (error) {
       console.error(error)
     }
   }
 
+  /**
+   * 문의 분류 드롭다운 메뉴 클릭 이벤트 핸들러 입니다.
+   * @param {MenuInfo} info Menu Click params
+   */
   const onQuestionTypeMenuClick = async ({ key }: MenuInfo) => {
     try {
       if (questionType !== key) {
@@ -122,8 +148,15 @@ const Inquiry: NextPage<Props> = (props) => {
           variables: {
             inquiriesInput: {
               page,
-              questionType: key !== 'All' ? (key as Maybe<QuestionType>) : undefined,
-              boardStatus: boardStatus !== 'All' ? (boardStatus as Maybe<BoardStatus>) : undefined,
+              pageView: pageSize,
+              questionType: key !== 'All' ? (key as QuestionType) : undefined,
+              boardStatus: boardStatus !== 'All' ? (boardStatus as BoardStatus) : undefined,
+              ...(dates && dates.length > 0 && { dates }),
+              ...(searchSelect === 'Email'
+                ? { email: searchText }
+                : searchSelect === 'Title'
+                ? { title: searchText }
+                : {}),
             },
           },
         })
@@ -137,6 +170,10 @@ const Inquiry: NextPage<Props> = (props) => {
     }
   }
 
+  /**
+   * 응답상태 드롭다운 메뉴 클릭 이벤트 핸들러 입니다.
+   * @param {MenuInfo} info Menu Click params
+   */
   const onBoardStatusMenuClick = async ({ key }: MenuInfo) => {
     try {
       if (boardStatus !== key) {
@@ -144,8 +181,15 @@ const Inquiry: NextPage<Props> = (props) => {
           variables: {
             inquiriesInput: {
               page,
-              questionType: questionType !== 'All' ? questionType : undefined,
-              boardStatus: key !== 'All' ? (key as Maybe<BoardStatus>) : undefined,
+              pageView: pageSize,
+              questionType: questionType !== 'All' ? (questionType as QuestionType) : undefined,
+              boardStatus: key !== 'All' ? (key as BoardStatus) : undefined,
+              ...(dates && dates.length > 0 && { dates }),
+              ...(searchSelect === 'Email'
+                ? { email: searchText }
+                : searchSelect === 'Title'
+                ? { title: searchText }
+                : {}),
             },
           },
         })
@@ -158,6 +202,71 @@ const Inquiry: NextPage<Props> = (props) => {
       console.error(error)
     }
   }
+
+  /**
+   * datepicker가 열릴 때 실행 이벤트 핸들러 입니다.
+   * @param {boolean} open 달력 오픈 여부
+   */
+  const onPickerOpen = (open: boolean) => {
+    if (open) setFilterOptions((prev) => ({ ...prev, dates: [] }))
+  }
+  /**
+   * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
+   * @param {RangeValue<moment.Moment>} value 날짜 결과 option
+   */
+  const onPickerChange = async (value: RangeValue<moment.Moment>) => {
+    try {
+      await inquiries({
+        variables: {
+          inquiriesInput: {
+            page,
+            pageView: pageSize,
+            questionType: questionType !== 'All' ? (questionType as QuestionType) : undefined,
+            boardStatus: boardStatus !== 'All' ? (boardStatus as BoardStatus) : undefined,
+            ...(value && value.length > 0 && { dates: value }),
+            ...(searchSelect === 'Email'
+              ? { email: searchText }
+              : searchSelect === 'Title'
+              ? { title: searchText }
+              : {}),
+          },
+        },
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  /**
+   * 검색 변경 이벤트 핸들러 입니다.
+   */
+  const onSearchChange = useCallback(
+    debounce(async ({ target: { value } }) => {
+      try {
+        const { data } = await inquiries({
+          variables: {
+            inquiriesInput: {
+              page,
+              pageView: pageSize,
+              questionType: questionType !== 'All' ? (questionType as QuestionType) : undefined,
+              boardStatus: boardStatus !== 'All' ? (boardStatus as BoardStatus) : undefined,
+              ...(dates && dates.length > 0 && { dates }),
+              ...(searchSelect === 'Email'
+                ? { email: value }
+                : searchSelect === 'Title'
+                ? { title: value }
+                : {}),
+            },
+          },
+        })
+
+        if (data?.inquiries.ok) setFilterOptions((prev) => ({ ...prev, searchText: value }))
+      } catch (error) {
+        console.error(error)
+      }
+    }, 1000),
+    [page, pageSize, questionType, boardStatus, searchSelect, searchText, dates]
+  )
 
   useEffect(() => {
     const fetch = async () => {
@@ -199,23 +308,25 @@ const Inquiry: NextPage<Props> = (props) => {
                     overlay={
                       <Menu onClick={onQuestionTypeMenuClick}>
                         <Menu.Item key="All">{locale === 'ko' ? '전체' : 'All'}</Menu.Item>
-                        {(Object.keys(QuestionType) as QuestionTypeKey[]).map((type) => (
-                          <Menu.Item key={QuestionType[type]}>
-                            {locale === 'ko'
-                              ? type === 'Etc'
-                                ? '기타'
-                                : type === 'Event'
-                                ? '이벤트/혜택'
-                                : type === 'Payment'
-                                ? '결제/취소/환불'
-                                : type === 'Play'
-                                ? '재생 및 사용오류'
-                                : type === 'Service'
-                                ? '서비스 이용 문의'
-                                : type
-                              : type}
-                          </Menu.Item>
-                        ))}
+                        {(Object.keys(QuestionType) as (keyof typeof QuestionType)[]).map(
+                          (type) => (
+                            <Menu.Item key={QuestionType[type]}>
+                              {locale === 'ko'
+                                ? type === 'Etc'
+                                  ? '기타'
+                                  : type === 'Event'
+                                  ? '이벤트/혜택'
+                                  : type === 'Payment'
+                                  ? '결제/취소/환불'
+                                  : type === 'Play'
+                                  ? '재생 및 사용오류'
+                                  : type === 'Service'
+                                  ? '서비스 이용 문의'
+                                  : type
+                                : type}
+                            </Menu.Item>
+                          )
+                        )}
                       </Menu>
                     }
                     onVisibleChange={(visible) =>
@@ -227,15 +338,15 @@ const Inquiry: NextPage<Props> = (props) => {
                       <span className="title">{locale === 'ko' ? '분류' : 'group'}</span>
                       <Button onClick={(e) => e.preventDefault()}>
                         {locale === 'ko'
-                          ? questionType === 'ETC'
+                          ? (questionType as QuestionType) === QuestionType.Etc
                             ? '기타'
-                            : questionType === 'EVENT'
+                            : (questionType as QuestionType) === QuestionType.Event
                             ? '이벤트/혜택'
-                            : questionType === 'PAYMENT'
+                            : (questionType as QuestionType) === QuestionType.Payment
                             ? '결제/취소/환불'
-                            : questionType === 'PLAY'
+                            : (questionType as QuestionType) === QuestionType.Play
                             ? '재생 및 사용오류'
-                            : questionType === 'SERVICE'
+                            : (questionType as QuestionType) === QuestionType.Service
                             ? '서비스 이용 문의'
                             : questionType === 'All'
                             ? '전체'
@@ -255,9 +366,9 @@ const Inquiry: NextPage<Props> = (props) => {
                         ).map((type) => (
                           <Menu.Item key={BoardStatus[type]}>
                             {locale === 'ko'
-                              ? type === 'Wait'
+                              ? type.toUpperCase() === BoardStatus.Wait
                                 ? '대기'
-                                : type === 'Completed'
+                                : type.toUpperCase() === BoardStatus.Completed
                                 ? '완료'
                                 : type
                               : type}
@@ -289,8 +400,49 @@ const Inquiry: NextPage<Props> = (props) => {
                       </Button>
                     </div>
                   </Dropdown>
+                  <RangePicker
+                    locale={locale}
+                    title={locale === 'ko' ? '접수일' : 'Date of receipt'}
+                    value={dates}
+                    onCalendarChange={(value) =>
+                      setFilterOptions((prev) => ({ ...prev, dates: value as any }))
+                    }
+                    onPickerChange={onPickerChange}
+                    onPickerOpen={onPickerOpen}
+                  />
                 </Space>
-                <Space></Space>
+                <Space>
+                  <Input.Group compact>
+                    <Select
+                      defaultValue={searchSelect}
+                      onChange={(value) =>
+                        setFilterOptions((prev) => ({ ...prev, searchSelect: value }))
+                      }>
+                      <Select.Option value="Email">
+                        {locale === 'ko' ? '이메일' : 'Email'}
+                      </Select.Option>
+                      <Select.Option value="Title">
+                        {locale === 'ko' ? '제목' : 'Title'}
+                      </Select.Option>
+                    </Select>
+                    <Input.Search
+                      name="searchText"
+                      placeholder={
+                        searchSelect === 'Email'
+                          ? locale === 'ko'
+                            ? '이메일'
+                            : 'Email'
+                          : searchSelect === 'Title'
+                          ? locale === 'ko'
+                            ? '제목'
+                            : 'Title'
+                          : searchSelect
+                      }
+                      loading={isInquiryLoading}
+                      onChange={onSearchChange}
+                    />
+                  </Input.Group>
+                </Space>
               </div>
 
               {isInquiryLoading ? (
@@ -317,7 +469,14 @@ const Inquiry: NextPage<Props> = (props) => {
                         inquiriesData
                           ? inquiriesData.inquiries.inquiries?.map(
                               (
-                                { _id, email, title, questionType, boardStatus, createDate }: any,
+                                {
+                                  _id,
+                                  createMember: { email },
+                                  title,
+                                  questionType,
+                                  boardStatus,
+                                  createDate,
+                                }: any,
                                 index: number
                               ) => {
                                 const questionTypeValue =
@@ -356,19 +515,23 @@ const Inquiry: NextPage<Props> = (props) => {
                           : []
                       }
                       pagination={{
-                        pageSize: 20,
+                        pageSize,
                         hideOnSinglePage: true,
                       }}
                     />
                   </div>
                   <div className="pagination-content">
+                    <span>
+                      <b>Total</b> {inquiriesData?.inquiries.totalResults?.toLocaleString()}
+                    </span>
                     <Pagination
                       pageSize={20}
                       current={page}
                       total={inquiriesData?.inquiries.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
-                      showSizeChanger={false}
+                      showSizeChanger
+                      pageSizeOptions={['10', '20', '30', '40', '50']}
                     />
                   </div>
                 </>
