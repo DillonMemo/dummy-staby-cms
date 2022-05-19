@@ -623,11 +623,13 @@ export const INQUIRIES_MUTATION = gql`
       totalResults
       inquiries {
         _id
-        email
         title
         questionType
         boardStatus
         createDate
+        createMember {
+          email
+        }
       }
     }
   }

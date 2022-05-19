@@ -187,7 +187,11 @@ const FaqDetail: NextPage<Props> = (props) => {
               </Link>
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
-            <li>FAQ</li>
+            <li>
+              <Link href="/faq">
+                <a>FAQ</a>
+              </Link>
+            </li>
           </ol>
         </div>
         <div className="main-content">

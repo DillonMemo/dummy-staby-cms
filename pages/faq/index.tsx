@@ -3,32 +3,36 @@ import { ColumnsType } from 'antd/lib/table'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { Button, Dropdown, Menu, Pagination, Skeleton, Space, Table } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Dropdown, Input, Menu, Pagination, Skeleton, Space, Table } from 'antd'
 import { MenuInfo } from 'rc-menu/lib/interface'
 import moment from 'moment'
+import { RangeValue } from 'rc-picker/lib/interface'
+import { debounce } from 'lodash'
 
 /** components */
 import Layout from '../../components/Layout'
+import RangePicker from '../../components/RangePicker'
 
 /** styles */
 import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
+import { LoadingOutlined } from '@ant-design/icons'
 
 /** graphql */
 import { FaqsMutation, FaqsMutationVariables, FaqType } from '../../generated'
 import { FAQS_MUTATION } from '../../graphql/mutations'
-import { LoadingOutlined } from '@ant-design/icons'
-import { Maybe } from 'graphql/jsutils/Maybe'
 
 type Props = styleMode
-type FaqTypeKey = keyof typeof FaqType
 /** filter 옵션 인터페이스 */
 interface Filters {
-  faqType: FaqType | 'All'
+  faqType: keyof typeof FaqType | 'All'
 }
 /** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
 interface Options extends Filters {
   page: number
+  pageSize: number
+  searchText: string
+  dates: moment.Moment[]
 }
 
 type Visible = Record<keyof Filters, boolean>
@@ -62,9 +66,12 @@ const Faq: NextPage<Props> = (props) => {
       responsive: ['md'],
     },
   ]
-  const [{ page, faqType }, setFilterOptions] = useState<Options>({
+  const [{ page, pageSize, faqType, searchText, dates }, setFilterOptions] = useState<Options>({
     page: 1,
+    pageSize: 20,
     faqType: 'All',
+    searchText: '',
+    dates: [],
   })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
     faqType: false,
@@ -84,16 +91,26 @@ const Faq: NextPage<Props> = (props) => {
     try {
       await faqs({
         variables: {
-          faqsInput: { page },
+          faqsInput: {
+            page,
+            pageView: pageSize,
+            faqType: faqType !== 'All' ? (faqType as FaqType) : undefined,
+            title: searchText,
+            ...(dates && dates.length > 0 && { dates }),
+          },
         },
       })
 
-      setFilterOptions((prev) => ({ ...prev, page }))
+      setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
     } catch (error) {
       console.error(error)
     }
   }
 
+  /**
+   * 질문 분류 카테고리 드롭다운 메뉴 클릭 이벤트 핸들러 입니다.
+   * @param {MenuInfo} info Menu Click params
+   */
   const onFaqTypeMenuClick = async ({ key }: MenuInfo) => {
     try {
       if (faqType !== key) {
@@ -101,19 +118,77 @@ const Faq: NextPage<Props> = (props) => {
           variables: {
             faqsInput: {
               page,
-              faqType: key !== 'All' ? (key as Maybe<FaqType>) : undefined,
+              pageView: pageSize,
+              faqType: key !== 'All' ? (key as FaqType) : undefined,
+              title: searchText,
+              ...(dates && dates.length > 0 && { dates }),
             },
           },
         })
 
         if (data?.faqs.ok) {
-          setFilterOptions((prev) => ({ ...prev, faqType: key as FaqType | 'All' }))
+          setFilterOptions((prev) => ({ ...prev, faqType: key as keyof typeof FaqType }))
         }
       }
     } catch (error) {
       console.error(error)
     }
   }
+
+  /**
+   * datepicker가 열릴 때 실행 이벤트 핸들러 입니다.
+   * @param {boolean} open 달력 오픈 여부
+   */
+  const onPickerOpen = (open: boolean) => {
+    if (open) setFilterOptions((prev) => ({ ...prev, dates: [] }))
+  }
+  /**
+   * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
+   * @param {RangeValue<moment.Moment>} value 날짜 결과 option
+   */
+  const onPickerChange = async (value: RangeValue<moment.Moment>) => {
+    try {
+      await faqs({
+        variables: {
+          faqsInput: {
+            page,
+            pageView: pageSize,
+            faqType: faqType !== 'All' ? (faqType as FaqType) : undefined,
+            title: searchText,
+            ...(value && value.length > 0 && { dates: value }),
+          },
+        },
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  /**
+   * 검색 (input) 변경 이벤트 핸들러 입니다.
+   */
+  const onSearchChange = useCallback(
+    debounce(async ({ target: { value } }) => {
+      try {
+        const { data } = await faqs({
+          variables: {
+            faqsInput: {
+              page,
+              pageView: pageSize,
+              title: value,
+              faqType: faqType !== 'All' ? (faqType as FaqType) : undefined,
+              ...(dates && dates.length > 0 && { dates }),
+            },
+          },
+        })
+
+        if (data?.faqs.ok) setFilterOptions((prev) => ({ ...prev, searchText: value }))
+      } catch (error) {
+        console.error(error)
+      }
+    }, 1000),
+    [page, pageSize, faqType, searchText, dates]
+  )
 
   useEffect(() => {
     const fetch = async () => {
@@ -149,15 +224,48 @@ const Faq: NextPage<Props> = (props) => {
         <div className="main-content">
           <ManagementWrapper className="card">
             <div className="table-wrapper">
+              <div className="extension-container">
+                <Space>
+                  <div></div>
+                </Space>
+                <Space>
+                  <Button
+                    onClick={() => push(`/notice/create`, `/notice/create`, { locale })}
+                    className="export-btn"
+                    loading={isFaqsLoading}>
+                    {locale === 'ko' ? '등록하기' : 'Create'}
+                  </Button>
+                </Space>
+              </div>
               <div className="filter-container">
                 <Space>
                   <Dropdown
                     overlay={
                       <Menu onClick={onFaqTypeMenuClick}>
-                        <Menu.Item key="All">All</Menu.Item>
-                        {(Object.keys(FaqType) as FaqTypeKey[]).map((type) => (
-                          <Menu.Item key={FaqType[type]}>{type}</Menu.Item>
-                        ))}
+                        <Menu.Item key="All">{locale === 'ko' ? '전체' : 'All'}</Menu.Item>
+                        {Object.keys(FaqType).map((type) => {
+                          const faqTypeValue =
+                            locale === 'ko'
+                              ? (type as FaqType).toUpperCase() === FaqType.Content
+                                ? '컨텐츠'
+                                : (type as FaqType).toUpperCase() === FaqType.Etc
+                                ? '기타'
+                                : (type as FaqType).toUpperCase() === FaqType.Member
+                                ? '회원'
+                                : (type as FaqType).toUpperCase() === FaqType.Payment
+                                ? '결제/환불'
+                                : (type as FaqType).toUpperCase() === FaqType.Play
+                                ? '재생 및 사용오류'
+                                : (type as FaqType).toUpperCase() === FaqType.Service
+                                ? '서비스'
+                                : type
+                              : type
+                          return (
+                            <Menu.Item key={FaqType[type as keyof typeof FaqType]}>
+                              {faqTypeValue}
+                            </Menu.Item>
+                          )
+                        })}
                       </Menu>
                     }
                     onVisibleChange={(visible) =>
@@ -168,19 +276,48 @@ const Faq: NextPage<Props> = (props) => {
                     <div className="dropdown">
                       <span className="title">{locale === 'ko' ? '분류' : 'group'}</span>
                       <Button onClick={(e) => e.preventDefault()}>
-                        {faqType}&nbsp;
+                        {locale === 'ko'
+                          ? faqType === 'All'
+                            ? '전체'
+                            : (faqType as FaqType).toUpperCase() === FaqType.Content
+                            ? '컨텐츠'
+                            : (faqType as FaqType).toUpperCase() === FaqType.Etc
+                            ? '기타'
+                            : (faqType as FaqType).toUpperCase() === FaqType.Member
+                            ? '회원'
+                            : (faqType as FaqType).toUpperCase() === FaqType.Payment
+                            ? '결제/환불'
+                            : (faqType as FaqType).toUpperCase() === FaqType.Play
+                            ? '재생 및 사용오류'
+                            : (faqType as FaqType).toUpperCase() === FaqType.Service
+                            ? '서비스'
+                            : faqType
+                          : faqType}
+                        &nbsp;
                         {isFaqsLoading && <LoadingOutlined style={{ fontSize: '12px' }} />}
                       </Button>
                     </div>
                   </Dropdown>
+                  <RangePicker
+                    locale={locale}
+                    title={locale === 'ko' ? '등록일' : 'Create Date'}
+                    value={dates}
+                    onCalendarChange={(value) =>
+                      setFilterOptions((prev) => ({ ...prev, dates: value as any }))
+                    }
+                    onPickerChange={onPickerChange}
+                    onPickerOpen={onPickerOpen}
+                  />
                 </Space>
                 <Space>
-                  <Button
-                    onClick={() => push(`/faq/create`, `/faq/create`, { locale })}
-                    className="default-btn"
-                    loading={isFaqsLoading}>
-                    {locale === 'ko' ? '등록하기' : 'Create'}
-                  </Button>
+                  <Input.Group compact>
+                    <Input.Search
+                      name="searchText"
+                      placeholder={locale === 'ko' ? '제목' : 'Title'}
+                      loading={isFaqsLoading}
+                      onChange={onSearchChange}
+                    />
+                  </Input.Group>
                 </Space>
               </div>
 
@@ -208,12 +345,18 @@ const Faq: NextPage<Props> = (props) => {
                               ({ _id, title, faqType, createDate }, index: number) => {
                                 const faqTypeValue =
                                   locale === 'ko'
-                                    ? faqType === 'CONTENT'
-                                      ? '콘텐츠'
-                                      : faqType === 'PAYMENT'
-                                      ? '결제/환불'
-                                      : faqType === 'ETC'
+                                    ? (faqType as FaqType) === FaqType.Content
+                                      ? '컨텐츠'
+                                      : (faqType as FaqType) === FaqType.Etc
                                       ? '기타'
+                                      : (faqType as FaqType) === FaqType.Member
+                                      ? '회원'
+                                      : (faqType as FaqType) === FaqType.Payment
+                                      ? '결제/환불'
+                                      : (faqType as FaqType) === FaqType.Play
+                                      ? '재생 및 사용오류'
+                                      : (faqType as FaqType) === FaqType.Service
+                                      ? '서비스'
                                       : faqType
                                     : faqType
                                 return {
@@ -228,19 +371,23 @@ const Faq: NextPage<Props> = (props) => {
                           : []
                       }
                       pagination={{
-                        pageSize: 20,
+                        pageSize,
                         hideOnSinglePage: true,
                       }}
                     />
                   </div>
                   <div className="pagination-content">
+                    <span>
+                      <b>Total</b> {faqsData?.faqs.totalResults?.toLocaleString()}
+                    </span>
                     <Pagination
-                      pageSize={20}
+                      pageSize={pageSize}
                       current={page}
                       total={faqsData?.faqs.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
-                      showSizeChanger={false}
+                      showSizeChanger
+                      pageSizeOptions={['10', '20', '30', '40', '50']}
                     />
                   </div>
                 </>

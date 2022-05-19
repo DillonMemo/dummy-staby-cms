@@ -153,7 +153,11 @@ const EventDetail: NextPage<Props> = (props) => {
               </Link>
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
-            <li>{locale === 'ko' ? '이벤트' : 'Event'}</li>
+            <li>
+              <Link href="/event">
+                <a>{locale === 'ko' ? '이벤트' : 'Event'}</a>
+              </Link>
+            </li>
           </ol>
         </div>
         <div className="main-content">

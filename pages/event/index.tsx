@@ -1,9 +1,11 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { Button, Pagination, Skeleton, Space, Table } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Input, Pagination, Skeleton, Space, Table } from 'antd'
 import { ColumnsType } from 'antd/lib/table'
+import moment from 'moment'
+import { RangeValue } from 'rc-picker/lib/interface'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -15,13 +17,17 @@ import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
 import { useMutation } from '@apollo/client'
 import { EventsMutation, EventsMutationVariables } from '../../generated'
 import { EVENTS_MUTATION } from '../../graphql/mutations'
-import moment from 'moment'
+import { debounce } from 'lodash'
+import RangePicker from '../../components/RangePicker'
 
 type Props = styleMode
 
 /** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
 interface Options {
   page: number
+  pageSize: number
+  searchText: string
+  dates: moment.Moment[]
 }
 
 export interface EventForm {
@@ -48,8 +54,11 @@ const Event: NextPage<Props> = ({ toggleStyle, theme }) => {
     },
   ]
 
-  const [{ page }, setFilterOptions] = useState<Options>({
+  const [{ page, pageSize, searchText, dates }, setFilterOptions] = useState<Options>({
     page: 1,
+    pageSize: 20,
+    searchText: '',
+    dates: [],
   })
   const [events, { data: eventsData, loading: eventsLoading }] = useMutation<
     EventsMutation,
@@ -65,15 +74,68 @@ const Event: NextPage<Props> = ({ toggleStyle, theme }) => {
     try {
       await events({
         variables: {
-          eventsInput: { page },
+          eventsInput: { page, pageView: pageSize },
         },
       })
 
-      setFilterOptions((prev) => ({ ...prev, page }))
+      setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
     } catch (error) {
       console.error(error)
     }
   }
+
+  /**
+   * datepicker가 열릴 때 실행 이벤트 핸들러 입니다.
+   * @param {boolean} open 달력 오픈 여부
+   */
+  const onPickerOpen = (open: boolean) => {
+    if (open) setFilterOptions((prev) => ({ ...prev, dates: [] }))
+  }
+  /**
+   * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
+   * @param {RangeValue<moment.Moment>} value 날짜 결과 option
+   */
+  const onPickerChange = async (value: RangeValue<moment.Moment>) => {
+    try {
+      await events({
+        variables: {
+          eventsInput: {
+            page,
+            pageView: pageSize,
+            title: searchText,
+            ...(value && value.length > 0 && { dates: value }),
+          },
+        },
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  /**
+   * 검색(Input) 이벤트 핸들러 입니다.
+   */
+  const onSearchChange = useCallback(
+    debounce(async ({ target: { value } }) => {
+      try {
+        const { data } = await events({
+          variables: {
+            eventsInput: {
+              page,
+              pageView: pageSize,
+              title: value,
+              ...(dates && dates.length > 0 && { dates }),
+            },
+          },
+        })
+
+        if (data?.events.ok) setFilterOptions((prev) => ({ ...prev, searchText: value }))
+      } catch (error) {
+        console.error(error)
+      }
+    }, 1000),
+    [page, pageSize, searchText, dates]
+  )
 
   useEffect(() => {
     const fetch = async () => {
@@ -105,15 +167,41 @@ const Event: NextPage<Props> = ({ toggleStyle, theme }) => {
         <div className="main-content">
           <ManagementWrapper className="card">
             <div className="table-wrapper">
-              <div className="filter-container">
-                <div></div>
+              <div className="extension-container">
+                <Space>
+                  <div></div>
+                </Space>
                 <Space>
                   <Button
                     onClick={() => push(`/event/create`, `/event/create`, { locale })}
-                    className="default-btn"
+                    className="export-btn"
                     loading={eventsLoading}>
                     {locale === 'ko' ? '등록하기' : 'Create'}
                   </Button>
+                </Space>
+              </div>
+              <div className="filter-container">
+                <Space>
+                  <RangePicker
+                    locale={locale}
+                    title={locale === 'ko' ? '등록일' : 'Create Date'}
+                    value={dates}
+                    onCalendarChange={(value) =>
+                      setFilterOptions((prev) => ({ ...prev, dates: value as any }))
+                    }
+                    onPickerChange={onPickerChange}
+                    onPickerOpen={onPickerOpen}
+                  />
+                </Space>
+                <Space>
+                  <Input.Group compact>
+                    <Input.Search
+                      name="searchText"
+                      placeholder={locale === 'ko' ? '제목' : 'Title'}
+                      loading={eventsLoading}
+                      onChange={onSearchChange}
+                    />
+                  </Input.Group>
                 </Space>
               </div>
               {eventsLoading ? (
@@ -147,19 +235,23 @@ const Event: NextPage<Props> = ({ toggleStyle, theme }) => {
                           : []
                       }
                       pagination={{
-                        pageSize: 20,
+                        pageSize,
                         hideOnSinglePage: true,
                       }}
                     />
                   </div>
                   <div className="pagination-content">
+                    <span>
+                      <b>Total</b> {eventsData?.events.totalResults?.toLocaleString()}
+                    </span>
                     <Pagination
-                      pageSize={20}
+                      pageSize={pageSize}
                       current={page}
                       total={eventsData?.events.totalResults || undefined}
                       onChange={onPageChange}
                       responsive
-                      showSizeChanger={false}
+                      showSizeChanger
+                      pageSizeOptions={['10', '20', '30', '40', '50']}
                     />
                   </div>
                 </>

@@ -521,8 +521,10 @@ export type EditVodOutput = {
 };
 
 export type EventsInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
   page?: Maybe<Scalars['Int']>;
   pageView?: Maybe<Scalars['Int']>;
+  title?: Maybe<Scalars['String']>;
 };
 
 export type EventsOutput = {
@@ -544,9 +546,11 @@ export enum FaqType {
 }
 
 export type FaqsInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
   faqType?: Maybe<FaqType>;
   page?: Maybe<Scalars['Int']>;
   pageView?: Maybe<Scalars['Int']>;
+  title?: Maybe<Scalars['String']>;
 };
 
 export type FaqsOutput = {
@@ -638,9 +642,12 @@ export type GoingDashboard = {
 
 export type InquiriesInput = {
   boardStatus?: Maybe<BoardStatus>;
+  dates?: Maybe<Array<Scalars['DateTime']>>;
+  email?: Maybe<Scalars['String']>;
   page?: Maybe<Scalars['Int']>;
   pageView?: Maybe<Scalars['Int']>;
   questionType?: Maybe<QuestionType>;
+  title?: Maybe<Scalars['String']>;
 };
 
 export type InquiriesOutput = {
@@ -1170,8 +1177,10 @@ export type MutationVodsArgs = {
 };
 
 export type NoticesInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
   page?: Maybe<Scalars['Int']>;
   pageView?: Maybe<Scalars['Int']>;
+  title?: Maybe<Scalars['String']>;
 };
 
 export type NoticesOutput = {
@@ -1655,7 +1664,7 @@ export type InquiriesMutationVariables = Exact<{
 }>;
 
 
-export type InquiriesMutation = { __typename?: 'Mutation', inquiries: { __typename?: 'InquiriesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, inquiries?: Array<{ __typename?: 'Board', _id: string, email?: string | null | undefined, title: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, createDate: any }> | null | undefined } };
+export type InquiriesMutation = { __typename?: 'Mutation', inquiries: { __typename?: 'InquiriesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, inquiries?: Array<{ __typename?: 'Board', _id: string, title: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, createDate: any, createMember: { __typename?: 'AuthMember', email: string } }> | null | undefined } };
 
 export type SuspendMemberByIdMutationVariables = Exact<{
   memberSuspendInput: MemberSuspendInput;
@@ -2983,11 +2992,13 @@ export const InquiriesDocument = gql`
     totalResults
     inquiries {
       _id
-      email
       title
       questionType
       boardStatus
       createDate
+      createMember {
+        email
+      }
     }
   }
 }
