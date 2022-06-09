@@ -23,7 +23,7 @@ import {
   LivesMutation,
   LivesMutationVariables,
   MemberType,
-  VodRatioType,
+  RatioType,
 } from '../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 
@@ -38,7 +38,7 @@ type Props = styleMode
 export interface VodCreateForm {
   title: string
   paymentAmount: number
-  vodRatioType: VodRatioType
+  vodRatioType: RatioType
   mainThumbnail: string
   content: string
   share: ShareInfo
@@ -446,8 +446,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                           <Select
                             value={value}
                             onChange={onChange}
-                            defaultValue={VodRatioType.Horizontal}>
-                            {Object.keys(VodRatioType).map((data, index) => (
+                            defaultValue={RatioType.Horizontal}>
+                            {Object.keys(RatioType).map((data, index) => (
                               <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
                                 {data}
                               </Select.Option>
