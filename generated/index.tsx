@@ -223,6 +223,13 @@ export type CommentHistoryView = {
   vodId: Scalars['ID'];
 };
 
+export type Content = {
+  __typename?: 'Content';
+  _id: Scalars['ID'];
+  title: Scalars['String'];
+  viewCount: Scalars['Float'];
+};
+
 export type CreateAdvertisementInput = {
   advertiseStatus?: Maybe<AdvertiseStatus>;
   displayDeviceType: DisplayDeviceType;
@@ -606,11 +613,52 @@ export type FindVodByTypesOutput = {
   vods: Array<Vod>;
 };
 
+export type GetContentsViewCountInput = {
+  dates?: Maybe<Array<Scalars['DateTime']>>;
+};
+
+export type GetContentsViewCountOutput = {
+  __typename?: 'GetContentsViewCountOutput';
+  error?: Maybe<LangErrorMessage>;
+  lives?: Maybe<Array<Content>>;
+  ok: Scalars['Boolean'];
+  vods?: Maybe<Array<Content>>;
+};
+
+export type GetDailyAccessorInput = {
+  date?: Maybe<Scalars['DateTime']>;
+};
+
+export type GetDailyAccessorOutput = {
+  __typename?: 'GetDailyAccessorOutput';
+  counts?: Maybe<Array<Scalars['Float']>>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
 export type GetGoingDashboardOutput = {
   __typename?: 'GetGoingDashboardOutput';
   dashboard?: Maybe<GoingDashboard>;
   error?: Maybe<LangErrorMessage>;
   memberType: MemberType;
+  ok: Scalars['Boolean'];
+};
+
+export type GetNewMembersInput = {
+  date?: Maybe<Scalars['DateTime']>;
+};
+
+export type GetNewMembersOutput = {
+  __typename?: 'GetNewMembersOutput';
+  counts?: Maybe<Array<Scalars['Float']>>;
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type GetTotalMembersOutput = {
+  __typename?: 'GetTotalMembersOutput';
+  count?: Maybe<Scalars['Float']>;
+  error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
 
@@ -1201,6 +1249,7 @@ export type Point = {
   paidPoint: Scalars['Int'];
   totalPoint: Scalars['Int'];
   updateDate: Scalars['DateTime'];
+  version: Scalars['Float'];
 };
 
 export type PointHistoriesByMemberIdInput = {
@@ -1277,7 +1326,11 @@ export type Query = {
   findMembersByType: MembersByTypeOutput;
   findVodById: FindVodByIdOutput;
   findVodByTypes: FindVodByTypesOutput;
+  getContentsViewCount: GetContentsViewCountOutput;
+  getDailyAccessor: GetDailyAccessorOutput;
   getGoingDashboard: GetGoingDashboardOutput;
+  getNewMembers: GetNewMembersOutput;
+  getTotalMembers: GetTotalMembersOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
   my: Member;
 };
@@ -1320,6 +1373,21 @@ export type QueryFindVodByIdArgs = {
 
 export type QueryFindVodByTypesArgs = {
   input: FindVodByTypesInput;
+};
+
+
+export type QueryGetContentsViewCountArgs = {
+  input: GetContentsViewCountInput;
+};
+
+
+export type QueryGetDailyAccessorArgs = {
+  input: GetDailyAccessorInput;
+};
+
+
+export type QueryGetNewMembersArgs = {
+  input: GetNewMembersInput;
 };
 
 export enum QuestionType {
@@ -1778,6 +1846,32 @@ export type GetGoingDashboardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetGoingDashboardQuery = { __typename?: 'Query', getGoingDashboard: { __typename?: 'GetGoingDashboardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, dashboard?: { __typename?: 'GoingDashboard', totalMemberCount: number, loginCountByDate: Array<number> } | null | undefined } };
+
+export type GetTotalMembersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetTotalMembersQuery = { __typename?: 'Query', getTotalMembers: { __typename?: 'GetTotalMembersOutput', ok: boolean, count?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type GetContentsViewCountQueryVariables = Exact<{
+  getContentsViewCountInput: GetContentsViewCountInput;
+}>;
+
+
+export type GetContentsViewCountQuery = { __typename?: 'Query', getContentsViewCount: { __typename?: 'GetContentsViewCountOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives?: Array<{ __typename?: 'Content', _id: string, title: string, viewCount: number }> | null | undefined, vods?: Array<{ __typename?: 'Content', _id: string, title: string, viewCount: number }> | null | undefined } };
+
+export type GetNewMembersQueryVariables = Exact<{
+  getNewMembersInput: GetNewMembersInput;
+}>;
+
+
+export type GetNewMembersQuery = { __typename?: 'Query', getNewMembers: { __typename?: 'GetNewMembersOutput', ok: boolean, counts?: Array<number> | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type GetDailyAccessorQueryVariables = Exact<{
+  getDailyAccessorInput: GetDailyAccessorInput;
+}>;
+
+
+export type GetDailyAccessorQuery = { __typename?: 'Query', getDailyAccessor: { __typename?: 'GetDailyAccessorOutput', ok: boolean, counts?: Array<number> | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
 
 
 export const LoginDocument = gql`
@@ -3872,3 +3966,171 @@ export function useGetGoingDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHook
 export type GetGoingDashboardQueryHookResult = ReturnType<typeof useGetGoingDashboardQuery>;
 export type GetGoingDashboardLazyQueryHookResult = ReturnType<typeof useGetGoingDashboardLazyQuery>;
 export type GetGoingDashboardQueryResult = Apollo.QueryResult<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>;
+export const GetTotalMembersDocument = gql`
+    query GetTotalMembers {
+  getTotalMembers {
+    ok
+    error {
+      ko
+      en
+    }
+    count
+  }
+}
+    `;
+
+/**
+ * __useGetTotalMembersQuery__
+ *
+ * To run a query within a React component, call `useGetTotalMembersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTotalMembersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTotalMembersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetTotalMembersQuery(baseOptions?: Apollo.QueryHookOptions<GetTotalMembersQuery, GetTotalMembersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTotalMembersQuery, GetTotalMembersQueryVariables>(GetTotalMembersDocument, options);
+      }
+export function useGetTotalMembersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTotalMembersQuery, GetTotalMembersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTotalMembersQuery, GetTotalMembersQueryVariables>(GetTotalMembersDocument, options);
+        }
+export type GetTotalMembersQueryHookResult = ReturnType<typeof useGetTotalMembersQuery>;
+export type GetTotalMembersLazyQueryHookResult = ReturnType<typeof useGetTotalMembersLazyQuery>;
+export type GetTotalMembersQueryResult = Apollo.QueryResult<GetTotalMembersQuery, GetTotalMembersQueryVariables>;
+export const GetContentsViewCountDocument = gql`
+    query GetContentsViewCount($getContentsViewCountInput: GetContentsViewCountInput!) {
+  getContentsViewCount(input: $getContentsViewCountInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    lives {
+      _id
+      title
+      viewCount
+    }
+    vods {
+      _id
+      title
+      viewCount
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetContentsViewCountQuery__
+ *
+ * To run a query within a React component, call `useGetContentsViewCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetContentsViewCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetContentsViewCountQuery({
+ *   variables: {
+ *      getContentsViewCountInput: // value for 'getContentsViewCountInput'
+ *   },
+ * });
+ */
+export function useGetContentsViewCountQuery(baseOptions: Apollo.QueryHookOptions<GetContentsViewCountQuery, GetContentsViewCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetContentsViewCountQuery, GetContentsViewCountQueryVariables>(GetContentsViewCountDocument, options);
+      }
+export function useGetContentsViewCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetContentsViewCountQuery, GetContentsViewCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetContentsViewCountQuery, GetContentsViewCountQueryVariables>(GetContentsViewCountDocument, options);
+        }
+export type GetContentsViewCountQueryHookResult = ReturnType<typeof useGetContentsViewCountQuery>;
+export type GetContentsViewCountLazyQueryHookResult = ReturnType<typeof useGetContentsViewCountLazyQuery>;
+export type GetContentsViewCountQueryResult = Apollo.QueryResult<GetContentsViewCountQuery, GetContentsViewCountQueryVariables>;
+export const GetNewMembersDocument = gql`
+    query GetNewMembers($getNewMembersInput: GetNewMembersInput!) {
+  getNewMembers(input: $getNewMembersInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    counts
+  }
+}
+    `;
+
+/**
+ * __useGetNewMembersQuery__
+ *
+ * To run a query within a React component, call `useGetNewMembersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNewMembersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNewMembersQuery({
+ *   variables: {
+ *      getNewMembersInput: // value for 'getNewMembersInput'
+ *   },
+ * });
+ */
+export function useGetNewMembersQuery(baseOptions: Apollo.QueryHookOptions<GetNewMembersQuery, GetNewMembersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetNewMembersQuery, GetNewMembersQueryVariables>(GetNewMembersDocument, options);
+      }
+export function useGetNewMembersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetNewMembersQuery, GetNewMembersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetNewMembersQuery, GetNewMembersQueryVariables>(GetNewMembersDocument, options);
+        }
+export type GetNewMembersQueryHookResult = ReturnType<typeof useGetNewMembersQuery>;
+export type GetNewMembersLazyQueryHookResult = ReturnType<typeof useGetNewMembersLazyQuery>;
+export type GetNewMembersQueryResult = Apollo.QueryResult<GetNewMembersQuery, GetNewMembersQueryVariables>;
+export const GetDailyAccessorDocument = gql`
+    query GetDailyAccessor($getDailyAccessorInput: GetDailyAccessorInput!) {
+  getDailyAccessor(input: $getDailyAccessorInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    counts
+  }
+}
+    `;
+
+/**
+ * __useGetDailyAccessorQuery__
+ *
+ * To run a query within a React component, call `useGetDailyAccessorQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDailyAccessorQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDailyAccessorQuery({
+ *   variables: {
+ *      getDailyAccessorInput: // value for 'getDailyAccessorInput'
+ *   },
+ * });
+ */
+export function useGetDailyAccessorQuery(baseOptions: Apollo.QueryHookOptions<GetDailyAccessorQuery, GetDailyAccessorQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDailyAccessorQuery, GetDailyAccessorQueryVariables>(GetDailyAccessorDocument, options);
+      }
+export function useGetDailyAccessorLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDailyAccessorQuery, GetDailyAccessorQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDailyAccessorQuery, GetDailyAccessorQueryVariables>(GetDailyAccessorDocument, options);
+        }
+export type GetDailyAccessorQueryHookResult = ReturnType<typeof useGetDailyAccessorQuery>;
+export type GetDailyAccessorLazyQueryHookResult = ReturnType<typeof useGetDailyAccessorLazyQuery>;
+export type GetDailyAccessorQueryResult = Apollo.QueryResult<GetDailyAccessorQuery, GetDailyAccessorQueryVariables>;

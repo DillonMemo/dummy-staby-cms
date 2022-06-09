@@ -308,3 +308,79 @@ export const GET_GOING_DASHBOARD = gql`
     }
   }
 `
+
+/**
+ * Going 대쉬보드 - 총 회원수 데이터를 가져옵니다
+ */
+export const GET_TOTAL_MEMBERS = gql`
+  query GetTotalMembers {
+    getTotalMembers {
+      ok
+      error {
+        ko
+        en
+      }
+      count
+    }
+  }
+`
+
+/**
+ * 컨텐츠별 조회수를 가져옵니다.
+ * @example {input: {dates: <Date[]>}}
+ */
+export const GET_CONTENTS_VIEW_COUNT = gql`
+  query GetContentsViewCount($getContentsViewCountInput: GetContentsViewCountInput!) {
+    getContentsViewCount(input: $getContentsViewCountInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      lives {
+        _id
+        title
+        viewCount
+      }
+      vods {
+        _id
+        title
+        viewCount
+      }
+    }
+  }
+`
+
+/**
+ * 신규 가입자 정보를 가져옵니다.
+ * @example {input: {dates: <Date[]>}}
+ */
+export const GET_NEW_MEMBERS = gql`
+  query GetNewMembers($getNewMembersInput: GetNewMembersInput!) {
+    getNewMembers(input: $getNewMembersInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      counts
+    }
+  }
+`
+
+/**
+ * 일일 접속자 정보를 가져옵니다.
+ * @example {input: {dates: <Date[]>}}
+ */
+export const GET_DAILY_ACCESSOR = gql`
+  query GetDailyAccessor($getDailyAccessorInput: GetDailyAccessorInput!) {
+    getDailyAccessor(input: $getDailyAccessorInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      counts
+    }
+  }
+`
