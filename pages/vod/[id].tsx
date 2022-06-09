@@ -44,7 +44,7 @@ type Props = styleMode
 export interface VodCreateForm {
   title: string
   paymentAmount: number
-  vodRatioType: VodRatioType
+  vodRatioType: RatioType
   mainThumbnail: string
   content: string
   share: ShareInfo
