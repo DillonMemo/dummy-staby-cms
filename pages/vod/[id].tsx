@@ -26,8 +26,8 @@ import {
   LivesMutation,
   LivesMutationVariables,
   MemberType,
+  RatioType,
   TranscodeStatus,
-  VodRatioType,
   VodStatus,
 } from '../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY, VOD_QUERY } from '../../graphql/queries'
@@ -592,7 +592,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             defaultValue={vodData?.findVodById.vod?.vodRatioType}
                             value={value}
                             onChange={onChange}>
-                            {Object.keys(VodRatioType).map((data, index) => (
+                            {Object.keys(RatioType).map((data, index) => (
                               <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
                                 {data}
                               </Select.Option>

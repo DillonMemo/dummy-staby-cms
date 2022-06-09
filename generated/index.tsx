@@ -351,7 +351,7 @@ export type CreateVodInput = {
   title: Scalars['String'];
   viewCount?: Maybe<Scalars['Float']>;
   vodLinkInfo: Array<VodLinkInfoInputType>;
-  vodRatioType?: Maybe<VodRatioType>;
+  vodRatioType?: Maybe<RatioType>;
   vodShareInfo: VodShareInfoInputType;
   vodStatus?: Maybe<VodStatus>;
 };
@@ -516,7 +516,7 @@ export type EditVodInput = {
   paymentAmount: Scalars['Float'];
   title: Scalars['String'];
   vodLinkInfo: Array<VodLinkInfoInputType>;
-  vodRatioType?: Maybe<VodRatioType>;
+  vodRatioType?: Maybe<RatioType>;
   vodShareInfo: VodShareInfoInputType;
   vodStatus?: Maybe<VodStatus>;
 };
@@ -731,6 +731,7 @@ export type Live = {
   liveEndDate?: Maybe<Scalars['DateTime']>;
   liveLinkInfo: Array<LiveLinkInfo>;
   livePreviewDate: Scalars['DateTime'];
+  liveRatioType: RatioType;
   liveShareInfo: LiveShareInfo;
   liveStartDate?: Maybe<Scalars['DateTime']>;
   liveStatus: LiveStatus;
@@ -1398,6 +1399,11 @@ export enum QuestionType {
   Service = 'SERVICE'
 }
 
+export enum RatioType {
+  Horizontal = 'HORIZONTAL',
+  Vertical = 'VERTICAL'
+}
+
 export type Report = {
   __typename?: 'Report';
   _id: Scalars['ID'];
@@ -1441,7 +1447,7 @@ export type Vod = {
   updateDate: Scalars['DateTime'];
   viewCount: Scalars['Float'];
   vodLinkInfo: Array<VodLinkInfo>;
-  vodRatioType: VodRatioType;
+  vodRatioType: RatioType;
   vodShareInfo: VodShareInfo;
   vodStatus: VodStatus;
 };
@@ -1472,11 +1478,6 @@ export type VodLinkInfoInputType = {
   transcodeId?: Maybe<Scalars['Float']>;
   transcodeStatus?: Maybe<TranscodeStatus>;
 };
-
-export enum VodRatioType {
-  Horizontal = 'HORIZONTAL',
-  Vertical = 'VERTICAL'
-}
 
 export type VodShareInfo = {
   __typename?: 'VodShareInfo';
@@ -1807,7 +1808,7 @@ export type FindVodByIdQueryVariables = Exact<{
 }>;
 
 
-export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, vodRatioType: VodRatioType, mainImageName: string, storageTotalCount: number, vodStatus: VodStatus, liveId?: string | null | undefined, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null | undefined, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null | undefined, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, vodRatioType: RatioType, mainImageName: string, storageTotalCount: number, vodStatus: VodStatus, liveId?: string | null | undefined, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null | undefined, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null | undefined, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
 
 export type FindLiveByTypesQueryVariables = Exact<{
   findLiveByTypesInput: FindLiveByTypesInput;
