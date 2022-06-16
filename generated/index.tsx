@@ -402,6 +402,11 @@ export type DeleteVodOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type DeviceInfo = {
+  __typename?: 'DeviceInfo';
+  deviceType: DisplayDeviceType;
+};
+
 export enum DisplayDeviceType {
   Android = 'ANDROID',
   Common = 'COMMON',
@@ -882,6 +887,7 @@ export type Member = {
   _id: Scalars['ID'];
   accountInfo?: Maybe<AccountInfo>;
   createDate: Scalars['DateTime'];
+  deviceInfo: Array<DeviceInfo>;
   email: Scalars['String'];
   lastLoginDate?: Maybe<Scalars['DateTime']>;
   memberStatus: MemberStatus;

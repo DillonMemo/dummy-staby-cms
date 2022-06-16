@@ -69,7 +69,11 @@ const DailyAccessorCard: React.FC = () => {
         <div style={{ flexGrow: 2 }}>
           <Chart
             options={{
-              chart: { id: 'daily-accessor-line-bar', toolbar: { show: false } },
+              chart: {
+                id: 'daily-accessor-line-bar',
+                toolbar: { show: false },
+                zoom: { enabled: false },
+              },
               xaxis: {
                 categories: [
                   moment(

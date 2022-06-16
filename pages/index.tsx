@@ -14,6 +14,7 @@ import { MainWrapper, md, styleMode, xl } from '../styles/styles'
 import TotalMemberCard from '../components/dashboard/TotalMemberCard'
 import ContentsViewCard from '../components/dashboard/ContentsViewCard'
 import DailyAccessorCard from '../components/dashboard/DailyAccessorCard'
+import UserByOSCard from '../components/dashboard/userByOSCard'
 
 type Props = styleMode
 enum Dashboard {
@@ -36,6 +37,7 @@ const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <ContentsViewCard />
                   <DailyAccessorCard />
                 </div>
+                <UserByOSCard />
               </div>
               {/* {isGoingLoading ? (
                 <>
