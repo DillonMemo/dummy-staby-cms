@@ -92,6 +92,7 @@ export const LIVE_QUERY = gql`
         content
         hostName
         paymentAmount
+        liveRatioType
         livePreviewDate
         liveStartDate
         liveEndDate
@@ -291,25 +292,6 @@ export const FIND_BOARD_BY_ID_QUERY = gql`
 `
 
 /**
- * Going 대쉬보드 데이터를 가져옵니다
- */
-export const GET_GOING_DASHBOARD = gql`
-  query GetGoingDashboard {
-    getGoingDashboard {
-      ok
-      error {
-        ko
-        en
-      }
-      dashboard {
-        totalMemberCount
-        loginCountByDate
-      }
-    }
-  }
-`
-
-/**
  * Going 대쉬보드 - 총 회원수 데이터를 가져옵니다
  */
 export const GET_TOTAL_MEMBERS = gql`
@@ -327,7 +309,7 @@ export const GET_TOTAL_MEMBERS = gql`
 
 /**
  * 컨텐츠별 조회수를 가져옵니다.
- * @example {input: {dates: <Date[]>}}
+ * @example {input: {date: <Date>}}
  */
 export const GET_CONTENTS_VIEW_COUNT = gql`
   query GetContentsViewCount($getContentsViewCountInput: GetContentsViewCountInput!) {
@@ -353,7 +335,7 @@ export const GET_CONTENTS_VIEW_COUNT = gql`
 
 /**
  * 신규 가입자 정보를 가져옵니다.
- * @example {input: {dates: <Date[]>}}
+ * @example {input: {date: <Date>}}
  */
 export const GET_NEW_MEMBERS = gql`
   query GetNewMembers($getNewMembersInput: GetNewMembersInput!) {
@@ -370,7 +352,7 @@ export const GET_NEW_MEMBERS = gql`
 
 /**
  * 일일 접속자 정보를 가져옵니다.
- * @example {input: {dates: <Date[]>}}
+ * @example {input: {date: <Date>}}
  */
 export const GET_DAILY_ACCESSOR = gql`
   query GetDailyAccessor($getDailyAccessorInput: GetDailyAccessorInput!) {
@@ -381,6 +363,24 @@ export const GET_DAILY_ACCESSOR = gql`
         en
       }
       counts
+    }
+  }
+`
+
+/**
+ * 일일 OS별 접속자 정보를 가져옵니다.
+ * @example {input: {date: <Date>}}
+ */
+export const GET_USER_BY_OS = gql`
+  query GetUserByOS($getUserByOsInput: GetUserByOSInput!) {
+    getUserByOs(input: $getUserByOsInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      iosCounts
+      androidCounts
     }
   }
 `
