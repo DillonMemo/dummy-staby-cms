@@ -271,7 +271,6 @@ export const FIND_BOARD_BY_ID_QUERY = gql`
         en
       }
       board {
-        email
         title
         content
         questionType
@@ -284,6 +283,9 @@ export const FIND_BOARD_BY_ID_QUERY = gql`
         answerInfo {
           answer
           createDate
+        }
+        createMember {
+          email
         }
         createDate
       }
@@ -381,6 +383,48 @@ export const GET_USER_BY_OS = gql`
       }
       iosCounts
       androidCounts
+    }
+  }
+`
+
+/**
+ * 문의 내역 정보를 가져옵니다.
+ */
+export const GET_INQUIRIES_HISTORY = gql`
+  query GetInquiriesHistory {
+    getInquiriesHistory {
+      ok
+      error {
+        ko
+        en
+      }
+      pendingInquiry
+      processedInquiry
+      inquiries {
+        _id
+        memberId
+        title
+        createMember {
+          email
+        }
+        createDate
+      }
+    }
+  }
+`
+/**
+ * 구매 포인트 데이터 정보를 가져옵니다.
+ */
+export const GET_PAY_HISTORY_BY_OS = gql`
+  query GetPayHistoryByOS {
+    getPayHistoryByOS {
+      ok
+      error {
+        ko
+        en
+      }
+      android
+      ios
     }
   }
 `

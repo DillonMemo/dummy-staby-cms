@@ -1,4 +1,5 @@
 import styled, { createGlobalStyle, keyframes } from 'styled-components'
+import { WIDTH } from '../lib/constants'
 import themes from './themes'
 
 export const mediaQuery = (maxWidth: number) => `
@@ -579,6 +580,11 @@ export const GlobalStyles = createGlobalStyle`
       outline: none;
 
     }
+    /** apex charts */
+    .apexcharts-legend-text {
+      top: -1px;
+      color: ${({ theme }) => theme.text} !important;
+    }
     /** odometer */
     .odometer.odometer-auto-theme,
     .odometer.odometer-theme-minimal {
@@ -696,11 +702,14 @@ const FadeIn = keyframes`
 
 export const MainWrapper = styled.main`
   min-height: 100vh;
-  /* margin-left: 5rem; */
-  margin-left: 16rem;
   padding: 7.75rem 2rem 0;
   background-color: ${({ theme }) => theme.body};
 
+  /* margin-left: 5rem; */
+  margin-left: 16rem;
+  ${lg} {
+    margin-left: ${WIDTH};
+  }
   ${md} {
     margin-left: 0;
     padding: 7.75rem 1.2rem 0;

@@ -5,14 +5,16 @@ import moment from 'moment'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
+import { markers, stroke, tooltip } from '../../lib/apexCharts'
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
-/** graphql */
+/** utils */
 import ko_KR from 'antd/lib/locale/ko_KR'
 import en_US from 'antd/lib/locale/en_US'
+
+/** graphql */
 import { GetDailyAccessorQuery, GetDailyAccessorQueryVariables } from '../../generated'
 import { GET_DAILY_ACCESSOR } from '../../graphql/queries'
-import { markers, stroke, tooltip } from '../../lib/apexCharts'
 
 const DailyAccessorCard: React.FC = () => {
   const { locale } = useRouter()
