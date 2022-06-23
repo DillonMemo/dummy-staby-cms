@@ -164,7 +164,7 @@ const InquiryDetail: NextPage<Props> = (props) => {
                         </div>
                         <div className="item">
                           <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
-                          <p>{boardData.findBoardById.board.email}</p>
+                          <p>{boardData.findBoardById.board.createMember.email}</p>
                         </div>
                         <div className="item">
                           <span>{locale === 'ko' ? '접수일' : 'Receipt date'}</span>

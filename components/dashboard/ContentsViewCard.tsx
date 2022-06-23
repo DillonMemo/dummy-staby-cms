@@ -71,7 +71,7 @@ const ContentsViewCard: React.FC = () => {
         <div style={{ flexGrow: 2 }}>
           <Chart
             options={{
-              chart: { id: 'line-bar', toolbar: { show: false } },
+              chart: { id: 'line-bar', toolbar: { show: false }, zoom: { enabled: false } },
               xaxis: {
                 categories: [
                   moment(

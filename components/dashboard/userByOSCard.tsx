@@ -5,7 +5,6 @@ import moment from 'moment'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
-import { markers, stroke, tooltip } from '../../lib/apexCharts'
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 /** utils */
@@ -13,20 +12,20 @@ import ko_KR from 'antd/lib/locale/ko_KR'
 import en_US from 'antd/lib/locale/en_US'
 
 /** graphql */
-import { GetDailyAccessorQuery, GetDailyAccessorQueryVariables } from '../../generated'
-import { GET_DAILY_ACCESSOR } from '../../graphql/queries'
+import { GetUserByOsQuery, GetUserByOsQueryVariables } from '../../generated'
+import { GET_USER_BY_OS } from '../../graphql/queries'
 
-const DailyAccessorCard: React.FC = () => {
+const UserByOSCard: React.FC = () => {
   const { locale } = useRouter()
   const [date, setDate] = useState<moment.Moment>(moment())
 
-  /** 일일 접속자 정보를 가져오는 Query */
-  const [getDailyAccessor, { data, loading: isLoading }] = useLazyQuery<
-    GetDailyAccessorQuery,
-    GetDailyAccessorQueryVariables
-  >(GET_DAILY_ACCESSOR, {
+  /** 일일 OS별 접속자 정보를 가져오는 Query */
+  const [getUserByOs, { data, loading: isLoading }] = useLazyQuery<
+    GetUserByOsQuery,
+    GetUserByOsQueryVariables
+  >(GET_USER_BY_OS, {
     variables: {
-      getDailyAccessorInput: {
+      getUserByOsInput: {
         date,
       },
     },
@@ -37,9 +36,9 @@ const DailyAccessorCard: React.FC = () => {
     current && current > moment().endOf('day')
 
   useEffect(() => {
-    getDailyAccessor({
+    getUserByOs({
       variables: {
-        getDailyAccessorInput: {
+        getUserByOsInput: {
           date,
         },
       },
@@ -48,12 +47,12 @@ const DailyAccessorCard: React.FC = () => {
 
   return isLoading && !data ? (
     <div>
-      <Skeleton.Button active />
+      <Skeleton.Button active style={{ height: '100%' }} />
     </div>
   ) : (
     <>
-      <div className="card mh-14">
-        <h6>{locale === 'ko' ? '일별 로그인수' : 'Daily number of login'}</h6>
+      <div className="card">
+        <h6>{locale === 'ko' ? 'OS별 이용자수' : 'User by OS'}</h6>
         <Space>
           <ConfigProvider locale={locale === 'ko' ? ko_KR : en_US}>
             <DatePicker
@@ -68,16 +67,31 @@ const DailyAccessorCard: React.FC = () => {
             />
           </ConfigProvider>
         </Space>
-        <div style={{ flexGrow: 2 }}>
+        <div style={{ flexGrow: 2, minHeight: '12rem' }}>
           <Chart
             options={{
               chart: {
-                id: 'daily-accessor-line-bar',
+                id: 'user-by-os-line-bar',
                 toolbar: { show: false },
                 zoom: { enabled: false },
               },
               xaxis: {
                 categories: [
+                  moment(
+                    new Date(new Date(date.format()).setDate(new Date(date.format()).getDate() - 9))
+                  ).format('MM-DD'),
+                  moment(
+                    new Date(new Date(date.format()).setDate(new Date(date.format()).getDate() - 8))
+                  ).format('MM-DD'),
+                  moment(
+                    new Date(new Date(date.format()).setDate(new Date(date.format()).getDate() - 7))
+                  ).format('MM-DD'),
+                  moment(
+                    new Date(new Date(date.format()).setDate(new Date(date.format()).getDate() - 6))
+                  ).format('MM-DD'),
+                  moment(
+                    new Date(new Date(date.format()).setDate(new Date(date.format()).getDate() - 5))
+                  ).format('MM-DD'),
                   moment(
                     new Date(new Date(date.format()).setDate(new Date(date.format()).getDate() - 4))
                   ).format('MM-DD'),
@@ -106,19 +120,46 @@ const DailyAccessorCard: React.FC = () => {
                 xaxis: { lines: { show: false } },
                 yaxis: { lines: { show: false } },
               },
-              stroke: stroke('#00E396'),
-              markers: markers('#00E396'),
-              tooltip: tooltip('#00E396'),
+              colors: ['rgba(254, 176, 25, 1)', 'rgba(119, 93, 208, 1)'],
+              stroke: {
+                curve: 'smooth',
+                width: [2, 2],
+              },
+              markers: {
+                size: 2,
+                colors: ['rgba(254, 176, 25, 1)', 'rgba(119, 93, 208, 1)'],
+                strokeColors: ['rgba(254, 176, 25, 1)', 'rgba(119, 93, 208, 1)'],
+                hover: { sizeOffset: 2 },
+                strokeWidth: 2,
+              },
+              tooltip: {
+                marker: { fillColors: ['rgba(254, 176, 25, 1)', 'rgba(119, 93, 208, 1)'] },
+                x: { show: false },
+              },
+              legend: {
+                position: 'top',
+                horizontalAlign: 'left',
+                offsetX: -36,
+                itemMargin: {
+                  vertical: 6,
+                  horizontal: 6,
+                },
+              },
             }}
             series={[
               {
-                name: locale === 'ko' ? '횟수' : 'Count',
-                data: data?.getDailyAccessor.counts,
+                name: 'IOS',
+                data: data?.getUserByOs.iosCounts,
+                type: 'line',
+              },
+              {
+                name: 'AOS',
+                data: data?.getUserByOs.androidCounts,
+                type: 'line',
               },
             ]}
-            type="line"
             width="100%"
-            height="85%"
+            height="90%"
           />
         </div>
       </div>
@@ -126,4 +167,4 @@ const DailyAccessorCard: React.FC = () => {
   )
 }
 
-export default DailyAccessorCard
+export default UserByOSCard

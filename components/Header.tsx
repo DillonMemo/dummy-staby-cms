@@ -28,7 +28,7 @@ import { EXPANDED_WIDTH, LOCALSTORAGE_TOKEN, WIDTH } from '../lib/constants'
 import { authTokenVar } from '../lib/apolloClient'
 
 /** styles */
-import { md, styleMode } from '../styles/styles'
+import { lg, md, styleMode } from '../styles/styles'
 
 /** graphql */
 import { useMutation, useQuery } from '@apollo/client'
@@ -560,6 +560,9 @@ const NavigatorWrapper = styled.div`
   /* max-width: ${WIDTH}; */
   max-width: ${EXPANDED_WIDTH};
 
+  ${lg} {
+    max-width: ${WIDTH};
+  }
   ${md} {
     max-width: ${EXPANDED_WIDTH};
     left: ${`-${EXPANDED_WIDTH}`};
@@ -650,6 +653,9 @@ const NavigatorWrapper = styled.div`
             height: 37%;
             /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
             /* display: none; */
+            ${lg} {
+              display: none;
+            }
             display: inline;
             background: ${({ theme }) =>
               theme.mode === 'dark'
@@ -687,6 +693,9 @@ const NavigatorWrapper = styled.div`
 
     /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
     /* overflow: hidden; */
+    ${lg} {
+      overflow: hidden;
+    }
     overflow: auto;
     overflow-anchor: none;
     touch-action: auto;
@@ -722,16 +731,23 @@ const NavigatorWrapper = styled.div`
         display: flex;
         /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
         /* justify-content: center; */
+
         justify-content: flex-start;
 
+        ${lg} {
+          justify-content: center;
+        }
         ${md} {
           font-size: 1rem;
         }
 
         .text {
+          display: block !important;
           /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
           /* display: none !important; */
-          display: block !important;
+          ${lg} {
+            display: none !important;
+          }
         }
 
         .icon {
@@ -741,6 +757,9 @@ const NavigatorWrapper = styled.div`
 
           /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
           /* display: block; */
+          ${lg} {
+            display: block;
+          }
           display: none;
         }
       }
@@ -822,9 +841,15 @@ const NavigatorWrapper = styled.div`
           /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
           margin: 0 auto;
           padding-right: 2rem;
+          ${lg} {
+            padding-right: initial;
+          }
           .text {
             /** 02.24 네비게이션 인터페이스 수정 - expanded 효과 제거 */
             /* display: none; */
+            ${lg} {
+              display: none;
+            }
             display: flex;
           }
         }
@@ -945,15 +970,19 @@ const HeaderWrapper = styled.header`
   z-index: 12;
   box-shadow: 0 4px 24px 0 rgb(34 41 47 / 10%);
 
-  /* width: calc(100% - 4.4rem - 74px); */
-  width: calc(100% - 15.4rem - 74px);
-  min-height: ${WIDTH};
-
   padding: 0.8rem 1rem;
   margin: 1.3rem 2rem 0;
 
   background-color: ${({ theme }) => theme.card};
   border-radius: ${({ theme }) => theme.card_radius};
+
+  /* width: calc(100% - 4.4rem - 74px); */
+  width: calc(100% - 15.4rem - 74px);
+  min-height: ${WIDTH};
+
+  ${lg} {
+    width: calc(100% - 4.4rem - 74px);
+  }
 
   ${md} {
     margin: 1.3rem auto 0;

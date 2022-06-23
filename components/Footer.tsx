@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { WIDTH } from '../lib/constants'
-import { md } from '../styles/styles'
+import { lg, md } from '../styles/styles'
 import Link from 'next/link'
 
 const Footer: React.FC = () => {
@@ -21,15 +21,18 @@ const FooterWrapper = styled.footer`
   display: flex;
   align-items: center;
 
-  /* margin-left: ${WIDTH}; */
-  margin-left: 16rem;
-  min-height: ${WIDTH};
-  padding: 0.8rem 2rem;
-
   position: relative;
   right: 0;
 
   background-color: ${({ theme }) => theme.body};
+
+  /* margin-left: ${WIDTH}; */
+  margin-left: 16rem;
+  min-height: ${WIDTH};
+  padding: 0.8rem 2rem;
+  ${lg} {
+    margin-left: ${WIDTH};
+  }
 
   p {
     color: ${({ theme }) => theme.text};

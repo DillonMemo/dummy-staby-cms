@@ -14,6 +14,9 @@ import { MainWrapper, md, styleMode, xl } from '../styles/styles'
 import TotalMemberCard from '../components/dashboard/TotalMemberCard'
 import ContentsViewCard from '../components/dashboard/ContentsViewCard'
 import DailyAccessorCard from '../components/dashboard/DailyAccessorCard'
+import UserByOSCard from '../components/dashboard/userByOSCard'
+import InquiriesHistoryCard from '../components/dashboard/InquiriesHistoryCard'
+import PayHistoryByOSCard from '../components/dashboard/PayHistoryByOSCard'
 
 type Props = styleMode
 enum Dashboard {
@@ -36,45 +39,14 @@ const Home: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <ContentsViewCard />
                   <DailyAccessorCard />
                 </div>
+                <UserByOSCard />
               </div>
-              {/* {isGoingLoading ? (
-                <>
-                </>
-              ) : goingData ? (
-                <>
-                  <div className="col-4 gap">
-                    <div className="grid col-2 gap">
-                      <div className="card" style={{ minHeight: '12.5rem' }}>
-                        <h6>{locale === 'ko' ? '누적 포인트' : 'Earned Point'}</h6>
-                        <p>{moment(new Date()).format('MM.DD')}</p>
-                        <div className="content">
-                          <div className="odometer-content">
-                            <Odometer value={odometerValue.earnedPoint} format="(,ddd)" />
-                            {currencyConvert(100000000).symbol}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    </div>
-                </>
-              ) : (
-                <>
-                  <h3>
-                    {locale === 'ko'
-                      ? '해당 권한은 대시보드 이용이 불가능 합니다.'
-                      : 'This permission is not available on the dashboard.'}
-                  </h3>
-                  <div className="col-4 gap">
-                    <div className="grid col-2 gap">
-                      <Skeleton.Button active />
-                      <Skeleton.Button active />
-                    </div>
-                    <Skeleton.Button active />
-                    <Skeleton.Button active />
-                    <Skeleton.Button active />
-                  </div>
-                </>
-              )} */}
+              <div className="col-2 gap">
+                <InquiriesHistoryCard />
+                <div className="grid responsive-col-2 gap responsive-mh-20">
+                  <PayHistoryByOSCard />
+                </div>
+              </div>
             </ContentWrapper>
           </Tabs.TabPane>
           <Tabs.TabPane tab="Go" key={Dashboard.GO}>
@@ -166,6 +138,16 @@ const ContentWrapper = styled.div`
   }
   .mh-14 {
     min-height: 14rem;
+  }
+  .mh-20 {
+    min-height: 20rem;
+  }
+  .responsive-mh-20 {
+    min-height: 20rem;
+
+    ${md} {
+      min-height: 35rem;
+    }
   }
 
   .col-2 {

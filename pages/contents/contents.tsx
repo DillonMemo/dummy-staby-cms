@@ -110,7 +110,9 @@ const Contents: NextPage<Props> = ({ toggleStyle, theme }) => {
       try {
         await getLives({
           variables: {
-            findLiveByTypesInput: { liveStatus: [LiveStatus['Display'], LiveStatus['Active']] },
+            findLiveByTypesInput: {
+              liveStatus: [LiveStatus['Display'], LiveStatus['Active'], LiveStatus['Finish']],
+            },
           },
         })
       } catch (error) {
