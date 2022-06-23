@@ -290,6 +290,7 @@ export type CreateLiveInput = {
   liveEndDate?: Maybe<Scalars['DateTime']>;
   liveLinkInfo: Array<LiveLinkInfoInputType>;
   livePreviewDate: Scalars['DateTime'];
+  liveRatioType?: Maybe<RatioType>;
   liveShareInfo: LiveShareInfoInputType;
   liveStartDate?: Maybe<Scalars['DateTime']>;
   liveStatus?: Maybe<LiveStatus>;
@@ -469,6 +470,7 @@ export type EditLiveInput = {
   liveEndDate?: Maybe<Scalars['DateTime']>;
   liveLinkInfo: Array<LiveLinkInfoInputType>;
   livePreviewDate: Scalars['DateTime'];
+  liveRatioType?: Maybe<RatioType>;
   liveShareInfo: LiveShareInfoInputType;
   liveStartDate?: Maybe<Scalars['DateTime']>;
   liveStatus?: Maybe<LiveStatus>;
@@ -664,6 +666,18 @@ export type GetTotalMembersOutput = {
   __typename?: 'GetTotalMembersOutput';
   count?: Maybe<Scalars['Float']>;
   error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type GetUserByOsInput = {
+  date?: Maybe<Scalars['DateTime']>;
+};
+
+export type GetUserByOsOutput = {
+  __typename?: 'GetUserByOSOutput';
+  androidCounts?: Maybe<Array<Scalars['Float']>>;
+  error?: Maybe<LangErrorMessage>;
+  iosCounts?: Maybe<Array<Scalars['Float']>>;
   ok: Scalars['Boolean'];
 };
 
@@ -887,7 +901,7 @@ export type Member = {
   _id: Scalars['ID'];
   accountInfo?: Maybe<AccountInfo>;
   createDate: Scalars['DateTime'];
-  deviceInfo: Array<DeviceInfo>;
+  deviceInfo?: Maybe<DeviceInfo>;
   email: Scalars['String'];
   lastLoginDate?: Maybe<Scalars['DateTime']>;
   memberStatus: MemberStatus;
@@ -1338,6 +1352,7 @@ export type Query = {
   getGoingDashboard: GetGoingDashboardOutput;
   getNewMembers: GetNewMembersOutput;
   getTotalMembers: GetTotalMembersOutput;
+  getUserByOs: GetUserByOsOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
   my: Member;
 };
@@ -1395,6 +1410,11 @@ export type QueryGetDailyAccessorArgs = {
 
 export type QueryGetNewMembersArgs = {
   input: GetNewMembersInput;
+};
+
+
+export type QueryGetUserByOsArgs = {
+  input: GetUserByOsInput;
 };
 
 export enum QuestionType {
@@ -1807,7 +1827,7 @@ export type FindLiveByIdQueryVariables = Exact<{
 }>;
 
 
-export type FindLiveByIdQuery = { __typename?: 'Query', findLiveById: { __typename?: 'LiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, live?: { __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, createDate: any, updateDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }>, liveShareInfo: { __typename?: 'LiveShareInfo', shareApplyDate?: any | null | undefined, liveId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+export type FindLiveByIdQuery = { __typename?: 'Query', findLiveById: { __typename?: 'LiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, live?: { __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, liveRatioType: RatioType, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, createDate: any, updateDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }>, liveShareInfo: { __typename?: 'LiveShareInfo', shareApplyDate?: any | null | undefined, liveId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
 
 export type FindVodByIdQueryVariables = Exact<{
   vodInput: FindVodByIdInput;
@@ -1849,11 +1869,6 @@ export type FindBoardByIdQueryVariables = Exact<{
 
 export type FindBoardByIdQuery = { __typename?: 'Query', findBoardById: { __typename?: 'BoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, board?: { __typename?: 'Board', email?: string | null | undefined, title: string, content: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, faqType?: FaqType | null | undefined, createDate: any, uploadImageInfo?: Array<{ __typename?: 'UploadImageInfo', uploadImageName: string, displayOrder: number }> | null | undefined, answerInfo?: { __typename?: 'AnswerInfo', answer: string, createDate: any } | null | undefined } | null | undefined } };
 
-export type GetGoingDashboardQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetGoingDashboardQuery = { __typename?: 'Query', getGoingDashboard: { __typename?: 'GetGoingDashboardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, dashboard?: { __typename?: 'GoingDashboard', totalMemberCount: number, loginCountByDate: Array<number> } | null | undefined } };
-
 export type GetTotalMembersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1879,6 +1894,13 @@ export type GetDailyAccessorQueryVariables = Exact<{
 
 
 export type GetDailyAccessorQuery = { __typename?: 'Query', getDailyAccessor: { __typename?: 'GetDailyAccessorOutput', ok: boolean, counts?: Array<number> | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+
+export type GetUserByOsQueryVariables = Exact<{
+  getUserByOsInput: GetUserByOsInput;
+}>;
+
+
+export type GetUserByOsQuery = { __typename?: 'Query', getUserByOs: { __typename?: 'GetUserByOSOutput', ok: boolean, iosCounts?: Array<number> | null | undefined, androidCounts?: Array<number> | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
 
 
 export const LoginDocument = gql`
@@ -3567,6 +3589,7 @@ export const FindLiveByIdDocument = gql`
       content
       hostName
       paymentAmount
+      liveRatioType
       livePreviewDate
       liveStartDate
       liveEndDate
@@ -3931,48 +3954,6 @@ export function useFindBoardByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
 export type FindBoardByIdQueryHookResult = ReturnType<typeof useFindBoardByIdQuery>;
 export type FindBoardByIdLazyQueryHookResult = ReturnType<typeof useFindBoardByIdLazyQuery>;
 export type FindBoardByIdQueryResult = Apollo.QueryResult<FindBoardByIdQuery, FindBoardByIdQueryVariables>;
-export const GetGoingDashboardDocument = gql`
-    query GetGoingDashboard {
-  getGoingDashboard {
-    ok
-    error {
-      ko
-      en
-    }
-    dashboard {
-      totalMemberCount
-      loginCountByDate
-    }
-  }
-}
-    `;
-
-/**
- * __useGetGoingDashboardQuery__
- *
- * To run a query within a React component, call `useGetGoingDashboardQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetGoingDashboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetGoingDashboardQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetGoingDashboardQuery(baseOptions?: Apollo.QueryHookOptions<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>(GetGoingDashboardDocument, options);
-      }
-export function useGetGoingDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>(GetGoingDashboardDocument, options);
-        }
-export type GetGoingDashboardQueryHookResult = ReturnType<typeof useGetGoingDashboardQuery>;
-export type GetGoingDashboardLazyQueryHookResult = ReturnType<typeof useGetGoingDashboardLazyQuery>;
-export type GetGoingDashboardQueryResult = Apollo.QueryResult<GetGoingDashboardQuery, GetGoingDashboardQueryVariables>;
 export const GetTotalMembersDocument = gql`
     query GetTotalMembers {
   getTotalMembers {
@@ -4141,3 +4122,44 @@ export function useGetDailyAccessorLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type GetDailyAccessorQueryHookResult = ReturnType<typeof useGetDailyAccessorQuery>;
 export type GetDailyAccessorLazyQueryHookResult = ReturnType<typeof useGetDailyAccessorLazyQuery>;
 export type GetDailyAccessorQueryResult = Apollo.QueryResult<GetDailyAccessorQuery, GetDailyAccessorQueryVariables>;
+export const GetUserByOsDocument = gql`
+    query GetUserByOS($getUserByOsInput: GetUserByOSInput!) {
+  getUserByOs(input: $getUserByOsInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    iosCounts
+    androidCounts
+  }
+}
+    `;
+
+/**
+ * __useGetUserByOsQuery__
+ *
+ * To run a query within a React component, call `useGetUserByOsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserByOsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserByOsQuery({
+ *   variables: {
+ *      getUserByOsInput: // value for 'getUserByOsInput'
+ *   },
+ * });
+ */
+export function useGetUserByOsQuery(baseOptions: Apollo.QueryHookOptions<GetUserByOsQuery, GetUserByOsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUserByOsQuery, GetUserByOsQueryVariables>(GetUserByOsDocument, options);
+      }
+export function useGetUserByOsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserByOsQuery, GetUserByOsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUserByOsQuery, GetUserByOsQueryVariables>(GetUserByOsDocument, options);
+        }
+export type GetUserByOsQueryHookResult = ReturnType<typeof useGetUserByOsQuery>;
+export type GetUserByOsLazyQueryHookResult = ReturnType<typeof useGetUserByOsLazyQuery>;
+export type GetUserByOsQueryResult = Apollo.QueryResult<GetUserByOsQuery, GetUserByOsQueryVariables>;

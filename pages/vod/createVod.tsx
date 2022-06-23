@@ -449,7 +449,13 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             defaultValue={RatioType.Horizontal}>
                             {Object.keys(RatioType).map((data, index) => (
                               <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
-                                {data}
+                                {locale === 'ko'
+                                  ? data.toUpperCase() === RatioType.Horizontal
+                                    ? '가로'
+                                    : data.toUpperCase() === RatioType.Vertical
+                                    ? '세로'
+                                    : data
+                                  : data}
                               </Select.Option>
                             ))}
                           </Select>
