@@ -154,7 +154,6 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         return
       }
 
-      debugger
       //메인 이미지 s3 업로드
       //아이디 생성
       const id = new mongoose.Types.ObjectId() as any
