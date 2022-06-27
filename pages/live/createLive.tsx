@@ -22,6 +22,7 @@ import {
   FindMembersByTypeQuery,
   FindMembersByTypeQueryVariables,
   MemberType,
+  RatioType,
 } from '../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 
@@ -40,6 +41,7 @@ export interface LiveCreateForm {
   title: string
   hostName: string
   paymentAmount: number
+  liveRatioType: RatioType
   livePreviewDate: Date | any
   liveThumbnail: string
   delayedEntryTime: number
@@ -137,8 +139,15 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const onSubmit = async () => {
     try {
-      const { title, hostName, paymentAmount, delayedEntryTime, livePreviewDate, content } =
-        getValues()
+      const {
+        title,
+        liveRatioType,
+        hostName,
+        paymentAmount,
+        delayedEntryTime,
+        livePreviewDate,
+        content,
+      } = getValues()
 
       //memberShareData 유효성 확인, 100이 되야한다.
       if (!shareCheck(memberShareInfo, locale)) {
@@ -185,6 +194,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
             mainImageName: mainImgFileName,
             delayedEntryTime,
             hostName,
+            liveRatioType,
             liveLinkInfo: liveLinkArr,
             liveShareInfo: {
               liveId: id,
@@ -349,6 +359,38 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <span>{errors.paymentAmount.message}</span>
                   </div>
                 )}
+              </div>
+
+              <div className="form-item mt-harf">
+                <div className="form-group">
+                  <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
+                  <Controller
+                    // key={liveRatioDummy}
+                    control={control}
+                    name="liveRatioType"
+                    rules={{ required: requiredText }}
+                    render={({ field: { onChange, value } }) => (
+                      <>
+                        <Select
+                          defaultValue={RatioType.Horizontal}
+                          value={value}
+                          onChange={onChange}>
+                          {Object.keys(RatioType).map((data, index) => (
+                            <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
+                              {locale === 'ko'
+                                ? data.toUpperCase() === RatioType.Horizontal
+                                  ? '가로'
+                                  : data.toUpperCase() === RatioType.Vertical
+                                  ? '세로'
+                                  : data
+                                : data}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </>
+                    )}
+                  />
+                </div>
               </div>
 
               <div className="form-item mt-harf">

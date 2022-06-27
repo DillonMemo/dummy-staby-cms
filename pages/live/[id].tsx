@@ -26,6 +26,7 @@ import {
   FindMembersByTypeQueryVariables,
   LiveStatus,
   MemberType,
+  RatioType,
 } from '../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY, LIVE_QUERY } from '../../graphql/queries'
 
@@ -39,12 +40,14 @@ import {
 import { omit } from 'lodash'
 import { CopyOutlined } from '@ant-design/icons'
 import { toast } from 'react-toastify'
+import ChangeFileInput from '../../components/ChangeFileInput'
 
 type Props = styleMode
 
 export interface LiveCreateForm {
   title: string
   hostName: string
+  liveRatioType: RatioType
   paymentAmount: number
   livePreviewDate: Date | any
   liveThumbnail: string
@@ -77,27 +80,27 @@ const ShareWrap = styled.div`
   gap: 5px;
 `
 
-const ImgInputWrap = styled.div`
-  position: relative;
+// const ImgInputWrap = styled.div`
+//   position: relative;
 
-  .delectBtn {
-    position: absolute;
-    width: 50px;
-    height: 30px;
-    line-height: 30px;
-    margin: 0;
-    top: 50%;
-    right: 7px;
-    transform: translateY(-50%);
-    background-color: #bbbbbb !important;
-  }
+//   .delectBtn {
+//     position: absolute;
+//     width: 50px;
+//     height: 30px;
+//     line-height: 30px;
+//     margin: 0;
+//     top: 50%;
+//     right: 7px;
+//     transform: translateY(-50%);
+//     background-color: #bbbbbb !important;
+//   }
 
-  .hidden {
-    position: absolute;
-    visibility: hidden;
-    opacity: 0;
-  }
-`
+//   .hidden {
+//     position: absolute;
+//     visibility: hidden;
+//     opacity: 0;
+//   }
+// `
 
 const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale, reload, query, push } = useRouter()
@@ -114,14 +117,13 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const {
     getValues,
     watch,
-    register,
     formState: { errors },
     control,
   } = useForm<LiveCreateForm>({
     mode: 'onChange',
   })
 
-  const watchLiveThumnailRemove = watch('liveThumnailRemove', false)
+  // const watchLiveThumnailRemove = watch('liveThumnailRemove', false)
   const liveStatus = ['Hide', 'Display', 'Active', 'Finish'] //라이브 상태
 
   //현재 라이브 아이디
@@ -153,7 +155,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
         setLiveInfoArr(infoResult as any)
         setMemberShareInfo(result as any)
-        setIsInputDisabled(liveData?.findLiveById.live?.liveStatus !== 'HIDE' && true)
+        // setIsInputDisabled(liveData?.findLiveById.live?.liveStatus !== 'HIDE' && true)
         setStatusRadio(
           liveData?.findLiveById.live?.liveStatus ? liveData?.findLiveById.live?.liveStatus : 'HIDE'
         )
@@ -165,7 +167,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [statusRadio, setStatusRadio] = useState('')
 
   //인풋 상태
-  const [isInputDisabled, setIsInputDisabled] = useState(false)
+  // const [isInputDisabled, setIsInputDisabled] = useState(false)
 
   const onCompleted = async (data: EditLiveMutation) => {
     const {
@@ -242,8 +244,15 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const onSubmit = async () => {
     try {
-      const { title, hostName, paymentAmount, delayedEntryTime, livePreviewDate, content } =
-        getValues()
+      const {
+        title,
+        hostName,
+        liveRatioType,
+        paymentAmount,
+        delayedEntryTime,
+        livePreviewDate,
+        content,
+      } = getValues()
 
       //memberShareData 유효성 확인, 100이 되야한다.
       if (!shareCheck(memberShareInfo, locale)) {
@@ -290,6 +299,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           editLiveInput: {
             _id: id,
             mainImageName: mainImgFileName,
+            liveRatioType,
             liveStatus: (LiveStatus as any)[statusRadio]
               ? (LiveStatus as any)[statusRadio]
               : liveData?.findLiveById.live?.liveStatus,
@@ -460,7 +470,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         placeholder="Please enter the title."
                         value={value}
                         onChange={onChange}
-                        disabled={isInputDisabled}
+                        // disabled={isInputDisabled}
                         maxLength={100}
                       />
                     )}
@@ -489,7 +499,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         placeholder="Please enter the hostName."
                         value={value}
                         onChange={onChange}
-                        disabled={isInputDisabled}
+                        // disabled={isInputDisabled}
                         maxLength={20}
                       />
                     )}
@@ -526,7 +536,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                           }
                         }}
                         onChange={onChange}
-                        disabled={isInputDisabled}
+                        // disabled={isInputDisabled}
                       />
                     )}
                   />
@@ -537,6 +547,41 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <span>{errors.paymentAmount.message}</span>
                   </div>
                 )}
+              </div>
+
+              <div className="form-item mt-harf">
+                <div className="form-group">
+                  <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
+                  <Controller
+                    key={liveData?.findLiveById.live?.liveRatioType}
+                    control={control}
+                    name="liveRatioType"
+                    rules={{ required: requiredText }}
+                    defaultValue={liveData?.findLiveById.live?.liveRatioType}
+                    render={({ field: { onChange, value } }) => (
+                      <>
+                        <Select
+                          defaultValue={liveData?.findLiveById.live?.liveRatioType}
+                          value={value}
+                          onChange={onChange}
+                          // disabled={isInputDisabled}
+                        >
+                          {Object.keys(RatioType).map((data, index) => (
+                            <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
+                              {locale === 'ko'
+                                ? data.toUpperCase() === RatioType.Horizontal
+                                  ? '가로'
+                                  : data.toUpperCase() === RatioType.Vertical
+                                  ? '세로'
+                                  : data
+                                : data}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </>
+                    )}
+                  />
+                </div>
               </div>
 
               <div className="form-item mt-harf">
@@ -562,7 +607,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         }}
                         value={value}
                         onChange={onChange}
-                        disabled={isInputDisabled}
+                        // disabled={isInputDisabled}
                       />
                     )}
                   />
@@ -590,7 +635,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         <Select
                           value={value}
                           onChange={onChange}
-                          disabled={isInputDisabled}
+                          // disabled={isInputDisabled}
                           placeholder={
                             locale === 'ko' ? '시작 후 구매가능 시간' : 'Set the purchase time'
                           }>
@@ -631,35 +676,36 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     rules={{
                       required: requiredText,
                     }}
-                    render={({ field: { onChange } }) => (
-                      <ImgInputWrap>
-                        {watchLiveThumnailRemove ? (
-                          <Input
-                            className="input"
-                            type="file"
-                            name="liveThumbnail"
-                            placeholder="Please upload img. only png or jpg"
-                            onChange={onChange}
-                          />
-                        ) : (
-                          <Input
-                            className="input"
-                            name="mainImgInput"
-                            value={mainImgInfo.mainImg}
-                            disabled={true}
-                          />
-                        )}
+                    render={({ field: { onChange, value } }) => (
+                      // <ImgInputWrap>
+                      //   {watchLiveThumnailRemove ? (
+                      //     <Input
+                      //       className="input"
+                      //       type="file"
+                      //       name="liveThumbnail"
+                      //       placeholder="Please upload img. only png or jpg"
+                      //       onChange={onChange}
+                      //     />
+                      //   ) : (
+                      //     <Input
+                      //       className="input"
+                      //       name="mainImgInput"
+                      //       value={mainImgInfo.mainImg}
+                      //       disabled={true}
+                      //     />
+                      //   )}
 
-                        <input
-                          type="checkbox"
-                          id="liveThumnailRemove"
-                          className="delectBtn hidden"
-                          {...register('liveThumnailRemove')}
-                        />
-                        <label className="delectBtn" htmlFor="liveThumnailRemove">
-                          {watchLiveThumnailRemove ? '취소' : '변경'}
-                        </label>
-                      </ImgInputWrap>
+                      //   <input
+                      //     type="checkbox"
+                      //     id="liveThumnailRemove"
+                      //     className="delectBtn hidden"
+                      //     {...register('liveThumnailRemove')}
+                      //   />
+                      //   <label className="delectBtn" htmlFor="liveThumnailRemove">
+                      //     {watchLiveThumnailRemove ? '취소' : '변경'}
+                      //   </label>
+                      // </ImgInputWrap>
+                      <ChangeFileInput src={value} onChange={onChange} name="liveThumbnail" />
                     )}
                   />
                 </div>
@@ -681,7 +727,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <Radio.Group
                       defaultValue={'Auto'}
                       buttonStyle="solid"
-                      disabled={isInputDisabled}>
+                      // disabled={isInputDisabled}
+                    >
                       <Radio.Button value="Auto" onChange={() => setIsAuto('Auto')}>
                         {locale === 'ko' ? '자동생성' : 'Automatic generation'}
                       </Radio.Button>
@@ -707,7 +754,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                             <Button
                               className="delectBtn"
                               onClick={() => onDeleteBtn(index, setLiveInfoArr, liveInfoArr)}
-                              disabled={isInputDisabled}>
+                              // disabled={isInputDisabled}
+                            >
                               {locale === 'ko' ? '삭제' : 'Delete'}
                             </Button>
                           )}
@@ -727,7 +775,9 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <Button
                       className="thumbnailAddBtn"
                       onClick={() => onAddLive('live')}
-                      disabled={isInputDisabled}>
+                      // disabled={isInputDisabled}
+                      // disabled={isAuto === 'Auto' ? true : false}
+                    >
                       {locale === 'ko' ? '추가' : 'Add'}
                     </Button>
                   )}
@@ -750,7 +800,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         value={value}
                         onChange={onChange}
                         defaultValue={liveData?.findLiveById.live?.content?.toString()}
-                        disabled={isInputDisabled}
+                        // disabled={isInputDisabled}
                       />
                     )}
                   />
@@ -801,7 +851,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                                     )
                                   }
                                   className={`member_${index}`}
-                                  disabled={isInputDisabled}>
+                                  // disabled={isInputDisabled}
+                                >
                                   {memberData?.findMembersByType.members.map((data, i) => {
                                     return (
                                       <Select.Option
@@ -827,7 +878,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                                       })
                                     )
                                   }
-                                  disabled={isInputDisabled}
+                                  // disabled={isInputDisabled}
                                 />
                                 <Input
                                   className="input"
@@ -835,7 +886,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                                   name={`directShare_${index}`}
                                   placeholder="directShare"
                                   value={memberShareInfo[index].directShare}
-                                  disabled={isInputDisabled}
+                                  // disabled={isInputDisabled}
                                   onChange={(e) =>
                                     setMemberShareInfo(
                                       memberShareInfo.map((data, i) => {
@@ -861,7 +912,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Button
                     className="thumbnailAddBtn"
                     onClick={() => onAddLive('member')}
-                    disabled={isInputDisabled}>
+                    // disabled={isInputDisabled}
+                  >
                     {locale === 'ko' ? '추가' : 'Add'}
                   </Button>
                 </div>
