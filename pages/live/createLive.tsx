@@ -154,6 +154,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         return
       }
 
+      debugger
       //메인 이미지 s3 업로드
       //아이디 생성
       const id = new mongoose.Types.ObjectId() as any
@@ -361,7 +362,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item mt-harf">
+              {/* <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
                   <Controller
@@ -391,7 +392,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     )}
                   />
                 </div>
-              </div>
+              </div> */}
 
               <div className="form-item mt-harf">
                 <div className="form-group">
