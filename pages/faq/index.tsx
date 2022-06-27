@@ -230,7 +230,7 @@ const Faq: NextPage<Props> = (props) => {
                 </Space>
                 <Space>
                   <Button
-                    onClick={() => push(`/notice/create`, `/notice/create`, { locale })}
+                    onClick={() => push(`/faq/create`, `/faq/create`, { locale })}
                     className="export-btn"
                     loading={isFaqsLoading}>
                     {locale === 'ko' ? '등록하기' : 'Create'}

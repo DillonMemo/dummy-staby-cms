@@ -66,9 +66,12 @@ const PayHistoryByOSCard: React.FC = () => {
                 radar: {
                   size: 80,
                   polygons: {
-                    strokeColors: '#e9e9e9',
+                    strokeColors: localStorage.getItem('theme') === 'dark' ? '#575757' : '#e9e9e9',
                     fill: {
-                      colors: ['#f8f8f8', '#fff'],
+                      colors:
+                        localStorage.getItem('theme') === 'dark'
+                          ? ['#dfdfdf', '#f8f8f8']
+                          : ['#f8f8f8', '#fff'],
                     },
                   },
                 },
@@ -77,6 +80,9 @@ const PayHistoryByOSCard: React.FC = () => {
               tooltip: {
                 marker: { fillColors: ['#785dd0'] },
                 x: { show: false },
+                y: {
+                  formatter: (value) => value.toString(),
+                },
               },
               responsive: [
                 {
@@ -149,9 +155,12 @@ const PayHistoryByOSCard: React.FC = () => {
                 radar: {
                   size: 80,
                   polygons: {
-                    strokeColors: '#e9e9e9',
+                    strokeColors: localStorage.getItem('theme') === 'dark' ? '#575757' : '#e9e9e9',
                     fill: {
-                      colors: ['#f8f8f8', '#fff'],
+                      colors:
+                        localStorage.getItem('theme') === 'dark'
+                          ? ['#dfdfdf', '#f8f8f8']
+                          : ['#f8f8f8', '#fff'],
                     },
                   },
                 },
@@ -160,6 +169,9 @@ const PayHistoryByOSCard: React.FC = () => {
               tooltip: {
                 marker: { fillColors: ['#feb219'] },
                 x: { show: false },
+                y: {
+                  formatter: (value) => value.toString(),
+                },
               },
               responsive: [
                 {

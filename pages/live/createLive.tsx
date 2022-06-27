@@ -84,7 +84,13 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [createLive, { loading: isCreateLiveLoading }] = useMutation<
     CreateLiveMutation,
     CreateLiveMutationVariables
-  >(CREATE_LIVE_MUTATION)
+  >(CREATE_LIVE_MUTATION, {
+    onError: (error) => {
+      toast.error(error.message, {
+        theme: localStorage.theme || 'light',
+      })
+    },
+  })
 
   const [getMember, { data: memberData }] = useLazyQuery<
     FindMembersByTypeQuery,

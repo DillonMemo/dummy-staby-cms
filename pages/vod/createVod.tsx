@@ -81,7 +81,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [upLoading, setUploading] = useState(false) //스피너
 
   const [createVod] = useMutation<CreateVodMutation, CreateVodMutationVariables>(
-    CREATE_VOD_MUTATION
+    CREATE_VOD_MUTATION,
+    {
+      onError: (error) => {
+        toast.error(error.message, {
+          theme: localStorage.theme || 'light',
+        })
+      },
+    }
   )
 
   //지분 설정을 위한 멤버쿼리
