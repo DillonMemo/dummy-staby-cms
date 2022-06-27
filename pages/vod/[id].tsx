@@ -332,7 +332,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
             //실패시 wait로 변경
             transcodeStatus:
               vodInfoArr[i].transcodeStatus === 'FAIL'
-                ? (TranscodeStatus as any)['Wait']
+                ? TranscodeStatus['Wait' as keyof typeof TranscodeStatus]
                 : vodInfoArr[i].transcodeStatus,
           })
         }
@@ -356,7 +356,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       //   mainImgFileName = `${vodId.toString()}_main_${nowDate}.jpg`
       // }
 
-      const id = new mongoose.Types.ObjectId() as any
+      const id = new mongoose.Types.ObjectId()
       let mainImgFileName = '' //메인 썸네일
 
       //MainThumbnail upload
@@ -385,7 +385,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                 ? vodData?.findVodById.vod?.mainImageName
                 : mainImgFileName,
             vodStatus: isStatusChange
-              ? (VodStatus as any)[statusRadio]
+              ? VodStatus[statusRadio as keyof typeof VodStatus]
               : vodData?.findVodById.vod?.vodStatus,
             //현재 vodStatus가 fail 이면 wait 로 변경.
             // vodData?.findVodById.vod?.vodStatus === 'FAIL'

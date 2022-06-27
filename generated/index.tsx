@@ -643,12 +643,13 @@ export type GetDailyAccessorOutput = {
   ok: Scalars['Boolean'];
 };
 
-export type GetGoingDashboardOutput = {
-  __typename?: 'GetGoingDashboardOutput';
-  dashboard?: Maybe<GoingDashboard>;
+export type GetInquiriesHistoryOutput = {
+  __typename?: 'GetInquiriesHistoryOutput';
   error?: Maybe<LangErrorMessage>;
-  memberType: MemberType;
+  inquiries?: Maybe<Array<Board>>;
   ok: Scalars['Boolean'];
+  pendingInquiry?: Maybe<Scalars['Float']>;
+  processedInquiry?: Maybe<Scalars['Float']>;
 };
 
 export type GetNewMembersInput = {
@@ -659,6 +660,14 @@ export type GetNewMembersOutput = {
   __typename?: 'GetNewMembersOutput';
   counts?: Maybe<Array<Scalars['Float']>>;
   error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type GetPayHistoryByOsOutput = {
+  __typename?: 'GetPayHistoryByOSOutput';
+  android?: Maybe<Scalars['String']>;
+  error?: Maybe<LangErrorMessage>;
+  ios?: Maybe<Scalars['String']>;
   ok: Scalars['Boolean'];
 };
 
@@ -695,15 +704,6 @@ export type GoingActiveLog = {
   memberType: MemberType;
   serviceType: ServiceType;
   targetId: Scalars['ID'];
-  updateDate: Scalars['DateTime'];
-};
-
-export type GoingDashboard = {
-  __typename?: 'GoingDashboard';
-  _id: Scalars['ID'];
-  createDate: Scalars['DateTime'];
-  loginCountByDate: Array<Scalars['Float']>;
-  totalMemberCount: Scalars['Float'];
   updateDate: Scalars['DateTime'];
 };
 
@@ -1349,8 +1349,9 @@ export type Query = {
   findVodByTypes: FindVodByTypesOutput;
   getContentsViewCount: GetContentsViewCountOutput;
   getDailyAccessor: GetDailyAccessorOutput;
-  getGoingDashboard: GetGoingDashboardOutput;
+  getInquiriesHistory: GetInquiriesHistoryOutput;
   getNewMembers: GetNewMembersOutput;
+  getPayHistoryByOS: GetPayHistoryByOsOutput;
   getTotalMembers: GetTotalMembersOutput;
   getUserByOs: GetUserByOsOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
