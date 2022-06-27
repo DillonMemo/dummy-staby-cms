@@ -364,7 +364,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         document.querySelector(`input[name=mainImgInput]`)
 
       if (mainImgInput?.files && mainImgInput?.files[0] instanceof File) {
-        const imgCheck = await liveImgCheckExtension(mainImgInput, id, locale, 'vod')
+        const imgCheck = await liveImgCheckExtension(mainImgInput, id.toString(), locale, 'vod')
 
         if (!imgCheck) {
           setUploading(false)

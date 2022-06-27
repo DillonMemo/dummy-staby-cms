@@ -2,7 +2,6 @@ import { Dispatch, SetStateAction } from 'react'
 import { styleMode } from '../styles/styles'
 import { S3 } from '../lib/awsClient'
 import { toast } from 'react-toastify'
-import * as Mongoose from 'mongoose'
 
 export type Props = styleMode
 
@@ -158,7 +157,7 @@ export const bankList = [
  */
 export const liveImgCheckExtension = async (
   inputElement: HTMLInputElement | null,
-  id: Mongoose.Types.ObjectId,
+  id: string,
   locale: string | undefined,
   playType: string
 ) => {

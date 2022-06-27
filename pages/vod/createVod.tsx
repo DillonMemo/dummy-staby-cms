@@ -155,7 +155,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
       //메인 이미지 s3 업로드
       //아이디 생성
-      const id = new mongoose.Types.ObjectId() as any
+      const id = new mongoose.Types.ObjectId()
       let mainImgFileName = '' //메인 썸네일
 
       const nowDate = nowDateStr
@@ -164,7 +164,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       const mainImgInput: HTMLInputElement | null =
         document.querySelector(`input[name=mainThumbnail]`)
 
-      const imgCheck = await liveImgCheckExtension(mainImgInput, id, locale, 'vod')
+      const imgCheck = await liveImgCheckExtension(mainImgInput, id.toString(), locale, 'vod')
 
       if (!imgCheck) {
         setUploading(false)
@@ -274,11 +274,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       const { data } = await createVod({
         variables: {
           createVodInput: {
-            _id: id,
+            _id: id.toString(),
             mainImageName: mainImgFileName,
             vodLinkInfo: vodLinkArr,
             vodShareInfo: {
-              vodId: id,
+              vodId: id.toString(),
               memberShareInfo,
             },
             liveId,
