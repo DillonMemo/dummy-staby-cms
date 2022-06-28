@@ -237,6 +237,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         console.error(error)
       }
     }
+
     fetch()
   }, [memberData])
 
@@ -361,20 +362,17 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              {/* <div className="form-item mt-harf">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
                   <Controller
-                    // key={liveRatioDummy}
                     control={control}
                     name="liveRatioType"
                     rules={{ required: requiredText }}
-                    render={({ field: { onChange, value } }) => (
+                    defaultValue={RatioType.Horizontal}
+                    render={({ field: { value, onChange } }) => (
                       <>
-                        <Select
-                          defaultValue={RatioType.Horizontal}
-                          value={value}
-                          onChange={onChange}>
+                        <Select value={value} onChange={onChange}>
                           {Object.keys(RatioType).map((data, index) => (
                             <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
                               {locale === 'ko'
@@ -391,7 +389,12 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     )}
                   />
                 </div>
-              </div> */}
+                {errors.liveRatioType?.message && (
+                  <div className="form-message">
+                    <span>{errors.liveRatioType.message}</span>
+                  </div>
+                )}
+              </div>
 
               <div className="form-item mt-harf">
                 <div className="form-group">

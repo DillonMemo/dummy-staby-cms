@@ -549,7 +549,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              {/* <div className="form-item mt-harf">
+              <div className="form-item mt-harf">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
                   <Controller
@@ -582,7 +582,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     )}
                   />
                 </div>
-              </div> */}
+              </div>
 
               <div className="form-item mt-harf">
                 <div className="form-group">

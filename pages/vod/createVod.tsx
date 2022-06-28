@@ -448,12 +448,10 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       rules={{
                         required: requiredText,
                       }}
+                      defaultValue={RatioType.Horizontal}
                       render={({ field: { onChange, value } }) => (
                         <>
-                          <Select
-                            value={value}
-                            onChange={onChange}
-                            defaultValue={RatioType.Horizontal}>
+                          <Select value={value} onChange={onChange}>
                             {Object.keys(RatioType).map((data, index) => (
                               <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
                                 {locale === 'ko'
@@ -470,6 +468,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       )}
                     />
                   </div>
+                  {errors.vodRatioType?.message && (
+                    <div className="form-message">
+                      <span>{errors.vodRatioType.message}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-item mt-harf">
@@ -730,7 +733,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       role="button"
                       htmlType="submit"
                       className="submit-button ml-harf"
-                      onClick={onSubmit}
                       disabled={Object.keys(errors).includes('paymentAmount')}>
                       {locale === 'ko' ? '저장' : 'save'}
                     </Button>
