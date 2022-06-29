@@ -200,3 +200,36 @@ export const liveImgCheckExtension = async (
 
   return false
 }
+
+/**
+ * 배열 아이템의 위치를 다른곳으로 이동시키는 유틸 함수 입니다.
+ * @param {Array<any>} array 이동시킬 배열 아이템. (required)
+ * @param {number} fromIndex 이동시 시작 지점. (required)
+ * @param {number} toIndex 이동 완료 지점. (required)
+ */
+export const swap = (array: Array<any>, fromIndex: number, toIndex: number) => {
+  const item = array[fromIndex]
+  const length = array.length
+  const diff = fromIndex - toIndex
+
+  if (diff > 0) {
+    // move left or move down
+    return [
+      ...array.slice(0, toIndex),
+      item,
+      ...array.slice(toIndex, fromIndex),
+      ...array.slice(fromIndex + 1, length),
+    ]
+  } else if (diff < 0) {
+    // move right or move up
+    const targetIndex = toIndex + 1
+    return [
+      ...array.slice(0, fromIndex),
+      ...array.slice(fromIndex + 1, targetIndex),
+      item,
+      ...array.slice(targetIndex, length),
+    ]
+  }
+
+  return array
+}
