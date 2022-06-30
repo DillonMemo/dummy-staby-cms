@@ -75,10 +75,11 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const memberId = router.query.id ? router.query.id?.toString() : ''
 
-  const { data: memberData, refetch: refreshMe } = useQuery<
-    FindMemberByIdQuery,
-    FindMemberByIdQueryVariables
-  >(MEMBER_QUERY, {
+  const {
+    data: memberData,
+    refetch: refreshMe,
+    loading: MeberIdLoading,
+  } = useQuery<FindMemberByIdQuery, FindMemberByIdQueryVariables>(MEMBER_QUERY, {
     variables: {
       memberInput: {
         memberId,
@@ -192,357 +193,362 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         </div>
         <div className="main-content">
           <Edit className="card">
-            <Form onSubmit={handleSubmit(onSubmit)}>
-              <div className="form-grid col-2 gap-1">
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '회원유형' : 'Member Type'}</span>
-                    <Controller
-                      key={memberData?.findMemberById.member?.memberType}
-                      control={control}
-                      defaultValue={memberData?.findMemberById.member?.memberType}
-                      name="memberType"
-                      render={({ field: { value, onChange } }) => (
-                        <Select
-                          defaultValue={memberData?.findMemberById.member?.memberType}
-                          value={value}
-                          onChange={onChange}>
-                          {(Object.values(MemberType) as string[]).map((data, index) => (
-                            <Select.Option value={data} key={`type-${index}`}>
-                              {data}
-                            </Select.Option>
-                          ))}
-                        </Select>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-item">
-                  <span>{locale === 'ko' ? '회원번호' : 'Member Number'}</span>
-                  <p>{router.query.id}</p>
-                </div>
-              </div>
-
-              <div className="form-grid col-2 gap-1">
-                <div
-                  className={[
-                    'collapse',
-                    watchMemberType === MemberType.Business ? 'open' : undefined,
-                  ].join(' ')}>
-                  {watchMemberType === MemberType.Business && (
-                    <>
-                      <div className="form-item">
-                        <div className="form-group">
-                          <span>{locale === 'ko' ? '은행' : 'BankName'}</span>
-                          <Controller
-                            control={control}
-                            name="bankName"
-                            defaultValue={
-                              memberData?.findMemberById.member?.accountInfo?.bankName ||
-                              bankList[0]
-                            }
-                            render={({ field: { value, onChange } }) => (
-                              <Select value={value} onChange={onChange}>
-                                {bankList.map((bank, index) => (
-                                  <Select.Option value={bank} key={`type-${index}`}>
-                                    {bank}
-                                  </Select.Option>
-                                ))}
-                              </Select>
-                            )}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-item mt-1">
-                        <div className="form-group">
-                          <span>{locale === 'ko' ? '예금주' : 'Depositor'}</span>
-                          <Controller
-                            control={control}
-                            name="depositor"
-                            defaultValue={memberData?.findMemberById.member?.accountInfo?.depositor}
-                            render={({ field: { value, onChange } }) => (
-                              <Input
-                                className="input"
-                                placeholder={locale === 'ko' ? '예금주' : 'Depositor'}
-                                value={value}
-                                onChange={onChange}
-                              />
-                            )}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-item mt-1">
-                        <div className="form-group">
-                          <span>{locale === 'ko' ? '계좌번호' : 'AccountNumber'}</span>
-                          <Controller
-                            control={control}
-                            name="accountNumber"
-                            defaultValue={
-                              memberData?.findMemberById.member?.accountInfo?.accountNumber
-                            }
-                            render={({ field: { value, onChange } }) => (
-                              <Input
-                                className="input"
-                                type="number"
-                                placeholder={locale === 'ko' ? '계좌번호' : 'AccountNumber'}
-                                value={value}
-                                onKeyPress={({ key, preventDefault }) => {
-                                  if (key === '.' || key === 'e' || key === '+' || key === '-') {
-                                    preventDefault()
-                                    return false
-                                  }
-                                }}
-                                onChange={onChange}
-                              />
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="form-grid col-2 gap-1 mt-1">
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '닉네임' : 'Nickname'}</span>
-                    <Controller
-                      key={memberData?.findMemberById.member?.nickName}
-                      control={control}
-                      name="nickName"
-                      defaultValue={memberData?.findMemberById.member?.nickName}
-                      render={({ field: { value, onChange } }) => (
-                        <Input
-                          className="input"
-                          placeholder="Nickname"
-                          value={value}
-                          onChange={onChange}
-                        />
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
-                    <Controller
-                      key={memberData?.findMemberById.member?.email}
-                      control={control}
-                      name="email"
-                      defaultValue={memberData?.findMemberById.member?.email}
-                      render={({ field: { value, onChange } }) => (
-                        <Input
-                          className="input"
-                          placeholder="Email"
-                          value={value}
-                          onChange={onChange}
-                          disabled
-                        />
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-grid col-2 gap-1 mt-1">
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '활동상태' : 'Activities'}</span>
-                    <Controller
-                      key={memberData?.findMemberById.member?.memberStatus}
-                      control={control}
-                      name="memberStatus"
-                      render={({ field: { value, onChange } }) => (
-                        <Input
-                          className="input"
-                          placeholder="MemberStatus"
-                          defaultValue={memberData?.findMemberById.member?.memberStatus}
-                          value={value}
-                          onChange={onChange}
-                          disabled
-                        />
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '등록일' : 'Registration Date'}</span>
-                    {memberData?.findMemberById.member?.createDate ? (
-                      <p>
-                        {moment(memberData?.findMemberById.member?.createDate).format(
-                          'YYYY.MM.DD HH:mm:ss'
+            {MeberIdLoading || (
+              <Form onSubmit={handleSubmit(onSubmit)}>
+                <div className="form-grid col-2 gap-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '회원유형' : 'Member Type'}</span>
+                      <Controller
+                        key={memberData?.findMemberById.member?.memberType}
+                        control={control}
+                        defaultValue={memberData?.findMemberById.member?.memberType}
+                        name="memberType"
+                        render={({ field: { value, onChange } }) => (
+                          <Select
+                            defaultValue={memberData?.findMemberById.member?.memberType}
+                            value={value}
+                            onChange={onChange}>
+                            {(Object.values(MemberType) as string[]).map((data, index) => (
+                              <Select.Option value={data} key={`type-${index}`}>
+                                {data}
+                              </Select.Option>
+                            ))}
+                          </Select>
                         )}
-                      </p>
-                    ) : (
-                      <Skeleton.Input active style={{ width: '50%', margin: '4px 0' }} />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-grid col-2 gap-1 mt-1">
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '정지여부' : 'Suspension Status'}</span>
-                    {memberData?.findMemberById.member?.report.memberReportStatus ? (
-                      <div className="row">
-                        <p>
-                          {locale === 'ko'
-                            ? memberData.findMemberById.member.report.memberReportStatus ===
-                              MemberReportStatus.None
-                              ? '정상'
-                              : `차단 (정지 해제 : ${moment(
-                                  memberData.findMemberById.member.report.releaseDate
-                                ).format('YYYY.MM.DD 00:00')})`
-                            : memberData.findMemberById.member.report.memberReportStatus ===
-                              MemberReportStatus.None
-                            ? 'NONE'
-                            : `BLOCK (release of suspension : ${moment(
-                                memberData.findMemberById.member.report.releaseDate
-                              ).format('YYYY.MM.DD 00:00')})`}
-                        </p>
-                        {memberData.findMemberById.member.report.memberReportStatus ===
-                        MemberReportStatus.None ? (
-                          <Button
-                            type="primary"
-                            role="button"
-                            htmlType="button"
-                            onClick={() =>
-                              setSuspendModal((prev) => ({ ...prev, isVisible: true }))
-                            }>
-                            {locale === 'ko' ? '이용 정지' : 'Suspend'}
-                          </Button>
-                        ) : (
-                          <Button
-                            type="primary"
-                            role="button"
-                            htmlType="button"
-                            onClick={() =>
-                              setReleaseModal((prev) => ({ ...prev, isVisible: !prev.isVisible }))
-                            }>
-                            {locale === 'ko' ? '정지 해제' : 'Continue'}
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <Skeleton.Input active style={{ width: '100%', margin: '4px 0' }} />
-                    )}
-                  </div>
-                </div>
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '최근접속일시' : 'Last login date'}</span>
-                    {memberData?.findMemberById.member?.lastLoginDate ? (
-                      <p>
-                        {moment(memberData?.findMemberById.member?.lastLoginDate).format(
-                          'YYYY.MM.DD HH:mm:ss'
-                        )}
-                      </p>
-                    ) : (
-                      <Skeleton.Input active style={{ width: '50%', margin: '4px 0' }} />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-grid col-2 gap-1 mt-1">
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '푸시수신여부' : 'Push received'}</span>
-                    {memberData?.findMemberById.member?.pushInfo[0] ? (
-                      <p>
-                        {memberData.findMemberById.member.pushInfo[0].notificationFlag
-                          ? locale === 'ko'
-                            ? '동의'
-                            : 'agree'
-                          : locale === 'ko'
-                          ? '거부'
-                          : 'disagree'}
-                      </p>
-                    ) : (
-                      <Skeleton.Input active style={{ width: '30%', margin: '4px 0' }} />
-                    )}
-                  </div>
-                </div>
-
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '신고이력' : 'Report'}</span>
-                    {memberData?.findMemberById.member?.report ? (
-                      <p>
-                        {memberData.findMemberById.member.report.chatCount +
-                          memberData.findMemberById.member.report.commentCount}
-                      </p>
-                    ) : (
-                      <Skeleton.Input active style={{ width: '30%', margin: '4px 0' }} />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-grid col-2 gap-1 mt-1">
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '비밀번호 변경' : 'Change Password'}</span>
-                    <Controller
-                      control={control}
-                      name="checkPassword"
-                      defaultValue={false}
-                      render={({ field: { value, onChange } }) => (
-                        <Radio.Group
-                          className="gap-3"
-                          onChange={({ target: { value } }) => {
-                            if (!value) {
-                              setValue('password', '')
-                            }
-                            onChange(value)
-                          }}
-                          value={value}>
-                          <Radio value={false}>{locale === 'ko' ? '미변경' : 'be unchanged'}</Radio>
-                          <Radio value={true}>{locale === 'ko' ? '변경' : 'be changed'}</Radio>
-                        </Radio.Group>
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
-                    <Controller
-                      control={control}
-                      name="password"
-                      rules={{
-                        required: {
-                          value: watchCheckPassword,
-                          message:
-                            locale === 'ko' ? '필수 입력 입니다.' : 'It is a required input.',
-                        },
-                      }}
-                      render={({ field: { value, onChange } }) => (
-                        <Input.Password
-                          className="input"
-                          placeholder="password"
-                          disabled={!watchCheckPassword}
-                          value={value}
-                          onChange={onChange}
-                        />
-                      )}
-                    />
-                  </div>
-                  {errors.password?.message && (
-                    <div className="form-message">
-                      <span>{errors.password.message}</span>
+                      />
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
 
-              {/* <div className="form-item">
+                  <div className="form-item">
+                    <span>{locale === 'ko' ? '회원번호' : 'Member Number'}</span>
+                    <p>{router.query.id}</p>
+                  </div>
+                </div>
+
+                <div className="form-grid col-2 gap-1">
+                  <div
+                    className={[
+                      'collapse',
+                      watchMemberType === MemberType.Business ? 'open' : undefined,
+                    ].join(' ')}>
+                    {watchMemberType === MemberType.Business && (
+                      <>
+                        <div className="form-item">
+                          <div className="form-group">
+                            <span>{locale === 'ko' ? '은행' : 'BankName'}</span>
+                            <Controller
+                              control={control}
+                              name="bankName"
+                              defaultValue={
+                                memberData?.findMemberById.member?.accountInfo?.bankName ||
+                                bankList[0]
+                              }
+                              render={({ field: { value, onChange } }) => (
+                                <Select value={value} onChange={onChange}>
+                                  {bankList.map((bank, index) => (
+                                    <Select.Option value={bank} key={`type-${index}`}>
+                                      {bank}
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="form-item mt-1">
+                          <div className="form-group">
+                            <span>{locale === 'ko' ? '예금주' : 'Depositor'}</span>
+                            <Controller
+                              control={control}
+                              name="depositor"
+                              defaultValue={
+                                memberData?.findMemberById.member?.accountInfo?.depositor
+                              }
+                              render={({ field: { value, onChange } }) => (
+                                <Input
+                                  className="input"
+                                  placeholder={locale === 'ko' ? '예금주' : 'Depositor'}
+                                  value={value}
+                                  onChange={onChange}
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="form-item mt-1">
+                          <div className="form-group">
+                            <span>{locale === 'ko' ? '계좌번호' : 'AccountNumber'}</span>
+                            <Controller
+                              control={control}
+                              name="accountNumber"
+                              defaultValue={
+                                memberData?.findMemberById.member?.accountInfo?.accountNumber
+                              }
+                              render={({ field: { value, onChange } }) => (
+                                <Input
+                                  className="input"
+                                  type="number"
+                                  placeholder={locale === 'ko' ? '계좌번호' : 'AccountNumber'}
+                                  value={value}
+                                  onKeyPress={({ key, preventDefault }) => {
+                                    if (key === '.' || key === 'e' || key === '+' || key === '-') {
+                                      preventDefault()
+                                      return false
+                                    }
+                                  }}
+                                  onChange={onChange}
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="form-grid col-2 gap-1 mt-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '닉네임' : 'Nickname'}</span>
+                      <Controller
+                        key={memberData?.findMemberById.member?.nickName}
+                        control={control}
+                        name="nickName"
+                        defaultValue={memberData?.findMemberById.member?.nickName}
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            className="input"
+                            placeholder="Nickname"
+                            value={value}
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '이메일' : 'Email'}</span>
+                      <Controller
+                        key={memberData?.findMemberById.member?.email}
+                        control={control}
+                        name="email"
+                        defaultValue={memberData?.findMemberById.member?.email}
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            className="input"
+                            placeholder="Email"
+                            value={value}
+                            onChange={onChange}
+                            disabled
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-grid col-2 gap-1 mt-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '활동상태' : 'Activities'}</span>
+                      <Controller
+                        key={memberData?.findMemberById.member?.memberStatus}
+                        control={control}
+                        name="memberStatus"
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            className="input"
+                            placeholder="MemberStatus"
+                            defaultValue={memberData?.findMemberById.member?.memberStatus}
+                            value={value}
+                            onChange={onChange}
+                            disabled
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '등록일' : 'Registration Date'}</span>
+                      {memberData?.findMemberById.member?.createDate ? (
+                        <p>
+                          {moment(memberData?.findMemberById.member?.createDate).format(
+                            'YYYY.MM.DD HH:mm:ss'
+                          )}
+                        </p>
+                      ) : (
+                        <Skeleton.Input active style={{ width: '50%', margin: '4px 0' }} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-grid col-2 gap-1 mt-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '정지여부' : 'Suspension Status'}</span>
+                      {memberData?.findMemberById.member?.report.memberReportStatus ? (
+                        <div className="row">
+                          <p>
+                            {locale === 'ko'
+                              ? memberData.findMemberById.member.report.memberReportStatus ===
+                                MemberReportStatus.None
+                                ? '정상'
+                                : `차단 (정지 해제 : ${moment(
+                                    memberData.findMemberById.member.report.releaseDate
+                                  ).format('YYYY.MM.DD 00:00')})`
+                              : memberData.findMemberById.member.report.memberReportStatus ===
+                                MemberReportStatus.None
+                              ? 'NONE'
+                              : `BLOCK (release of suspension : ${moment(
+                                  memberData.findMemberById.member.report.releaseDate
+                                ).format('YYYY.MM.DD 00:00')})`}
+                          </p>
+                          {memberData.findMemberById.member.report.memberReportStatus ===
+                          MemberReportStatus.None ? (
+                            <Button
+                              type="primary"
+                              role="button"
+                              htmlType="button"
+                              onClick={() =>
+                                setSuspendModal((prev) => ({ ...prev, isVisible: true }))
+                              }>
+                              {locale === 'ko' ? '이용 정지' : 'Suspend'}
+                            </Button>
+                          ) : (
+                            <Button
+                              type="primary"
+                              role="button"
+                              htmlType="button"
+                              onClick={() =>
+                                setReleaseModal((prev) => ({ ...prev, isVisible: !prev.isVisible }))
+                              }>
+                              {locale === 'ko' ? '정지 해제' : 'Continue'}
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <Skeleton.Input active style={{ width: '100%', margin: '4px 0' }} />
+                      )}
+                    </div>
+                  </div>
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '최근접속일시' : 'Last login date'}</span>
+                      {memberData?.findMemberById.member?.lastLoginDate ? (
+                        <p>
+                          {moment(memberData?.findMemberById.member?.lastLoginDate).format(
+                            'YYYY.MM.DD HH:mm:ss'
+                          )}
+                        </p>
+                      ) : (
+                        <Skeleton.Input active style={{ width: '50%', margin: '4px 0' }} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-grid col-2 gap-1 mt-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '푸시수신여부' : 'Push received'}</span>
+                      {memberData?.findMemberById.member?.pushInfo[0] ? (
+                        <p>
+                          {memberData.findMemberById.member.pushInfo[0].notificationFlag
+                            ? locale === 'ko'
+                              ? '동의'
+                              : 'agree'
+                            : locale === 'ko'
+                            ? '거부'
+                            : 'disagree'}
+                        </p>
+                      ) : (
+                        <Skeleton.Input active style={{ width: '30%', margin: '4px 0' }} />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '신고이력' : 'Report'}</span>
+                      {memberData?.findMemberById.member?.report ? (
+                        <p>
+                          {memberData.findMemberById.member.report.chatCount +
+                            memberData.findMemberById.member.report.commentCount}
+                        </p>
+                      ) : (
+                        <Skeleton.Input active style={{ width: '30%', margin: '4px 0' }} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-grid col-2 gap-1 mt-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '비밀번호 변경' : 'Change Password'}</span>
+                      <Controller
+                        control={control}
+                        name="checkPassword"
+                        defaultValue={false}
+                        render={({ field: { value, onChange } }) => (
+                          <Radio.Group
+                            className="gap-3"
+                            onChange={({ target: { value } }) => {
+                              if (!value) {
+                                setValue('password', '')
+                              }
+                              onChange(value)
+                            }}
+                            value={value}>
+                            <Radio value={false}>
+                              {locale === 'ko' ? '미변경' : 'be unchanged'}
+                            </Radio>
+                            <Radio value={true}>{locale === 'ko' ? '변경' : 'be changed'}</Radio>
+                          </Radio.Group>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '비밀번호' : 'Password'}</span>
+                      <Controller
+                        control={control}
+                        name="password"
+                        rules={{
+                          required: {
+                            value: watchCheckPassword,
+                            message:
+                              locale === 'ko' ? '필수 입력 입니다.' : 'It is a required input.',
+                          },
+                        }}
+                        render={({ field: { value, onChange } }) => (
+                          <Input.Password
+                            className="input"
+                            placeholder="password"
+                            disabled={!watchCheckPassword}
+                            value={value}
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                    {errors.password?.message && (
+                      <div className="form-message">
+                        <span>{errors.password.message}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* <div className="form-item">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '총 포인트' : 'Total Point'}</span>
                   <Controller
@@ -603,19 +609,20 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
               </div> */}
 
-              <div className="form-item">
-                <div className="button-group">
-                  <Button
-                    type="primary"
-                    role="button"
-                    htmlType="submit"
-                    className="submit-button"
-                    loading={editLoading}>
-                    {locale === 'ko' ? '저장' : 'save'}
-                  </Button>
+                <div className="form-item">
+                  <div className="button-group">
+                    <Button
+                      type="primary"
+                      role="button"
+                      htmlType="submit"
+                      className="submit-button"
+                      loading={editLoading}>
+                      {locale === 'ko' ? '저장' : 'save'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Form>
+              </Form>
+            )}
           </Edit>
 
           <HistoryTabs memberId={memberId} />

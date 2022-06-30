@@ -105,10 +105,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const vodId = router.query.id ? router.query.id?.toString() : ''
 
   //vod쿼리
-  const { data: vodData, refetch: refreshMe } = useQuery<
-    FindVodByIdQuery,
-    FindVodByIdQueryVariables
-  >(VOD_QUERY, {
+  const {
+    data: vodData,
+    refetch: refreshMe,
+    loading: VodIdLoading,
+  } = useQuery<FindVodByIdQuery, FindVodByIdQueryVariables>(VOD_QUERY, {
     variables: {
       vodInput: {
         vodId,
@@ -439,6 +440,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         },
       })
+
       if (!data?.editVod.ok) {
         const message = locale === 'ko' ? data?.editVod.error?.ko : data?.editVod.error?.en
         notification.error({
@@ -496,190 +498,196 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
           </div>
           <div className="main-content">
             <Edit className="card">
-              <Form name="createLiveForm" onSubmit={handleSubmit(onSubmit)}>
-                <Radio.Group
-                  defaultValue={vodData?.findVodById.vod?.vodStatus
-                    .toLowerCase()
-                    .replace(/^./, vodData?.findVodById.vod?.vodStatus[0].toUpperCase())}
-                  key={vodData?.findVodById.vod?.vodStatus}
-                  buttonStyle="solid">
-                  {vodStatus.map((data, i) => {
-                    return (
-                      <Radio.Button
-                        key={i}
-                        value={data}
-                        onChange={() => {
-                          setStatusRadio(data)
-                          setIsStatusChange(true)
-                        }}
-                        disabled={data === 'Fail' || data === 'Wait'}>
-                        {data}
-                      </Radio.Button>
-                    )
-                  })}
-                </Radio.Group>
-                <div className="form-item mt-harf">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '제목' : 'Title'}</span>
-                    <Controller
-                      key={vodData?.findVodById.vod?.title}
-                      defaultValue={vodData?.findVodById.vod?.title}
-                      control={control}
-                      name="title"
-                      rules={{
-                        required: requiredText,
-                      }}
-                      render={({ field: { value, onChange } }) => (
-                        <Input
-                          className="input"
-                          placeholder="Please enter the title."
-                          value={value}
-                          onChange={onChange}
-                          // disabled={isInputDisabled}
-                          maxLength={100}
-                        />
-                      )}
-                    />
-                  </div>
-                  {errors.title?.message && (
-                    <div className="form-message">
-                      <span>{errors.title.message}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-item mt-harf">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '가격' : 'Price'}</span>
-                    <Controller
-                      key={vodData?.findVodById.vod?.paymentAmount}
-                      defaultValue={vodData?.findVodById.vod?.paymentAmount}
-                      control={control}
-                      name="paymentAmount"
-                      rules={{
-                        required: requiredText,
-                      }}
-                      render={({ field: { value, onChange } }) => (
-                        <InputNumber
-                          className="input"
-                          placeholder="Please enter the paymentAmount."
-                          value={value}
-                          max={65535}
-                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                          onKeyPress={(e) => {
-                            if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
-                              e.preventDefault()
-                              return false
-                            }
+              {VodIdLoading || (
+                <Form name="createLiveForm" onSubmit={handleSubmit(onSubmit)}>
+                  <Radio.Group
+                    defaultValue={vodData?.findVodById.vod?.vodStatus
+                      .toLowerCase()
+                      .replace(/^./, vodData?.findVodById.vod?.vodStatus[0].toUpperCase())}
+                    key={vodData?.findVodById.vod?.vodStatus}
+                    buttonStyle="solid">
+                    {vodStatus.map((data, i) => {
+                      return (
+                        <Radio.Button
+                          key={i}
+                          value={data}
+                          onChange={() => {
+                            setStatusRadio(data)
+                            setIsStatusChange(true)
                           }}
-                          onChange={onChange}
-                          disabled={isInputDisabled}
-                        />
-                      )}
-                    />
-                  </div>
-
-                  {errors.paymentAmount?.message && (
-                    <div className="form-message">
-                      <span>{errors.paymentAmount.message}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-item mt-harf">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
-                    <Controller
-                      key={vodData?.findVodById.vod?.vodRatioType}
-                      control={control}
-                      name="vodRatioType"
-                      rules={{ required: requiredText }}
-                      defaultValue={vodData?.findVodById.vod?.vodRatioType}
-                      render={({ field: { onChange, value } }) => (
-                        <>
-                          <Select
-                            defaultValue={vodData?.findVodById.vod?.vodRatioType}
+                          disabled={data === 'Fail' || data === 'Wait'}>
+                          {data}
+                        </Radio.Button>
+                      )
+                    })}
+                  </Radio.Group>
+                  <div className="form-item mt-harf">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '제목' : 'Title'}</span>
+                      <Controller
+                        key={vodData?.findVodById.vod?.title}
+                        defaultValue={vodData?.findVodById.vod?.title}
+                        control={control}
+                        name="title"
+                        rules={{
+                          required: requiredText,
+                        }}
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            className="input"
+                            placeholder="Please enter the title."
                             value={value}
                             onChange={onChange}
                             // disabled={isInputDisabled}
-                          >
-                            {Object.keys(RatioType).map((data, index) => (
-                              <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
-                                {locale === 'ko'
-                                  ? data.toUpperCase() === RatioType.Horizontal
-                                    ? '가로'
-                                    : data.toUpperCase() === RatioType.Vertical
-                                    ? '세로'
-                                    : data
-                                  : data}
-                              </Select.Option>
-                            ))}
-                          </Select>
-                        </>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-item mt-harf">
-                  <div className="form-group">
-                    <span>Main {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
-                    <Controller
-                      key={vodData?.findVodById.vod?.mainImageName}
-                      defaultValue={vodData?.findVodById.vod?.mainImageName?.toString()}
-                      control={control}
-                      name="mainThumbnail"
-                      rules={{
-                        required: requiredText,
-                      }}
-                      render={({ field: { onChange, value } }) => (
-                        // <Input
-                        //   className="input"
-                        //   name="mainImgInput"
-                        //   placeholder="Please upload img. only png or jpg"
-                        //   value={mainImgInfo.mainImg}
-                        //   onChange={onChange}
-                        //   disabled={true}
-                        // />
-                        <ChangeFileInput
-                          src={value}
-                          setValue={setValue}
-                          Fname="mainThumbnail"
-                          name="mainImgInput"
-                          onChange={onChange}
-                        />
-                      )}
-                    />
-                  </div>
-                  {errors.mainThumbnail?.message && (
-                    <div className="form-message">
-                      <span>{errors.mainThumbnail.message}</span>
+                            maxLength={100}
+                          />
+                        )}
+                      />
                     </div>
-                  )}
-                </div>
-                <div className="form-item mt-harf">
-                  <div className="form-group">
-                    <span>
-                      Vod
-                      <span style={{ color: '#ada7a7' }}>
-                        {locale === 'ko'
-                          ? ' ※vod 최대 8개까지 추가할 수 있습니다. '
-                          : ' ※Up to eight vod can be uploaded. '}
+                    {errors.title?.message && (
+                      <div className="form-message">
+                        <span>{errors.title.message}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="form-item mt-harf">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '가격' : 'Price'}</span>
+                      <Controller
+                        key={vodData?.findVodById.vod?.paymentAmount}
+                        defaultValue={vodData?.findVodById.vod?.paymentAmount}
+                        control={control}
+                        name="paymentAmount"
+                        rules={{
+                          required: requiredText,
+                        }}
+                        render={({ field: { value, onChange } }) => (
+                          <InputNumber
+                            className="input"
+                            placeholder="Please enter the paymentAmount."
+                            value={value}
+                            max={65535}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            onKeyPress={(e) => {
+                              if (
+                                e.key === '.' ||
+                                e.key === 'e' ||
+                                e.key === '+' ||
+                                e.key === '-'
+                              ) {
+                                e.preventDefault()
+                                return false
+                              }
+                            }}
+                            onChange={onChange}
+                            disabled={isInputDisabled}
+                          />
+                        )}
+                      />
+                    </div>
+
+                    {errors.paymentAmount?.message && (
+                      <div className="form-message">
+                        <span>{errors.paymentAmount.message}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="form-item mt-harf">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
+                      <Controller
+                        key={vodData?.findVodById.vod?.vodRatioType}
+                        control={control}
+                        name="vodRatioType"
+                        rules={{ required: requiredText }}
+                        defaultValue={vodData?.findVodById.vod?.vodRatioType}
+                        render={({ field: { onChange, value } }) => (
+                          <>
+                            <Select
+                              defaultValue={vodData?.findVodById.vod?.vodRatioType}
+                              value={value}
+                              onChange={onChange}
+                              // disabled={isInputDisabled}
+                            >
+                              {Object.keys(RatioType).map((data, index) => (
+                                <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
+                                  {locale === 'ko'
+                                    ? data.toUpperCase() === RatioType.Horizontal
+                                      ? '가로'
+                                      : data.toUpperCase() === RatioType.Vertical
+                                      ? '세로'
+                                      : data
+                                    : data}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-item mt-harf">
+                    <div className="form-group">
+                      <span>Main {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
+                      <Controller
+                        key={vodData?.findVodById.vod?.mainImageName}
+                        defaultValue={vodData?.findVodById.vod?.mainImageName?.toString()}
+                        control={control}
+                        name="mainThumbnail"
+                        rules={{
+                          required: requiredText,
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                          // <Input
+                          //   className="input"
+                          //   name="mainImgInput"
+                          //   placeholder="Please upload img. only png or jpg"
+                          //   value={mainImgInfo.mainImg}
+                          //   onChange={onChange}
+                          //   disabled={true}
+                          // />
+                          <ChangeFileInput
+                            src={value}
+                            setValue={setValue}
+                            Fname="mainThumbnail"
+                            name="mainImgInput"
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                    {errors.mainThumbnail?.message && (
+                      <div className="form-message">
+                        <span>{errors.mainThumbnail.message}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="form-item mt-harf">
+                    <div className="form-group">
+                      <span>
+                        Vod
+                        <span style={{ color: '#ada7a7' }}>
+                          {locale === 'ko'
+                            ? ' ※vod 최대 8개까지 추가할 수 있습니다. '
+                            : ' ※Up to eight vod can be uploaded. '}
+                        </span>
                       </span>
-                    </span>
-                    {vodInfoArr.map((data, index) => {
-                      return (
-                        <div key={index} className="mt-15">
-                          <div>
-                            <em className="fontSize12 mrT5">
-                              Ch{index + 1}_Vod
-                              {data.transcodeStatus === 'FAIL' ? (
-                                <span style={{ color: 'red', marginLeft: '3px' }}>
-                                  {locale === 'ko' ? '인코딩 실패' : 'fail'}
-                                </span>
-                              ) : null}
-                            </em>
-                            {/* {index >= 1 && (
+                      {vodInfoArr.map((data, index) => {
+                        return (
+                          <div key={index} className="mt-15">
+                            <div>
+                              <em className="fontSize12 mrT5">
+                                Ch{index + 1}_Vod
+                                {data.transcodeStatus === 'FAIL' ? (
+                                  <span style={{ color: 'red', marginLeft: '3px' }}>
+                                    {locale === 'ko' ? '인코딩 실패' : 'fail'}
+                                  </span>
+                                ) : null}
+                              </em>
+                              {/* {index >= 1 && (
                               <Button
                                 className="delectBtn"
                                 disabled={data.transcodeStatus !== 'FAIL'}
@@ -687,40 +695,40 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                                 {locale === 'ko' ? '삭제' : 'Delete'}
                               </Button>
                             )} */}
-                          </div>
-                          {data.transcodeStatus === 'FAIL' && (
-                            <Input
-                              className="input"
-                              type={'file'}
-                              name={`vodFile_${index}`}
-                              disabled={data.transcodeStatus !== 'FAIL'}
-                              accept=".mp4"
-                              placeholder="Please upload the video.(only mp4)"
-                            />
-                          )}
-                          {vodInfoArr[index].linkPath && (
-                            <Input
-                              className="input"
-                              name={`vodFile_${index}`}
-                              placeholder="Please upload the video.(only mp4)"
-                              key={vodInfoArr[index].linkPath}
-                              defaultValue={vodInfoArr[index].linkPath}
-                              disabled={true}
-                              style={{ marginTop: '5px' }}
-                            />
-                          )}
+                            </div>
+                            {data.transcodeStatus === 'FAIL' && (
+                              <Input
+                                className="input"
+                                type={'file'}
+                                name={`vodFile_${index}`}
+                                disabled={data.transcodeStatus !== 'FAIL'}
+                                accept=".mp4"
+                                placeholder="Please upload the video.(only mp4)"
+                              />
+                            )}
+                            {vodInfoArr[index].linkPath && (
+                              <Input
+                                className="input"
+                                name={`vodFile_${index}`}
+                                placeholder="Please upload the video.(only mp4)"
+                                key={vodInfoArr[index].linkPath}
+                                defaultValue={vodInfoArr[index].linkPath}
+                                disabled={true}
+                                style={{ marginTop: '5px' }}
+                              />
+                            )}
 
-                          <em className="fontSize12 mrT5">Ch{index + 1}_Img</em>
-                          {data.transcodeStatus === 'FAIL' && (
-                            <Input
-                              type="file"
-                              className="input mrT5"
-                              disabled={data.transcodeStatus !== 'FAIL'}
-                              name={`playImgUrl_${index}`}
-                              placeholder="Please upload playingThumnail img. only png or jpg"
-                            />
-                          )}
-                          {/* <Input
+                            <em className="fontSize12 mrT5">Ch{index + 1}_Img</em>
+                            {data.transcodeStatus === 'FAIL' && (
+                              <Input
+                                type="file"
+                                className="input mrT5"
+                                disabled={data.transcodeStatus !== 'FAIL'}
+                                name={`playImgUrl_${index}`}
+                                placeholder="Please upload playingThumnail img. only png or jpg"
+                              />
+                            )}
+                            {/* <Input
                             className="input mrT5"
                             name={`introImgUrl_${index}`}
                             placeholder="Please upload playingThumnail img. only png or jpg"
@@ -729,237 +737,238 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             value={vodInfoArr[index].introImageName}
                             // value={vodInfoArr[index].introImageName as string}
                           /> */}
-                          <ChangeFileInput
-                            src={vodInfoArr[index].introImageName}
-                            name={`introImgUrl_${index}`}
+                            <ChangeFileInput
+                              src={vodInfoArr[index].introImageName}
+                              name={`introImgUrl_${index}`}
+                            />
+                          </div>
+                        )
+                      })}
+                      {vodInfoArr.length < 8 && (
+                        <Button
+                          className="thumbnailAddBtn"
+                          onClick={() => onAddLive('live')}
+                          disabled={true}>
+                          {locale === 'ko' ? '추가' : 'Add'}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="form-item mt-harf">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '내용' : 'Content'}</span>
+                      <Controller
+                        key={vodData?.findVodById.vod?.content}
+                        defaultValue={vodData?.findVodById.vod?.content?.toString()}
+                        control={control}
+                        name="content"
+                        rules={{
+                          required: requiredText,
+                        }}
+                        render={({ field: { value, onChange } }) => (
+                          <TextArea
+                            className="input ant-input"
+                            placeholder="Please upload content."
+                            maxLength={1000}
+                            value={value}
+                            onChange={onChange}
+                            // disabled={isInputDisabled}
                           />
-                        </div>
-                      )
-                    })}
-                    {vodInfoArr.length < 8 && (
-                      <Button
-                        className="thumbnailAddBtn"
-                        onClick={() => onAddLive('live')}
-                        disabled={true}>
-                        {locale === 'ko' ? '추가' : 'Add'}
-                      </Button>
+                        )}
+                      />
+                    </div>
+                    {errors.content?.message && (
+                      <div className="form-message">
+                        <span>{errors.content.message}</span>
+                      </div>
                     )}
                   </div>
-                </div>
-                <div className="form-item mt-harf">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '내용' : 'Content'}</span>
-                    <Controller
-                      key={vodData?.findVodById.vod?.content}
-                      defaultValue={vodData?.findVodById.vod?.content?.toString()}
-                      control={control}
-                      name="content"
-                      rules={{
-                        required: requiredText,
-                      }}
-                      render={({ field: { value, onChange } }) => (
-                        <TextArea
-                          className="input ant-input"
-                          placeholder="Please upload content."
-                          maxLength={1000}
-                          value={value}
-                          onChange={onChange}
-                          // disabled={isInputDisabled}
-                        />
-                      )}
-                    />
-                  </div>
-                  {errors.content?.message && (
-                    <div className="form-message">
-                      <span>{errors.content.message}</span>
-                    </div>
-                  )}
-                </div>
 
-                <div className="form-item mt-harf">
-                  <div className="form-group">
-                    <span>Live</span>
-                    <Controller
-                      key={vodData?.findVodById.vod?.liveId}
-                      defaultValue={vodData?.findVodById.vod?.liveId?.toString()}
-                      control={control}
-                      name="liveId"
-                      rules={{
-                        required: requiredText,
-                      }}
-                      render={({ field: { value, onChange } }) => (
-                        <>
-                          <Select
-                            showSearch
-                            optionFilterProp="children"
-                            value={value}
-                            onChange={onChange}>
-                            {livesData?.lives.lives &&
-                              livesData?.lives.lives.map((data, i) => {
-                                return (
-                                  <Option key={i} value={data._id}>
-                                    {data.title}
-                                  </Option>
-                                )
-                              })}
-                          </Select>
-                        </>
-                      )}
-                    />
-                  </div>
-                  {errors.liveId?.message && (
-                    <div className="form-message">
-                      <span>{errors.liveId.message}</span>
+                  <div className="form-item mt-harf">
+                    <div className="form-group">
+                      <span>Live</span>
+                      <Controller
+                        key={vodData?.findVodById.vod?.liveId}
+                        defaultValue={vodData?.findVodById.vod?.liveId?.toString()}
+                        control={control}
+                        name="liveId"
+                        rules={{
+                          required: requiredText,
+                        }}
+                        render={({ field: { value, onChange } }) => (
+                          <>
+                            <Select
+                              showSearch
+                              optionFilterProp="children"
+                              value={value}
+                              onChange={onChange}>
+                              {livesData?.lives.lives &&
+                                livesData?.lives.lives.map((data, i) => {
+                                  return (
+                                    <Option key={i} value={data._id}>
+                                      {data.title}
+                                    </Option>
+                                  )
+                                })}
+                            </Select>
+                          </>
+                        )}
+                      />
                     </div>
-                  )}
-                </div>
-                <div className="form-item mt-harf">
-                  <div className="form-group">
-                    {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
-                    <span>
-                      {locale === 'ko'
-                        ? '지분 - 우선환수, 직분배'
-                        : 'Share - priorityShare, directShare'}
-                    </span>
-                    {memberShareInfo.map((data, index) => {
-                      return (
-                        <div key={index}>
-                          <div>
-                            <em className="fontSize12 mrT5">{index + 1}</em>
-                            {index >= 1 && (
-                              <Button
-                                className="delectBtn"
-                                // disabled={isInputDisabled}
-                                onClick={() =>
-                                  onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
-                                }>
-                                {locale === 'ko' ? '삭제' : 'Delete'}
-                              </Button>
-                            )}
-                          </div>
-                          <ShareWrap>
-                            <Controller
-                              control={control}
-                              name="share"
-                              rules={{
-                                required: requiredText,
-                              }}
-                              render={() => (
-                                <>
-                                  <Select
-                                    defaultValue={memberShareInfo[0].nickName}
-                                    value={memberShareInfo[index].nickName}
-                                    // disabled={isInputDisabled}
-                                    onChange={(value) =>
-                                      setMemberShareInfo(
-                                        memberShareInfo.map((data, i) => {
-                                          return i === index
-                                            ? {
-                                                ...data,
-                                                memberId: value.toString().split('/')[0],
-                                                nickName: value.toString().split('/')[1],
-                                              }
-                                            : data
-                                        })
-                                      )
-                                    }
-                                    className={`member_${index}`}>
-                                    {memberData?.findMembersByType.members.map((data, i) => {
-                                      return (
-                                        <Select.Option
-                                          value={data._id + '/' + data.nickName}
-                                          key={`type-${i}`}>
-                                          {data.nickName}
-                                        </Select.Option>
-                                      )
-                                    })}
-                                  </Select>
-                                  <Input
-                                    type="number"
-                                    className="input"
-                                    name={`priorityShare_${index}`}
-                                    placeholder="priorityShare"
-                                    value={memberShareInfo[index].priorityShare}
-                                    // disabled={isInputDisabled}
-                                    onChange={(e) =>
-                                      setMemberShareInfo(
-                                        memberShareInfo.map((data, i) => {
-                                          return i === index
-                                            ? { ...data, priorityShare: parseInt(e.target.value) }
-                                            : data
-                                        })
-                                      )
-                                    }
-                                  />
-                                  <Input
-                                    className="input"
-                                    type="number"
-                                    name={`directShare_${index}`}
-                                    placeholder="directShare"
-                                    value={memberShareInfo[index].directShare}
-                                    // disabled={isInputDisabled}
-                                    onChange={(e) =>
-                                      setMemberShareInfo(
-                                        memberShareInfo.map((data, i) => {
-                                          return i === index
-                                            ? { ...data, directShare: parseInt(e.target.value) }
-                                            : data
-                                        })
-                                      )
-                                    }
-                                  />
-                                </>
+                    {errors.liveId?.message && (
+                      <div className="form-message">
+                        <span>{errors.liveId.message}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="form-item mt-harf">
+                    <div className="form-group">
+                      {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
+                      <span>
+                        {locale === 'ko'
+                          ? '지분 - 우선환수, 직분배'
+                          : 'Share - priorityShare, directShare'}
+                      </span>
+                      {memberShareInfo.map((data, index) => {
+                        return (
+                          <div key={index}>
+                            <div>
+                              <em className="fontSize12 mrT5">{index + 1}</em>
+                              {index >= 1 && (
+                                <Button
+                                  className="delectBtn"
+                                  // disabled={isInputDisabled}
+                                  onClick={() =>
+                                    onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
+                                  }>
+                                  {locale === 'ko' ? '삭제' : 'Delete'}
+                                </Button>
                               )}
-                            />
-                          </ShareWrap>
-                        </div>
-                      )
-                    })}
-                    <Button
-                      className="thumbnailAddBtn"
-                      onClick={() => onAddLive('member')}
-                      // disabled={isInputDisabled}
-                    >
-                      {locale === 'ko' ? '추가' : 'Add'}
-                    </Button>
-                  </div>
-                  {errors.share?.nickName?.message && (
-                    <div className="form-message">
-                      <span>{errors.share?.nickName.message}</span>
+                            </div>
+                            <ShareWrap>
+                              <Controller
+                                control={control}
+                                name="share"
+                                rules={{
+                                  required: requiredText,
+                                }}
+                                render={() => (
+                                  <>
+                                    <Select
+                                      defaultValue={memberShareInfo[0].nickName}
+                                      value={memberShareInfo[index].nickName}
+                                      // disabled={isInputDisabled}
+                                      onChange={(value) =>
+                                        setMemberShareInfo(
+                                          memberShareInfo.map((data, i) => {
+                                            return i === index
+                                              ? {
+                                                  ...data,
+                                                  memberId: value.toString().split('/')[0],
+                                                  nickName: value.toString().split('/')[1],
+                                                }
+                                              : data
+                                          })
+                                        )
+                                      }
+                                      className={`member_${index}`}>
+                                      {memberData?.findMembersByType.members.map((data, i) => {
+                                        return (
+                                          <Select.Option
+                                            value={data._id + '/' + data.nickName}
+                                            key={`type-${i}`}>
+                                            {data.nickName}
+                                          </Select.Option>
+                                        )
+                                      })}
+                                    </Select>
+                                    <Input
+                                      type="number"
+                                      className="input"
+                                      name={`priorityShare_${index}`}
+                                      placeholder="priorityShare"
+                                      value={memberShareInfo[index].priorityShare}
+                                      // disabled={isInputDisabled}
+                                      onChange={(e) =>
+                                        setMemberShareInfo(
+                                          memberShareInfo.map((data, i) => {
+                                            return i === index
+                                              ? { ...data, priorityShare: parseInt(e.target.value) }
+                                              : data
+                                          })
+                                        )
+                                      }
+                                    />
+                                    <Input
+                                      className="input"
+                                      type="number"
+                                      name={`directShare_${index}`}
+                                      placeholder="directShare"
+                                      value={memberShareInfo[index].directShare}
+                                      // disabled={isInputDisabled}
+                                      onChange={(e) =>
+                                        setMemberShareInfo(
+                                          memberShareInfo.map((data, i) => {
+                                            return i === index
+                                              ? { ...data, directShare: parseInt(e.target.value) }
+                                              : data
+                                          })
+                                        )
+                                      }
+                                    />
+                                  </>
+                                )}
+                              />
+                            </ShareWrap>
+                          </div>
+                        )
+                      })}
+                      <Button
+                        className="thumbnailAddBtn"
+                        onClick={() => onAddLive('member')}
+                        // disabled={isInputDisabled}
+                      >
+                        {locale === 'ko' ? '추가' : 'Add'}
+                      </Button>
                     </div>
-                  )}
-                </div>
-                <div className="form-item">
-                  <div className="button-group">
-                    <Link href="/vod/vods">
-                      <a>
-                        <Button className="submit-button" type="primary" role="button">
-                          목록
-                        </Button>
-                      </a>
-                    </Link>
-                    <Button
-                      type="primary"
-                      role="button"
-                      className="submit-button ml-harf"
-                      disabled={vodData?.findVodById.vod?.vodStatus === 'WAIT'}
-                      loading={editLoading}
-                      onClick={onSubmit}>
-                      {locale === 'ko' ? '수정' : 'Edit'}
-                    </Button>
-                    <Button
-                      type="primary"
-                      role="button"
-                      htmlType="button"
-                      className="submit-button"
-                      loading={editLoading}
-                      onClick={vodDelete}
-                      style={{ marginLeft: '10px' }}>
-                      {locale === 'ko' ? '삭제' : 'Remove'}
-                    </Button>
+                    {errors.share?.nickName?.message && (
+                      <div className="form-message">
+                        <span>{errors.share?.nickName.message}</span>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </Form>
+                  <div className="form-item">
+                    <div className="button-group">
+                      <Link href="/vod/vods">
+                        <a>
+                          <Button className="submit-button" type="primary" role="button">
+                            목록
+                          </Button>
+                        </a>
+                      </Link>
+                      <Button
+                        type="primary"
+                        role="button"
+                        className="submit-button ml-harf"
+                        disabled={vodData?.findVodById.vod?.vodStatus === 'WAIT'}
+                        loading={editLoading}
+                        onClick={onSubmit}>
+                        {locale === 'ko' ? '수정' : 'Edit'}
+                      </Button>
+                      <Button
+                        type="primary"
+                        role="button"
+                        htmlType="button"
+                        className="submit-button"
+                        loading={editLoading}
+                        onClick={vodDelete}
+                        style={{ marginLeft: '10px' }}>
+                        {locale === 'ko' ? '삭제' : 'Remove'}
+                      </Button>
+                    </div>
+                  </div>
+                </Form>
+              )}
             </Edit>
           </div>
         </MainWrapper>
