@@ -3,10 +3,11 @@
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-const defaultOptions =  {}
+const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -14,7 +15,6 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
   DateTime: any;
 };
 
@@ -32,12 +32,12 @@ export type AccountInfoInputType = {
 };
 
 export type ActiveHistoriesByMemberIdInput = {
-  activeType?: Maybe<ActiveType>;
-  dates?: Maybe<Array<Scalars['DateTime']>>;
+  activeType?: InputMaybe<ActiveType>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
   memberId: Scalars['ID'];
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
-  serviceType?: Maybe<ServiceType>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
+  serviceType?: InputMaybe<ServiceType>;
 };
 
 export type ActiveHistoriesByMemberIdOutput = {
@@ -90,9 +90,9 @@ export type Advertisement = {
 };
 
 export type AdvertisementsInput = {
-  displayType?: Maybe<DisplayType>;
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
+  displayType?: InputMaybe<DisplayType>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
 };
 
 export type AdvertisementsOutput = {
@@ -182,7 +182,7 @@ export enum CategoryType {
 
 export type ChangeAdvertisementStatusInput = {
   _id: Scalars['ID'];
-  advertiseStatus?: Maybe<AdvertiseStatus>;
+  advertiseStatus?: InputMaybe<AdvertiseStatus>;
 };
 
 export type ChangeAdvertisementStatusOutput = {
@@ -192,10 +192,10 @@ export type ChangeAdvertisementStatusOutput = {
 };
 
 export type CommentHistoriesByMemberIdInput = {
-  dates?: Maybe<Array<Scalars['DateTime']>>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
   memberId: Scalars['ID'];
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
 };
 
 export type CommentHistoriesByMemberIdOutput = {
@@ -231,7 +231,7 @@ export type Content = {
 };
 
 export type CreateAdvertisementInput = {
-  advertiseStatus?: Maybe<AdvertiseStatus>;
+  advertiseStatus?: InputMaybe<AdvertiseStatus>;
   displayDeviceType: DisplayDeviceType;
   displayType: DisplayType;
   endDate: Scalars['DateTime'];
@@ -249,8 +249,8 @@ export type CreateAdvertisementOutput = {
 };
 
 export type CreateAnswerInput = {
-  _id?: Maybe<Scalars['ID']>;
-  answerInfo?: Maybe<AnswerInfoInputType>;
+  _id?: InputMaybe<Scalars['ID']>;
+  answerInfo?: InputMaybe<AnswerInfoInputType>;
 };
 
 export type CreateAnswerOutput = {
@@ -260,8 +260,8 @@ export type CreateAnswerOutput = {
 };
 
 export type CreateEventInput = {
-  content?: Maybe<Scalars['String']>;
-  title?: Maybe<Scalars['String']>;
+  content?: InputMaybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type CreateEventOutput = {
@@ -271,9 +271,9 @@ export type CreateEventOutput = {
 };
 
 export type CreateFaqInput = {
-  content?: Maybe<Scalars['String']>;
-  faqType?: Maybe<FaqType>;
-  title?: Maybe<Scalars['String']>;
+  content?: InputMaybe<Scalars['String']>;
+  faqType?: InputMaybe<FaqType>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type CreateFaqOutput = {
@@ -284,21 +284,21 @@ export type CreateFaqOutput = {
 
 export type CreateLiveInput = {
   _id: Scalars['ID'];
-  content?: Maybe<Scalars['String']>;
+  content?: InputMaybe<Scalars['String']>;
   delayedEntryTime: Scalars['Float'];
   hostName: Scalars['String'];
-  liveEndDate?: Maybe<Scalars['DateTime']>;
+  liveEndDate?: InputMaybe<Scalars['DateTime']>;
   liveLinkInfo: Array<LiveLinkInfoInputType>;
   livePreviewDate: Scalars['DateTime'];
-  liveRatioType?: Maybe<RatioType>;
+  liveRatioType?: InputMaybe<RatioType>;
   liveShareInfo: LiveShareInfoInputType;
-  liveStartDate?: Maybe<Scalars['DateTime']>;
-  liveStatus?: Maybe<LiveStatus>;
+  liveStartDate?: InputMaybe<Scalars['DateTime']>;
+  liveStatus?: InputMaybe<LiveStatus>;
   mainImageName: Scalars['String'];
   paymentAmount: Scalars['Float'];
-  storageTotalCount?: Maybe<Scalars['Float']>;
+  storageTotalCount?: InputMaybe<Scalars['Float']>;
   title: Scalars['String'];
-  viewCount?: Maybe<Scalars['Float']>;
+  viewCount?: InputMaybe<Scalars['Float']>;
 };
 
 export type CreateLiveOutput = {
@@ -318,9 +318,9 @@ export type CreateMainBannerLiveOutput = {
 };
 
 export type CreateMemberInput = {
-  accountInfo?: Maybe<AccountInfoInputType>;
+  accountInfo?: InputMaybe<AccountInfoInputType>;
   email: Scalars['String'];
-  memberType?: Maybe<MemberType>;
+  memberType?: InputMaybe<MemberType>;
   nickName: Scalars['String'];
   password: Scalars['String'];
 };
@@ -332,8 +332,8 @@ export type CreateMemberOutput = {
 };
 
 export type CreateNoticeInput = {
-  content?: Maybe<Scalars['String']>;
-  title?: Maybe<Scalars['String']>;
+  content?: InputMaybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type CreateNoticeOutput = {
@@ -344,17 +344,17 @@ export type CreateNoticeOutput = {
 
 export type CreateVodInput = {
   _id: Scalars['ID'];
-  content?: Maybe<Scalars['String']>;
-  liveId?: Maybe<Scalars['ID']>;
+  content?: InputMaybe<Scalars['String']>;
+  liveId?: InputMaybe<Scalars['ID']>;
   mainImageName: Scalars['String'];
   paymentAmount: Scalars['Float'];
-  storageTotalCount?: Maybe<Scalars['Float']>;
+  storageTotalCount?: InputMaybe<Scalars['Float']>;
   title: Scalars['String'];
-  viewCount?: Maybe<Scalars['Float']>;
+  viewCount?: InputMaybe<Scalars['Float']>;
   vodLinkInfo: Array<VodLinkInfoInputType>;
-  vodRatioType?: Maybe<RatioType>;
+  vodRatioType?: InputMaybe<RatioType>;
   vodShareInfo: VodShareInfoInputType;
-  vodStatus?: Maybe<VodStatus>;
+  vodStatus?: InputMaybe<VodStatus>;
 };
 
 export type CreateVodOutput = {
@@ -420,15 +420,15 @@ export enum DisplayType {
 }
 
 export type EditAdvertisementInput = {
-  _id?: Maybe<Scalars['ID']>;
-  displayDeviceType?: Maybe<DisplayDeviceType>;
-  displayType?: Maybe<DisplayType>;
-  endDate?: Maybe<Scalars['DateTime']>;
-  linkType?: Maybe<LinkType>;
-  linkUrl?: Maybe<Scalars['String']>;
-  mainImageName?: Maybe<Scalars['String']>;
-  startDate?: Maybe<Scalars['DateTime']>;
-  title?: Maybe<Scalars['String']>;
+  _id?: InputMaybe<Scalars['ID']>;
+  displayDeviceType?: InputMaybe<DisplayDeviceType>;
+  displayType?: InputMaybe<DisplayType>;
+  endDate?: InputMaybe<Scalars['DateTime']>;
+  linkType?: InputMaybe<LinkType>;
+  linkUrl?: InputMaybe<Scalars['String']>;
+  mainImageName?: InputMaybe<Scalars['String']>;
+  startDate?: InputMaybe<Scalars['DateTime']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type EditAdvertisementOutput = {
@@ -438,9 +438,9 @@ export type EditAdvertisementOutput = {
 };
 
 export type EditEventInput = {
-  _id?: Maybe<Scalars['ID']>;
-  content?: Maybe<Scalars['String']>;
-  title?: Maybe<Scalars['String']>;
+  _id?: InputMaybe<Scalars['ID']>;
+  content?: InputMaybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type EditEventOutput = {
@@ -450,10 +450,10 @@ export type EditEventOutput = {
 };
 
 export type EditFaqInput = {
-  _id?: Maybe<Scalars['ID']>;
-  content?: Maybe<Scalars['String']>;
-  faqType?: Maybe<FaqType>;
-  title?: Maybe<Scalars['String']>;
+  _id?: InputMaybe<Scalars['ID']>;
+  content?: InputMaybe<Scalars['String']>;
+  faqType?: InputMaybe<FaqType>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type EditFaqOutput = {
@@ -464,16 +464,16 @@ export type EditFaqOutput = {
 
 export type EditLiveInput = {
   _id: Scalars['ID'];
-  content?: Maybe<Scalars['String']>;
+  content?: InputMaybe<Scalars['String']>;
   delayedEntryTime: Scalars['Float'];
   hostName: Scalars['String'];
-  liveEndDate?: Maybe<Scalars['DateTime']>;
+  liveEndDate?: InputMaybe<Scalars['DateTime']>;
   liveLinkInfo: Array<LiveLinkInfoInputType>;
   livePreviewDate: Scalars['DateTime'];
-  liveRatioType?: Maybe<RatioType>;
+  liveRatioType?: InputMaybe<RatioType>;
   liveShareInfo: LiveShareInfoInputType;
-  liveStartDate?: Maybe<Scalars['DateTime']>;
-  liveStatus?: Maybe<LiveStatus>;
+  liveStartDate?: InputMaybe<Scalars['DateTime']>;
+  liveStatus?: InputMaybe<LiveStatus>;
   mainImageName: Scalars['String'];
   paymentAmount: Scalars['Float'];
   title: Scalars['String'];
@@ -486,15 +486,15 @@ export type EditLiveOutput = {
 };
 
 export type EditMemberInput = {
-  _id?: Maybe<Scalars['ID']>;
-  accountInfo?: Maybe<AccountInfoInputType>;
-  freePoint?: Maybe<Scalars['Int']>;
-  memberStatus?: Maybe<MemberStatus>;
-  memberType?: Maybe<MemberType>;
-  nickName?: Maybe<Scalars['String']>;
-  paidPoint?: Maybe<Scalars['Int']>;
-  password?: Maybe<Scalars['String']>;
-  profileImageName?: Maybe<Scalars['String']>;
+  _id?: InputMaybe<Scalars['ID']>;
+  accountInfo?: InputMaybe<AccountInfoInputType>;
+  freePoint?: InputMaybe<Scalars['Int']>;
+  memberStatus?: InputMaybe<MemberStatus>;
+  memberType?: InputMaybe<MemberType>;
+  nickName?: InputMaybe<Scalars['String']>;
+  paidPoint?: InputMaybe<Scalars['Int']>;
+  password?: InputMaybe<Scalars['String']>;
+  profileImageName?: InputMaybe<Scalars['String']>;
 };
 
 export type EditMemberOutput = {
@@ -504,9 +504,9 @@ export type EditMemberOutput = {
 };
 
 export type EditNoticeInput = {
-  _id?: Maybe<Scalars['ID']>;
-  content?: Maybe<Scalars['String']>;
-  title?: Maybe<Scalars['String']>;
+  _id?: InputMaybe<Scalars['ID']>;
+  content?: InputMaybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type EditNoticeOutput = {
@@ -517,15 +517,15 @@ export type EditNoticeOutput = {
 
 export type EditVodInput = {
   _id: Scalars['ID'];
-  content?: Maybe<Scalars['String']>;
-  liveId?: Maybe<Scalars['ID']>;
+  content?: InputMaybe<Scalars['String']>;
+  liveId?: InputMaybe<Scalars['ID']>;
   mainImageName: Scalars['String'];
   paymentAmount: Scalars['Float'];
   title: Scalars['String'];
   vodLinkInfo: Array<VodLinkInfoInputType>;
-  vodRatioType?: Maybe<RatioType>;
+  vodRatioType?: InputMaybe<RatioType>;
   vodShareInfo: VodShareInfoInputType;
-  vodStatus?: Maybe<VodStatus>;
+  vodStatus?: InputMaybe<VodStatus>;
 };
 
 export type EditVodOutput = {
@@ -535,10 +535,10 @@ export type EditVodOutput = {
 };
 
 export type EventsInput = {
-  dates?: Maybe<Array<Scalars['DateTime']>>;
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
-  title?: Maybe<Scalars['String']>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type EventsOutput = {
@@ -560,11 +560,11 @@ export enum FaqType {
 }
 
 export type FaqsInput = {
-  dates?: Maybe<Array<Scalars['DateTime']>>;
-  faqType?: Maybe<FaqType>;
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
-  title?: Maybe<Scalars['String']>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
+  faqType?: InputMaybe<FaqType>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type FaqsOutput = {
@@ -621,7 +621,7 @@ export type FindVodByTypesOutput = {
 };
 
 export type GetContentsViewCountInput = {
-  dates?: Maybe<Array<Scalars['DateTime']>>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
 };
 
 export type GetContentsViewCountOutput = {
@@ -633,7 +633,7 @@ export type GetContentsViewCountOutput = {
 };
 
 export type GetDailyAccessorInput = {
-  date?: Maybe<Scalars['DateTime']>;
+  date?: InputMaybe<Scalars['DateTime']>;
 };
 
 export type GetDailyAccessorOutput = {
@@ -653,7 +653,7 @@ export type GetInquiriesHistoryOutput = {
 };
 
 export type GetNewMembersInput = {
-  date?: Maybe<Scalars['DateTime']>;
+  date?: InputMaybe<Scalars['DateTime']>;
 };
 
 export type GetNewMembersOutput = {
@@ -679,7 +679,7 @@ export type GetTotalMembersOutput = {
 };
 
 export type GetUserByOsInput = {
-  date?: Maybe<Scalars['DateTime']>;
+  date?: InputMaybe<Scalars['DateTime']>;
 };
 
 export type GetUserByOsOutput = {
@@ -708,13 +708,13 @@ export type GoingActiveLog = {
 };
 
 export type InquiriesInput = {
-  boardStatus?: Maybe<BoardStatus>;
-  dates?: Maybe<Array<Scalars['DateTime']>>;
-  email?: Maybe<Scalars['String']>;
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
-  questionType?: Maybe<QuestionType>;
-  title?: Maybe<Scalars['String']>;
+  boardStatus?: InputMaybe<BoardStatus>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
+  email?: InputMaybe<Scalars['String']>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
+  questionType?: InputMaybe<QuestionType>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type InquiriesOutput = {
@@ -766,10 +766,10 @@ export type Live = {
 
 export type LiveChatHistoriesByHistoryIdInput = {
   historyId: Scalars['ID'];
-  messages?: Maybe<Array<MessageInputType>>;
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
-  timestemp?: Maybe<Scalars['Float']>;
+  messages?: InputMaybe<Array<MessageInputType>>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
+  timestemp?: InputMaybe<Scalars['Float']>;
 };
 
 export type LiveChatHistoriesByHistoryIdOutput = {
@@ -798,9 +798,9 @@ export type LiveLinkInfo = {
 };
 
 export type LiveLinkInfoInputType = {
-  linkPath?: Maybe<Scalars['String']>;
+  linkPath?: InputMaybe<Scalars['String']>;
   listingOrder: Scalars['Float'];
-  playingImageName?: Maybe<Scalars['String']>;
+  playingImageName?: InputMaybe<Scalars['String']>;
 };
 
 export type LiveOutput = {
@@ -823,7 +823,7 @@ export type LiveShareInfo = {
 export type LiveShareInfoInputType = {
   liveId: Scalars['ID'];
   memberShareInfo: Array<MemberShareInfoInputType>;
-  shareApplyDate?: Maybe<Scalars['DateTime']>;
+  shareApplyDate?: InputMaybe<Scalars['DateTime']>;
 };
 
 export enum LiveStatus {
@@ -835,13 +835,13 @@ export enum LiveStatus {
 }
 
 export type LivesInput = {
-  dates?: Maybe<Array<Scalars['DateTime']>>;
-  hostName?: Maybe<Scalars['String']>;
-  livePreviewDates?: Maybe<Array<Scalars['DateTime']>>;
-  liveStatus?: Maybe<LiveStatus>;
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
-  title?: Maybe<Scalars['String']>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
+  hostName?: InputMaybe<Scalars['String']>;
+  livePreviewDates?: InputMaybe<Array<Scalars['DateTime']>>;
+  liveStatus?: InputMaybe<LiveStatus>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type LivesOutput = {
@@ -886,7 +886,7 @@ export type MainBannerLive = {
 export type MainBannerLiveInputType = {
   listingOrder: Scalars['Float'];
   liveId: Scalars['ID'];
-  title?: Maybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type MainBannerLiveOutput = {
@@ -954,7 +954,7 @@ export enum MemberStatus {
 }
 
 export type MemberSuspendInput = {
-  increase?: Maybe<Scalars['Float']>;
+  increase?: InputMaybe<Scalars['Float']>;
   memberId: Scalars['ID'];
 };
 
@@ -974,7 +974,7 @@ export enum MemberType {
 }
 
 export type MembersByTypeInput = {
-  memberType?: Maybe<MemberType>;
+  memberType?: InputMaybe<MemberType>;
 };
 
 export type MembersByTypeOutput = {
@@ -985,13 +985,13 @@ export type MembersByTypeOutput = {
 };
 
 export type MembersInput = {
-  dates?: Maybe<Array<Scalars['DateTime']>>;
-  email?: Maybe<Scalars['String']>;
-  memberStatus?: Maybe<MemberStatus>;
-  memberType?: Maybe<MemberType>;
-  nickName?: Maybe<Scalars['String']>;
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
+  email?: InputMaybe<Scalars['String']>;
+  memberStatus?: InputMaybe<MemberStatus>;
+  memberType?: InputMaybe<MemberType>;
+  nickName?: InputMaybe<Scalars['String']>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
 };
 
 export type MembersOutput = {
@@ -1246,10 +1246,10 @@ export type MutationVodsArgs = {
 };
 
 export type NoticesInput = {
-  dates?: Maybe<Array<Scalars['DateTime']>>;
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
-  title?: Maybe<Scalars['String']>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type NoticesOutput = {
@@ -1274,11 +1274,11 @@ export type Point = {
 };
 
 export type PointHistoriesByMemberIdInput = {
-  dates?: Maybe<Array<Scalars['DateTime']>>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
   memberId: Scalars['ID'];
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
-  pointPayStatus?: Maybe<PointPayStatus>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
+  pointPayStatus?: InputMaybe<PointPayStatus>;
 };
 
 export type PointHistoriesByMemberIdOutput = {
@@ -1500,10 +1500,10 @@ export type VodLinkInfoInputType = {
   introImageName: Scalars['String'];
   linkPath: Scalars['String'];
   listingOrder: Scalars['Float'];
-  playingImageName?: Maybe<Scalars['String']>;
-  transcodeEndDate?: Maybe<Scalars['DateTime']>;
-  transcodeId?: Maybe<Scalars['Float']>;
-  transcodeStatus?: Maybe<TranscodeStatus>;
+  playingImageName?: InputMaybe<Scalars['String']>;
+  transcodeEndDate?: InputMaybe<Scalars['DateTime']>;
+  transcodeId?: InputMaybe<Scalars['Float']>;
+  transcodeStatus?: InputMaybe<TranscodeStatus>;
 };
 
 export type VodShareInfo = {
@@ -1518,7 +1518,7 @@ export type VodShareInfo = {
 
 export type VodShareInfoInputType = {
   memberShareInfo: Array<MemberShareInfoInputType>;
-  shareApplyDate?: Maybe<Scalars['DateTime']>;
+  shareApplyDate?: InputMaybe<Scalars['DateTime']>;
   vodId: Scalars['ID'];
 };
 
@@ -1531,11 +1531,11 @@ export enum VodStatus {
 }
 
 export type VodsInput = {
-  dates?: Maybe<Array<Scalars['DateTime']>>;
-  page?: Maybe<Scalars['Int']>;
-  pageView?: Maybe<Scalars['Int']>;
-  title?: Maybe<Scalars['String']>;
-  vodStatus?: Maybe<VodStatus>;
+  dates?: InputMaybe<Array<Scalars['DateTime']>>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageView?: InputMaybe<Scalars['Int']>;
+  title?: InputMaybe<Scalars['String']>;
+  vodStatus?: InputMaybe<VodStatus>;
 };
 
 export type VodsOutput = {
@@ -1552,366 +1552,366 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginOutput', ok: boolean, token?: string | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginOutput', ok: boolean, token?: string | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type CreateAccountMutationVariables = Exact<{
   createMemberInput: CreateMemberInput;
 }>;
 
 
-export type CreateAccountMutation = { __typename?: 'Mutation', createAccount: { __typename?: 'CreateMemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type CreateAccountMutation = { __typename?: 'Mutation', createAccount: { __typename?: 'CreateMemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type EditAccountMutationVariables = Exact<{
   editMemberInput: EditMemberInput;
 }>;
 
 
-export type EditAccountMutation = { __typename?: 'Mutation', editAccount: { __typename?: 'EditMemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type EditAccountMutation = { __typename?: 'Mutation', editAccount: { __typename?: 'EditMemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LogoutMutation = { __typename?: 'Mutation', logout: { __typename?: 'LogoutOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type LogoutMutation = { __typename?: 'Mutation', logout: { __typename?: 'LogoutOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type MembersMutationVariables = Exact<{
   membersInput: MembersInput;
 }>;
 
 
-export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null | undefined, totalPages?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any }> | null | undefined } };
+export type MembersMutation = { __typename?: 'Mutation', members: { __typename?: 'MembersOutput', ok: boolean, totalResults?: number | null, totalPages?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, members?: Array<{ __typename?: 'Member', _id: string, email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any }> | null } };
 
 export type EditMemberByIdMutationVariables = Exact<{
   editMemberInput: EditMemberInput;
 }>;
 
 
-export type EditMemberByIdMutation = { __typename?: 'Mutation', editMemberById: { __typename?: 'EditMemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type EditMemberByIdMutation = { __typename?: 'Mutation', editMemberById: { __typename?: 'EditMemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type CreateLiveMutationVariables = Exact<{
   createLiveInput: CreateLiveInput;
 }>;
 
 
-export type CreateLiveMutation = { __typename?: 'Mutation', createLive: { __typename?: 'CreateLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type CreateLiveMutation = { __typename?: 'Mutation', createLive: { __typename?: 'CreateLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type LivesMutationVariables = Exact<{
   livesInput: LivesInput;
 }>;
 
 
-export type LivesMutation = { __typename?: 'Mutation', lives: { __typename?: 'LivesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives?: Array<{ __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, createDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }> }> | null | undefined } };
+export type LivesMutation = { __typename?: 'Mutation', lives: { __typename?: 'LivesOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, lives?: Array<{ __typename?: 'Live', _id: string, title: string, content?: string | null, hostName: string, paymentAmount: number, livePreviewDate: any, liveStartDate?: any | null, liveEndDate?: any | null, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null, liveStatus: LiveStatus, vodId?: string | null, createDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null, playingImageName?: string | null, listingOrder: number }> }> | null } };
 
 export type EditLiveMutationVariables = Exact<{
   editLiveInput: EditLiveInput;
 }>;
 
 
-export type EditLiveMutation = { __typename?: 'Mutation', editLive: { __typename?: 'EditLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type EditLiveMutation = { __typename?: 'Mutation', editLive: { __typename?: 'EditLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type DeleteLiveMutationVariables = Exact<{
   deleteLiveInput: DeleteLiveInput;
 }>;
 
 
-export type DeleteLiveMutation = { __typename?: 'Mutation', deleteLive: { __typename?: 'DeleteLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type DeleteLiveMutation = { __typename?: 'Mutation', deleteLive: { __typename?: 'DeleteLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type CreateVodMutationVariables = Exact<{
   createVodInput: CreateVodInput;
 }>;
 
 
-export type CreateVodMutation = { __typename?: 'Mutation', createVod: { __typename?: 'CreateVodOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type CreateVodMutation = { __typename?: 'Mutation', createVod: { __typename?: 'CreateVodOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type VodsMutationVariables = Exact<{
   vodsInput: VodsInput;
 }>;
 
 
-export type VodsMutation = { __typename?: 'Mutation', vods: { __typename?: 'VodsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods?: Array<{ __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, viewCount: number, storageTotalCount: number, mainImageName: string, liveId?: string | null | undefined, vodStatus: VodStatus, createDate: any }> | null | undefined } };
+export type VodsMutation = { __typename?: 'Mutation', vods: { __typename?: 'VodsOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, vods?: Array<{ __typename?: 'Vod', _id: string, title: string, content?: string | null, paymentAmount: number, viewCount: number, storageTotalCount: number, mainImageName: string, liveId?: string | null, vodStatus: VodStatus, createDate: any }> | null } };
 
 export type EditVodMutationVariables = Exact<{
   editVodInput: EditVodInput;
 }>;
 
 
-export type EditVodMutation = { __typename?: 'Mutation', editVod: { __typename?: 'EditVodOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type EditVodMutation = { __typename?: 'Mutation', editVod: { __typename?: 'EditVodOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type DeleteVodMutationVariables = Exact<{
   deleteVodInput: DeleteVodInput;
 }>;
 
 
-export type DeleteVodMutation = { __typename?: 'Mutation', deleteVod: { __typename?: 'DeleteVodOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type DeleteVodMutation = { __typename?: 'Mutation', deleteVod: { __typename?: 'DeleteVodOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type CreateMainBannerLiveContentsMutationVariables = Exact<{
   createMainBannerLiveInput: CreateMainBannerLiveInput;
 }>;
 
 
-export type CreateMainBannerLiveContentsMutation = { __typename?: 'Mutation', createMainBannerLiveContents: { __typename?: 'CreateMainBannerLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type CreateMainBannerLiveContentsMutation = { __typename?: 'Mutation', createMainBannerLiveContents: { __typename?: 'CreateMainBannerLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type CreateAdvertisementMutationVariables = Exact<{
   createAdvertisementInput: CreateAdvertisementInput;
 }>;
 
 
-export type CreateAdvertisementMutation = { __typename?: 'Mutation', createAdvertisement: { __typename?: 'CreateAdvertisementOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type CreateAdvertisementMutation = { __typename?: 'Mutation', createAdvertisement: { __typename?: 'CreateAdvertisementOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type AdvertisementsMutationVariables = Exact<{
   advertisementsInput: AdvertisementsInput;
 }>;
 
 
-export type AdvertisementsMutation = { __typename?: 'Mutation', advertisements: { __typename?: 'AdvertisementsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, advertisements?: Array<{ __typename?: 'Advertisement', _id: string, advertiseStatus: AdvertiseStatus, displayType: DisplayType, title: string, content?: string | null | undefined, linkType: LinkType, linkUrl: string, startDate: any, endDate: any, createDate: any }> | null | undefined } };
+export type AdvertisementsMutation = { __typename?: 'Mutation', advertisements: { __typename?: 'AdvertisementsOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, advertisements?: Array<{ __typename?: 'Advertisement', _id: string, advertiseStatus: AdvertiseStatus, displayType: DisplayType, title: string, content?: string | null, linkType: LinkType, linkUrl: string, startDate: any, endDate: any, createDate: any }> | null } };
 
 export type EditAdvertisementMutationVariables = Exact<{
   editAdvertisementInput: EditAdvertisementInput;
 }>;
 
 
-export type EditAdvertisementMutation = { __typename?: 'Mutation', editAdvertisement: { __typename?: 'EditAdvertisementOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type EditAdvertisementMutation = { __typename?: 'Mutation', editAdvertisement: { __typename?: 'EditAdvertisementOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type ChangeAdvertisementStatusMutationVariables = Exact<{
   changeAdvertisementStatusInput: ChangeAdvertisementStatusInput;
 }>;
 
 
-export type ChangeAdvertisementStatusMutation = { __typename?: 'Mutation', changeAdvertisementStatus: { __typename?: 'ChangeAdvertisementStatusOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type ChangeAdvertisementStatusMutation = { __typename?: 'Mutation', changeAdvertisementStatus: { __typename?: 'ChangeAdvertisementStatusOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type CreateNoticeMutationVariables = Exact<{
   createNoticeInput: CreateNoticeInput;
 }>;
 
 
-export type CreateNoticeMutation = { __typename?: 'Mutation', createNotice: { __typename?: 'CreateNoticeOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type CreateNoticeMutation = { __typename?: 'Mutation', createNotice: { __typename?: 'CreateNoticeOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type NoticesMutationVariables = Exact<{
   noticesInput: NoticesInput;
 }>;
 
 
-export type NoticesMutation = { __typename?: 'Mutation', notices: { __typename?: 'NoticesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, notices?: Array<{ __typename?: 'Board', _id: string, title: string, content: string, boardCategoryType: BoardCategoryType, createDate: any }> | null | undefined } };
+export type NoticesMutation = { __typename?: 'Mutation', notices: { __typename?: 'NoticesOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, notices?: Array<{ __typename?: 'Board', _id: string, title: string, content: string, boardCategoryType: BoardCategoryType, createDate: any }> | null } };
 
 export type EditNoticeMutationVariables = Exact<{
   editNoticeInput: EditNoticeInput;
 }>;
 
 
-export type EditNoticeMutation = { __typename?: 'Mutation', editNotice: { __typename?: 'EditNoticeOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type EditNoticeMutation = { __typename?: 'Mutation', editNotice: { __typename?: 'EditNoticeOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type DeleteBoardMutationVariables = Exact<{
   deleteBoardInput: DeleteBoardInput;
 }>;
 
 
-export type DeleteBoardMutation = { __typename?: 'Mutation', deleteBoard: { __typename?: 'DeleteBoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type DeleteBoardMutation = { __typename?: 'Mutation', deleteBoard: { __typename?: 'DeleteBoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type CreateEventMutationVariables = Exact<{
   createEventInput: CreateEventInput;
 }>;
 
 
-export type CreateEventMutation = { __typename?: 'Mutation', createEvent: { __typename?: 'CreateEventOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type CreateEventMutation = { __typename?: 'Mutation', createEvent: { __typename?: 'CreateEventOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type EventsMutationVariables = Exact<{
   eventsInput: EventsInput;
 }>;
 
 
-export type EventsMutation = { __typename?: 'Mutation', events: { __typename?: 'EventsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, events?: Array<{ __typename?: 'Board', _id: string, title: string, content: string, boardCategoryType: BoardCategoryType, createDate: any }> | null | undefined } };
+export type EventsMutation = { __typename?: 'Mutation', events: { __typename?: 'EventsOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, events?: Array<{ __typename?: 'Board', _id: string, title: string, content: string, boardCategoryType: BoardCategoryType, createDate: any }> | null } };
 
 export type EditEventMutationVariables = Exact<{
   editEventInput: EditEventInput;
 }>;
 
 
-export type EditEventMutation = { __typename?: 'Mutation', editEvent: { __typename?: 'EditEventOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type EditEventMutation = { __typename?: 'Mutation', editEvent: { __typename?: 'EditEventOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type CreateFaqMutationVariables = Exact<{
   createFaqInput: CreateFaqInput;
 }>;
 
 
-export type CreateFaqMutation = { __typename?: 'Mutation', createFaq: { __typename?: 'CreateFaqOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type CreateFaqMutation = { __typename?: 'Mutation', createFaq: { __typename?: 'CreateFaqOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type FaqsMutationVariables = Exact<{
   faqsInput: FaqsInput;
 }>;
 
 
-export type FaqsMutation = { __typename?: 'Mutation', faqs: { __typename?: 'FaqsOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, faqs?: Array<{ __typename?: 'Board', _id: string, title: string, content: string, boardCategoryType: BoardCategoryType, faqType?: FaqType | null | undefined, createDate: any }> | null | undefined } };
+export type FaqsMutation = { __typename?: 'Mutation', faqs: { __typename?: 'FaqsOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, faqs?: Array<{ __typename?: 'Board', _id: string, title: string, content: string, boardCategoryType: BoardCategoryType, faqType?: FaqType | null, createDate: any }> | null } };
 
 export type EditFaqMutationVariables = Exact<{
   editFaqInput: EditFaqInput;
 }>;
 
 
-export type EditFaqMutation = { __typename?: 'Mutation', editFaq: { __typename?: 'EditFaqOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type EditFaqMutation = { __typename?: 'Mutation', editFaq: { __typename?: 'EditFaqOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type CreateAnswerMutationVariables = Exact<{
   createAnswerInput: CreateAnswerInput;
 }>;
 
 
-export type CreateAnswerMutation = { __typename?: 'Mutation', createAnswer: { __typename?: 'CreateAnswerOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type CreateAnswerMutation = { __typename?: 'Mutation', createAnswer: { __typename?: 'CreateAnswerOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type InquiriesMutationVariables = Exact<{
   inquiriesInput: InquiriesInput;
 }>;
 
 
-export type InquiriesMutation = { __typename?: 'Mutation', inquiries: { __typename?: 'InquiriesOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, inquiries?: Array<{ __typename?: 'Board', _id: string, title: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, createDate: any, createMember: { __typename?: 'AuthMember', email: string } }> | null | undefined } };
+export type InquiriesMutation = { __typename?: 'Mutation', inquiries: { __typename?: 'InquiriesOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, inquiries?: Array<{ __typename?: 'Board', _id: string, title: string, questionType?: QuestionType | null, boardStatus: BoardStatus, createDate: any, createMember: { __typename?: 'AuthMember', email: string } }> | null } };
 
 export type SuspendMemberByIdMutationVariables = Exact<{
   memberSuspendInput: MemberSuspendInput;
 }>;
 
 
-export type SuspendMemberByIdMutation = { __typename?: 'Mutation', suspendMemberById: { __typename?: 'MemberSuspendOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type SuspendMemberByIdMutation = { __typename?: 'Mutation', suspendMemberById: { __typename?: 'MemberSuspendOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type ActiveHistoriesByMemberIdMutationVariables = Exact<{
   activeHistoriesByMemberIdInput: ActiveHistoriesByMemberIdInput;
 }>;
 
 
-export type ActiveHistoriesByMemberIdMutation = { __typename?: 'Mutation', activeHistoriesByMemberId: { __typename?: 'ActiveHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, goingActiveLog?: Array<{ __typename?: 'GoingActiveLog', memberType: MemberType, categoryType: CategoryType, activeType: ActiveType, serviceType: ServiceType, content: string, createDate: any }> | null | undefined } };
+export type ActiveHistoriesByMemberIdMutation = { __typename?: 'Mutation', activeHistoriesByMemberId: { __typename?: 'ActiveHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, goingActiveLog?: Array<{ __typename?: 'GoingActiveLog', memberType: MemberType, categoryType: CategoryType, activeType: ActiveType, serviceType: ServiceType, content: string, createDate: any }> | null } };
 
 export type PointHistoriesByMemberIdMutationVariables = Exact<{
   pointHistoriesByMemberIdInput: PointHistoriesByMemberIdInput;
 }>;
 
 
-export type PointHistoriesByMemberIdMutation = { __typename?: 'Mutation', pointHistoriesByMemberId: { __typename?: 'PointHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, pointPayHistoryView?: Array<{ __typename?: 'PointPayHistoryView', _id: string, pointPayType: PointPayType, pointPayStatus: PointPayStatus, amount: number, content: string, createDate: any }> | null | undefined } };
+export type PointHistoriesByMemberIdMutation = { __typename?: 'Mutation', pointHistoriesByMemberId: { __typename?: 'PointHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, pointPayHistoryView?: Array<{ __typename?: 'PointPayHistoryView', _id: string, pointPayType: PointPayType, pointPayStatus: PointPayStatus, amount: number, content: string, createDate: any }> | null } };
 
 export type CommentHistoriesByMemberIdMutationVariables = Exact<{
   commentHistoriesByMemberIdInput: CommentHistoriesByMemberIdInput;
 }>;
 
 
-export type CommentHistoriesByMemberIdMutation = { __typename?: 'Mutation', commentHistoriesByMemberId: { __typename?: 'CommentHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null | undefined, totalResults?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, commentHistoryView?: Array<{ __typename?: 'CommentHistoryView', _id: string, title: string, content: string, vodCommentStatus: VodCommentStatus, reportCount: number, nickName: string, createDate: any }> | null | undefined } };
+export type CommentHistoriesByMemberIdMutation = { __typename?: 'Mutation', commentHistoriesByMemberId: { __typename?: 'CommentHistoriesByMemberIdOutput', ok: boolean, totalPages?: number | null, totalResults?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, commentHistoryView?: Array<{ __typename?: 'CommentHistoryView', _id: string, title: string, content: string, vodCommentStatus: VodCommentStatus, reportCount: number, nickName: string, createDate: any }> | null } };
 
 export type DeleteVodCommentMutationVariables = Exact<{
   deleteVodCommentInput: DeleteVodCommentInput;
 }>;
 
 
-export type DeleteVodCommentMutation = { __typename?: 'Mutation', deleteVodComment: { __typename?: 'DeleteVodCommentOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type DeleteVodCommentMutation = { __typename?: 'Mutation', deleteVodComment: { __typename?: 'DeleteVodCommentOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type ListSendBirdMessagesMutationVariables = Exact<{
   liveChatHistoriesByHistoryIdInput: LiveChatHistoriesByHistoryIdInput;
 }>;
 
 
-export type ListSendBirdMessagesMutation = { __typename?: 'Mutation', listSendbirdMessages: { __typename?: 'LiveChatHistoriesByHistoryIdOutput', ok: boolean, email?: string | null | undefined, nickName?: string | null | undefined, liveTitle?: string | null | undefined, liveStartDate?: any | null | undefined, isDisable?: boolean | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, messages?: Array<{ __typename?: 'Message', message_id: number, type: string, message: string, created_at: number }> | null | undefined } };
+export type ListSendBirdMessagesMutation = { __typename?: 'Mutation', listSendbirdMessages: { __typename?: 'LiveChatHistoriesByHistoryIdOutput', ok: boolean, email?: string | null, nickName?: string | null, liveTitle?: string | null, liveStartDate?: any | null, isDisable?: boolean | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, messages?: Array<{ __typename?: 'Message', message_id: number, type: string, message: string, created_at: number }> | null } };
 
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MyQuery = { __typename?: 'Query', my: { __typename?: 'Member', _id: string, email: string, password: string, nickName: string, profileImageName?: string | null | undefined, memberStatus: MemberStatus, memberType: MemberType, refreshToken?: string | null | undefined, lastLoginDate?: any | null | undefined, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined } };
+export type MyQuery = { __typename?: 'Query', my: { __typename?: 'Member', _id: string, email: string, password: string, nickName: string, profileImageName?: string | null, memberStatus: MemberStatus, memberType: MemberType, refreshToken?: string | null, lastLoginDate?: any | null, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null } };
 
 export type FindMemberByIdQueryVariables = Exact<{
   memberInput: MemberInput;
 }>;
 
 
-export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, lastLoginDate?: any | null | undefined, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, report: { __typename?: 'Report', memberReportStatus: MemberReportStatus, chatCount: number, commentCount: number, releaseDate?: any | null | undefined }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null | undefined, pushInfo: Array<{ __typename?: 'PushInfo', pushType: PushType, notificationFlag: boolean }> } | null | undefined } };
+export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, lastLoginDate?: any | null, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, report: { __typename?: 'Report', memberReportStatus: MemberReportStatus, chatCount: number, commentCount: number, releaseDate?: any | null }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null, pushInfo: Array<{ __typename?: 'PushInfo', pushType: PushType, notificationFlag: boolean }> } | null } };
 
 export type FindMembersByTypeQueryVariables = Exact<{
   membersByTypeInput: MembersByTypeInput;
 }>;
 
 
-export type FindMembersByTypeQuery = { __typename?: 'Query', findMembersByType: { __typename?: 'MembersByTypeOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, members: Array<{ __typename?: 'Member', _id: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType }> } };
+export type FindMembersByTypeQuery = { __typename?: 'Query', findMembersByType: { __typename?: 'MembersByTypeOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, members: Array<{ __typename?: 'Member', _id: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType }> } };
 
 export type FindLiveByIdQueryVariables = Exact<{
   liveInput: LiveInput;
 }>;
 
 
-export type FindLiveByIdQuery = { __typename?: 'Query', findLiveById: { __typename?: 'LiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, live?: { __typename?: 'Live', _id: string, title: string, content?: string | null | undefined, hostName: string, paymentAmount: number, liveRatioType: RatioType, livePreviewDate: any, liveStartDate?: any | null | undefined, liveEndDate?: any | null | undefined, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null | undefined, liveStatus: LiveStatus, vodId?: string | null | undefined, createDate: any, updateDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null | undefined, playingImageName?: string | null | undefined, listingOrder: number }>, liveShareInfo: { __typename?: 'LiveShareInfo', shareApplyDate?: any | null | undefined, liveId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+export type FindLiveByIdQuery = { __typename?: 'Query', findLiveById: { __typename?: 'LiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, live?: { __typename?: 'Live', _id: string, title: string, content?: string | null, hostName: string, paymentAmount: number, liveRatioType: RatioType, livePreviewDate: any, liveStartDate?: any | null, liveEndDate?: any | null, mainImageName: string, viewCount: number, delayedEntryTime: number, likeCount?: number | null, liveStatus: LiveStatus, vodId?: string | null, createDate: any, updateDate: any, liveLinkInfo: Array<{ __typename?: 'LiveLinkInfo', linkPath?: string | null, playingImageName?: string | null, listingOrder: number }>, liveShareInfo: { __typename?: 'LiveShareInfo', shareApplyDate?: any | null, liveId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null } };
 
 export type FindVodByIdQueryVariables = Exact<{
   vodInput: FindVodByIdInput;
 }>;
 
 
-export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null | undefined, paymentAmount: number, vodRatioType: RatioType, mainImageName: string, storageTotalCount: number, vodStatus: VodStatus, liveId?: string | null | undefined, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null | undefined, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null | undefined, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null | undefined } };
+export type FindVodByIdQuery = { __typename?: 'Query', findVodById: { __typename?: 'FindVodByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, vod?: { __typename?: 'Vod', _id: string, title: string, content?: string | null, paymentAmount: number, vodRatioType: RatioType, mainImageName: string, storageTotalCount: number, vodStatus: VodStatus, liveId?: string | null, createDate: any, updateDate: any, vodLinkInfo: Array<{ __typename?: 'VodLinkInfo', linkPath: string, introImageName: string, playingImageName?: string | null, transcodeStatus: TranscodeStatus, listingOrder: number }>, vodShareInfo: { __typename?: 'VodShareInfo', shareApplyDate?: any | null, vodId: string, memberShareInfo: Array<{ __typename?: 'MemberShareInfo', memberId: string, nickName: string, priorityShare: number, directShare: number }> } } | null } };
 
 export type FindLiveByTypesQueryVariables = Exact<{
   findLiveByTypesInput: FindLiveByTypesInput;
 }>;
 
 
-export type FindLiveByTypesQuery = { __typename?: 'Query', findLiveByTypes: { __typename?: 'FindLiveByTypesOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives: Array<{ __typename?: 'Live', _id: string, title: string }> } };
+export type FindLiveByTypesQuery = { __typename?: 'Query', findLiveByTypes: { __typename?: 'FindLiveByTypesOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, lives: Array<{ __typename?: 'Live', _id: string, title: string }> } };
 
 export type FindVodByTypesQueryVariables = Exact<{
   findVodByTypesInput: FindVodByTypesInput;
 }>;
 
 
-export type FindVodByTypesQuery = { __typename?: 'Query', findVodByTypes: { __typename?: 'FindVodByTypesOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, vods: Array<{ __typename?: 'Vod', _id: string, title: string }> } };
+export type FindVodByTypesQuery = { __typename?: 'Query', findVodByTypes: { __typename?: 'FindVodByTypesOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, vods: Array<{ __typename?: 'Vod', _id: string, title: string }> } };
 
 export type MainBannerLiveContentsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MainBannerLiveContentsQuery = { __typename?: 'Query', mainBannerLiveContents: { __typename?: 'MainBannerLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, mainBannerLives?: Array<{ __typename?: 'MainBannerLive', liveId: string, listingOrder: number, title?: string | null | undefined }> | null | undefined } };
+export type MainBannerLiveContentsQuery = { __typename?: 'Query', mainBannerLiveContents: { __typename?: 'MainBannerLiveOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, mainBannerLives?: Array<{ __typename?: 'MainBannerLive', liveId: string, listingOrder: number, title?: string | null }> | null } };
 
 export type FindAdvertisementByIdQueryVariables = Exact<{
   findAdvertisementByIdInput: FindAdvertisementByIdInput;
 }>;
 
 
-export type FindAdvertisementByIdQuery = { __typename?: 'Query', findAdvertisementById: { __typename?: 'FindAdvertisementByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, advertisement?: { __typename?: 'Advertisement', _id: string, advertiseStatus: AdvertiseStatus, displayType: DisplayType, displayDeviceType: DisplayDeviceType, title: string, content?: string | null | undefined, mainImageName: string, linkType: LinkType, linkUrl: string, startDate: any, endDate: any } | null | undefined } };
+export type FindAdvertisementByIdQuery = { __typename?: 'Query', findAdvertisementById: { __typename?: 'FindAdvertisementByIdOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, advertisement?: { __typename?: 'Advertisement', _id: string, advertiseStatus: AdvertiseStatus, displayType: DisplayType, displayDeviceType: DisplayDeviceType, title: string, content?: string | null, mainImageName: string, linkType: LinkType, linkUrl: string, startDate: any, endDate: any } | null } };
 
 export type FindBoardByIdQueryVariables = Exact<{
   boardInput: BoardInput;
 }>;
 
 
-export type FindBoardByIdQuery = { __typename?: 'Query', findBoardById: { __typename?: 'BoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, board?: { __typename?: 'Board', title: string, content: string, questionType?: QuestionType | null | undefined, boardStatus: BoardStatus, faqType?: FaqType | null | undefined, createDate: any, uploadImageInfo?: Array<{ __typename?: 'UploadImageInfo', uploadImageName: string, displayOrder: number }> | null | undefined, answerInfo?: { __typename?: 'AnswerInfo', answer: string, createDate: any } | null | undefined, createMember: { __typename?: 'AuthMember', email: string } } | null | undefined } };
+export type FindBoardByIdQuery = { __typename?: 'Query', findBoardById: { __typename?: 'BoardOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, board?: { __typename?: 'Board', title: string, content: string, questionType?: QuestionType | null, boardStatus: BoardStatus, faqType?: FaqType | null, createDate: any, uploadImageInfo?: Array<{ __typename?: 'UploadImageInfo', uploadImageName: string, displayOrder: number }> | null, answerInfo?: { __typename?: 'AnswerInfo', answer: string, createDate: any } | null, createMember: { __typename?: 'AuthMember', email: string } } | null } };
 
 export type GetTotalMembersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetTotalMembersQuery = { __typename?: 'Query', getTotalMembers: { __typename?: 'GetTotalMembersOutput', ok: boolean, count?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type GetTotalMembersQuery = { __typename?: 'Query', getTotalMembers: { __typename?: 'GetTotalMembersOutput', ok: boolean, count?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type GetContentsViewCountQueryVariables = Exact<{
   getContentsViewCountInput: GetContentsViewCountInput;
 }>;
 
 
-export type GetContentsViewCountQuery = { __typename?: 'Query', getContentsViewCount: { __typename?: 'GetContentsViewCountOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, lives?: Array<{ __typename?: 'Content', _id: string, title: string, viewCount: number }> | null | undefined, vods?: Array<{ __typename?: 'Content', _id: string, title: string, viewCount: number }> | null | undefined } };
+export type GetContentsViewCountQuery = { __typename?: 'Query', getContentsViewCount: { __typename?: 'GetContentsViewCountOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, lives?: Array<{ __typename?: 'Content', _id: string, title: string, viewCount: number }> | null, vods?: Array<{ __typename?: 'Content', _id: string, title: string, viewCount: number }> | null } };
 
 export type GetNewMembersQueryVariables = Exact<{
   getNewMembersInput: GetNewMembersInput;
 }>;
 
 
-export type GetNewMembersQuery = { __typename?: 'Query', getNewMembers: { __typename?: 'GetNewMembersOutput', ok: boolean, counts?: Array<number> | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type GetNewMembersQuery = { __typename?: 'Query', getNewMembers: { __typename?: 'GetNewMembersOutput', ok: boolean, counts?: Array<number> | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type GetDailyAccessorQueryVariables = Exact<{
   getDailyAccessorInput: GetDailyAccessorInput;
 }>;
 
 
-export type GetDailyAccessorQuery = { __typename?: 'Query', getDailyAccessor: { __typename?: 'GetDailyAccessorOutput', ok: boolean, counts?: Array<number> | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type GetDailyAccessorQuery = { __typename?: 'Query', getDailyAccessor: { __typename?: 'GetDailyAccessorOutput', ok: boolean, counts?: Array<number> | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type GetUserByOsQueryVariables = Exact<{
   getUserByOsInput: GetUserByOsInput;
 }>;
 
 
-export type GetUserByOsQuery = { __typename?: 'Query', getUserByOs: { __typename?: 'GetUserByOSOutput', ok: boolean, iosCounts?: Array<number> | null | undefined, androidCounts?: Array<number> | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type GetUserByOsQuery = { __typename?: 'Query', getUserByOs: { __typename?: 'GetUserByOSOutput', ok: boolean, iosCounts?: Array<number> | null, androidCounts?: Array<number> | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 export type GetInquiriesHistoryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetInquiriesHistoryQuery = { __typename?: 'Query', getInquiriesHistory: { __typename?: 'GetInquiriesHistoryOutput', ok: boolean, pendingInquiry?: number | null | undefined, processedInquiry?: number | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined, inquiries?: Array<{ __typename?: 'Board', _id: string, memberId: string, title: string, createDate: any, createMember: { __typename?: 'AuthMember', email: string } }> | null | undefined } };
+export type GetInquiriesHistoryQuery = { __typename?: 'Query', getInquiriesHistory: { __typename?: 'GetInquiriesHistoryOutput', ok: boolean, pendingInquiry?: number | null, processedInquiry?: number | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, inquiries?: Array<{ __typename?: 'Board', _id: string, memberId: string, title: string, createDate: any, createMember: { __typename?: 'AuthMember', email: string } }> | null } };
 
 export type GetPayHistoryByOsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetPayHistoryByOsQuery = { __typename?: 'Query', getPayHistoryByOS: { __typename?: 'GetPayHistoryByOSOutput', ok: boolean, android?: string | null | undefined, ios?: string | null | undefined, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null | undefined } };
+export type GetPayHistoryByOsQuery = { __typename?: 'Query', getPayHistoryByOS: { __typename?: 'GetPayHistoryByOSOutput', ok: boolean, android?: string | null, ios?: string | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
 
 
 export const LoginDocument = gql`

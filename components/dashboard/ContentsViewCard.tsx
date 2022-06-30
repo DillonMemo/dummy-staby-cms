@@ -109,7 +109,7 @@ const ContentsViewCard: React.FC = () => {
             series={[
               {
                 name: locale === 'ko' ? '횟수' : 'Count',
-                data: data?.getNewMembers.counts,
+                data: data?.getNewMembers.counts as number[],
               },
             ]}
             type="line"

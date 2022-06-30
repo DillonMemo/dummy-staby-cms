@@ -149,12 +149,12 @@ const UserByOSCard: React.FC = () => {
             series={[
               {
                 name: 'IOS',
-                data: data?.getUserByOs.iosCounts,
+                data: data?.getUserByOs.iosCounts as number[],
                 type: 'line',
               },
               {
                 name: 'AOS',
-                data: data?.getUserByOs.androidCounts,
+                data: data?.getUserByOs.androidCounts as number[],
                 type: 'line',
               },
             ]}

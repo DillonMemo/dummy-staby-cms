@@ -580,6 +580,10 @@ export const GlobalStyles = createGlobalStyle`
       outline: none;
 
     }
+    .global-drag-line {
+      border-color: ${({ theme }) => theme.border} !important;
+      margin-top: 5px !important;
+    }
     /** apex charts */
     .apexcharts-legend-text {
       top: -1px;
@@ -1024,6 +1028,126 @@ export const Edit = styled.div`
           font-size: 0.75rem;
         }
       }
+    }
+  }
+
+  .form-item {
+    color: ${({ theme }) => theme.text};
+
+    p {
+      display: flex;
+      height: 2.714rem;
+      align-items: center;
+      padding: 0 0.6875rem;
+
+      ${md} {
+        padding: 0;
+      }
+    }
+    select,
+    .input:not(.ant-input-disabled, .ant-input-affix-wrapper-disabled),
+    .ant-input-number-input,
+    .ant-select-selector {
+      height: 2.714rem;
+      align-items: center;
+      background-color: ${({ theme }) => theme.card};
+      color: ${({ theme }) => theme.text};
+      border: 1px solid ${({ theme }) => theme.border};
+      border-radius: ${({ theme }) => theme.card_radius};
+    }
+
+    .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled) {
+      > input.ant-input {
+        background-color: ${({ theme }) => theme.card};
+        color: ${({ theme }) => theme.text};
+      }
+    }
+
+    .ant-select-arrow,
+    .ant-input-suffix svg {
+      color: ${({ theme }) => theme.text};
+    }
+
+    .ant-input[disabled],
+    .ant-select-disabled .ant-select-selector,
+    .ant-input-affix-wrapper-disabled {
+      height: 2.714rem;
+      border: 1px solid ${({ theme }) => theme.border};
+      border-radius: ${({ theme }) => theme.card_radius};
+      background-color: ${({ theme }) => theme.body};
+      color: ${({ theme }) => theme.text};
+    }
+    .ant-input-affix-wrapper-disabled {
+      > .ant-input.ant-input-disabled {
+        height: 2rem;
+        border: none;
+      }
+    }
+
+    *::placeholder,
+    .ant-select-selection-placeholder {
+      color: ${({ theme }) => `${theme.text}75`}!important;
+    }
+
+    .ant-radio-group {
+      height: 2.714rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+
+      ${md} {
+        justify-content: center;
+      }
+
+      &.gap-3 {
+        gap: 3rem;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-flow: column nowrap;
+
+      .form-message {
+        color: red;
+        font-size: 0.75rem;
+      }
+
+      .row {
+        display: inline-flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 2rem;
+
+      &.add-write {
+        padding: 0 1.5rem;
+
+        ${md} {
+          padding: 0;
+        }
+      }
+
+      .submit-button {
+        padding: 0.786rem 1.5rem;
+        border: 1px solid transparent;
+        box-shadow: none;
+        min-height: 2.714rem;
+
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+    .ant-input-group-addon {
+      min-width: 7.5rem;
+      color: ${({ theme }) => theme.text};
+      background-color: ${({ theme }) => theme.body};
     }
   }
 `

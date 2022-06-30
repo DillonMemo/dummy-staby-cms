@@ -113,7 +113,7 @@ const DailyAccessorCard: React.FC = () => {
             series={[
               {
                 name: locale === 'ko' ? '횟수' : 'Count',
-                data: data?.getDailyAccessor.counts,
+                data: data?.getDailyAccessor.counts as number[],
               },
             ]}
             type="line"

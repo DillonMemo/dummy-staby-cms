@@ -353,17 +353,17 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                         {Object.keys(MemberType).map((type) => {
                           const memberTypeValue =
                             locale === 'ko'
-                              ? (type as MemberType) === MemberType.Normal
+                              ? (type as MemberType).toUpperCase() === MemberType.Normal
                                 ? '일반'
-                                : (type as MemberType) === MemberType.Business
+                                : (type as MemberType).toUpperCase() === MemberType.Business
                                 ? '기업'
-                                : (type as MemberType) === MemberType.Contents
+                                : (type as MemberType).toUpperCase() === MemberType.Contents
                                 ? '컨텐츠관리자'
-                                : (type as MemberType) === MemberType.Cx
+                                : (type as MemberType).toUpperCase() === MemberType.Cx
                                 ? 'CX관리자'
-                                : (type as MemberType) === MemberType.Service
+                                : (type as MemberType).toUpperCase() === MemberType.Service
                                 ? '서비스관리자'
-                                : (type as MemberType) === MemberType.System
+                                : (type as MemberType).toUpperCase() === MemberType.System
                                 ? '시스템관리자'
                                 : type
                               : type

@@ -4,7 +4,7 @@ export PATH='/home/stabyprod/.nvm/versions/node/v16.13.2/bin:/usr/local/sbin:/us
 
 cp ../.env.production .
 
-npm i
+npm i react-quill --save --force
 
 npm run build
 
