@@ -12,7 +12,7 @@ import { Controller, useForm } from 'react-hook-form'
 import TextArea from 'rc-textarea'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useLazyQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { DELETE_VOD_MUTATION, EDIT_VOD_MUTATION, LIVES_MUTATION } from '../../graphql/mutations'
 import {
   DeleteVodMutation,
@@ -105,10 +105,38 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const vodId = router.query.id ? router.query.id?.toString() : ''
 
   //vod쿼리
-  const [getVod, { data: vodData, refetch: refreshMe }] = useLazyQuery<
+  const { data: vodData, refetch: refreshMe } = useQuery<
     FindVodByIdQuery,
     FindVodByIdQueryVariables
-  >(VOD_QUERY)
+  >(VOD_QUERY, {
+    variables: {
+      vodInput: {
+        vodId,
+      },
+    },
+    onCompleted: (data: FindVodByIdQuery) => {
+      if (
+        data?.findVodById.ok &&
+        data?.findVodById.vod?.vodLinkInfo &&
+        data?.findVodById.vod?.vodShareInfo.memberShareInfo
+      ) {
+        const infoResult = data?.findVodById.vod?.vodLinkInfo.map((data) => {
+          return omit(data, ['__typename', 'playingImageName'])
+        }) //liveInfoArr result
+        const result = data?.findVodById.vod?.vodShareInfo.memberShareInfo.map((data) => {
+          return omit(data, ['__typename'])
+        }) //memberShareInfo result
+
+        setMainImgInfo({
+          ...mainImgInfo,
+          mainImg: data?.findVodById.vod?.mainImageName,
+        })
+        setVodInfoArr(infoResult as any)
+        setMemberShareInfo(result as any)
+        setIsInputDisabled(data?.findVodById.vod?.vodStatus !== 'AVAILABLE')
+      }
+    },
+  })
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [statusRadio, setStatusRadio] = useState(
@@ -117,10 +145,16 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [isStatusChange, setIsStatusChange] = useState(false)
 
   //지분 설정을 위한 멤버 쿼리
-  const [getMember, { data: memberData }] = useLazyQuery<
-    FindMembersByTypeQuery,
-    FindMembersByTypeQueryVariables
-  >(FIND_MEMBERS_BY_TYPE_QUERY)
+  const { data: memberData } = useQuery<FindMembersByTypeQuery, FindMembersByTypeQueryVariables>(
+    FIND_MEMBERS_BY_TYPE_QUERY,
+    {
+      variables: {
+        membersByTypeInput: {
+          memberType: MemberType.Business,
+        },
+      },
+    }
+  )
 
   //라이브 연결을 위한 뮤테이션
   const [lives, { data: livesData }] = useMutation<LivesMutation, LivesMutationVariables>(
@@ -427,23 +461,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     }
   }
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        await getMember({
-          variables: {
-            membersByTypeInput: {
-              memberType: MemberType.Business,
-            },
-          },
-        })
-      } catch (error) {
-        console.error(error)
-      }
-    }
-    fetch()
-  }, [])
-
+  // live 목록 조회
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -458,44 +476,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     }
     fetch()
   }, [])
-
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        await getVod({
-          variables: {
-            vodInput: {
-              vodId,
-            },
-          },
-        })
-      } catch (error) {
-        console.error(error)
-      }
-    }
-    fetch()
-
-    if (
-      vodData?.findVodById.ok &&
-      vodData?.findVodById.vod?.vodLinkInfo &&
-      vodData?.findVodById.vod?.vodShareInfo.memberShareInfo
-    ) {
-      const infoResult = vodData?.findVodById.vod?.vodLinkInfo.map((data) => {
-        return omit(data, ['__typename', 'playingImageName'])
-      }) //liveInfoArr result
-      const result = vodData?.findVodById.vod?.vodShareInfo.memberShareInfo.map((data) => {
-        return omit(data, ['__typename'])
-      }) //memberShareInfo result
-
-      setMainImgInfo({
-        ...mainImgInfo,
-        mainImg: vodData?.findVodById.vod?.mainImageName,
-      })
-      setVodInfoArr(infoResult)
-      setMemberShareInfo(result)
-      setIsInputDisabled(vodData?.findVodById.vod?.vodStatus !== 'AVAILABLE')
-    }
-  }, [vodData])
 
   return (
     <>

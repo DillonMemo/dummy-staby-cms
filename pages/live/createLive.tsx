@@ -417,7 +417,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 {errors.livePreviewDate?.message && (
                   <div className="form-message">
-                    <span>{errors.livePreviewDate.message}</span>
+                    <span>{errors.livePreviewDate.message.toString()}</span>
                   </div>
                 )}
               </div>

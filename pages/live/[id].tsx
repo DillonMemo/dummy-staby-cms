@@ -13,7 +13,7 @@ import TextArea from 'rc-textarea'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useLazyQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { DELETE_LIVE_MUTATION, EDIT_LIVE_MUTATION } from '../../graphql/mutations'
 import {
   DeleteLiveMutation,
@@ -130,34 +130,41 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const liveId = query.id ? query.id?.toString() : ''
 
   //지분 설정을 위한 멤버 쿼리
-  const [getMember, { data: memberData }] = useLazyQuery<
-    FindMembersByTypeQuery,
-    FindMembersByTypeQueryVariables
-  >(FIND_MEMBERS_BY_TYPE_QUERY)
+  const { data: memberData } = useQuery<FindMembersByTypeQuery, FindMembersByTypeQueryVariables>(
+    FIND_MEMBERS_BY_TYPE_QUERY,
+    {
+      variables: {
+        membersByTypeInput: {
+          memberType: MemberType.Business,
+        },
+      },
+    }
+  )
 
   //라이브 쿼리
-  const [getLive, { data: liveData, refetch: refreshMe }] = useLazyQuery<
+  const { data: liveData, refetch: refreshMe } = useQuery<
     FindLiveByIdQuery,
     FindLiveByIdQueryVariables
   >(LIVE_QUERY, {
+    variables: { liveInput: { liveId } },
     onCompleted: (data: FindLiveByIdQuery) => {
       if (data.findLiveById.ok) {
-        const infoResult = liveData?.findLiveById.live?.liveLinkInfo.map((data) => {
+        const infoResult = data?.findLiveById.live?.liveLinkInfo.map((data) => {
           return omit(data, ['playingImageName', '__typename'])
         }) //liveInfoArr result
-        const result = liveData?.findLiveById.live?.liveShareInfo.memberShareInfo.map((data) => {
+        const result = data?.findLiveById.live?.liveShareInfo.memberShareInfo.map((data) => {
           return omit(data, ['__typename'])
         }) //memberShareInfo result
 
         setMainImgInfo({
           ...mainImgInfo,
-          mainImg: liveData?.findLiveById.live?.mainImageName,
+          mainImg: data?.findLiveById.live?.mainImageName,
         })
         setLiveInfoArr(infoResult as any)
         setMemberShareInfo(result as any)
         // setIsInputDisabled(liveData?.findLiveById.live?.liveStatus !== 'HIDE' && true)
         setStatusRadio(
-          liveData?.findLiveById.live?.liveStatus ? liveData?.findLiveById.live?.liveStatus : 'HIDE'
+          data?.findLiveById.live?.liveStatus ? data?.findLiveById.live?.liveStatus : 'HIDE'
         )
       }
     },
@@ -374,37 +381,37 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   //useEffect(() => {}, [memberData])
 
-  useEffect(() => {
-    const memberFetch = async () => {
-      try {
-        await getMember({
-          variables: {
-            membersByTypeInput: {
-              memberType: MemberType.Business,
-            },
-          },
-        })
-      } catch (e) {
-        console.error(e)
-      }
-    }
+  // useEffect(() => {
+  // const memberFetch = async () => {
+  //   try {
+  //     await getMember({
+  //       variables: {
+  //         membersByTypeInput: {
+  //           memberType: MemberType.Business,
+  //         },
+  //       },
+  //     })
+  //   } catch (e) {
+  //     console.error(e)
+  //   }
+  // }
 
-    const liveFetch = async () => {
-      try {
-        await getLive({
-          variables: {
-            liveInput: {
-              liveId,
-            },
-          },
-        })
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    liveFetch()
-    memberFetch()
-  }, [liveData, memberData])
+  // const liveFetch = async () => {
+  //   try {
+  //     await getLive({
+  //       variables: {
+  //         liveInput: {
+  //           liveId,
+  //         },
+  //       },
+  //     })
+  //   } catch (e) {
+  //     console.error(e)
+  //   }
+  // }
+  // liveFetch()
+  // memberFetch()
+  // }, [liveData, memberData])
 
   useEffect(() => {
     // eslint-disable-next-line no-console
@@ -614,7 +621,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 {errors.livePreviewDate?.message && (
                   <div className="form-message">
-                    <span>{errors.livePreviewDate.message}</span>
+                    <span>{errors.livePreviewDate.message.toString()}</span>
                   </div>
                 )}
               </div>

@@ -1,4 +1,4 @@
-import { useLazyQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import {
@@ -16,7 +16,7 @@ import { EDIT_MEMBER_BY_ID_MUTATION, SUSPEND_MEMBER_BY_ID_MUTATION } from '../..
 import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
 import { Button, Input, Modal, Radio, Select, Skeleton } from 'antd'
 import { toast } from 'react-toastify'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import styled from 'styled-components'
@@ -75,10 +75,16 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const memberId = router.query.id ? router.query.id?.toString() : ''
 
-  const [getMember, { data: memberData, refetch: refreshMe }] = useLazyQuery<
+  const { data: memberData, refetch: refreshMe } = useQuery<
     FindMemberByIdQuery,
     FindMemberByIdQueryVariables
-  >(MEMBER_QUERY)
+  >(MEMBER_QUERY, {
+    variables: {
+      memberInput: {
+        memberId,
+      },
+    },
+  })
   const [suspendMember, { loading: isSuspendMemberLoading }] = useMutation<
     SuspendMemberByIdMutation,
     SuspendMemberByIdMutationVariables
@@ -155,15 +161,15 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     }
   }
 
-  useEffect(() => {
-    getMember({
-      variables: {
-        memberInput: {
-          memberId,
-        },
-      },
-    })
-  }, [memberData])
+  // useEffect(() => {
+  //   getMember({
+  //     variables: {
+  //       memberInput: {
+  //         memberId,
+  //       },
+  //     },
+  //   })
+  // }, [memberData])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
