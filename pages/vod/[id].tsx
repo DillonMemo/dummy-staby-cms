@@ -108,7 +108,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const {
     data: vodData,
     refetch: refreshMe,
-    loading: VodIdLoading,
+    loading: isVodIdLoading,
   } = useQuery<FindVodByIdQuery, FindVodByIdQueryVariables>(VOD_QUERY, {
     variables: {
       vodInput: {
@@ -498,7 +498,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
           </div>
           <div className="main-content">
             <Edit className="card">
-              {VodIdLoading || (
+              {isVodIdLoading || (
                 <Form name="createLiveForm" onSubmit={handleSubmit(onSubmit)}>
                   <Radio.Group
                     defaultValue={vodData?.findVodById.vod?.vodStatus
