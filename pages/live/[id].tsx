@@ -147,7 +147,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const {
     data: liveData,
     refetch: refreshMe,
-    loading: LiveIdLoading,
+    loading: isLiveIdLoading,
   } = useQuery<FindLiveByIdQuery, FindLiveByIdQueryVariables>(LIVE_QUERY, {
     variables: { liveInput: { liveId } },
     onCompleted: (data: FindLiveByIdQuery) => {
@@ -404,7 +404,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         </div>
         <div className="main-content">
           <Edit className="card">
-            {LiveIdLoading || (
+            {isLiveIdLoading || (
               <Form name="createLiveForm">
                 <Radio.Group
                   defaultValue={liveData?.findLiveById.live?.liveStatus

@@ -637,9 +637,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             <Controller
                               control={control}
                               name="share"
-                              rules={{
-                                required: requiredText,
-                              }}
                               render={() => (
                                 <>
                                   <Select
@@ -713,11 +710,6 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       {locale === 'ko' ? '추가' : 'Add'}
                     </Button>
                   </div>
-                  {errors.share && (
-                    <div className="form-message">
-                      <span>{requiredText}</span>
-                    </div>
-                  )}
                 </div>
                 <div className="form-item mt-harf">
                   <div className="button-group">
