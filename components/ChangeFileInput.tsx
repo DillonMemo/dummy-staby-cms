@@ -1,5 +1,3 @@
-// import styled from "styled-components";
-
 import { Button, Input } from 'antd'
 import { useRouter } from 'next/router'
 import React, { ReactNode, useState } from 'react'
@@ -34,17 +32,18 @@ const ChangeFileInput = ({ src, onChange, name }: ChangeFileInputProps) => {
     <>
       {isEdit ? (
         <Input
+          type="file"
           className="input"
           name={name}
           placeholder="Please upload img. only png or jpg"
-          type="file"
         />
       ) : (
         <Input
+          type="text"
           className="input"
           name={name}
-          placeholder="Please upload img. only png or jpg"
-          value={src}
+          placeholder={src}
+          // value={src}
           onChange={onChange}
           disabled={true}
         />
