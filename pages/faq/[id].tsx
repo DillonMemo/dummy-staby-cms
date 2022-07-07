@@ -2,7 +2,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { pick } from 'lodash'
+import { omit, pick } from 'lodash'
 import { useMutation, useQuery } from '@apollo/client'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
@@ -188,7 +188,10 @@ const FaqDetail: NextPage<Props> = (props) => {
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
             <li>
-              <Link href="/faq">
+              <Link
+                href={{ pathname: '/faq', query: { ...omit(query, 'id') } }}
+                as={'/faq'}
+                locale={locale}>
                 <a>FAQ</a>
               </Link>
             </li>

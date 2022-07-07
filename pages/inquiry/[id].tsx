@@ -1,4 +1,4 @@
-import { pick } from 'lodash'
+import { omit, pick } from 'lodash'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -7,6 +7,7 @@ import { Button, Skeleton } from 'antd'
 import Parser from 'html-react-parser'
 import styled from 'styled-components'
 import { toast } from 'react-toastify'
+import moment from 'moment'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -25,7 +26,6 @@ import {
   FindBoardByIdQueryVariables,
 } from '../../generated'
 import { FIND_BOARD_BY_ID_QUERY } from '../../graphql/queries'
-import moment from 'moment'
 import { CREATE_ANSWER_MUTATION } from '../../graphql/mutations'
 
 type Props = styleMode
@@ -124,7 +124,10 @@ const InquiryDetail: NextPage<Props> = (props) => {
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
             <li>
-              <Link href="/inquiry">
+              <Link
+                href={{ pathname: '/inquiry', query: { ...omit(query, 'id') } }}
+                as={'/inquiry'}
+                locale={locale}>
                 <a>{locale === 'ko' ? '문의' : 'Inquiry'}</a>
               </Link>
             </li>

@@ -23,6 +23,7 @@ import { LIVES_MUTATION } from '../../graphql/mutations'
 /** util */
 import { DATE_FORMAT } from '../../Common/commonFn'
 import { toast } from 'react-toastify'
+import { PAGE, PAGESIZE } from '../../lib/constants'
 
 type Props = styleMode
 
@@ -92,8 +93,8 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
     { page, pageSize, liveStatus, dates, livePreviewDates, searchSelect, searchText },
     setFilterOptions,
   ] = useState<Options>({
-    page: 1,
-    pageSize: 20,
+    page: PAGE,
+    pageSize: PAGESIZE,
     liveStatus: 'All',
     dates: [],
     livePreviewDates: [],
@@ -133,6 +134,11 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
 
       setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
+      router.push(
+        { pathname: router.pathname, query: { ...router.query, page, pageSize } },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -147,9 +153,9 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
         const { data } = await lives({
           variables: {
             livesInput: {
-              page,
-              pageView: pageSize,
-              liveStatus: key !== 'All' ? (key as LiveStatus) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(key !== 'All' && { liveStatus: key as LiveStatus }),
               ...(dates && dates.length > 0 && { dates }),
               ...(livePreviewDates && livePreviewDates.length > 0 && { livePreviewDates }),
               ...(searchSelect === 'Title'
@@ -162,7 +168,20 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
 
         if (data?.lives.ok) {
-          setFilterOptions((prev) => ({ ...prev, liveStatus: key as keyof typeof LiveStatus }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            liveStatus: key as keyof typeof LiveStatus,
+          }))
+          router.push(
+            {
+              pathname: router.pathname,
+              query: { ...router.query, page: PAGE, pageSize: PAGESIZE, liveStatus: key },
+            },
+            router.asPath,
+            { locale }
+          )
         }
       }
     } catch (error) {
@@ -176,11 +195,34 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
    */
   const onPickerOpen = (open: boolean) => {
     if (open) {
-      setFilterOptions((prev) => ({ ...prev, dates: [] }))
+      setFilterOptions((prev) => ({ ...prev, page: PAGE, pageSize: PAGESIZE, dates: [] }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: PAGE, pageSize: PAGESIZE, dates: [] },
+        },
+        router.asPath,
+        { locale }
+      )
     }
   }
   const onPreviewPickerOpen = (open: boolean) => {
-    if (open) setFilterOptions((prev) => ({ ...prev, livePreviewDates: [] }))
+    if (open) {
+      setFilterOptions((prev) => ({
+        ...prev,
+        page: PAGE,
+        pageSize: PAGESIZE,
+        livePreviewDates: [],
+      }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: PAGE, pageSize: PAGESIZE, livePreviewDates: [] },
+        },
+        router.asPath,
+        { locale }
+      )
+    }
   }
 
   /**
@@ -192,9 +234,9 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
       await lives({
         variables: {
           livesInput: {
-            page,
-            pageView: pageSize,
-            liveStatus: liveStatus !== 'All' ? (liveStatus as LiveStatus) : undefined,
+            page: PAGE,
+            pageView: PAGESIZE,
+            ...(liveStatus !== 'All' && { liveStatus: liveStatus as LiveStatus }),
             ...(value && value.length > 0 && { dates: value }),
             ...(livePreviewDates && livePreviewDates.length > 0 && { livePreviewDates }),
             ...(searchSelect === 'Title'
@@ -205,27 +247,75 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         },
       })
+
+      setFilterOptions((prev) => ({
+        ...prev,
+        page: PAGE,
+        pageSize: PAGESIZE,
+        dates: value as moment.Moment[],
+      }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            dates: value
+              ? ([value[0]?.format().toString(), value[1]?.format().toString()] as string[])
+              : [],
+          },
+        },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
   }
   const onPreviewPickerChange = async (value: RangeValue<moment.Moment>) => {
-    await lives({
-      variables: {
-        livesInput: {
-          page,
-          pageView: pageSize,
-          liveStatus: liveStatus !== 'All' ? (liveStatus as LiveStatus) : undefined,
-          ...(dates && dates.length > 0 && { dates }),
-          ...(value && value.length > 0 && { livePreviewDates: value }),
-          ...(searchSelect === 'Title'
-            ? { title: searchText }
-            : searchSelect === 'MC'
-            ? { hostName: searchText }
-            : {}),
+    try {
+      await lives({
+        variables: {
+          livesInput: {
+            page: PAGE,
+            pageView: PAGESIZE,
+            ...(liveStatus !== 'All' && { liveStatus: liveStatus as LiveStatus }),
+            ...(dates && dates.length > 0 && { dates }),
+            ...(value && value.length > 0 && { livePreviewDates: value }),
+            ...(searchSelect === 'Title'
+              ? { title: searchText }
+              : searchSelect === 'MC'
+              ? { hostName: searchText }
+              : {}),
+          },
         },
-      },
-    })
+      })
+
+      setFilterOptions((prev) => ({
+        ...prev,
+        page: PAGE,
+        pageSize: PAGESIZE,
+        livePreviewDates: value as moment.Moment[],
+      }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            livePreviewDates: value
+              ? ([value[0]?.format().toString(), value[1]?.format().toString()] as string[])
+              : [],
+          },
+        },
+        router.asPath,
+        { locale }
+      )
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   /**
@@ -237,9 +327,9 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
         const { data } = await lives({
           variables: {
             livesInput: {
-              page,
-              pageView: pageSize,
-              liveStatus: liveStatus !== 'All' ? (liveStatus as LiveStatus) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(liveStatus !== 'All' && { liveStatus: liveStatus as LiveStatus }),
               ...(dates && dates.length > 0 && { dates }),
               ...(livePreviewDates && livePreviewDates.length > 0 && { livePreviewDates }),
               ...(searchSelect === 'Title'
@@ -251,7 +341,12 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         })
         if (data?.lives.ok) {
-          setFilterOptions((prev) => ({ ...prev, searchText: value }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            searchText: value,
+          }))
         }
       } catch (error) {
         console.error(error)
@@ -284,17 +379,57 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
   useEffect(() => {
     const fetch = async () => {
       try {
-        await lives({
+        const { data } = await lives({
           variables: {
-            livesInput: {},
+            livesInput: {
+              page: +(router.query.page || page),
+              pageView: +(router.query.pageSize || pageSize),
+              ...(router.query.liveStatus &&
+                router.query.liveStatus !== 'All' && {
+                  liveStatus: router.query.liveStatus as LiveStatus,
+                }),
+              ...(router.query.dates &&
+                router.query.dates.length > 0 && {
+                  dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+                }),
+              ...(router.query.livePreviewDates &&
+                router.query.livePreviewDates.length > 0 && {
+                  livePreviewDates: [
+                    moment(router.query.livePreviewDates[0]),
+                    moment(router.query.livePreviewDates[1]),
+                  ],
+                }),
+            },
           },
         })
+
+        if (data?.lives.ok) {
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: +(router.query.page || prev.page),
+            pageSize: +(router.query.pageSize || prev.pageSize),
+            ...(router.query.liveStatus && {
+              liveStatus: router.query.liveStatus as keyof typeof LiveStatus,
+            }),
+            ...(router.query.dates &&
+              router.query.dates.length > 0 && {
+                dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+              }),
+            ...(router.query.livePreviewDates &&
+              router.query.livePreviewDates.length > 0 && {
+                livePreviewDates: [
+                  moment(router.query.livePreviewDates[0]),
+                  moment(router.query.livePreviewDates[1]),
+                ],
+              }),
+          }))
+        }
       } catch (error) {
         console.error(error)
       }
     }
     fetch()
-  }, [])
+  }, [router])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
@@ -332,14 +467,33 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <Space className="responsive-flex">
                   <Dropdown
                     overlay={
-                      <Menu onClick={onLiveStatusMenuClick}>
-                        <Menu.Item key="All">All</Menu.Item>
-                        {Object.keys(LiveStatus).map((status) => (
-                          <Menu.Item key={LiveStatus[status as keyof typeof LiveStatus]}>
-                            {status}
-                          </Menu.Item>
-                        ))}
-                      </Menu>
+                      <Menu
+                        onClick={onLiveStatusMenuClick}
+                        items={[
+                          { key: 'All', label: locale === 'ko' ? '전체' : 'All' },
+                          ...Object.keys(LiveStatus).map((status) => {
+                            const liveStatusValue =
+                              locale === 'ko'
+                                ? (status as LiveStatus).toUpperCase() === LiveStatus.Active
+                                  ? '진행'
+                                  : (status as LiveStatus).toUpperCase() === LiveStatus.Delete
+                                  ? '삭제'
+                                  : (status as LiveStatus).toUpperCase() === LiveStatus.Display
+                                  ? '노출'
+                                  : (status as LiveStatus).toUpperCase() === LiveStatus.Finish
+                                  ? '종료'
+                                  : (status as LiveStatus).toUpperCase() === LiveStatus.Hide
+                                  ? '대기'
+                                  : status
+                                : status
+
+                            return {
+                              key: LiveStatus[status as keyof typeof LiveStatus],
+                              label: liveStatusValue,
+                            }
+                          }),
+                        ]}
+                      />
                     }
                     onVisibleChange={(visible) =>
                       setVisibleOptions((prev) => ({ ...prev, liveStatus: visible }))
@@ -348,7 +502,22 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <div className="dropdown">
                       <span className="title">{locale === 'ko' ? '상태' : 'Status'}</span>
                       <Button onClick={(e) => e.preventDefault()}>
-                        {liveStatus}&nbsp;
+                        {locale === 'ko'
+                          ? liveStatus === 'All'
+                            ? '전체'
+                            : (liveStatus as LiveStatus) === LiveStatus.Active
+                            ? '진행'
+                            : (liveStatus as LiveStatus) === LiveStatus.Delete
+                            ? '삭제'
+                            : (liveStatus as LiveStatus) === LiveStatus.Display
+                            ? '노출'
+                            : (liveStatus as LiveStatus) === LiveStatus.Finish
+                            ? '종료'
+                            : (liveStatus as LiveStatus) === LiveStatus.Hide
+                            ? '대기'
+                            : liveStatus
+                          : liveStatus}
+                        &nbsp;
                         {livesLoading && <LoadingOutlined style={{ fontSize: '12px' }} />}
                       </Button>
                     </div>
@@ -424,6 +593,7 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                             router.push({
                               pathname: '/live/[id]',
                               query: {
+                                ...router.query,
                                 id: column && column._id ? column._id : '',
                               },
                             })
@@ -432,17 +602,46 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                       }}
                       dataSource={
                         livesData
-                          ? livesData.lives.lives?.map((live: any, index: number) => ({
-                              index: index + 1 + pageSize * (page - 1),
-                              key: index,
-                              _id: live._id,
-                              liveStatus: live.liveStatus,
-                              title: live.title,
-                              hostName: live.hostName,
-                              paymentAmount: live.paymentAmount + ' G',
-                              livePreviewDate: DATE_FORMAT('YYYY-MM-DD', live.livePreviewDate),
-                              createDate: moment(live.createDate).format('YYYY.MM.DD'),
-                            }))
+                          ? livesData.lives.lives?.map(
+                              (
+                                {
+                                  _id,
+                                  liveStatus,
+                                  title,
+                                  hostName,
+                                  paymentAmount,
+                                  livePreviewDate,
+                                  createDate,
+                                },
+                                index: number
+                              ) => {
+                                const liveStatusValue =
+                                  locale === 'ko'
+                                    ? (liveStatus as LiveStatus) === LiveStatus.Active
+                                      ? '진행'
+                                      : (liveStatus as LiveStatus) === LiveStatus.Delete
+                                      ? '삭제'
+                                      : (liveStatus as LiveStatus) === LiveStatus.Display
+                                      ? '노출'
+                                      : (liveStatus as LiveStatus) === LiveStatus.Finish
+                                      ? '종료'
+                                      : (liveStatus as LiveStatus) === LiveStatus.Hide
+                                      ? '대기'
+                                      : liveStatus
+                                    : liveStatus
+                                return {
+                                  index: index + 1 + pageSize * (page - 1),
+                                  key: index,
+                                  _id: _id,
+                                  liveStatus: liveStatusValue,
+                                  title: title,
+                                  hostName: hostName,
+                                  paymentAmount: paymentAmount + ' G',
+                                  livePreviewDate: DATE_FORMAT('YYYY-MM-DD', livePreviewDate),
+                                  createDate: moment(createDate).format('YYYY.MM.DD'),
+                                }
+                              }
+                            )
                           : []
                       }
                       pagination={{

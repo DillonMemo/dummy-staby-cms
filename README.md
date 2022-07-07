@@ -7,7 +7,14 @@
 ### 22. 06. 28
 
 - [x] NPM package refactoring 
-- [ ] pagination bug
+- pagination bug
+  - [x] Member
+  - [x] VOD
+  - [x] LIVE
+  - [x] 공지사항
+  - [x] 이벤트
+  - [x] FAQ
+  - [x] 문의
 
 #### 메모 및 계획
 

@@ -25,9 +25,11 @@ import {
   FindVodByIdQueryVariables,
   LivesMutation,
   LivesMutationVariables,
+  MemberShareInfo,
   MemberType,
   RatioType,
   TranscodeStatus,
+  VodLinkInfo,
   VodStatus,
 } from '../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY, VOD_QUERY } from '../../graphql/queries'
@@ -121,12 +123,14 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         data?.findVodById.vod?.vodLinkInfo &&
         data?.findVodById.vod?.vodShareInfo.memberShareInfo
       ) {
-        const infoResult = data?.findVodById.vod?.vodLinkInfo.map((data) => {
+        const infoResult = data?.findVodById.vod?.vodLinkInfo.map((data: VodLinkInfo) => {
           return omit(data, ['__typename', 'playingImageName'])
         }) //liveInfoArr result
-        const result = data?.findVodById.vod?.vodShareInfo.memberShareInfo.map((data) => {
-          return omit(data, ['__typename'])
-        }) //memberShareInfo result
+        const result = data?.findVodById.vod?.vodShareInfo.memberShareInfo.map(
+          (data: MemberShareInfo) => {
+            return omit(data, ['__typename'])
+          }
+        ) //memberShareInfo result
 
         setMainImgInfo({
           ...mainImgInfo,
@@ -492,7 +496,17 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <a>{locale === 'ko' ? '홈' : 'Home'}</a>
                 </Link>
               </li>
-              <li>{locale === 'ko' ? 'Vod' : 'Vod'}</li>
+              <li>
+                <Link
+                  href={{
+                    pathname: '/vod/vods',
+                    query: { ...omit(router.query, 'id') },
+                  }}
+                  as={'/vod/vods'}
+                  locale={locale}>
+                  <a>{locale === 'ko' ? 'Vod' : 'Vod'}</a>
+                </Link>
+              </li>
               <li>{locale === 'ko' ? 'Vod 관리' : 'Vod Edit'}</li>
             </ol>
           </div>

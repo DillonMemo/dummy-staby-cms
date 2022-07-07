@@ -27,6 +27,7 @@ import {
 } from '../../generated'
 import { MEMBERS_MUTATION } from '../../graphql/mutations'
 import RangePicker from '../../components/RangePicker'
+import { PAGE, PAGESIZE } from '../../lib/constants'
 
 type Props = styleMode
 
@@ -88,8 +89,8 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
     { page, pageSize, memberType, memberStatus, dates, searchSelect, searchText },
     setFilterOptions,
   ] = useState<Options>({
-    page: 1,
-    pageSize: 20,
+    page: PAGE,
+    pageSize: PAGESIZE,
     memberType: 'All',
     memberStatus: 'All',
     dates: [],
@@ -129,6 +130,11 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
 
       setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
+      router.push(
+        { pathname: router.pathname, query: { ...router.query, page, pageSize } },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -144,10 +150,10 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         const { data } = await members({
           variables: {
             membersInput: {
-              page,
-              pageView: pageSize,
-              memberType: key !== 'All' ? (key as MemberType) : undefined,
-              memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(key !== 'All' && { memberType: key as MemberType }),
+              ...(memberStatus !== 'All' && { memberStatus: memberStatus as MemberStatus }),
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: searchText }
@@ -159,7 +165,25 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
 
         if (data?.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, memberType: key as Filters['memberType'] }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            memberType: key as keyof typeof MemberType,
+          }))
+          router.push(
+            {
+              pathname: router.pathname,
+              query: {
+                ...router.query,
+                page: PAGE,
+                pageSize: PAGESIZE,
+                memberType: key,
+              },
+            },
+            router.asPath,
+            { locale }
+          )
         }
       }
     } catch (error) {
@@ -177,10 +201,10 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         const { data } = await members({
           variables: {
             membersInput: {
-              page,
-              pageView: pageSize,
-              memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
-              memberStatus: key !== 'All' ? (key as MemberStatus) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(memberType !== 'All' && { memberType: memberType as MemberType }),
+              ...(key !== 'All' && { memberStatus: key as MemberStatus }),
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: searchText }
@@ -191,7 +215,25 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         })
         if (data?.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, memberStatus: key as keyof typeof MemberStatus }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            memberStatus: key as keyof typeof MemberStatus,
+          }))
+          router.push(
+            {
+              pathname: router.pathname,
+              query: {
+                ...router.query,
+                page: PAGE,
+                pageSize: PAGESIZE,
+                memberStatus: key,
+              },
+            },
+            router.asPath,
+            { locale }
+          )
         }
       }
     } catch (error) {
@@ -205,7 +247,20 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
    */
   const onPickerOpen = (open: boolean) => {
     if (open) {
-      setFilterOptions((prev) => ({ ...prev, dates: [] }))
+      setFilterOptions((prev) => ({ ...prev, page: PAGE, pageSize: PAGESIZE, dates: [] }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            dates: [],
+          },
+        },
+        router.asPath,
+        { locale }
+      )
     }
   }
 
@@ -218,10 +273,10 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
       await members({
         variables: {
           membersInput: {
-            page,
-            pageView: pageSize,
-            memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
-            memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
+            page: PAGE,
+            pageView: PAGESIZE,
+            ...(memberType !== 'All' && { memberType: memberType as MemberType }),
+            ...(memberStatus !== 'All' && { memberStatus: memberStatus as MemberStatus }),
             ...(value && value.length > 0 && { dates: value }),
             ...(searchSelect === 'Email'
               ? { email: searchText }
@@ -231,6 +286,28 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
           },
         },
       })
+
+      setFilterOptions((prev) => ({
+        ...prev,
+        page: PAGE,
+        pageSize: PAGESIZE,
+        dates: value as moment.Moment[],
+      }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            dates: value
+              ? ([value[0]?.format().toString(), value[1]?.format().toString()] as string[])
+              : [],
+          },
+        },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -245,10 +322,10 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         const { data } = await members({
           variables: {
             membersInput: {
-              page,
-              pageView: pageSize,
-              memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
-              memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(memberType !== 'All' && { memberType: memberType as MemberType }),
+              ...(memberStatus !== 'All' && { memberStatus: memberStatus as MemberStatus }),
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: value }
@@ -260,7 +337,12 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
 
         if (data?.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, searchText: value }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            searchText: value,
+          }))
         }
       } catch (error) {
         console.error(error)
@@ -292,17 +374,47 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
   }
 
   useEffect(() => {
+    // console.log('effect start', router.query)
     const fetch = async () => {
       try {
         const { data } = await members({
           variables: {
             //현재 상태가 acrive 상태인 멤버들만 보여준다.
-            membersInput: { memberStatus: MemberStatus['Active'] },
+            membersInput: {
+              page: +(router.query.page || page),
+              pageView: +(router.query.pageSize || pageSize),
+              ...(router.query.memberType &&
+                router.query.memberType !== 'All' && {
+                  memberType: router.query.memberType as MemberType,
+                }),
+              memberStatus:
+                router.query.memberStatus && router.query.memberStatus !== 'All'
+                  ? (router.query.memberStatus as MemberStatus)
+                  : MemberStatus['Active'],
+              ...(router.query.dates &&
+                router.query.dates.length > 0 && {
+                  dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+                }),
+            },
           },
         })
 
         if (data?.members.ok) {
-          setFilterOptions((prev) => ({ ...prev, memberStatus: MemberStatus.Active as any }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: +(router.query.page || prev.page),
+            pageSize: +(router.query.pageSize || prev.pageSize),
+            memberStatus: (router.query.memberStatus && router.query.memberStatus !== 'All'
+              ? router.query.memberStatus
+              : MemberStatus['Active']) as keyof typeof MemberStatus,
+            ...(router.query.memberType && {
+              memberType: router.query.memberType as keyof typeof MemberType,
+            }),
+            ...(router.query.dates &&
+              router.query.dates.length > 0 && {
+                dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+              }),
+          }))
         }
       } catch (error) {
         console.error(error)
@@ -310,7 +422,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
     }
 
     fetch()
-  }, [])
+  }, [router])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
@@ -348,32 +460,34 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <Space>
                   <Dropdown
                     overlay={
-                      <Menu onClick={onMemberTypeMenuClick}>
-                        <Menu.Item key="All">{locale === 'ko' ? '전체' : 'All'}</Menu.Item>
-                        {Object.keys(MemberType).map((type) => {
-                          const memberTypeValue =
-                            locale === 'ko'
-                              ? (type as MemberType).toUpperCase() === MemberType.Normal
-                                ? '일반'
-                                : (type as MemberType).toUpperCase() === MemberType.Business
-                                ? '기업'
-                                : (type as MemberType).toUpperCase() === MemberType.Contents
-                                ? '컨텐츠관리자'
-                                : (type as MemberType).toUpperCase() === MemberType.Cx
-                                ? 'CX관리자'
-                                : (type as MemberType).toUpperCase() === MemberType.Service
-                                ? '서비스관리자'
-                                : (type as MemberType).toUpperCase() === MemberType.System
-                                ? '시스템관리자'
+                      <Menu
+                        onClick={onMemberTypeMenuClick}
+                        items={[
+                          { key: 'All', label: locale === 'ko' ? '전체' : 'All' },
+                          ...Object.keys(MemberType).map((type) => {
+                            const memberTypeValue =
+                              locale === 'ko'
+                                ? (type as MemberType).toUpperCase() === MemberType.Normal
+                                  ? '일반'
+                                  : (type as MemberType).toUpperCase() === MemberType.Business
+                                  ? '기업'
+                                  : (type as MemberType).toUpperCase() === MemberType.Contents
+                                  ? '컨텐츠관리자'
+                                  : (type as MemberType).toUpperCase() === MemberType.Cx
+                                  ? 'CX관리자'
+                                  : (type as MemberType).toUpperCase() === MemberType.Service
+                                  ? '서비스관리자'
+                                  : (type as MemberType).toUpperCase() === MemberType.System
+                                  ? '시스템관리자'
+                                  : type
                                 : type
-                              : type
-                          return (
-                            <Menu.Item key={MemberType[type as keyof typeof MemberType]}>
-                              {memberTypeValue}
-                            </Menu.Item>
-                          )
-                        })}
-                      </Menu>
+                            return {
+                              key: MemberType[type as keyof typeof MemberType],
+                              label: memberTypeValue,
+                            }
+                          }),
+                        ]}
+                      />
                     }
                     onVisibleChange={(visible) =>
                       setVisibleOptions((prev) => ({ ...prev, memberType: visible }))
@@ -406,26 +520,32 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </Dropdown>
                   <Dropdown
                     overlay={
-                      <Menu onClick={onMemberStatusMenuClick}>
-                        <Menu.Item key="All">{locale === 'ko' ? '전체' : 'All'}</Menu.Item>
-                        {Object.keys(MemberStatus).map((status) => {
-                          const memberStatusValue =
-                            locale === 'ko'
-                              ? status === 'Active'
-                                ? '활성'
-                                : status === 'RemoveStandby'
-                                ? '탈퇴 접수'
-                                : status === 'Removed'
-                                ? '탈퇴'
+                      <Menu
+                        onClick={onMemberStatusMenuClick}
+                        items={[
+                          {
+                            key: 'All',
+                            label: locale === 'ko' ? '전체' : 'All',
+                          },
+                          ...Object.keys(MemberStatus).map((status) => {
+                            const memberStatusValue =
+                              locale === 'ko'
+                                ? status === 'Active'
+                                  ? '활성'
+                                  : status === 'RemoveStandby'
+                                  ? '탈퇴 접수'
+                                  : status === 'Removed'
+                                  ? '탈퇴'
+                                  : status
                                 : status
-                              : status
-                          return (
-                            <Menu.Item key={MemberStatus[status as keyof typeof MemberStatus]}>
-                              {memberStatusValue}
-                            </Menu.Item>
-                          )
-                        })}
-                      </Menu>
+
+                            return {
+                              key: MemberStatus[status as keyof typeof MemberStatus],
+                              label: memberStatusValue,
+                            }
+                          }),
+                        ]}
+                      />
                     }
                     onVisibleChange={(visible) =>
                       setVisibleOptions((prev) => ({ ...prev, memberStatus: visible }))
@@ -488,6 +608,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                             : 'NickName'
                           : searchSelect
                       }
+                      defaultValue={searchText}
                       loading={membersLoading}
                       onChange={onNickNameChange}
                     />
@@ -513,6 +634,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                             router.push({
                               pathname: '/member/[id]',
                               query: {
+                                ...router.query,
                                 id: column && column._id ? column._id : '',
                               },
                             })

@@ -27,6 +27,7 @@ import {
   FindBoardByIdQueryVariables,
 } from '../../generated'
 import { DELETE_BOARD_MUTATION, EDIT_NOTICE_MUTATION } from '../../graphql/mutations'
+import { omit } from 'lodash'
 
 type Props = styleMode
 
@@ -152,7 +153,13 @@ const NoticeDetail: NextPage<Props> = (props) => {
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
             <li>
-              <Link href="/notice">
+              <Link
+                href={{
+                  pathname: '/notice',
+                  query: { ...omit(query, 'id') },
+                }}
+                as={'/notice'}
+                locale={locale}>
                 <a>{locale === 'ko' ? '공지사항' : 'Notice'}</a>
               </Link>
             </li>

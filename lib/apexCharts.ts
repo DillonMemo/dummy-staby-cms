@@ -11,20 +11,20 @@ export const stroke = (color = '#00E396'): ApexStroke => ({
 
 export const markers = (color = '#00E396'): ApexMarkers => ({
   size: 2,
-  colors: color,
-  strokeColors: color,
+  colors: [color],
+  strokeColors: [color],
   strokeWidth: 2,
   hover: {
     sizeOffset: 2,
   },
-  discrete: [
-    {
-      seriesIndex: 0,
-      dataPointIndex: 5,
-      fillColor: '#ffffff',
-      strokeColor: color,
-      size: 5,
-      shape: 'circle',
-    },
-  ],
+  // discrete: [
+  //   {
+  //     seriesIndex: 0,
+  //     dataPointIndex: 5,
+  //     fillColor: '#ffffff',
+  //     strokeColor: color,
+  //     size: 5,
+  //     shape: 'circle',
+  //   },
+  // ],
 })

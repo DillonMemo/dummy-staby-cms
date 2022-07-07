@@ -1,7 +1,7 @@
 import { useMutation } from '@apollo/client'
 import { ColumnsType } from 'antd/lib/table'
 import { NextPage } from 'next'
-import { useRouter } from 'next/router'
+import router, { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Dropdown, Input, Menu, Pagination, Skeleton, Space, Table } from 'antd'
@@ -21,6 +21,9 @@ import { LoadingOutlined } from '@ant-design/icons'
 /** graphql */
 import { FaqsMutation, FaqsMutationVariables, FaqType } from '../../generated'
 import { FAQS_MUTATION } from '../../graphql/mutations'
+
+/** utils */
+import { PAGE, PAGESIZE } from '../../lib/constants'
 
 type Props = styleMode
 /** filter 옵션 인터페이스 */
@@ -67,8 +70,8 @@ const Faq: NextPage<Props> = (props) => {
     },
   ]
   const [{ page, pageSize, faqType, searchText, dates }, setFilterOptions] = useState<Options>({
-    page: 1,
-    pageSize: 20,
+    page: PAGE,
+    pageSize: PAGESIZE,
     faqType: 'All',
     searchText: '',
     dates: [],
@@ -102,6 +105,11 @@ const Faq: NextPage<Props> = (props) => {
       })
 
       setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
+      router.push(
+        { pathname: router.pathname, query: { ...router.query, page, pageSize } },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -119,15 +127,28 @@ const Faq: NextPage<Props> = (props) => {
             faqsInput: {
               page,
               pageView: pageSize,
-              faqType: key !== 'All' ? (key as FaqType) : undefined,
               title: searchText,
+              ...(key !== 'All' && { faqType: key as FaqType }),
               ...(dates && dates.length > 0 && { dates }),
             },
           },
         })
 
         if (data?.faqs.ok) {
-          setFilterOptions((prev) => ({ ...prev, faqType: key as keyof typeof FaqType }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            faqType: key as keyof typeof FaqType,
+          }))
+          router.push(
+            {
+              pathname: router.pathname,
+              query: { ...router.query, page: PAGE, pageSize: PAGESIZE, faqType: key },
+            },
+            router.asPath,
+            { locale }
+          )
         }
       }
     } catch (error) {
@@ -140,7 +161,17 @@ const Faq: NextPage<Props> = (props) => {
    * @param {boolean} open 달력 오픈 여부
    */
   const onPickerOpen = (open: boolean) => {
-    if (open) setFilterOptions((prev) => ({ ...prev, dates: [] }))
+    if (open) {
+      setFilterOptions((prev) => ({ ...prev, page: PAGE, pageSize: PAGESIZE, dates: [] }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: PAGE, pageSize: PAGESIZE, dates: [] },
+        },
+        router.asPath,
+        { locale }
+      )
+    }
   }
   /**
    * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
@@ -151,14 +182,36 @@ const Faq: NextPage<Props> = (props) => {
       await faqs({
         variables: {
           faqsInput: {
-            page,
-            pageView: pageSize,
-            faqType: faqType !== 'All' ? (faqType as FaqType) : undefined,
+            page: PAGE,
+            pageView: PAGESIZE,
             title: searchText,
+            ...(faqType !== 'All' && { faqType: faqType as FaqType }),
             ...(value && value.length > 0 && { dates: value }),
           },
         },
       })
+
+      setFilterOptions((prev) => ({
+        ...prev,
+        page: PAGE,
+        pageSize: PAGESIZE,
+        dates: value as moment.Moment[],
+      }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            dates: value
+              ? ([value[0]?.format().toString(), value[1]?.format().toString()] as string[])
+              : [],
+          },
+        },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -173,16 +226,23 @@ const Faq: NextPage<Props> = (props) => {
         const { data } = await faqs({
           variables: {
             faqsInput: {
-              page,
-              pageView: pageSize,
+              page: PAGE,
+              pageView: PAGESIZE,
               title: value,
-              faqType: faqType !== 'All' ? (faqType as FaqType) : undefined,
+              ...(faqType !== 'All' && { faqType: faqType as FaqType }),
               ...(dates && dates.length > 0 && { dates }),
             },
           },
         })
 
-        if (data?.faqs.ok) setFilterOptions((prev) => ({ ...prev, searchText: value }))
+        if (data?.faqs.ok) {
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            searchText: value,
+          }))
+        }
       } catch (error) {
         console.error(error)
       }
@@ -193,11 +253,35 @@ const Faq: NextPage<Props> = (props) => {
   useEffect(() => {
     const fetch = async () => {
       try {
-        await faqs({
+        const { data } = await faqs({
           variables: {
-            faqsInput: {},
+            faqsInput: {
+              page: +(router.query.page || page),
+              pageView: +(router.query.pageSize || pageSize),
+              ...(router.query.faqType &&
+                router.query.faqType !== 'All' && {
+                  faqType: router.query.faqType as FaqType,
+                }),
+              ...(router.query.dates &&
+                router.query.dates.length > 0 && {
+                  dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+                }),
+            },
           },
         })
+
+        if (data?.faqs.ok) {
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: +(router.query.page || prev.page),
+            pageSize: +(router.query.pageSize || prev.pageSize),
+            ...(router.query.faqType && { faqType: router.query.faqType as keyof typeof FaqType }),
+            ...(router.query.dates &&
+              router.query.dates.length > 0 && {
+                dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+              }),
+          }))
+        }
       } catch (error) {
         console.error(error)
       }
@@ -241,32 +325,35 @@ const Faq: NextPage<Props> = (props) => {
                 <Space>
                   <Dropdown
                     overlay={
-                      <Menu onClick={onFaqTypeMenuClick}>
-                        <Menu.Item key="All">{locale === 'ko' ? '전체' : 'All'}</Menu.Item>
-                        {Object.keys(FaqType).map((type) => {
-                          const faqTypeValue =
-                            locale === 'ko'
-                              ? (type as FaqType).toUpperCase() === FaqType.Content
-                                ? '컨텐츠'
-                                : (type as FaqType).toUpperCase() === FaqType.Etc
-                                ? '기타'
-                                : (type as FaqType).toUpperCase() === FaqType.Member
-                                ? '회원'
-                                : (type as FaqType).toUpperCase() === FaqType.Payment
-                                ? '결제/환불'
-                                : (type as FaqType).toUpperCase() === FaqType.Play
-                                ? '재생 및 사용오류'
-                                : (type as FaqType).toUpperCase() === FaqType.Service
-                                ? '서비스'
+                      <Menu
+                        onClick={onFaqTypeMenuClick}
+                        items={[
+                          { key: 'All', label: locale === 'ko' ? '전체' : 'All' },
+                          ...Object.keys(FaqType).map((type) => {
+                            const faqTypeValue =
+                              locale === 'ko'
+                                ? (type as FaqType).toUpperCase() === FaqType.Content
+                                  ? '컨텐츠'
+                                  : (type as FaqType).toUpperCase() === FaqType.Etc
+                                  ? '기타'
+                                  : (type as FaqType).toUpperCase() === FaqType.Member
+                                  ? '회원'
+                                  : (type as FaqType).toUpperCase() === FaqType.Payment
+                                  ? '결제/환불'
+                                  : (type as FaqType).toUpperCase() === FaqType.Play
+                                  ? '재생 및 사용오류'
+                                  : (type as FaqType).toUpperCase() === FaqType.Service
+                                  ? '서비스'
+                                  : type
                                 : type
-                              : type
-                          return (
-                            <Menu.Item key={FaqType[type as keyof typeof FaqType]}>
-                              {faqTypeValue}
-                            </Menu.Item>
-                          )
-                        })}
-                      </Menu>
+
+                            return {
+                              key: FaqType[type as keyof typeof FaqType],
+                              label: faqTypeValue,
+                            }
+                          }),
+                        ]}
+                      />
                     }
                     onVisibleChange={(visible) =>
                       setVisibleOptions((prev) => ({ ...prev, faqType: visible }))
@@ -335,9 +422,11 @@ const Faq: NextPage<Props> = (props) => {
                       columns={columns}
                       onRow={(column) => ({
                         onClick: () =>
-                          push({ pathname: '/faq/[id]', query: { id: column._id } }, `/faq/[id]`, {
-                            locale,
-                          }),
+                          push(
+                            { pathname: '/faq/[id]', query: { ...router.query, id: column._id } },
+                            `/faq/[id]`,
+                            { locale }
+                          ),
                       })}
                       dataSource={
                         faqsData

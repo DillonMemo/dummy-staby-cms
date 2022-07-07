@@ -1,7 +1,7 @@
 import { ColumnsType } from 'antd/lib/table'
 import { debounce, pick } from 'lodash'
 import { NextPage } from 'next'
-import { useRouter } from 'next/router'
+import router, { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Dropdown, Input, Menu, Pagination, Select, Skeleton, Space, Table } from 'antd'
@@ -15,6 +15,7 @@ import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
 
 /** components */
 import Layout from '../../components/Layout'
+import RangePicker from '../../components/RangePicker'
 
 /** graphql */
 import {
@@ -25,7 +26,9 @@ import {
 } from '../../generated'
 import { useMutation } from '@apollo/client'
 import { INQUIRIES_MUTATION } from '../../graphql/mutations'
-import RangePicker from '../../components/RangePicker'
+
+/** utils */
+import { PAGE, PAGESIZE } from '../../lib/constants'
 
 type Props = styleMode
 type BoardStatusKey = keyof Pick<typeof BoardStatus, 'Wait' | 'Completed'>
@@ -90,8 +93,8 @@ const Inquiry: NextPage<Props> = (props) => {
     { page, pageSize, questionType, boardStatus, dates, searchSelect, searchText },
     setFilterOptions,
   ] = useState<Options>({
-    page: 1,
-    pageSize: 20,
+    page: PAGE,
+    pageSize: PAGESIZE,
     questionType: 'All',
     boardStatus: 'All',
     dates: [],
@@ -132,6 +135,11 @@ const Inquiry: NextPage<Props> = (props) => {
       })
 
       setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
+      router.push(
+        { pathname: router.pathname, query: { ...router.query, page, pageSize } },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -147,10 +155,10 @@ const Inquiry: NextPage<Props> = (props) => {
         const { data } = await inquiries({
           variables: {
             inquiriesInput: {
-              page,
-              pageView: pageSize,
-              questionType: key !== 'All' ? (key as QuestionType) : undefined,
-              boardStatus: boardStatus !== 'All' ? (boardStatus as BoardStatus) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(key !== 'All' && { questionType: key as QuestionType }),
+              ...(boardStatus !== 'All' && { boardStatus: boardStatus as BoardStatus }),
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: searchText }
@@ -162,7 +170,20 @@ const Inquiry: NextPage<Props> = (props) => {
         })
 
         if (data?.inquiries.ok) {
-          setFilterOptions((prev) => ({ ...prev, questionType: key as Filters['questionType'] }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            questionType: key as Filters['questionType'],
+          }))
+          router.push(
+            {
+              pathname: router.pathname,
+              query: { ...router.query, page: PAGE, pageSize: PAGESIZE, questionType: key },
+            },
+            router.asPath,
+            { locale }
+          )
         }
       }
     } catch (error) {
@@ -180,10 +201,10 @@ const Inquiry: NextPage<Props> = (props) => {
         const { data } = await inquiries({
           variables: {
             inquiriesInput: {
-              page,
-              pageView: pageSize,
-              questionType: questionType !== 'All' ? (questionType as QuestionType) : undefined,
-              boardStatus: key !== 'All' ? (key as BoardStatus) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(questionType !== 'All' && { questionType: questionType as QuestionType }),
+              ...(key !== 'All' && { boardStatus: key as BoardStatus }),
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: searchText }
@@ -195,7 +216,20 @@ const Inquiry: NextPage<Props> = (props) => {
         })
 
         if (data?.inquiries.ok) {
-          setFilterOptions((prev) => ({ ...prev, boardStatus: key as Filters['boardStatus'] }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            boardStatus: key as Filters['boardStatus'],
+          }))
+          router.push(
+            {
+              pathname: router.pathname,
+              query: { ...router.query, page: PAGE, pageSize: PAGESIZE, boardStatus: key },
+            },
+            router.asPath,
+            { locale }
+          )
         }
       }
     } catch (error) {
@@ -208,7 +242,17 @@ const Inquiry: NextPage<Props> = (props) => {
    * @param {boolean} open 달력 오픈 여부
    */
   const onPickerOpen = (open: boolean) => {
-    if (open) setFilterOptions((prev) => ({ ...prev, dates: [] }))
+    if (open) {
+      setFilterOptions((prev) => ({ ...prev, page: PAGE, pageSize: PAGESIZE, dates: [] }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: PAGE, pageSize: PAGESIZE, dates: [] },
+        },
+        router.asPath,
+        { locale }
+      )
+    }
   }
   /**
    * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
@@ -219,10 +263,10 @@ const Inquiry: NextPage<Props> = (props) => {
       await inquiries({
         variables: {
           inquiriesInput: {
-            page,
-            pageView: pageSize,
-            questionType: questionType !== 'All' ? (questionType as QuestionType) : undefined,
-            boardStatus: boardStatus !== 'All' ? (boardStatus as BoardStatus) : undefined,
+            page: PAGE,
+            pageView: PAGESIZE,
+            ...(questionType !== 'All' && { questionType: questionType as QuestionType }),
+            ...(boardStatus !== 'All' && { boardStatus: boardStatus as BoardStatus }),
             ...(value && value.length > 0 && { dates: value }),
             ...(searchSelect === 'Email'
               ? { email: searchText }
@@ -232,6 +276,28 @@ const Inquiry: NextPage<Props> = (props) => {
           },
         },
       })
+
+      setFilterOptions((prev) => ({
+        ...prev,
+        page: PAGE,
+        pageSize: PAGESIZE,
+        dates: value as moment.Moment[],
+      }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            dates: value
+              ? ([value[0]?.format().toString(), value[1]?.format().toString()] as string[])
+              : [],
+          },
+        },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -246,10 +312,10 @@ const Inquiry: NextPage<Props> = (props) => {
         const { data } = await inquiries({
           variables: {
             inquiriesInput: {
-              page,
-              pageView: pageSize,
-              questionType: questionType !== 'All' ? (questionType as QuestionType) : undefined,
-              boardStatus: boardStatus !== 'All' ? (boardStatus as BoardStatus) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(questionType !== 'All' && { questionType: questionType as QuestionType }),
+              ...(boardStatus !== 'All' && { boardStatus: boardStatus as BoardStatus }),
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: value }
@@ -260,7 +326,13 @@ const Inquiry: NextPage<Props> = (props) => {
           },
         })
 
-        if (data?.inquiries.ok) setFilterOptions((prev) => ({ ...prev, searchText: value }))
+        if (data?.inquiries.ok)
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            searchText: value,
+          }))
       } catch (error) {
         console.error(error)
       }
@@ -271,11 +343,43 @@ const Inquiry: NextPage<Props> = (props) => {
   useEffect(() => {
     const fetch = async () => {
       try {
-        await inquiries({
+        const { data } = await inquiries({
           variables: {
-            inquiriesInput: {},
+            inquiriesInput: {
+              page: +(router.query.page || page),
+              pageView: +(router.query.pageSize || pageSize),
+              ...(router.query.questionType &&
+                router.query.questionType !== 'All' && {
+                  questionType: router.query.questionType as QuestionType,
+                }),
+              ...(router.query.boardStatus &&
+                router.query.boardStatus !== 'All' && {
+                  boardStatus: router.query.boardStatus as BoardStatus,
+                }),
+              ...(router.query.dates &&
+                router.query.dates.length > 0 && {
+                  dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+                }),
+            },
           },
         })
+
+        if (data?.inquiries.ok) {
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: +(router.query.page || prev.page),
+            pageSize: +(router.query.pageSize || prev.pageSize),
+            ...(router.query.questionType && {
+              questionType: router.query.questionType as Filters['questionType'],
+            }),
+            ...(router.query.boardStatus && {
+              boardStatus: router.query.boardStatus as Filters['boardStatus'],
+            }),
+            ...(router.query.dates && {
+              dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+            }),
+          }))
+        }
       } catch (error) {
         console.error(error)
       }
@@ -306,28 +410,33 @@ const Inquiry: NextPage<Props> = (props) => {
                 <Space>
                   <Dropdown
                     overlay={
-                      <Menu onClick={onQuestionTypeMenuClick}>
-                        <Menu.Item key="All">{locale === 'ko' ? '전체' : 'All'}</Menu.Item>
-                        {(Object.keys(QuestionType) as (keyof typeof QuestionType)[]).map(
-                          (type) => (
-                            <Menu.Item key={QuestionType[type]}>
-                              {locale === 'ko'
-                                ? type === 'Etc'
+                      <Menu
+                        onClick={onQuestionTypeMenuClick}
+                        items={[
+                          { key: 'All', label: locale === 'ko' ? '전체' : 'All' },
+                          ...Object.keys(QuestionType).map((type) => {
+                            const questionTypeValue =
+                              locale === 'ko'
+                                ? (type as QuestionType).toUpperCase() === QuestionType.Etc
                                   ? '기타'
-                                  : type === 'Event'
+                                  : (type as QuestionType).toUpperCase() === QuestionType.Event
                                   ? '이벤트/혜택'
-                                  : type === 'Payment'
+                                  : (type as QuestionType).toUpperCase() === QuestionType.Payment
                                   ? '결제/취소/환불'
-                                  : type === 'Play'
+                                  : (type as QuestionType).toUpperCase() === QuestionType.Play
                                   ? '재생 및 사용오류'
-                                  : type === 'Service'
+                                  : (type as QuestionType).toUpperCase() === QuestionType.Service
                                   ? '서비스 이용 문의'
                                   : type
-                                : type}
-                            </Menu.Item>
-                          )
-                        )}
-                      </Menu>
+                                : type
+
+                            return {
+                              key: QuestionType[type as keyof typeof QuestionType],
+                              label: questionTypeValue,
+                            }
+                          }),
+                        ]}
+                      />
                     }
                     onVisibleChange={(visible) =>
                       setVisibleOptions((prev) => ({ ...prev, questionType: visible }))
@@ -359,22 +468,26 @@ const Inquiry: NextPage<Props> = (props) => {
                   </Dropdown>
                   <Dropdown
                     overlay={
-                      <Menu onClick={onBoardStatusMenuClick}>
-                        <Menu.Item key="All">{locale === 'ko' ? '전체' : 'All'}</Menu.Item>
-                        {(
-                          Object.keys(pick(BoardStatus, ['Wait', 'Completed'])) as BoardStatusKey[]
-                        ).map((type) => (
-                          <Menu.Item key={BoardStatus[type]}>
-                            {locale === 'ko'
-                              ? type.toUpperCase() === BoardStatus.Wait
-                                ? '대기'
-                                : type.toUpperCase() === BoardStatus.Completed
-                                ? '완료'
+                      <Menu
+                        onClick={onBoardStatusMenuClick}
+                        items={[
+                          { key: 'All', label: locale === 'ko' ? '전체' : 'All' },
+                          ...Object.keys(pick(BoardStatus, ['Wait', 'Completed'])).map((type) => {
+                            const boardStatusValue =
+                              locale === 'ko'
+                                ? type.toUpperCase() === BoardStatus.Wait
+                                  ? '대기'
+                                  : type.toUpperCase() === BoardStatus.Completed
+                                  ? '완료'
+                                  : type
                                 : type
-                              : type}
-                          </Menu.Item>
-                        ))}
-                      </Menu>
+                            return {
+                              key: BoardStatus[type as keyof typeof BoardStatus],
+                              label: boardStatusValue,
+                            }
+                          }),
+                        ]}
+                      />
                     }
                     onVisibleChange={(visible) =>
                       setVisibleOptions((prev) => ({ ...prev, boardStatus: visible }))
@@ -460,7 +573,10 @@ const Inquiry: NextPage<Props> = (props) => {
                       onRow={(column) => ({
                         onClick: () =>
                           push(
-                            { pathname: '/inquiry/[id]', query: { id: column._id } },
+                            {
+                              pathname: '/inquiry/[id]',
+                              query: { ...router.query, id: column._id },
+                            },
                             `/inquiry/[id]`,
                             { locale }
                           ),

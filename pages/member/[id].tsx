@@ -21,6 +21,7 @@ import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import styled from 'styled-components'
 import moment from 'moment'
+import { omit } from 'lodash'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -183,7 +184,13 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               </Link>
             </li>
             <li>
-              <Link href="/member/members" locale={locale}>
+              <Link
+                href={{
+                  pathname: '/member/members',
+                  query: { ...omit(router.query, 'id') },
+                }}
+                as={'/member/members'}
+                locale={locale}>
                 <a>{locale === 'ko' ? '멤버' : 'Member'}</a>
               </Link>
             </li>

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { pick } from 'lodash'
+import { omit, pick } from 'lodash'
 import { Button, Skeleton } from 'antd'
 import Parser from 'html-react-parser'
 
@@ -154,7 +154,13 @@ const EventDetail: NextPage<Props> = (props) => {
             </li>
             <li>{locale === 'ko' ? '안내' : 'News'}</li>
             <li>
-              <Link href="/event">
+              <Link
+                href={{
+                  pathname: '/event',
+                  query: { ...omit(query, 'id') },
+                }}
+                as={'/event'}
+                locale={locale}>
                 <a>{locale === 'ko' ? '이벤트' : 'Event'}</a>
               </Link>
             </li>

@@ -14,14 +14,16 @@ import { LoadingOutlined } from '@ant-design/icons'
 
 /** components */
 import Layout from '../../components/Layout'
+import RangePicker from '../../components/RangePicker'
 
 /** graphql */
-import { useMutation } from '@apollo/client'
 import { VodsMutation, VodsMutationVariables, VodStatus } from '../../generated'
+import { useMutation } from '@apollo/client'
 import { VODS_MUTATION } from '../../graphql/mutations'
-import { Maybe } from 'graphql/jsutils/Maybe'
+
+/** utils */
 import { DATE_FORMAT } from '../../Common/commonFn'
-import RangePicker from '../../components/RangePicker'
+import { PAGE, PAGESIZE } from '../../lib/constants'
 
 type Props = styleMode
 
@@ -74,8 +76,8 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
     },
   ]
   const [{ page, pageSize, dates, vodStatus, searchText }, setFilterOptions] = useState<Options>({
-    page: 1,
-    pageSize: 20,
+    page: PAGE,
+    pageSize: PAGESIZE,
     dates: [],
     vodStatus: 'All',
     searchText: '',
@@ -108,6 +110,16 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
 
       setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page, pageSize },
+        },
+        router.asPath,
+        {
+          locale,
+        }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -122,16 +134,34 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
         const { data } = await vods({
           variables: {
             vodsInput: {
-              page,
-              pageView: pageSize,
-              vodStatus: key !== 'All' ? (key as Maybe<VodStatus>) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(key !== 'All' && { vodStatus: key as VodStatus }),
               title: searchText,
               ...(dates && dates.length > 0 && { dates }),
             },
           },
         })
         if (data?.vods.ok) {
-          setFilterOptions((prev) => ({ ...prev, vodStatus: key as keyof typeof VodStatus }))
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            vodStatus: key as keyof typeof VodStatus,
+          }))
+          router.push(
+            {
+              pathname: router.pathname,
+              query: {
+                ...router.query,
+                page: PAGE,
+                pageSize: PAGESIZE,
+                vodStatus: key,
+              },
+            },
+            router.asPath,
+            { locale }
+          )
         }
       }
     } catch (error) {
@@ -147,9 +177,9 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
         const { data } = await vods({
           variables: {
             vodsInput: {
-              page,
-              pageView: pageSize,
-              vodStatus: vodStatus !== 'All' ? (vodStatus as VodStatus) : undefined,
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(vodStatus !== 'All' && { vodStatus: vodStatus as VodStatus }),
               title: value,
               ...(dates && dates.length > 0 && { dates }),
             },
@@ -171,7 +201,15 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
    */
   const onPickerOpen = (open: boolean) => {
     if (open) {
-      setFilterOptions((prev) => ({ ...prev, dates: [] }))
+      setFilterOptions((prev) => ({ ...prev, page: PAGE, pageSize: PAGESIZE, dates: [] }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: PAGE, pageSize: PAGESIZE, dates: [] },
+        },
+        router.asPath,
+        { locale }
+      )
     }
   }
 
@@ -184,14 +222,36 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
       await vods({
         variables: {
           vodsInput: {
-            page,
-            pageView: pageSize,
-            vodStatus: vodStatus !== 'All' ? (vodStatus as VodStatus) : undefined,
+            page: PAGE,
+            pageView: PAGESIZE,
+            ...(vodStatus !== 'All' && { vodStatus: vodStatus as VodStatus }),
             title: searchText,
             ...(value && value.length > 0 && { dates: value }),
           },
         },
       })
+
+      setFilterOptions((prev) => ({
+        ...prev,
+        page: PAGE,
+        pageSize: PAGESIZE,
+        dates: value as moment.Moment[],
+      }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            dates: value
+              ? ([value[0]?.format().toString(), value[1]?.format().toString()] as string[])
+              : [],
+          },
+        },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -217,17 +277,44 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
   useEffect(() => {
     const fetch = async () => {
       try {
-        await vods({
+        const { data } = await vods({
           variables: {
-            vodsInput: {},
+            vodsInput: {
+              page: +(router.query.page || page),
+              pageView: +(router.query.pageSize || pageSize),
+              ...(router.query.vodStatus &&
+                router.query.vodStatus !== 'All' && {
+                  vodStatus: router.query.vodStatus as VodStatus,
+                }),
+              ...(router.query.dates &&
+                router.query.dates.length > 0 && {
+                  dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+                }),
+            },
           },
         })
+
+        if (data?.vods.ok) {
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: +(router.query.page || prev.page),
+            pageSize: +(router.query.pageSize || prev.pageSize),
+            ...(router.query.vodStatus && {
+              vodStatus: router.query.vodStatus as keyof typeof VodStatus,
+            }),
+            ...(router.query.dates &&
+              router.query.dates.length > 0 && {
+                dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+              }),
+          }))
+        }
       } catch (error) {
         console.error(error)
       }
     }
+
     fetch()
-  }, [])
+  }, [router])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
@@ -265,14 +352,32 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <Space>
                   <Dropdown
                     overlay={
-                      <Menu onClick={onVodStatusMenuClick}>
-                        <Menu.Item key="All">All</Menu.Item>
-                        {Object.keys(VodStatus).map((status) => (
-                          <Menu.Item key={VodStatus[status as keyof typeof VodStatus]}>
-                            {status}
-                          </Menu.Item>
-                        ))}
-                      </Menu>
+                      <Menu
+                        onClick={onVodStatusMenuClick}
+                        items={[
+                          { key: 'All', label: locale === 'ko' ? '전체' : 'All' },
+                          ...Object.keys(VodStatus).map((status) => {
+                            const statusValue =
+                              locale === 'ko'
+                                ? (status as VodStatus).toUpperCase() === VodStatus.Active
+                                  ? '판매중'
+                                  : (status as VodStatus).toUpperCase() === VodStatus.Available
+                                  ? '판매가능'
+                                  : (status as VodStatus).toUpperCase() === VodStatus.Delete
+                                  ? '삭제'
+                                  : (status as VodStatus).toUpperCase() === VodStatus.Fail
+                                  ? '실패'
+                                  : (status as VodStatus).toUpperCase() === VodStatus.Wait
+                                  ? '등록대기'
+                                  : status
+                                : status
+                            return {
+                              key: VodStatus[status as keyof typeof VodStatus],
+                              label: statusValue,
+                            }
+                          }),
+                        ]}
+                      />
                     }
                     onVisibleChange={(visible) =>
                       setVisibleOptions((prev) => ({ ...prev, vodStatus: visible }))
@@ -281,7 +386,22 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <div className="dropdown">
                       <span className="title">{locale === 'ko' ? '상태' : 'Status'}</span>
                       <Button onClick={(e) => e.preventDefault()}>
-                        {vodStatus}&nbsp;
+                        {locale === 'ko'
+                          ? vodStatus === 'All'
+                            ? '전체'
+                            : (vodStatus as VodStatus) === VodStatus.Active
+                            ? '판매중'
+                            : (vodStatus as VodStatus) === VodStatus.Available
+                            ? '판매가능'
+                            : (vodStatus as VodStatus) === VodStatus.Delete
+                            ? '삭제'
+                            : (vodStatus as VodStatus) === VodStatus.Fail
+                            ? '실패'
+                            : (vodStatus as VodStatus) === VodStatus.Wait
+                            ? '등록대기'
+                            : vodStatus
+                          : vodStatus}
+                        &nbsp;
                         {vodsLoading && <LoadingOutlined style={{ fontSize: '12px' }} />}
                       </Button>
                     </div>
@@ -325,6 +445,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                             router.push({
                               pathname: '/vod/[id]',
                               query: {
+                                ...router.query,
                                 id: column && column._id ? column._id : '',
                               },
                             })
@@ -333,15 +454,36 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                       }}
                       dataSource={
                         vodsData
-                          ? vodsData.vods.vods?.map((vod: any, index: number) => ({
-                              key: index,
-                              index: index + 1 + pageSize * (page - 1),
-                              _id: vod._id,
-                              vodStatus: vod.vodStatus,
-                              title: vod.title,
-                              paymentAmount: vod.paymentAmount + ' G',
-                              createDate: DATE_FORMAT('YYYY-MM-DD', vod.createDate),
-                            }))
+                          ? vodsData.vods.vods?.map(
+                              (
+                                { _id, vodStatus, title, paymentAmount, createDate },
+                                index: number
+                              ) => {
+                                const vodStatusValue =
+                                  locale === 'ko'
+                                    ? vodStatus === VodStatus.Active
+                                      ? '판매중'
+                                      : vodStatus === VodStatus.Available
+                                      ? '판매가능'
+                                      : vodStatus === VodStatus.Delete
+                                      ? '삭제'
+                                      : vodStatus === VodStatus.Fail
+                                      ? '실패'
+                                      : vodStatus === VodStatus.Wait
+                                      ? '등록대기'
+                                      : vodStatus
+                                    : vodStatus
+                                return {
+                                  key: index,
+                                  index: index + 1 + pageSize * (page - 1),
+                                  _id: _id,
+                                  vodStatus: vodStatusValue,
+                                  title: title,
+                                  paymentAmount: paymentAmount + ' G',
+                                  createDate: DATE_FORMAT('YYYY-MM-DD', createDate),
+                                }
+                              }
+                            )
                           : []
                       }
                       pagination={{

@@ -182,6 +182,7 @@ const Contents: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <>
                   <ReactDragListView
                     nodeSelector=".contentsInfo"
+                    handleSelector=".contentsInfo"
                     onDragEnd={onDragEnd}
                     lineClassName="global-drag-line">
                     {contentsInfo.map((data, index) => {

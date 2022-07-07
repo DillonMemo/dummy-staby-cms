@@ -3,7 +3,7 @@ import { Button, Input, Pagination, Skeleton, Space, Table } from 'antd'
 import { ColumnsType } from 'antd/lib/table'
 import { NextPage } from 'next'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import router, { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import moment from 'moment'
 import { RangeValue } from 'rc-picker/lib/interface'
@@ -19,6 +19,9 @@ import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
 /** graphql */
 import { NoticesMutation, NoticesMutationVariables } from '../../generated'
 import { NOTICES_MUTATION } from '../../graphql/mutations'
+
+/** utils */
+import { PAGE, PAGESIZE } from '../../lib/constants'
 
 type Props = styleMode
 
@@ -54,8 +57,8 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
     },
   ]
   const [{ page, pageSize, searchText, dates }, setFilterOptions] = useState<Options>({
-    page: 1,
-    pageSize: 20,
+    page: PAGE,
+    pageSize: PAGESIZE,
     searchText: '',
     dates: [],
   })
@@ -83,6 +86,11 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
       })
 
       setFilterOptions((prev) => ({ ...prev, page, ...(pageSize !== undefined && { pageSize }) }))
+      router.push(
+        { pathname: router.pathname, query: { ...router.query, page, pageSize } },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -93,7 +101,17 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
    * @param {boolean} open 달력 오픈 여부
    */
   const onPickerOpen = (open: boolean) => {
-    if (open) setFilterOptions((prev) => ({ ...prev, dates: [] }))
+    if (open) {
+      setFilterOptions((prev) => ({ ...prev, page: PAGE, pageSize: PAGESIZE, dates: [] }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: PAGE, pageSize: PAGESIZE, dates: [] },
+        },
+        router.asPath,
+        { locale }
+      )
+    }
   }
   /**
    * 시작일, 종료일을 다 선택 했거나 clear 했을때 실행 이벤트 핸들러 입니다.
@@ -104,13 +122,35 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
       await notices({
         variables: {
           noticesInput: {
-            page,
-            pageView: pageSize,
+            page: PAGE,
+            pageView: PAGESIZE,
             title: searchText,
             ...(value && value.length > 0 && { dates: value }),
           },
         },
       })
+
+      setFilterOptions((prev) => ({
+        ...prev,
+        page: PAGE,
+        pageSize: PAGESIZE,
+        dates: value as moment.Moment[],
+      }))
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            dates: value
+              ? ([value[0]?.format().toString(), value[1]?.format().toString()] as string[])
+              : [],
+          },
+        },
+        router.asPath,
+        { locale }
+      )
     } catch (error) {
       console.error(error)
     }
@@ -125,15 +165,21 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
         const { data } = await notices({
           variables: {
             noticesInput: {
-              page,
-              pageView: pageSize,
+              page: PAGE,
+              pageView: PAGESIZE,
               title: value,
               ...(dates && dates.length > 0 && { dates }),
             },
           },
         })
 
-        if (data?.notices.ok) setFilterOptions((prev) => ({ ...prev, searchText: value }))
+        if (data?.notices.ok)
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            searchText: value,
+          }))
       } catch (error) {
         console.error(error)
       }
@@ -144,18 +190,37 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
   useEffect(() => {
     const fetch = async () => {
       try {
-        await notices({
+        const { data } = await notices({
           variables: {
-            noticesInput: {},
+            noticesInput: {
+              page: +(router.query.page || page),
+              pageView: +(router.query.pageSize || pageSize),
+              ...(router.query.dates &&
+                router.query.dates.length > 0 && {
+                  dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+                }),
+            },
           },
         })
+
+        if (data?.notices.ok) {
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: +(router.query.page || prev.page),
+            pageSize: +(router.query.pageSize || prev.pageSize),
+            ...(router.query.dates &&
+              router.query.dates.length > 0 && {
+                dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
+              }),
+          }))
+        }
       } catch (error) {
         console.error(error)
       }
     }
 
     fetch()
-  }, [])
+  }, [router])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
@@ -229,7 +294,7 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
                           push(
                             {
                               pathname: '/notice/[id]',
-                              query: { id: column._id },
+                              query: { ...router.query, id: column._id },
                             },
                             `/notice/[id]`,
                             { locale }

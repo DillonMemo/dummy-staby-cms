@@ -398,7 +398,17 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <a>{locale === 'ko' ? '홈' : 'Home'}</a>
               </Link>
             </li>
-            <li>{locale === 'ko' ? 'Live' : 'Live'}</li>
+            <li>
+              <Link
+                href={{
+                  pathname: '/live/lives',
+                  query: { ...omit(query, 'id') },
+                }}
+                as={'/live/lives'}
+                locale={locale}>
+                <a>{locale === 'ko' ? 'Live' : 'Live'}</a>
+              </Link>
+            </li>
             <li>{locale === 'ko' ? 'Live 관리' : 'Live Edit'}</li>
           </ol>
         </div>
