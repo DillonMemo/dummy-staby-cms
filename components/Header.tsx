@@ -355,6 +355,17 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   </a>
                 </Link>
               </li>
+              <li className="nav-item">
+                {/* <Link href="/contents/contents"> */}
+                <Link href="/contents/testContents">
+                  <a>
+                    <UnorderedListOutlined className="icon" />
+                    <span className="text">
+                      {locale === 'ko' ? '테스트콘텐츠' : 'Test Contents'}
+                    </span>
+                  </a>
+                </Link>
+              </li>
               {/* AD */}
               <li className="nav-item has-sub">
                 <a onClick={handleClickItem}>
