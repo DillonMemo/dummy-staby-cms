@@ -559,10 +559,6 @@ export const GlobalStyles = createGlobalStyle`
       min-height:150px;
     }
 
-    .mrT5{
-      margin-top:5px;
-    }
-
     .fontSize12{
       font-size:12px;
     }
@@ -578,12 +574,31 @@ export const GlobalStyles = createGlobalStyle`
       color: #6e6b7b;
       border: none;
       outline: none;
-
     }
     .global-drag-line {
       border-color: ${({ theme }) => theme.border} !important;
       margin-top: 5px !important;
     }
+
+    /** set global margin */
+    .mt-harf {
+    margin-top: 0.5rem;
+    }
+    .mt-1 {
+      margin-top: 1rem;
+    }
+
+    .mt-15 {
+      margin-top: 1.5rem;
+    }
+
+    .mt-2 {
+      margin-top: 2rem;
+    }
+    .ml-harf {
+      margin-left: 0.5rem;
+    }
+      
     /** apex charts */
     .apexcharts-legend-text {
       top: -1px;
@@ -818,24 +833,6 @@ export const MainWrapper = styled.main`
 export const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr;
-
-  .mt-harf {
-    margin-top: 0.5rem;
-  }
-  .mt-1 {
-    margin-top: 1rem;
-  }
-
-  .mt-15 {
-    margin-top: 1.5rem;
-  }
-
-  .mt-2 {
-    margin-top: 2rem;
-  }
-  .ml-harf {
-    margin-left: 0.5rem;
-  }
   .form-grid {
     display: grid;
 

@@ -233,3 +233,14 @@ export const swap = (array: Array<any>, fromIndex: number, toIndex: number) => {
 
   return array
 }
+
+export const getError = (error: unknown) => {
+  if (error instanceof Error) {
+    toast.error(error.message, {
+      theme: localStorage.theme || 'light',
+      autoClose: 1000,
+    })
+
+    console.error(error)
+  }
+}

@@ -727,7 +727,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       return (
                         <div key={index}>
                           <div>
-                            <em className="fontSize12 mrT5">
+                            <em className="fontSize12 mt-harf">
                               Ch{index + 1}
                               <CopyOutlined
                                 onClick={() =>
@@ -800,7 +800,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       return (
                         <div key={index}>
                           <div>
-                            <em className="fontSize12 mrT5">{index + 1}</em>
+                            <em className="fontSize12 mt-harf">{index + 1}</em>
                             {index >= 1 && (
                               <Button
                                 className="delectBtn"

@@ -170,7 +170,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
         <div className="navbar-header">
           <ul className="nav">
             <li className="nav-item logo">
-              <Link href="/">
+              <Link href="/" locale={locale}>
                 <a>
                   <div className="status">
                     {networkStatus ? <Badge status="success" /> : <Badge status="error" />}
@@ -196,7 +196,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 'has-sub',
                 pathname.includes('/mypage') ? 'open' : undefined,
               ].join(' ')}>
-              <Link href="#">
+              <Link href="#" locale={locale}>
                 <a onClick={handleClickItem}>
                   <UserOutlined className="icon" />
                   <span className="text">{locale === 'ko' ? '마이페이지' : 'My Page'}</span>
@@ -208,7 +208,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                     ' '
                   )}>
                   <li className="nav-item">
-                    <Link href={{ pathname: '/mypage/edit' }}>
+                    <Link href={{ pathname: '/mypage/edit' }} locale={locale}>
                       <a>
                         <ArrowRightOutlined className="icon" />
                         <span>{locale === 'ko' ? '내 정보 관리' : 'Account Settings'}</span>
@@ -225,7 +225,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   <span className="text">MEMBER</span>
                 </li>
                 <li className="nav-item">
-                  <Link href="/member/members">
+                  <Link href="/member/members" locale={locale}>
                     <a>
                       <SettingOutlined className="icon" />
                       <span className="text">{locale === 'ko' ? '관리' : 'Management'}</span>
@@ -233,7 +233,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link href="/member/createMember">
+                  <Link href="/member/createMember" locale={locale}>
                     <a>
                       <PlusOutlined className="icon" />
                       <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
@@ -257,7 +257,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      <Link href="/vod/vods">
+                      <Link href="/vod/vods" locale={locale}>
                         <a>
                           <LayoutOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
@@ -265,7 +265,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/vod/createVod">
+                      <Link href="/vod/createVod" locale={locale}>
                         <a>
                           <PlusOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
@@ -284,7 +284,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      <Link href="/live/lives">
+                      <Link href="/live/lives" locale={locale}>
                         <a>
                           <LayoutOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
@@ -311,7 +311,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      <Link href="/notice">
+                      <Link href="/notice" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '공지사항' : 'Notice'}</span>
@@ -319,7 +319,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/event">
+                      <Link href="/event" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '이벤트' : 'Event'}</span>
@@ -327,7 +327,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/faq">
+                      <Link href="/faq" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? 'FAQ' : 'FAQ'}</span>
@@ -335,7 +335,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/inquiry">
+                      <Link href="/inquiry" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '문의' : 'Inquiry'}</span>
@@ -347,22 +347,10 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               </li>
               {/* 콘텐츠 */}
               <li className="nav-item">
-                {/* <Link href="/contents/contents"> */}
-                <Link href="/contents/contents">
+                <Link href="/contents" locale={locale}>
                   <a>
                     <UnorderedListOutlined className="icon" />
                     <span className="text">{locale === 'ko' ? '콘텐츠' : 'Contents'}</span>
-                  </a>
-                </Link>
-              </li>
-              <li className="nav-item">
-                {/* <Link href="/contents/contents"> */}
-                <Link href="/contents/testContents">
-                  <a>
-                    <UnorderedListOutlined className="icon" />
-                    <span className="text">
-                      {locale === 'ko' ? '테스트콘텐츠' : 'Test Contents'}
-                    </span>
                   </a>
                 </Link>
               </li>
@@ -375,7 +363,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      <Link href="/ad/ads">
+                      <Link href="/ad/ads" locale={locale}>
                         <a onClick={() => alert('준비중 입니다')}>
                           <SettingOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
@@ -383,7 +371,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/ad/createAd">
+                      <Link href="/ad/createAd" locale={locale}>
                         <a onClick={() => alert('준비중 입니다')}>
                           <PlusOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
@@ -401,7 +389,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <span className="text">GO 2.0</span>
               </li>
               <li className="nav-item">
-                <Link href="#">
+                <Link href="#" locale={locale}>
                   <a>
                     <FileTextOutlined className="icon" />
                     <span className="text">{locale === 'ko' ? '준비중' : 'Comming soon'}</span>
@@ -409,7 +397,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </Link>
               </li>
               <li className="nav-item has-sub">
-                <Link href="#">
+                <Link href="#" locale={locale}>
                   <a onClick={handleClickItem}>
                     <MoreOutlined className="icon" />
                     <span className="text">{locale === 'ko' ? '준비중' : 'Comming soon'}</span>
@@ -418,7 +406,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      <Link href="#">
+                      <Link href="#" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '서브1' : 'SUB1'}</span>
@@ -426,7 +414,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="#">
+                      <Link href="#" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '서브2' : 'SUB2'}</span>

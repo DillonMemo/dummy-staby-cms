@@ -518,7 +518,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       return (
                         <div key={index} className="mt-15">
                           <div>
-                            <em className="fontSize12 mrT5">Ch{index + 1}_Vod</em>
+                            <em className="fontSize12 mt-harf">Ch{index + 1}_Vod</em>
                             {index >= 1 && (
                               <Button
                                 className="delectBtn"
@@ -534,11 +534,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             accept=".mp4"
                             placeholder="Please upload the video.(only mp4)"
                           />
-                          <em className="fontSize12 mrT5">Ch{index + 1}_Img</em>
+                          <em className="fontSize12 mt-harf">Ch{index + 1}_Img</em>
 
                           <Input
                             type="file"
-                            className="input mrT5"
+                            className="input mt-harf"
                             name={`playImgUrl_${index}`}
                             placeholder="Please upload playingThumnail img. only png or jpg"
                           />
@@ -622,7 +622,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       return (
                         <div key={index}>
                           <div>
-                            <em className="fontSize12 mrT5">{index + 1}</em>
+                            <em className="fontSize12 mt-harf">{index + 1}</em>
                             {index >= 1 && (
                               <Button
                                 className="delectBtn"

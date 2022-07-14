@@ -173,7 +173,7 @@ export const VOD_QUERY = gql`
  * @param {Array} liveStatus live status
  * @example {input: {liveStatus: [DISPLAY, ACTIVE]}}
  */
-export const FIND_LIVD_BY_TYPES_QUERY = gql`
+export const FIND_LIVE_BY_TYPES_QUERY = gql`
   query FindLiveByTypes($findLiveByTypesInput: FindLiveByTypesInput!) {
     findLiveByTypes(input: $findLiveByTypesInput) {
       ok

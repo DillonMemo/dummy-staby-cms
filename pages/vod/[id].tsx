@@ -693,7 +693,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                         return (
                           <div key={index} className="mt-15">
                             <div>
-                              <em className="fontSize12 mrT5">
+                              <em className="fontSize12 mt-harf">
                                 Ch{index + 1}_Vod
                                 {data.transcodeStatus === 'FAIL' ? (
                                   <span style={{ color: 'red', marginLeft: '3px' }}>
@@ -732,11 +732,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               />
                             )}
 
-                            <em className="fontSize12 mrT5">Ch{index + 1}_Img</em>
+                            <em className="fontSize12 mt-harf">Ch{index + 1}_Img</em>
                             {data.transcodeStatus === 'FAIL' && (
                               <Input
                                 type="file"
-                                className="input mrT5"
+                                className="input mt-harf"
                                 disabled={data.transcodeStatus !== 'FAIL'}
                                 name={`playImgUrl_${index}`}
                                 placeholder="Please upload playingThumnail img. only png or jpg"
@@ -847,7 +847,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                         return (
                           <div key={index}>
                             <div>
-                              <em className="fontSize12 mrT5">{index + 1}</em>
+                              <em className="fontSize12 mt-harf">{index + 1}</em>
                               {index >= 1 && (
                                 <Button
                                   className="delectBtn"
