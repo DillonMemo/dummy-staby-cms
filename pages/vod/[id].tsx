@@ -806,9 +806,9 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                         defaultValue={vodData?.findVodById.vod?.liveId?.toString()}
                         control={control}
                         name="liveId"
-                        rules={{
-                          required: requiredText,
-                        }}
+                        // rules={{
+                        //   required: requiredText,
+                        // }}
                         render={({ field: { value, onChange } }) => (
                           <>
                             <Select
@@ -829,11 +829,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                         )}
                       />
                     </div>
-                    {errors.liveId?.message && (
+                    {/* {errors.liveId?.message && (
                       <div className="form-message">
                         <span>{errors.liveId.message}</span>
                       </div>
-                    )}
+                    )} */}
                   </div>
                   <div className="form-item mt-harf">
                     <div className="form-group">
