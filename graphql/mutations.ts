@@ -70,7 +70,6 @@ export const MEMBERS_MUTATION = gql`
         nickName
         memberStatus
         memberType
-        monitorFlag
         createDate
       }
     }
