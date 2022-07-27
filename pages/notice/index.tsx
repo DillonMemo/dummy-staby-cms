@@ -287,7 +287,7 @@ const Notice: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <>
                   <div>
                     <Table
-                      style={{ width: '100%' }}
+                      style={{ width: '100%', whiteSpace: 'pre' }}
                       columns={columns}
                       onRow={(column) => ({
                         onClick: () =>

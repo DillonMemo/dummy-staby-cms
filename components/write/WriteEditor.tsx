@@ -185,7 +185,7 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
           <Skeleton active paragraph={{ rows: 20 }} />
         ) : (
           <>
-            <TitleStyled>{title}</TitleStyled>
+            <TitleStyled style={{ whiteSpace: 'pre' }}>{title}</TitleStyled>
             <ContentStyled>{Parser(content)}</ContentStyled>
           </>
         )}

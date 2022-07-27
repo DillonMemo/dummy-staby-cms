@@ -34,6 +34,7 @@ export const MEMBER_QUERY = gql`
         nickName
         memberStatus
         memberType
+        monitorFlag
         point {
           totalPoint
           paidPoint

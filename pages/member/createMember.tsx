@@ -1,6 +1,6 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { Button, Input, Select } from 'antd'
+import { Button, Input, Select, Switch } from 'antd'
 import { Controller, useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { useMutation } from '@apollo/client'
@@ -32,6 +32,7 @@ export interface MemberCreateForm {
   depositor?: string
   bankName?: string
   accountNumber?: string
+  monitorFlag: boolean
 }
 
 const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
@@ -52,7 +53,8 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
   >(CREATE_ACCOUNT_MUTATION)
   const onSubmit = async () => {
     try {
-      const { email, password, nickName, depositor, bankName, accountNumber } = getValues()
+      const { email, password, nickName, depositor, bankName, accountNumber, monitorFlag } =
+        getValues()
       const { data } = await createMember({
         variables: {
           createMemberInput: {
@@ -60,6 +62,7 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
             password,
             nickName,
             memberType: accountInfo,
+            monitorFlag: monitorFlag,
             ...(accountInfo === MemberType.Business && {
               accountInfo: {
                 depositor: depositor || '',
@@ -282,6 +285,19 @@ const CreateMember: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <span>{errors.nickName.message}</span>
                   </div>
                 )}
+              </div>
+              <div className="form-item mt-1">
+                <div className="form-group" style={{ width: 'fit-content' }}>
+                  <span>{locale === 'ko' ? '모니터링 권한' : 'MonitorFlag'}</span>
+                  <Controller
+                    control={control}
+                    name="monitorFlag"
+                    defaultValue={false}
+                    render={({ field: { value, onChange } }) => (
+                      <Switch style={{ width: '50%' }} defaultChecked={value} onChange={onChange} />
+                    )}
+                  />
+                </div>
               </div>
 
               <div className="form-item">

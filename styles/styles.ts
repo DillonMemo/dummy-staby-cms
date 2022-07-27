@@ -472,6 +472,12 @@ export const GlobalStyles = createGlobalStyle`
         color: ${({ theme }) => theme.text};
       }
     } */
+
+    .ant-list-items{
+      .ant-list-item-meta-title, .ant-list-item-meta-description, .monitor-date {
+        color: ${({ theme }) => theme.text};
+      }
+    } 
     
 
     .ant-tabs {

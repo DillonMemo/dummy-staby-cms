@@ -14,7 +14,7 @@ import {
 import { MEMBER_QUERY } from '../../graphql/queries'
 import { EDIT_MEMBER_BY_ID_MUTATION, SUSPEND_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
 import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, Input, Modal, Radio, Select, Skeleton } from 'antd'
+import { Button, Input, Modal, Radio, Select, Skeleton, Switch } from 'antd'
 import { toast } from 'react-toastify'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -47,6 +47,7 @@ export interface MemberEditForm {
   depositor?: string
   bankName?: string
   accountNumber?: string
+  monitorFlag: boolean | null
 }
 
 const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
@@ -122,6 +123,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
         depositor,
         bankName,
         accountNumber,
+        monitorFlag,
       } = getValues()
 
       const { data } = await editMember({
@@ -133,6 +135,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
             ...(paidPoint === 0 ? { paidPoint: 0 } : { paidPoint: +paidPoint }),
             ...(freePoint === 0 ? { freePoint: 0 } : { freePoint: +freePoint }),
             memberType: memberType,
+            monitorFlag: monitorFlag || false,
             //...(point !== 0 && { point }),
             ...(watchMemberType === MemberType.Business && {
               accountInfo: {
@@ -201,29 +204,33 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           <Edit className="card">
             <Form onSubmit={handleSubmit(onSubmit)}>
               <div className="form-grid col-2 gap-1">
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '회원유형' : 'Member Type'}</span>
-                    <Controller
-                      key={memberData?.findMemberById.member?.memberType}
-                      control={control}
-                      defaultValue={memberData?.findMemberById.member?.memberType}
-                      name="memberType"
-                      render={({ field: { value, onChange } }) => (
-                        <Select
-                          defaultValue={memberData?.findMemberById.member?.memberType}
-                          value={value}
-                          onChange={onChange}>
-                          {(Object.values(MemberType) as string[]).map((data, index) => (
-                            <Select.Option value={data} key={`type-${index}`}>
-                              {data}
-                            </Select.Option>
-                          ))}
-                        </Select>
-                      )}
-                    />
+                {memberData ? (
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '회원유형' : 'Member Type'}</span>
+                      <Controller
+                        key={memberData?.findMemberById.member?.memberType}
+                        control={control}
+                        defaultValue={memberData?.findMemberById.member?.memberType}
+                        name="memberType"
+                        render={({ field: { value, onChange } }) => (
+                          <Select
+                            defaultValue={memberData?.findMemberById.member?.memberType}
+                            value={value}
+                            onChange={onChange}>
+                            {(Object.values(MemberType) as string[]).map((data, index) => (
+                              <Select.Option value={data} key={`type-${index}`}>
+                                {data}
+                              </Select.Option>
+                            ))}
+                          </Select>
+                        )}
+                      />
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <Skeleton.Input active style={{ width: '100%', margin: '4px 0' }} />
+                )}
 
                 <div className="form-item">
                   <span>{locale === 'ko' ? '회원번호' : 'Member Number'}</span>
@@ -546,6 +553,28 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <span>{errors.password.message}</span>
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div className="form-grid col-2 gap-1 mt-1">
+                <div className="form-item">
+                  <div className="form-group" style={{ width: 'fit-content' }}>
+                    <span>{locale === 'ko' ? '모니터링 권한' : 'MonitorFlag'}</span>
+                    {memberData?.findMemberById.member && (
+                      <Controller
+                        control={control}
+                        name="monitorFlag"
+                        defaultValue={memberData?.findMemberById.member?.monitorFlag}
+                        render={({ field: { value, onChange } }) => (
+                          <Switch
+                            style={{ width: '50%' }}
+                            checked={value || false}
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
