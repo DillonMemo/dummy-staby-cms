@@ -321,6 +321,7 @@ export type CreateMemberInput = {
   accountInfo?: InputMaybe<AccountInfoInputType>;
   email: Scalars['String'];
   memberType?: InputMaybe<MemberType>;
+  monitorFlag?: InputMaybe<Scalars['Boolean']>;
   nickName: Scalars['String'];
   password: Scalars['String'];
 };
@@ -491,6 +492,7 @@ export type EditMemberInput = {
   freePoint?: InputMaybe<Scalars['Int']>;
   memberStatus?: InputMaybe<MemberStatus>;
   memberType?: InputMaybe<MemberType>;
+  monitorFlag?: InputMaybe<Scalars['Boolean']>;
   nickName?: InputMaybe<Scalars['String']>;
   paidPoint?: InputMaybe<Scalars['Int']>;
   password?: InputMaybe<Scalars['String']>;
@@ -906,6 +908,7 @@ export type Member = {
   lastLoginDate?: Maybe<Scalars['DateTime']>;
   memberStatus: MemberStatus;
   memberType: MemberType;
+  monitorFlag?: Maybe<Scalars['Boolean']>;
   nickName: Scalars['String'];
   password: Scalars['String'];
   point: Point;
@@ -989,6 +992,7 @@ export type MembersInput = {
   email?: InputMaybe<Scalars['String']>;
   memberStatus?: InputMaybe<MemberStatus>;
   memberType?: InputMaybe<MemberType>;
+  monitorFlag?: InputMaybe<Scalars['Boolean']>;
   nickName?: InputMaybe<Scalars['String']>;
   page?: InputMaybe<Scalars['Int']>;
   pageView?: InputMaybe<Scalars['Int']>;
