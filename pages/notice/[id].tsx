@@ -184,7 +184,7 @@ const NoticeDetail: NextPage<Props> = (props) => {
                       </>
                     ) : (
                       <>
-                        <TitleStyled style={{ whiteSpace: 'pre' }}>{title}</TitleStyled>
+                        <TitleStyled>{title}</TitleStyled>
                         <ContentStyled>{Parser(content)}</ContentStyled>
                       </>
                     )}

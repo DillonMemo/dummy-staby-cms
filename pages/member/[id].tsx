@@ -47,7 +47,7 @@ export interface MemberEditForm {
   depositor?: string
   bankName?: string
   accountNumber?: string
-  monitorFlag: boolean | null
+  monitorFlag: boolean
 }
 
 const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
@@ -564,13 +564,9 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Controller
                         control={control}
                         name="monitorFlag"
-                        defaultValue={memberData?.findMemberById.member?.monitorFlag}
+                        defaultValue={memberData?.findMemberById.member.monitorFlag || false}
                         render={({ field: { value, onChange } }) => (
-                          <Switch
-                            style={{ width: '50%' }}
-                            checked={value || false}
-                            onChange={onChange}
-                          />
+                          <Switch style={{ width: '50%' }} checked={value} onChange={onChange} />
                         )}
                       />
                     )}

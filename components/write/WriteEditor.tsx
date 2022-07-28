@@ -185,7 +185,7 @@ const WriteEditor: React.FC<WriteEditorProps> = ({
           <Skeleton active paragraph={{ rows: 20 }} />
         ) : (
           <>
-            <TitleStyled style={{ whiteSpace: 'pre' }}>{title}</TitleStyled>
+            <TitleStyled>{title}</TitleStyled>
             <ContentStyled>{Parser(content)}</ContentStyled>
           </>
         )}
@@ -282,6 +282,7 @@ export const TitleStyled = styled.div`
   font-weight: bold;
   font-size: 2rem;
   margin-bottom: 1.5rem;
+  white-space: pre-line;
 
   word-break: break-word;
   line-height: 1.25;
