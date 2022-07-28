@@ -908,7 +908,7 @@ export type Member = {
   lastLoginDate?: Maybe<Scalars['DateTime']>;
   memberStatus: MemberStatus;
   memberType: MemberType;
-  monitorFlag?: Maybe<Scalars['Boolean']>;
+  monitorFlag: Scalars['Boolean'];
   nickName: Scalars['String'];
   password: Scalars['String'];
   point: Point;
@@ -1818,7 +1818,7 @@ export type FindMemberByIdQueryVariables = Exact<{
 }>;
 
 
-export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, createDate: any, lastLoginDate?: any | null, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, report: { __typename?: 'Report', memberReportStatus: MemberReportStatus, chatCount: number, commentCount: number, releaseDate?: any | null }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null, pushInfo: Array<{ __typename?: 'PushInfo', pushType: PushType, notificationFlag: boolean }> } | null } };
+export type FindMemberByIdQuery = { __typename?: 'Query', findMemberById: { __typename?: 'MemberOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, member?: { __typename?: 'Member', email: string, nickName: string, memberStatus: MemberStatus, memberType: MemberType, monitorFlag: boolean, createDate: any, lastLoginDate?: any | null, point: { __typename?: 'Point', totalPoint: number, paidPoint: number, freePoint: number }, report: { __typename?: 'Report', memberReportStatus: MemberReportStatus, chatCount: number, commentCount: number, releaseDate?: any | null }, accountInfo?: { __typename?: 'AccountInfo', bankName: string, depositor: string, accountNumber: string } | null, pushInfo: Array<{ __typename?: 'PushInfo', pushType: PushType, notificationFlag: boolean }> } | null } };
 
 export type FindMembersByTypeQueryVariables = Exact<{
   membersByTypeInput: MembersByTypeInput;
@@ -3491,6 +3491,7 @@ export const FindMemberByIdDocument = gql`
       nickName
       memberStatus
       memberType
+      monitorFlag
       point {
         totalPoint
         paidPoint
