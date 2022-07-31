@@ -587,7 +587,7 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     /** set global margin */
-    .mt-harf {
+    .mt-half {
     margin-top: 0.5rem;
     }
     .mt-1 {
@@ -601,7 +601,7 @@ export const GlobalStyles = createGlobalStyle`
     .mt-2 {
       margin-top: 2rem;
     }
-    .ml-harf {
+    .ml-half {
       margin-left: 0.5rem;
     }
       
@@ -850,6 +850,21 @@ export const Form = styled.form`
       }
     }
 
+    &.col-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+
+      &.merge {
+        grid-template-columns: 1fr 2fr;
+      }
+      &.merge-reverse {
+        grid-template-columns: 2fr 1fr;
+      }
+
+      ${md} {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
     &.gap-1 {
       gap: 1rem;
     }
@@ -928,6 +943,23 @@ export const Form = styled.form`
       }
     }
 
+    .ant-picker {
+      height: 2.714rem;
+      align-items: center;
+      background-color: ${({ theme }) => theme.card} !important;
+      color: #6e6b7b;
+      border: 1px solid ${({ theme }) => theme.border} !important;
+      border-radius: 0.428rem;
+
+      .ant-picker-clear {
+        background: ${({ theme }) => theme.card};
+      }
+    }
+
+    .ant-upload.ant-upload-select.ant-upload-select-text {
+      width: 100%;
+    }
+
     .form-group {
       display: flex;
       flex-flow: column nowrap;
@@ -948,6 +980,7 @@ export const Form = styled.form`
       display: flex;
       justify-content: flex-end;
       margin-top: 2rem;
+      gap: 1rem;
 
       &.add-write {
         padding: 0 1.5rem;

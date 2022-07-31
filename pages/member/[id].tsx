@@ -559,7 +559,7 @@ const MemberDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
               <div className="form-grid col-2 gap-1 mt-1">
                 <div className="form-item">
                   <div className="form-group" style={{ width: 'fit-content' }}>
-                    <span>{locale === 'ko' ? '모니터링 권한' : 'MonitorFlag'}</span>
+                    <span>{locale === 'ko' ? '모니터링 권한' : 'Monitor Permission'}</span>
                     {memberData?.findMemberById.member && (
                       <Controller
                         control={control}

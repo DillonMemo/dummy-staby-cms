@@ -285,7 +285,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '호스트' : 'HostName'}</span>
                   <Controller
@@ -312,7 +312,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                   <Controller
@@ -362,7 +362,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
                   <Controller
@@ -396,7 +396,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="form-group">
                   <span>{locale === 'ko' ? 'Live 시작 예정 시간' : 'Estimated start date'}</span>
                   <Controller
@@ -422,7 +422,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 )}
               </div>
 
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '시작 후 구매가능 시간' : 'Set the purchase time'}</span>
                   <Controller
@@ -462,7 +462,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="form-group">
                   <span>Live {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                   <Controller
@@ -490,7 +490,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 )}
               </div>
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="form-group">
                   <span>
                     Live
@@ -512,7 +512,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     return (
                       <div key={index}>
                         <div>
-                          <em className="fontSize12 mt-harf">Ch{index + 1}</em>
+                          <em className="fontSize12 mt-half">Ch{index + 1}</em>
                           {index >= 1 && (
                             <Button
                               className="delectBtn"
@@ -538,7 +538,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   )}
                 </div>
               </div>
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="form-group">
                   <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                   <Controller
@@ -556,7 +556,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   />
                 </div>
               </div>
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="form-group">
                   {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
                   <span>{locale === 'ko' ? '지분 - 우선환수, 직분배' : 'Share'}</span>
@@ -564,7 +564,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                     return (
                       <div key={index}>
                         <div>
-                          <em className="fontSize12 mt-harf">{index + 1}</em>
+                          <em className="fontSize12 mt-half">{index + 1}</em>
                           {index >= 1 && (
                             <Button
                               className="delectBtn"
@@ -652,7 +652,7 @@ const CreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </Button>
                 </div>
               </div>
-              <div className="form-item mt-harf">
+              <div className="form-item mt-half">
                 <div className="button-group">
                   <Link href="/live/lives">
                     <a>

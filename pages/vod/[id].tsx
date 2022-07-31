@@ -535,7 +535,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       )
                     })}
                   </Radio.Group>
-                  <div className="form-item mt-harf">
+                  <div className="form-item mt-half">
                     <div className="form-group">
                       <span>{locale === 'ko' ? '제목' : 'Title'}</span>
                       <Controller
@@ -565,7 +565,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     )}
                   </div>
 
-                  <div className="form-item mt-harf">
+                  <div className="form-item mt-half">
                     <div className="form-group">
                       <span>{locale === 'ko' ? '가격' : 'Price'}</span>
                       <Controller
@@ -608,7 +608,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     )}
                   </div>
 
-                  <div className="form-item mt-harf">
+                  <div className="form-item mt-half">
                     <div className="form-group">
                       <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
                       <Controller
@@ -643,7 +643,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     </div>
                   </div>
 
-                  <div className="form-item mt-harf">
+                  <div className="form-item mt-half">
                     <div className="form-group">
                       <span>Main {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
                       <Controller
@@ -679,7 +679,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       </div>
                     )}
                   </div>
-                  <div className="form-item mt-harf">
+                  <div className="form-item mt-half">
                     <div className="form-group">
                       <span>
                         Vod
@@ -693,7 +693,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                         return (
                           <div key={index} className="mt-15">
                             <div>
-                              <em className="fontSize12 mt-harf">
+                              <em className="fontSize12 mt-half">
                                 Ch{index + 1}_Vod
                                 {data.transcodeStatus === 'FAIL' ? (
                                   <span style={{ color: 'red', marginLeft: '3px' }}>
@@ -732,11 +732,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               />
                             )}
 
-                            <em className="fontSize12 mt-harf">Ch{index + 1}_Img</em>
+                            <em className="fontSize12 mt-half">Ch{index + 1}_Img</em>
                             {data.transcodeStatus === 'FAIL' && (
                               <Input
                                 type="file"
-                                className="input mt-harf"
+                                className="input mt-half"
                                 disabled={data.transcodeStatus !== 'FAIL'}
                                 name={`playImgUrl_${index}`}
                                 placeholder="Please upload playingThumnail img. only png or jpg"
@@ -768,7 +768,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       )}
                     </div>
                   </div>
-                  <div className="form-item mt-harf">
+                  <div className="form-item mt-half">
                     <div className="form-group">
                       <span>{locale === 'ko' ? '내용' : 'Content'}</span>
                       <Controller
@@ -798,7 +798,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                     )}
                   </div>
 
-                  <div className="form-item mt-harf">
+                  <div className="form-item mt-half">
                     <div className="form-group">
                       <span>Live</span>
                       <Controller
@@ -835,7 +835,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       </div>
                     )} */}
                   </div>
-                  <div className="form-item mt-harf">
+                  <div className="form-item mt-half">
                     <div className="form-group">
                       {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정. _승철 */}
                       <span>
@@ -847,7 +847,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                         return (
                           <div key={index}>
                             <div>
-                              <em className="fontSize12 mt-harf">{index + 1}</em>
+                              <em className="fontSize12 mt-half">{index + 1}</em>
                               {index >= 1 && (
                                 <Button
                                   className="delectBtn"
@@ -963,7 +963,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Button
                         type="primary"
                         role="button"
-                        className="submit-button ml-harf"
+                        className="submit-button ml-half"
                         disabled={vodData?.findVodById.vod?.vodStatus === 'WAIT'}
                         loading={editLoading}
                         onClick={onSubmit}>

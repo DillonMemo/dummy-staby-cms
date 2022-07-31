@@ -49,7 +49,7 @@ const ChangeFileInput = ({ src, onChange, name }: ChangeFileInputProps) => {
         />
       )}
 
-      <div className="edit-btn mt-harf">
+      <div className="edit-btn mt-half">
         <Button type="primary" onClick={onBtnClick}>
           {isEdit ? (locale === 'ko' ? '취소' : 'cancel') : locale === 'ko' ? '수정' : 'edit'}
         </Button>
