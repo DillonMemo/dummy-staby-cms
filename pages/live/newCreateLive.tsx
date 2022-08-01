@@ -19,11 +19,22 @@ import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
 /** utils */
 import { delayedEntryTimeArr, getError } from '../../Common/commonFn'
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, DatePicker, Image, Input, InputNumber, Select, Upload } from 'antd'
+import {
+  Button,
+  DatePicker,
+  Image,
+  Input,
+  InputNumber,
+  Segmented,
+  Select,
+  Tooltip,
+  Upload,
+} from 'antd'
 import moment from 'moment'
-import { RcFile, UploadFile } from 'antd/lib/upload'
-import { UploadOutlined } from '@ant-design/icons'
+import { RcFile } from 'antd/lib/upload'
+import { QuestionOutlined, UploadOutlined } from '@ant-design/icons'
 import { useState } from 'react'
+import styled from 'styled-components'
 
 type Props = styleMode
 
@@ -318,7 +329,7 @@ const NewCreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         <>
                           <Upload
                             name="liveThumbnail"
-                            showUploadList={true}
+                            showUploadList={false}
                             maxCount={1}
                             accept=".jpg, .png, .jpeg"
                             beforeUpload={(file: RcFile) => {
@@ -367,7 +378,30 @@ const NewCreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 </div>
                 <div className="form-item">
                   <div className="form-group">
-                    <span>test2</span>
+                    <InlineFlexContainer>
+                      <span>
+                        Live&nbsp;
+                        <Tooltip
+                          title={
+                            <small>
+                              {locale === 'ko'
+                                ? '※ live는 최대 8개까지 추가할 수 있습니다.'
+                                : '※ Can add up to 8 Live.'}
+                            </small>
+                          }>
+                          <QuestionOutlined style={{ cursor: 'help', fontSize: 12 }} />
+                        </Tooltip>
+                      </span>
+                      <Segmented
+                        options={[
+                          { label: locale === 'ko' ? '자동' : 'Auto', value: 'Auto' },
+                          {
+                            label: locale === 'ko' ? '수동' : 'Manual',
+                            value: 'Manual',
+                          },
+                        ]}
+                      />
+                    </InlineFlexContainer>
                   </div>
                 </div>
               </div>
@@ -398,5 +432,11 @@ const NewCreateLive: NextPage<Props> = ({ toggleStyle, theme }) => {
     </Layout>
   )
 }
+
+const InlineFlexContainer = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+`
 
 export default NewCreateLive
