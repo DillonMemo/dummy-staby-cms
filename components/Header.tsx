@@ -234,11 +234,11 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link href="/member/moniter" locale={locale}>
+                  <Link href="/member/monitor" locale={locale}>
                     <a>
                       <DesktopOutlined className="icon" />
                       <span className="text">
-                        {locale === 'ko' ? '모니터링 계정' : 'Moniter Account'}
+                        {locale === 'ko' ? '모니터링 계정' : 'Monitor Account'}
                       </span>
                     </a>
                   </Link>

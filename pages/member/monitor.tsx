@@ -19,7 +19,7 @@ import { toast } from 'react-toastify'
 
 type Props = styleMode
 
-const Moniter: NextPage<Props> = ({ toggleStyle, theme }) => {
+const Monitor: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale, reload } = useRouter()
   const [monitorMembers, { data: monitorMembersData, loading: monitorMemberLoading }] = useMutation<
     MembersMutation,
@@ -89,7 +89,7 @@ const Moniter: NextPage<Props> = ({ toggleStyle, theme }) => {
     <Layout toggleStyle={toggleStyle} theme={theme}>
       <MainWrapper>
         <div className="main-header">
-          <h2>{locale === 'ko' ? '모니터링 계정' : 'Moniter Account'}</h2>
+          <h2>{locale === 'ko' ? '모니터링 계정' : 'Monitor Account'}</h2>
           <ol>
             <li>
               <Link href="/">
@@ -97,7 +97,7 @@ const Moniter: NextPage<Props> = ({ toggleStyle, theme }) => {
               </Link>
             </li>
             <li>{locale === 'ko' ? '회원' : 'Member'}</li>
-            <li>{locale === 'ko' ? '모니터링 계정' : 'Moniter Account'}</li>
+            <li>{locale === 'ko' ? '모니터링 계정' : 'Monitor Account'}</li>
           </ol>
         </div>
         <div className="main-content">
@@ -136,4 +136,4 @@ const Moniter: NextPage<Props> = ({ toggleStyle, theme }) => {
   )
 }
 
-export default Moniter
+export default Monitor
