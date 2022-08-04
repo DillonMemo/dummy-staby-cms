@@ -703,7 +703,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               </em>
                               {/* {index >= 1 && (
                               <Button
-                                className="delectBtn"
+                                className="deleteBtn"
                                 disabled={data.transcodeStatus !== 'FAIL'}
                                 onClick={() => onDeleteBtn(index, setVodInfoArr, vodInfoArr)}>
                                 {locale === 'ko' ? '삭제' : 'Delete'}
@@ -850,7 +850,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               <em className="fontSize12 mt-half">{index + 1}</em>
                               {index >= 1 && (
                                 <Button
-                                  className="delectBtn"
+                                  className="deleteBtn"
                                   // disabled={isInputDisabled}
                                   onClick={() =>
                                     onDeleteBtn(index, setMemberShareInfo, memberShareInfo)

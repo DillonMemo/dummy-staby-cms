@@ -179,16 +179,29 @@ export const GlobalStyles = createGlobalStyle`
       display: inline-flex !important;
     }
     .ant-btn {
-      background: ${({ theme }) => theme.body} !important;
-      color: ${({ theme }) => theme.text} !important;
+      &:not(.ant-btn-dashed) {
+        background: ${({ theme }) => theme.body} !important;
+        color: ${({ theme }) => theme.text} !important;
+  
+        border: none;
+        outline: none;
 
-      border: none;
-      outline: none;
-
-      &:hover, &:focus  {
-        background: ${({ theme }) => `${theme.body}`} !important;
-        color: ${({ theme }) => theme.text_hover} !important;
+        &:hover, &:focus  {
+          background: ${({ theme }) => `${theme.body}`} !important;
+          color: ${({ theme }) => theme.text_hover} !important;
+        }
       }
+
+      &.ant-btn-dashed {
+        background-color: transparent;
+        color: ${({ theme }) => theme.text};
+        border-color: ${({ theme }) => theme.border};
+        &:hover, &:focus {
+          border-color: ${({ theme }) => `${theme.text}`} !important;
+          color: ${({ theme }) => theme.text_hover} !important;
+        }
+      }
+
 
       &[disabled] {
         background-color: ${({ theme }) => `${theme.disable} !important`};
@@ -561,6 +574,26 @@ export const GlobalStyles = createGlobalStyle`
       border: none!important;
     }
 
+    .ant-segmented {
+      background-color: ${({ theme }) => theme.body};
+      color: ${({ theme }) => theme.text};
+
+      &:not(.ant-segmented-disabled):hover,
+      &:not(.ant-segmented-disabled):focus {
+        background-color: ${({ theme }) => theme.border};
+      }
+
+      .ant-segmented-item-selected {
+        background-color: ${({ theme }) => theme.item};
+        color: ${({ theme }) => theme.text};
+      }
+      .ant-segmented-item {
+        &:hover, &:focus {
+          color: ${({ theme }) => theme.text_hover};
+        }
+      }
+    }
+
     textarea.ant-input {
       min-height:150px;
     }
@@ -569,7 +602,7 @@ export const GlobalStyles = createGlobalStyle`
       font-size:12px;
     }
 
-    .delectBtn{
+    .deleteBtn{
       width:fit-content;
       height:auto;
       margin:5px 5px;
@@ -603,6 +636,9 @@ export const GlobalStyles = createGlobalStyle`
     }
     .ml-half {
       margin-left: 0.5rem;
+    }
+    .mb-half {
+      margin-bottom: 0.5rem
     }
       
     /** apex charts */
@@ -1011,11 +1047,7 @@ export const Form = styled.form`
 
 export const Edit = styled.div`
   width: 100%;
-  max-width: 1024px;
   margin: 0 auto;
-  ${md} {
-    width: 100%;
-  }
 
   .thumbnailAddBtn {
     margin-top: 7px;

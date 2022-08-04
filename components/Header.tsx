@@ -310,16 +310,6 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                         </a>
                       </Link>
                     </li>
-                    <li className="nav-item">
-                      <Link href="/live/newCreateLive">
-                        <a>
-                          <PlusOutlined className="icon" />
-                          <span className="text">
-                            {locale === 'ko' ? '테스트 추가' : 'Test Create'}
-                          </span>
-                        </a>
-                      </Link>
-                    </li>
                   </div>
                 </ul>
               </li>

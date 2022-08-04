@@ -234,13 +234,20 @@ export const swap = (array: Array<any>, fromIndex: number, toIndex: number) => {
   return array
 }
 
-export const getError = (error: unknown) => {
+export const getError = (error: unknown, isConvert = false) => {
   if (error instanceof Error) {
-    toast.error(error.message, {
-      theme: localStorage.theme || 'light',
-      autoClose: 1000,
-    })
+    if (isConvert) {
+      toast.error(<div dangerouslySetInnerHTML={{ __html: error.message }}></div>, {
+        theme: localStorage.theme || 'light',
+        autoClose: 10000,
+      })
+    } else {
+      toast.error(error.message, {
+        theme: localStorage.theme || 'light',
+        autoClose: 10000,
+      })
 
-    console.error(error)
+      console.error(error)
+    }
   }
 }

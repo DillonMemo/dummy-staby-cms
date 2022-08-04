@@ -10,5 +10,6 @@ declare module 'styled-components' {
     text_hover: string
     border: string
     disable: string
+    item: string
   }
 }

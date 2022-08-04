@@ -521,7 +521,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             <em className="fontSize12 mt-half">Ch{index + 1}_Vod</em>
                             {index >= 1 && (
                               <Button
-                                className="delectBtn"
+                                className="deleteBtn"
                                 onClick={() => onDeleteBtn(index, setVodInfoArr, vodInfoArr)}>
                                 {locale === 'ko' ? '삭제' : 'Delete'}
                               </Button>
@@ -625,7 +625,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                             <em className="fontSize12 mt-half">{index + 1}</em>
                             {index >= 1 && (
                               <Button
-                                className="delectBtn"
+                                className="deleteBtn"
                                 onClick={() =>
                                   onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
                                 }>
