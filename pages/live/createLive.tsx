@@ -17,7 +17,7 @@ import {
   Upload,
 } from 'antd'
 import moment from 'moment'
-import { QuestionOutlined, UploadOutlined } from '@ant-design/icons'
+import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons'
 import { Fragment, useState } from 'react'
 import styled from 'styled-components'
 import { delay, omit, pick } from 'lodash'
@@ -33,12 +33,14 @@ import {
   CreateLiveMutationVariables,
   FindMembersByTypeQuery,
   FindMembersByTypeQueryVariables,
+  LiveChannelsQuery,
+  LiveChannelsQueryVariables,
   LiveLinkInfo,
   MemberShareInfo,
   MemberType,
   RatioType,
 } from '../../generated'
-import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
+import { FIND_MEMBERS_BY_TYPE_QUERY, LIVE_CHANNELS } from '../../graphql/queries'
 import { CREATE_LIVE_MUTATION } from '../../graphql/mutations'
 
 /** utils */
@@ -61,7 +63,7 @@ export interface LiveCreateForm {
   share: ShareInfo
 }
 
-type PreviewImgType = {
+export type PreviewImgType = {
   isVisible: boolean
   src?: string
   progress: number
@@ -108,6 +110,25 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       },
     }
   )
+  const { data: liveChannelsData } = useQuery<LiveChannelsQuery, LiveChannelsQueryVariables>(
+    LIVE_CHANNELS,
+    {
+      onCompleted: (data: LiveChannelsQuery) => {
+        if (data.liveChannels.ok) {
+          const liveChannels = data.liveChannels.liveChannels
+
+          if (liveChannels)
+            setLiveInfo([
+              {
+                listingOrder: 0,
+                linkPath: liveChannels[Math.floor(Math.random() * liveChannels.length)].channelId,
+                checked: false,
+              },
+            ])
+        }
+      },
+    }
+  )
   const [createLive] = useMutation<CreateLiveMutation, CreateLiveMutationVariables>(
     CREATE_LIVE_MUTATION
   )
@@ -119,11 +140,20 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
    */
   const onAdd = (type: 'live' | 'member') => () => {
     if (type === 'live') {
-      if (liveInfo.length < 8)
-        setLiveInfo((prev) => [
-          ...prev,
-          { listingOrder: prev.length, linkPath: '', checked: false },
-        ])
+      if (liveInfo.length < 8) {
+        const liveChannels = liveChannelsData?.liveChannels.liveChannels
+
+        if (liveChannels) {
+          let id = liveChannels[Math.floor(Math.random() * liveChannels.length)].channelId
+          while (liveInfo.findIndex((info) => info.linkPath === id) !== -1) {
+            id = liveChannels[Math.floor(Math.random() * liveChannels.length)].channelId
+          }
+          setLiveInfo((prev) => [
+            ...prev,
+            { listingOrder: prev.length, linkPath: id, checked: false },
+          ])
+        }
+      }
     } else if (type === 'member') {
       setShareInfo((prev) => [
         ...prev,
@@ -260,10 +290,6 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
         title,
       } = getValues()
 
-      for (const info of liveInfo) {
-        info.linkPath = `live/${_id}_${info.listingOrder + 1}`
-      }
-
       const { data } = await createLive({
         variables: {
           createLiveInput: {
@@ -298,6 +324,7 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
       }
     } catch (error) {
       getError(error, true)
+      setLoading((prev) => ({ ...prev, isProcessing: false }))
     }
   }
 
@@ -452,12 +479,12 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                         </Select>
                       )}
                     />
+                    {errors.liveRatioType?.message && (
+                      <div className="form-message">
+                        <span>{errors.liveRatioType.message}</span>
+                      </div>
+                    )}
                   </div>
-                  {errors.liveRatioType?.message && (
-                    <div className="form-message">
-                      <span>{errors.liveRatioType.message}</span>
-                    </div>
-                  )}
                 </div>
                 <div className="form-item">
                   <div className="form-group">
@@ -492,7 +519,7 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                 <div className="form-item">
                   <div className="form-group">
                     <span>
-                      {locale === 'ko' ? '시작 후  구매가능 시간' : 'Set the puchase time'}
+                      {locale === 'ko' ? '시작 후 구매가능 시간' : 'Set the purchase time'}
                     </span>
                     <Controller
                       control={control}
@@ -612,7 +639,7 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                             </small>
                           }
                           placement="right">
-                          <QuestionOutlined style={{ cursor: 'help', fontSize: 12 }} />
+                          <QuestionCircleOutlined style={{ cursor: 'help', fontSize: 12 }} />
                         </Tooltip>
                       </span>
                       <Tooltip
@@ -645,13 +672,13 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <div>{locale === 'ko' ? '경로' : 'Path'}</div>
                       <div className="controller-content"></div>
                     </div>
-                    {liveInfo.map((_, index) => (
+                    {liveInfo.map((info, index) => (
                       <div key={`ch-${index}`}>
                         <div>
                           <small>CH {index + 1}</small>
                         </div>
                         <div>
-                          <span>live/&#123;LIVEID&#125;_{index + 1}</span>
+                          <span>{info.linkPath}</span>
                         </div>
                         <div className="controller-content">
                           {liveInfo.length > 1 && liveInfo.length - 1 === index && (

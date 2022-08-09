@@ -429,3 +429,21 @@ export const GET_PAY_HISTORY_BY_OS = gql`
     }
   }
 `
+
+/**
+ * TheO 채널 ID 정보를 가져옵니다.
+ */
+export const LIVE_CHANNELS = gql`
+  query LiveChannels {
+    liveChannels {
+      ok
+      error {
+        ko
+        en
+      }
+      liveChannels {
+        channelId
+      }
+    }
+  }
+`

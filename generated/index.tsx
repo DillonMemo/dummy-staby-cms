@@ -766,6 +766,22 @@ export type Live = {
   vodId?: Maybe<Scalars['ID']>;
 };
 
+export type LiveChannel = {
+  __typename?: 'LiveChannel';
+  _id: Scalars['ID'];
+  channelId: Scalars['String'];
+  name: Scalars['String'];
+  rtmpUrl: Scalars['String'];
+  streamKey: Scalars['String'];
+};
+
+export type LiveChannelsOutput = {
+  __typename?: 'LiveChannelsOutput';
+  error?: Maybe<LangErrorMessage>;
+  liveChannels?: Maybe<Array<LiveChannel>>;
+  ok: Scalars['Boolean'];
+};
+
 export type LiveChatHistoriesByHistoryIdInput = {
   historyId: Scalars['ID'];
   messages?: InputMaybe<Array<MessageInputType>>;
@@ -1358,6 +1374,7 @@ export type Query = {
   getPayHistoryByOS: GetPayHistoryByOsOutput;
   getTotalMembers: GetTotalMembersOutput;
   getUserByOs: GetUserByOsOutput;
+  liveChannels: LiveChannelsOutput;
   mainBannerLiveContents: MainBannerLiveOutput;
   my: Member;
 };
@@ -1916,6 +1933,11 @@ export type GetPayHistoryByOsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetPayHistoryByOsQuery = { __typename?: 'Query', getPayHistoryByOS: { __typename?: 'GetPayHistoryByOSOutput', ok: boolean, android?: string | null, ios?: string | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
+
+export type LiveChannelsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LiveChannelsQuery = { __typename?: 'Query', liveChannels: { __typename?: 'LiveChannelsOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, liveChannels?: Array<{ __typename?: 'LiveChannel', channelId: string }> | null } };
 
 
 export const LoginDocument = gql`
@@ -4270,3 +4292,44 @@ export function useGetPayHistoryByOsLazyQuery(baseOptions?: Apollo.LazyQueryHook
 export type GetPayHistoryByOsQueryHookResult = ReturnType<typeof useGetPayHistoryByOsQuery>;
 export type GetPayHistoryByOsLazyQueryHookResult = ReturnType<typeof useGetPayHistoryByOsLazyQuery>;
 export type GetPayHistoryByOsQueryResult = Apollo.QueryResult<GetPayHistoryByOsQuery, GetPayHistoryByOsQueryVariables>;
+export const LiveChannelsDocument = gql`
+    query LiveChannels {
+  liveChannels {
+    ok
+    error {
+      ko
+      en
+    }
+    liveChannels {
+      channelId
+    }
+  }
+}
+    `;
+
+/**
+ * __useLiveChannelsQuery__
+ *
+ * To run a query within a React component, call `useLiveChannelsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLiveChannelsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLiveChannelsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLiveChannelsQuery(baseOptions?: Apollo.QueryHookOptions<LiveChannelsQuery, LiveChannelsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LiveChannelsQuery, LiveChannelsQueryVariables>(LiveChannelsDocument, options);
+      }
+export function useLiveChannelsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LiveChannelsQuery, LiveChannelsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LiveChannelsQuery, LiveChannelsQueryVariables>(LiveChannelsDocument, options);
+        }
+export type LiveChannelsQueryHookResult = ReturnType<typeof useLiveChannelsQuery>;
+export type LiveChannelsLazyQueryHookResult = ReturnType<typeof useLiveChannelsLazyQuery>;
+export type LiveChannelsQueryResult = Apollo.QueryResult<LiveChannelsQuery, LiveChannelsQueryVariables>;

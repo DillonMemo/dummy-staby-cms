@@ -583,6 +583,13 @@ export const GlobalStyles = createGlobalStyle`
         background-color: ${({ theme }) => theme.border};
       }
 
+      .ant-segmented-item-disabled {
+        color: ${({ theme }) => theme.text_hover};
+      }
+
+      .ant-segmented-thumb {
+        background-color: ${({ theme }) => theme.item};
+      }
       .ant-segmented-item-selected {
         background-color: ${({ theme }) => theme.item};
         color: ${({ theme }) => theme.text};

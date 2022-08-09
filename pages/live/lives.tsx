@@ -475,15 +475,15 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                             const liveStatusValue =
                               locale === 'ko'
                                 ? (status as LiveStatus).toUpperCase() === LiveStatus.Active
-                                  ? '진행'
+                                  ? '송출'
                                   : (status as LiveStatus).toUpperCase() === LiveStatus.Delete
                                   ? '삭제'
                                   : (status as LiveStatus).toUpperCase() === LiveStatus.Display
-                                  ? '노출'
+                                  ? '준비'
                                   : (status as LiveStatus).toUpperCase() === LiveStatus.Finish
                                   ? '종료'
                                   : (status as LiveStatus).toUpperCase() === LiveStatus.Hide
-                                  ? '대기'
+                                  ? '비노출'
                                   : status
                                 : status
 
@@ -506,15 +506,15 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                           ? liveStatus === 'All'
                             ? '전체'
                             : (liveStatus as LiveStatus) === LiveStatus.Active
-                            ? '진행'
+                            ? '송출'
                             : (liveStatus as LiveStatus) === LiveStatus.Delete
                             ? '삭제'
                             : (liveStatus as LiveStatus) === LiveStatus.Display
-                            ? '노출'
+                            ? '준비'
                             : (liveStatus as LiveStatus) === LiveStatus.Finish
                             ? '종료'
                             : (liveStatus as LiveStatus) === LiveStatus.Hide
-                            ? '대기'
+                            ? '비노출'
                             : liveStatus
                           : liveStatus}
                         &nbsp;
@@ -618,15 +618,15 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
                                 const liveStatusValue =
                                   locale === 'ko'
                                     ? (liveStatus as LiveStatus) === LiveStatus.Active
-                                      ? '진행'
+                                      ? '송출'
                                       : (liveStatus as LiveStatus) === LiveStatus.Delete
                                       ? '삭제'
                                       : (liveStatus as LiveStatus) === LiveStatus.Display
-                                      ? '노출'
+                                      ? '준비'
                                       : (liveStatus as LiveStatus) === LiveStatus.Finish
                                       ? '종료'
                                       : (liveStatus as LiveStatus) === LiveStatus.Hide
-                                      ? '대기'
+                                      ? '비노출'
                                       : liveStatus
                                     : liveStatus
                                 return {
