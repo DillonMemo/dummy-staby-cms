@@ -442,6 +442,7 @@ export const LIVE_CHANNELS = gql`
         en
       }
       liveChannels {
+        name
         channelId
       }
     }

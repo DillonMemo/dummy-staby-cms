@@ -239,12 +239,12 @@ export const getError = (error: unknown, isConvert = false) => {
     if (isConvert) {
       toast.error(<div dangerouslySetInnerHTML={{ __html: error.message }}></div>, {
         theme: localStorage.theme || 'light',
-        autoClose: 10000,
+        autoClose: 1500,
       })
     } else {
       toast.error(error.message, {
         theme: localStorage.theme || 'light',
-        autoClose: 10000,
+        autoClose: 1500,
       })
 
       console.error(error)

@@ -191,6 +191,18 @@ export type ChangeAdvertisementStatusOutput = {
   ok: Scalars['Boolean'];
 };
 
+export type ChannelStatusInput = {
+  channelId: Scalars['String'];
+};
+
+export type ChannelStatusOutput = {
+  __typename?: 'ChannelStatusOutput';
+  code?: Maybe<Scalars['String']>;
+  error?: Maybe<LangErrorMessage>;
+  message?: Maybe<Scalars['String']>;
+  ok: Scalars['Boolean'];
+};
+
 export type CommentHistoriesByMemberIdInput = {
   dates?: InputMaybe<Array<Scalars['DateTime']>>;
   memberId: Scalars['ID'];
@@ -434,6 +446,17 @@ export type EditAdvertisementInput = {
 
 export type EditAdvertisementOutput = {
   __typename?: 'EditAdvertisementOutput';
+  error?: Maybe<LangErrorMessage>;
+  ok: Scalars['Boolean'];
+};
+
+export type EditChannelInput = {
+  channelId: Scalars['String'];
+  checked: Scalars['Boolean'];
+};
+
+export type EditChannelOutput = {
+  __typename?: 'EditChannelOutput';
   error?: Maybe<LangErrorMessage>;
   ok: Scalars['Boolean'];
 };
@@ -1043,6 +1066,7 @@ export type Mutation = {
   activeHistoriesByMemberId: ActiveHistoriesByMemberIdOutput;
   advertisements: AdvertisementsOutput;
   changeAdvertisementStatus: ChangeAdvertisementStatusOutput;
+  channelStatus: ChannelStatusOutput;
   commentHistoriesByMemberId: CommentHistoriesByMemberIdOutput;
   createAccount: CreateMemberOutput;
   createAdvertisement: CreateAdvertisementOutput;
@@ -1059,6 +1083,7 @@ export type Mutation = {
   deleteVodComment: DeleteVodCommentOutput;
   editAccount: EditMemberOutput;
   editAdvertisement: EditAdvertisementOutput;
+  editChannel: EditChannelOutput;
   editEvent: EditEventOutput;
   editFaq: EditFaqOutput;
   editLive: EditLiveOutput;
@@ -1093,6 +1118,11 @@ export type MutationAdvertisementsArgs = {
 
 export type MutationChangeAdvertisementStatusArgs = {
   input: ChangeAdvertisementStatusInput;
+};
+
+
+export type MutationChannelStatusArgs = {
+  input: ChannelStatusInput;
 };
 
 
@@ -1173,6 +1203,11 @@ export type MutationEditAccountArgs = {
 
 export type MutationEditAdvertisementArgs = {
   input: EditAdvertisementInput;
+};
+
+
+export type MutationEditChannelArgs = {
+  input: EditChannelInput;
 };
 
 
@@ -1825,6 +1860,20 @@ export type ListSendBirdMessagesMutationVariables = Exact<{
 
 export type ListSendBirdMessagesMutation = { __typename?: 'Mutation', listSendbirdMessages: { __typename?: 'LiveChatHistoriesByHistoryIdOutput', ok: boolean, email?: string | null, nickName?: string | null, liveTitle?: string | null, liveStartDate?: any | null, isDisable?: boolean | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, messages?: Array<{ __typename?: 'Message', message_id: number, type: string, message: string, created_at: number }> | null } };
 
+export type ChannelStatusMutationVariables = Exact<{
+  channelStatusInput: ChannelStatusInput;
+}>;
+
+
+export type ChannelStatusMutation = { __typename?: 'Mutation', channelStatus: { __typename?: 'ChannelStatusOutput', ok: boolean, code?: string | null, message?: string | null, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
+
+export type EditChannelMutationVariables = Exact<{
+  editChannelInput: EditChannelInput;
+}>;
+
+
+export type EditChannelMutation = { __typename?: 'Mutation', editChannel: { __typename?: 'EditChannelOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null } };
+
 export type MyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1937,7 +1986,7 @@ export type GetPayHistoryByOsQuery = { __typename?: 'Query', getPayHistoryByOS: 
 export type LiveChannelsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LiveChannelsQuery = { __typename?: 'Query', liveChannels: { __typename?: 'LiveChannelsOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, liveChannels?: Array<{ __typename?: 'LiveChannel', channelId: string }> | null } };
+export type LiveChannelsQuery = { __typename?: 'Query', liveChannels: { __typename?: 'LiveChannelsOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, liveChannels?: Array<{ __typename?: 'LiveChannel', name: string, channelId: string }> | null } };
 
 
 export const LoginDocument = gql`
@@ -3453,6 +3502,82 @@ export function useListSendBirdMessagesMutation(baseOptions?: Apollo.MutationHoo
 export type ListSendBirdMessagesMutationHookResult = ReturnType<typeof useListSendBirdMessagesMutation>;
 export type ListSendBirdMessagesMutationResult = Apollo.MutationResult<ListSendBirdMessagesMutation>;
 export type ListSendBirdMessagesMutationOptions = Apollo.BaseMutationOptions<ListSendBirdMessagesMutation, ListSendBirdMessagesMutationVariables>;
+export const ChannelStatusDocument = gql`
+    mutation ChannelStatus($channelStatusInput: ChannelStatusInput!) {
+  channelStatus(input: $channelStatusInput) {
+    ok
+    error {
+      ko
+      en
+    }
+    code
+    message
+  }
+}
+    `;
+export type ChannelStatusMutationFn = Apollo.MutationFunction<ChannelStatusMutation, ChannelStatusMutationVariables>;
+
+/**
+ * __useChannelStatusMutation__
+ *
+ * To run a mutation, you first call `useChannelStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChannelStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [channelStatusMutation, { data, loading, error }] = useChannelStatusMutation({
+ *   variables: {
+ *      channelStatusInput: // value for 'channelStatusInput'
+ *   },
+ * });
+ */
+export function useChannelStatusMutation(baseOptions?: Apollo.MutationHookOptions<ChannelStatusMutation, ChannelStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChannelStatusMutation, ChannelStatusMutationVariables>(ChannelStatusDocument, options);
+      }
+export type ChannelStatusMutationHookResult = ReturnType<typeof useChannelStatusMutation>;
+export type ChannelStatusMutationResult = Apollo.MutationResult<ChannelStatusMutation>;
+export type ChannelStatusMutationOptions = Apollo.BaseMutationOptions<ChannelStatusMutation, ChannelStatusMutationVariables>;
+export const EditChannelDocument = gql`
+    mutation EditChannel($editChannelInput: EditChannelInput!) {
+  editChannel(input: $editChannelInput) {
+    ok
+    error {
+      ko
+      en
+    }
+  }
+}
+    `;
+export type EditChannelMutationFn = Apollo.MutationFunction<EditChannelMutation, EditChannelMutationVariables>;
+
+/**
+ * __useEditChannelMutation__
+ *
+ * To run a mutation, you first call `useEditChannelMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditChannelMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editChannelMutation, { data, loading, error }] = useEditChannelMutation({
+ *   variables: {
+ *      editChannelInput: // value for 'editChannelInput'
+ *   },
+ * });
+ */
+export function useEditChannelMutation(baseOptions?: Apollo.MutationHookOptions<EditChannelMutation, EditChannelMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditChannelMutation, EditChannelMutationVariables>(EditChannelDocument, options);
+      }
+export type EditChannelMutationHookResult = ReturnType<typeof useEditChannelMutation>;
+export type EditChannelMutationResult = Apollo.MutationResult<EditChannelMutation>;
+export type EditChannelMutationOptions = Apollo.BaseMutationOptions<EditChannelMutation, EditChannelMutationVariables>;
 export const MyDocument = gql`
     query My {
   my {
@@ -4301,6 +4426,7 @@ export const LiveChannelsDocument = gql`
       en
     }
     liveChannels {
+      name
       channelId
     }
   }

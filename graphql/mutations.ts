@@ -801,3 +801,42 @@ export const LIST_SENDBIRD_MESSAGES = gql`
     }
   }
 `
+
+/**
+ * 채널 상태를 가져옵니다
+ * @example {input: {
+ *  channelId: <String>
+ * }}
+ */
+export const CHANNEL_STATUS_MUTATION = gql`
+  mutation ChannelStatus($channelStatusInput: ChannelStatusInput!) {
+    channelStatus(input: $channelStatusInput) {
+      ok
+      error {
+        ko
+        en
+      }
+      code
+      message
+    }
+  }
+`
+
+/**
+ * 채널 상태를 변경 합니다
+ * @example {input: {
+ *  checked: <Boolean>
+ *  channelId: <String>
+ * }}
+ */
+export const EDIT_CHANNEL_MUTATION = gql`
+  mutation EditChannel($editChannelInput: EditChannelInput!) {
+    editChannel(input: $editChannelInput) {
+      ok
+      error {
+        ko
+        en
+      }
+    }
+  }
+`

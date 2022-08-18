@@ -723,7 +723,6 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         </Radio.Button>
                       </Radio.Group>
                     </span>
-                    {console.log(liveInfoArr)}
                     {liveInfoArr.map((data, index) => {
                       return (
                         <div key={index}>

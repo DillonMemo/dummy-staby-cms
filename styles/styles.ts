@@ -179,7 +179,7 @@ export const GlobalStyles = createGlobalStyle`
       display: inline-flex !important;
     }
     .ant-btn {
-      &:not(.ant-btn-dashed) {
+      &:not(.ant-btn-dashed):not(.ant-btn-icon-only) {
         background: ${({ theme }) => theme.body} !important;
         color: ${({ theme }) => theme.text} !important;
   
@@ -199,6 +199,16 @@ export const GlobalStyles = createGlobalStyle`
         &:hover, &:focus {
           border-color: ${({ theme }) => `${theme.text}`} !important;
           color: ${({ theme }) => theme.text_hover} !important;
+        }
+      }
+      &.ant-btn-icon-only {
+        border: none;
+        color: ${({ theme }) => theme.text};
+        background: transparent;
+        box-shadow: none;
+
+        &:hover {
+          color: ${({ theme }) => theme.text_hover}
         }
       }
 
@@ -601,6 +611,54 @@ export const GlobalStyles = createGlobalStyle`
       }
     }
 
+    .ant-badge {
+      &.ant-badge-status {
+        ${md} {
+          display: inline-flex;
+          align-items: center;
+        }
+
+        &.channel-status:not(.no-title) {
+          min-width: 5rem;
+
+          ${md} {
+            min-width: 4rem;
+          }
+        }
+
+        .ant-badge-status-text {
+          color: ${({ theme }) => theme.text};
+          ${md} {
+            line-height: 0;
+            margin-left: 4px;
+            font-size: 12px;
+          }
+        }
+      }
+    }
+
+    .ant-drawer {
+      /* position: fixed;
+      inset: 0;
+      z-index: 1000;
+      pointer-events: none; */
+      &.ant-drawer-open {
+        .ant-drawer-mask {
+          /* opacity: 0.04;
+          animation: none;
+          pointer-events: none;
+          position: absolute;
+          inset: 0;
+          z-index: 1000;
+          background: rgba(0, 0, 0, 0.45); */
+        }
+
+        .ant-drawer-content-wrapper {
+          /* box-shadow: none; */
+        }
+      }
+    }
+
     textarea.ant-input {
       min-height:150px;
     }
@@ -858,6 +916,7 @@ export const MainWrapper = styled.main`
     }
 
     .form-message {
+      line-height: 1.5;
       color: red;
     }
   }
@@ -908,6 +967,14 @@ export const Form = styled.form`
       }
     }
 
+    &.col-4 {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+
+      ${md} {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
     &.gap-1 {
       gap: 1rem;
     }
@@ -926,10 +993,15 @@ export const Form = styled.form`
         padding: 0;
       }
     }
+    .ant-select.live-channels .ant-select-selector {
+      padding: 0;
+      height: 1.5rem;
+    }
+
     select,
     .input:not(.ant-input-disabled, .ant-input-affix-wrapper-disabled),
     .ant-input-number-input,
-    .ant-select-selector {
+    .ant-select .ant-select-selector {
       height: 2.714rem;
       align-items: center;
       background-color: ${({ theme }) => theme.card};

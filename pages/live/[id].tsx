@@ -1,46 +1,72 @@
-import { useQuery } from '@apollo/client'
-import { omit, pick } from 'lodash'
+import { useMutation, useQuery } from '@apollo/client'
+import { delay, omit, pick } from 'lodash'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import {
+  Badge,
   Button,
   DatePicker,
   Image,
   Input,
   InputNumber,
+  Progress,
   Segmented,
   Select,
   Skeleton,
-  Switch,
+  Slider,
   Tooltip,
   Upload,
 } from 'antd'
-import { CSSProperties, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import moment from 'moment'
-import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons'
-import styled from 'styled-components'
+import {
+  DeleteOutlined,
+  PlusOutlined,
+  QuestionCircleOutlined,
+  UploadOutlined,
+} from '@ant-design/icons'
+import { toast } from 'react-toastify'
 
 /** components */
 import Layout from '../../components/Layout'
+import LoadingOverlay from '../../components/LoadingOverlay'
 
 /** graphql */
 import {
+  ChannelStatusMutation,
+  ChannelStatusMutationVariables,
+  EditLiveMutation,
+  EditLiveMutationVariables,
   FindLiveByIdQuery,
   FindLiveByIdQueryVariables,
   FindMembersByTypeQuery,
   FindMembersByTypeQueryVariables,
+  LiveChannelsQuery,
+  LiveChannelsQueryVariables,
+  LiveLinkInfo,
   LiveStatus,
   MemberType,
   RatioType,
 } from '../../generated'
-import { FIND_MEMBERS_BY_TYPE_QUERY, LIVE_QUERY } from '../../graphql/queries'
+import { FIND_MEMBERS_BY_TYPE_QUERY, LIVE_CHANNELS, LIVE_QUERY } from '../../graphql/queries'
+import { CHANNEL_STATUS_MUTATION, EDIT_LIVE_MUTATION } from '../../graphql/mutations'
 
 /** utils */
-import { Edit, Form, MainWrapper, md, styleMode } from '../../styles/styles'
-import { LiveCreateForm, LiveInfo, PreviewImgType } from './createLive'
-import { delayedEntryTimeArr } from '../../Common/commonFn'
+import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
+import {
+  InlineFlexContainer,
+  LiveCreateForm,
+  LiveInfo,
+  LiveInfoGrid,
+  PreviewImgType,
+  ShareInfo,
+  ShareInfoGrid,
+  SkeletonStyle,
+} from './createLive'
+import { delayedEntryTimeArr, getError, nowDateStr } from '../../Common/commonFn'
+import { S3 } from '../../lib/awsClient'
 
 type Props = styleMode
 
@@ -49,18 +75,22 @@ interface LiveEditForm extends LiveCreateForm {
 }
 
 const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale, reload, query, push } = useRouter()
+  const { locale, query, push } = useRouter()
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({
+    isUploading: false,
+    isProcessing: false,
+  })
   const [previewImg, setPreviewImg] = useState<PreviewImgType>({
     isVisible: false,
     progress: 0,
     status: 'normal',
   })
-  const [liveInfo, setLiveInfo] = useState<LiveInfo[]>([
-    { listingOrder: 0, linkPath: '', checked: false },
-  ])
+  const [liveInfo, setLiveInfo] = useState<LiveInfo[]>([])
+  const [shareInfo, setShareInfo] = useState<ShareInfo[]>([])
 
   const {
     getValues,
+    setValue,
     formState: { errors },
     control,
     handleSubmit,
@@ -76,7 +106,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   /** Live 정보 쿼리 */
   const {
     data: liveData,
-    refetch: refreshLive,
+    // refetch: refreshLive,
     loading: isLiveLoading,
   } = useQuery<FindLiveByIdQuery, FindLiveByIdQueryVariables>(LIVE_QUERY, {
     variables: {
@@ -86,24 +116,309 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     },
     onCompleted: (data: FindLiveByIdQuery) => {
       if (data.findLiveById.ok) {
-        const liveInfo = data.findLiveById.live?.liveLinkInfo.map((info) =>
-          pick(info, ['listingOrder', 'linkPath'])
+        const shareInfo = data.findLiveById.live?.liveShareInfo.memberShareInfo.map((info) =>
+          omit(info, ['__typename'])
         )
-        if (data.findLiveById.live) {
-          for (const info of data.findLiveById.live.liveLinkInfo) {
-            console.log(info)
-          }
-        }
+
+        if (shareInfo) setShareInfo(shareInfo)
       }
     },
   })
 
+  /** TheO 채널 목록 쿼리 */
+  const { data: liveChannelsData, loading: isChannelLoading } = useQuery<
+    LiveChannelsQuery,
+    LiveChannelsQueryVariables
+  >(LIVE_CHANNELS)
+  /** 다채널 상태 정보 뮤테이션 */
+  const [channelsStatus, { loading: isChannelsStatusLoading }] = useMutation<
+    ChannelStatusMutation,
+    ChannelStatusMutationVariables
+  >(CHANNEL_STATUS_MUTATION)
+  const [editLive, { loading: isEditLiveLoading }] = useMutation<
+    EditLiveMutation,
+    EditLiveMutationVariables
+  >(EDIT_LIVE_MUTATION)
+
+  /**
+   * 추가 버튼 클릭 이벤트 핸들러 입니다.
+   * @returns 추가 성공 여부를 반환
+   */
+  const onAddMember = () =>
+    setShareInfo((prev) => [
+      ...prev,
+      { memberId: '', nickName: '', priorityShare: 0, directShare: 100 },
+    ])
+
+  /**
+   * 채널 추가 이벤트 핸들러 입니다.
+   * @param {string} value select option value
+   */
+  const onChangeChannel = async (value: string) => {
+    try {
+      const { data } = await channelsStatus({
+        variables: {
+          channelStatusInput: {
+            channelId: value,
+          },
+        },
+      })
+
+      if (!data?.channelStatus.ok) {
+        const message =
+          locale === 'ko' ? data?.channelStatus.error?.ko : data?.channelStatus.error?.en
+        throw new Error(message)
+      } else {
+        setLiveInfo((prev) => [
+          ...prev,
+          {
+            listingOrder: prev.length,
+            linkPath: value,
+            checked: data.channelStatus.code === 'playing',
+            code: data.channelStatus.code || 'unauthorized',
+          },
+        ])
+      }
+    } catch (error) {
+      getError(error)
+    }
+  }
+
+  /**
+   * 라이브 삭제 버튼 클릭 이벤트 핸들러 입니다.
+   * @param {number} index row index number
+   * @return {void} 라이브 삭제 성공 여부를 반환
+   */
+  const onDeleteLive = (index: number) => () =>
+    setLiveInfo((prev) => [...prev.slice(0, index), ...prev.slice(index + 1, prev.length)])
+
+  /**
+   * 지분 삭제 버튼 클릭 이벤트 핸들러 입니다.
+   * @param {number} index
+   * @returns 지분 삭제 성공 여부를 반환
+   */
+  const onDeleteShare = (index: number) => () =>
+    setShareInfo((prev) => [...prev.slice(0, index), ...prev.slice(index + 1, prev.length)])
+
   /**
    * 최종 저장 버튼 이벤트 핸들러
    */
-  const onSubmit = async () => {
-    console.log('submit', getValues())
+  const onSubmit = () => {
+    setLoading((prev) => ({ ...prev, isUploading: true }))
+    const { liveThumbnail, livePreviewDate } = getValues()
+    const id = query.id as string
+    if (!id)
+      return toast.error(
+        locale === 'ko' ? '라이브 ID가 존재 하지 않습니다' : 'Live ID does not exist',
+        {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+        }
+      )
+
+    if (moment(livePreviewDate) <= moment().endOf('hour'))
+      return toast.error(
+        locale === 'ko'
+          ? 'Live 시작 예정 시간이 현재시간이거나 이전시간 입니다'
+          : 'The scheduled time to start the live is the current time or the previous time',
+        {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => {
+            setValue('livePreviewDate', new Date())
+            setLoading({ isUploading: false, isProcessing: false })
+          },
+        }
+      )
+
+    const [priorityShareSum, directShareSum] = [
+      shareInfo.reduce(
+        (prev, current) => (prev ? prev + current.priorityShare : 0 + current.priorityShare),
+        0
+      ),
+      shareInfo.reduce(
+        (prev, current) => (prev ? prev + current.directShare : 0 + current.directShare),
+        0
+      ),
+    ]
+
+    if (!(priorityShareSum === 100 || priorityShareSum === 0))
+      return toast.error(
+        locale === 'ko'
+          ? '우선환수 지분은 총합이 100 또는 0 이어야 합니다'
+          : 'Priority share sum is 100 or 0',
+        {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+        }
+      )
+
+    if (directShareSum !== 100)
+      return toast.error(
+        locale === 'ko' ? '직분배 지분은 총합이 100 이어야 합니다' : 'Direct share sum is 100',
+        {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+        }
+      )
+    if (typeof liveThumbnail === 'string') {
+      setLoading({ isUploading: false, isProcessing: true })
+      onMutation(id, liveThumbnail)
+    } else if ((liveThumbnail as any).file.originFileObj instanceof File) {
+      const file = (liveThumbnail as any).file.originFileObj as File
+      const fileExtension = file.name.split('.')[file.name.split('.').length - 1]
+      const fileName = `${id}_main_${nowDateStr}.${fileExtension}`
+      const mainImgFileName = `${
+        process.env.NODE_ENV === 'production' ? 'prod' : 'dev'
+      }/going/live/${id}/main/${fileName}`
+
+      process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+        S3.upload(
+          {
+            Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+            Key: mainImgFileName,
+            Body: (liveThumbnail as any).file.originFileObj,
+            ACL: 'public-read',
+          },
+          (error: Error) => {
+            if (error) {
+              return toast.error(
+                locale === 'ko'
+                  ? `파일 업로드 오류: ${error}`
+                  : `There was an error uploading your file: ${error}`,
+                {
+                  theme: localStorage.theme || 'light',
+                  autoClose: 750,
+                  onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+                }
+              )
+            }
+
+            return delay(() => {
+              setLoading({ isUploading: false, isProcessing: true })
+              onMutation(id, fileName)
+            }, 750)
+          }
+        ).on('httpUploadProgress', (progress) => {
+          const progressPercentage = Math.round((progress.loaded / progress.total) * 100)
+
+          if (progressPercentage < 100) {
+            setPreviewImg((prev) => ({ ...prev, status: 'active', progress: progressPercentage }))
+          } else if (progressPercentage === 100) {
+            setPreviewImg((prev) => ({
+              ...prev,
+              status: 'success',
+              progress: progressPercentage,
+            }))
+          }
+        })
+    }
   }
+
+  /**
+   * graphql 호출 이벤트 핸들러 입니다.
+   * @param {String} _id entity id
+   * @param {String} fileName upload file name
+   * @return mutation 호출 성공 여부를 반환 합니다
+   */
+  const onMutation = async (_id: string, fileName: string) => {
+    try {
+      const {
+        title,
+        hostName,
+        liveRatioType,
+        paymentAmount,
+        delayedEntryTime,
+        livePreviewDate,
+        content,
+        liveStatus,
+      } = getValues()
+
+      const { data } = await editLive({
+        variables: {
+          editLiveInput: {
+            _id,
+            mainImageName: fileName,
+            delayedEntryTime,
+            hostName,
+            liveRatioType,
+            liveStatus,
+            liveLinkInfo: liveInfo.map((info) => omit(info, ['checked', 'code'])),
+            liveShareInfo: {
+              liveId: _id,
+              memberShareInfo: shareInfo,
+            },
+            livePreviewDate: new Date(livePreviewDate),
+            content,
+            paymentAmount,
+            title,
+          },
+        },
+      })
+
+      if (!data?.editLive.ok) {
+        const message = locale === 'ko' ? data?.editLive.error?.ko : data?.editLive.error?.en
+        throw new Error(message)
+      } else {
+        setLoading({ isUploading: false, isProcessing: false })
+        toast.success(locale === 'ko' ? '수정이 완료 되었습니다.' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => push('/live/lives'),
+        })
+      }
+      setLoading({ isUploading: false, isProcessing: false })
+    } catch (error) {
+      getError(error, true)
+      setLoading((prev) => ({ ...prev, isProcessing: false }))
+    }
+  }
+
+  useEffect(() => {
+    const fetch = async (liveInfo: LiveLinkInfo[]) => {
+      try {
+        // 하나 끝나면 다음 비동기 실행 처럼 순서대로 들어가는 로직이 아닌 한번의 비동기 로직 실행.
+        const response: LiveInfo[] = await Promise.all(
+          liveInfo.map(async ({ listingOrder, linkPath }) => {
+            if (typeof linkPath === 'string') {
+              const { data } = await channelsStatus({
+                variables: {
+                  channelStatusInput: {
+                    channelId: linkPath,
+                  },
+                },
+              })
+              if (!data?.channelStatus.ok) {
+                const message =
+                  locale === 'ko' ? data?.channelStatus.error?.ko : data?.channelStatus.error?.en
+                throw new Error(message)
+              } else {
+                return {
+                  listingOrder,
+                  linkPath,
+                  checked: data.channelStatus.code === 'playing',
+                  code: data.channelStatus.code || 'unauthorized',
+                }
+              }
+            } else {
+              throw new Error('일부 라이브 채널의 채널 ID가 존재 하지 않습니다.')
+            }
+          })
+        )
+
+        setLiveInfo(response)
+      } catch (error) {
+        getError(error)
+      }
+    }
+    if (!isLiveLoading) {
+      const liveInfo = liveData?.findLiveById.live?.liveLinkInfo
+      if (liveInfo) fetch(liveInfo)
+    }
+  }, [isLiveLoading])
 
   return (
     <Layout toggleStyle={toggleStyle} theme={theme}>
@@ -341,6 +656,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                         }}
                         render={({ field: { value, onChange } }) => (
                           <DatePicker
+                            disabledDate={(current) => current && current <= moment().endOf('hour')}
                             value={moment(value).isValid() ? moment(value) : undefined}
                             onChange={onChange}
                             showTime={{
@@ -491,47 +807,264 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                     </div>
                   </div>
 
+                  {!isChannelLoading ? (
+                    <div className="form-item">
+                      <div className="form-group">
+                        <InlineFlexContainer>
+                          <span>
+                            Live&nbsp;
+                            <Tooltip
+                              title={
+                                <small>
+                                  {locale === 'ko'
+                                    ? '※ live는 최대 8개까지 추가할 수 있습니다.'
+                                    : '※ Can add up to 8 Live.'}
+                                </small>
+                              }
+                              placement="right">
+                              <QuestionCircleOutlined style={{ cursor: 'help', fontSize: 12 }} />
+                            </Tooltip>
+                          </span>
+                        </InlineFlexContainer>
+                      </div>
+
+                      <LiveInfoGrid>
+                        <div>
+                          <div>&nbsp;</div>
+                          <div>{locale === 'ko' ? '채널' : 'Channel'}</div>
+                          <div>{locale === 'ko' ? '경로' : 'Path'}</div>
+                          <div className="controller-content"></div>
+                        </div>
+                        {!isChannelsStatusLoading ? (
+                          liveInfo.map((info, index) => (
+                            <div key={`ch-${index}`}>
+                              <div>
+                                <Button
+                                  onClick={onDeleteLive(index)}
+                                  icon={<DeleteOutlined style={{ fontSize: 16 }} />}
+                                />
+                              </div>
+                              <div>
+                                <small>CH {index + 1}</small>
+                              </div>
+                              <div>
+                                <span>
+                                  {
+                                    liveChannelsData?.liveChannels.liveChannels?.find(
+                                      (channel) => channel.channelId === info.linkPath
+                                    )?.name
+                                  }
+                                </span>
+                              </div>
+                              <div className="controller-content">
+                                <div>
+                                  <Badge
+                                    className="channel-status"
+                                    {...(info.code === 'stopped'
+                                      ? { status: 'error', text: <span>{info.code}</span> }
+                                      : info.code === 'playing'
+                                      ? { status: 'processing', text: <span>{info.code}</span> }
+                                      : info.code === 'waiting'
+                                      ? { status: 'success', text: <span>{info.code}</span> }
+                                      : { status: 'warning', text: <span>{info.code}</span> })}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <>
+                            {liveInfo.map((_, index) => (
+                              <Skeleton active title paragraph={false} key={index} />
+                            ))}
+                            <Skeleton active title paragraph={false} />
+                          </>
+                        )}
+
+                        {liveInfo.length < 8 && (
+                          <div>
+                            <div></div>
+                            <div>
+                              <small>CH {liveInfo.length + 1}</small>
+                            </div>
+                            <div>
+                              <Select
+                                className="live-channels"
+                                placeholder={locale === 'ko' ? '라이브 선택' : 'Choose Live'}
+                                bordered={false}
+                                loading={isChannelsStatusLoading}
+                                disabled={isChannelsStatusLoading}
+                                onChange={onChangeChannel}
+                                style={{ width: '100%' }}>
+                                {liveChannelsData?.liveChannels.liveChannels
+                                  ?.map((channel) => pick(channel, ['channelId', 'name']))
+                                  .sort((x, y) => {
+                                    const a = x.name.toUpperCase(),
+                                      b = y.name.toUpperCase()
+
+                                    return a === b ? 0 : a > b ? 1 : -1
+                                  })
+                                  .map((channel, index) => (
+                                    <Select.Option
+                                      key={`channel-${index}`}
+                                      value={channel.channelId}
+                                      disabled={
+                                        liveInfo.findIndex(
+                                          (info) => info.linkPath === channel.channelId
+                                        ) !== -1
+                                      }>
+                                      {channel.name}
+                                    </Select.Option>
+                                  ))}
+                              </Select>
+                            </div>
+                            <div>
+                              {liveInfo.length < 1 && (
+                                <div className="form-message">
+                                  <small>
+                                    {locale === 'ko'
+                                      ? '최소 1개 채널은 필수 입니다'
+                                      : 'At least 1 channel is required'}
+                                  </small>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </LiveInfoGrid>
+                    </div>
+                  ) : (
+                    <Skeleton.Button
+                      size="large"
+                      active
+                      style={{ ...SkeletonStyle, minHeight: '10rem' }}
+                    />
+                  )}
+                </div>
+
+                <div className="form-grid col-3 merge gap-1 mt-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '내용' : 'Content'}</span>
+                      <Controller
+                        control={control}
+                        name="content"
+                        key={liveData?.findLiveById.live?.content}
+                        defaultValue={liveData?.findLiveById.live?.content || ''}
+                        render={({ field: { value, onChange } }) => (
+                          <Input.TextArea
+                            className="input"
+                            placeholder={locale === 'ko' ? '내용 입력' : 'Please enter content'}
+                            maxLength={1000}
+                            value={value}
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+
                   <div className="form-item">
                     <div className="form-group">
                       <InlineFlexContainer>
-                        <span>
-                          Live&nbsp;
-                          <Tooltip
-                            title={
-                              <small>
-                                {locale === 'ko'
-                                  ? '※ live는 최대 8개까지 추가할 수 있습니다.'
-                                  : '※ Can add up to 8 Live.'}
-                              </small>
-                            }
-                            placement="right">
-                            <QuestionCircleOutlined style={{ cursor: 'help', fontSize: 12 }} />
-                          </Tooltip>
-                        </span>
-                        <Tooltip
-                          title={
-                            <small>
-                              {locale === 'ko'
-                                ? '※ 라이브를 일괄 변경합니다.'
-                                : '※ Change Live in batches.'}
-                              <br />
-                              {locale === 'ko'
-                                ? '※ 라이브 생성에서는 이용 불가능 합니다.'
-                                : '※ Not available in live creation.'}
-                            </small>
-                          }
-                          placement="left">
-                          <Switch disabled />
-                        </Tooltip>
+                        <span>{locale === 'ko' ? '지분' : 'Share'}</span>
                       </InlineFlexContainer>
+                      <Button
+                        type="dashed"
+                        htmlType="button"
+                        onClick={onAddMember}
+                        style={{ width: '100%' }}>
+                        <PlusOutlined />
+                        {locale === 'ko' ? '추가' : 'Add'}
+                      </Button>
+                      {shareInfo.map((info, index) => (
+                        <Fragment key={index}>
+                          <ShareInfoGrid>
+                            <Select
+                              value={info.memberId}
+                              onChange={(value) => {
+                                const { nickName, _id: memberId } = pick(
+                                  memberData?.findMembersByType.members.find(
+                                    (member) => member._id === value
+                                  ),
+                                  ['_id', 'nickName']
+                                )
+
+                                if (nickName && memberId) {
+                                  setShareInfo((prev) => [
+                                    ...prev.slice(0, index),
+                                    { ...prev[index], nickName, memberId },
+                                    ...prev.slice(index + 1, prev.length),
+                                  ])
+                                } else {
+                                  toast.error(
+                                    locale === 'ko'
+                                      ? '지분 회원 정보가 잘못 되었습니다'
+                                      : 'Undefined share member info',
+                                    {
+                                      theme: localStorage.theme || 'light',
+                                      autoClose: 750,
+                                    }
+                                  )
+                                }
+                              }}>
+                              {memberData?.findMembersByType.members.map((data, index) => (
+                                <Select.Option key={`member-${index}`} value={data._id}>
+                                  {data.nickName}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                            <div className="controller-content">
+                              <div>
+                                <Slider
+                                  defaultValue={info.priorityShare}
+                                  tipFormatter={(value) =>
+                                    value &&
+                                    `${locale === 'ko' ? '우선환수' : 'priority share'} : ${value}`
+                                  }
+                                  onChange={(value) =>
+                                    setShareInfo((prev) => [
+                                      ...prev.slice(0, index),
+                                      { ...prev[index], priorityShare: value },
+                                      ...prev.slice(index + 1, prev.length),
+                                    ])
+                                  }
+                                />
+                                <Slider
+                                  defaultValue={info.directShare}
+                                  tipFormatter={(value) =>
+                                    value &&
+                                    `${locale === 'ko' ? '직분배' : 'direct share'} : ${value}`
+                                  }
+                                  onChange={(value) =>
+                                    setShareInfo((prev) => [
+                                      ...prev.slice(0, index),
+                                      { ...prev[index], directShare: value },
+                                      ...prev.slice(index + 1, prev.length),
+                                    ])
+                                  }
+                                />
+                              </div>
+                              {shareInfo.length > 1 && shareInfo.length - 1 === index && (
+                                <Button
+                                  onClick={onDeleteShare(index)}
+                                  icon={<DeleteOutlined style={{ fontSize: 16 }} />}
+                                />
+                              )}
+                            </div>
+                          </ShareInfoGrid>
+                          {!info.memberId && (
+                            <div className="form-message">
+                              <span>
+                                {locale === 'ko'
+                                  ? '위 항목은 필수 항목입니다'
+                                  : 'This input is required'}
+                              </span>
+                            </div>
+                          )}
+                        </Fragment>
+                      ))}
                     </div>
-                    <Button
-                      type="dashed"
-                      htmlType="button"
-                      onClick={() => console.log('click')}
-                      style={{ width: '100%' }}>
-                      {locale === 'ko' ? '추가 (최대: 8)' : 'Add (Max: 8)'}
-                    </Button>
                   </div>
                 </div>
                 <div className="form-item">
@@ -548,8 +1081,12 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       role="button"
                       htmlType="submit"
                       className="submit-button"
-                      disabled={Object.keys(errors).length > 0}
-                      loading={false}>
+                      disabled={
+                        Object.keys(errors).length > 0 ||
+                        shareInfo.findIndex((info) => !info.memberId) !== -1 ||
+                        liveInfo.length < 1
+                      }
+                      loading={isEditLiveLoading}>
                       {locale === 'ko' ? '저장' : 'Save'}
                     </Button>
                   </div>
@@ -601,22 +1138,36 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           </Edit>
         </div>
       </MainWrapper>
+      <LoadingOverlay states={loading}>
+        <div className="container">
+          {loading.isUploading && (
+            <div className="progress">
+              <Progress
+                type="circle"
+                percent={previewImg.progress}
+                size="small"
+                status={previewImg.status}
+              />
+            </div>
+          )}
+          {loading.isProcessing && (
+            <div className="letter-holder">
+              <div className="l-1 letter">L</div>
+              <div className="l-2 letter">o</div>
+              <div className="l-3 letter">a</div>
+              <div className="l-4 letter">d</div>
+              <div className="l-5 letter">i</div>
+              <div className="l-6 letter">n</div>
+              <div className="l-7 letter">g</div>
+              <div className="l-8 letter">.</div>
+              <div className="l-9 letter">.</div>
+              <div className="l-10 letter">.</div>
+            </div>
+          )}
+        </div>
+      </LoadingOverlay>
     </Layout>
   )
 }
-
-const SkeletonStyle: CSSProperties = { width: '100%', minHeight: '3.714rem' }
-
-const InlineFlexContainer = styled.div`
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin-bottom: 0.5rem;
-
-  ${md} {
-    padding: 1rem 0;
-  }
-`
 
 export default LiveDetail

@@ -2,17 +2,17 @@ import { useCallback, useEffect, useState } from 'react'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import router, { useRouter } from 'next/router'
-import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
 import { Button, Dropdown, Input, Menu, Pagination, Select, Skeleton, Space, Table } from 'antd'
 import { ColumnsType } from 'antd/lib/table'
 import { debounce } from 'lodash'
 import moment from 'moment'
 import { MenuInfo } from 'rc-menu/lib/interface'
 import { RangeValue } from 'rc-picker/lib/interface'
+import { toast } from 'react-toastify'
+import { LoadingOutlined } from '@ant-design/icons'
 
 /** components */
 import Layout from '../../components/Layout'
-import { LoadingOutlined } from '@ant-design/icons'
 import RangePicker from '../../components/RangePicker'
 
 /** graphql */
@@ -21,9 +21,10 @@ import { LivesMutation, LivesMutationVariables, LiveStatus } from '../../generat
 import { LIVES_MUTATION } from '../../graphql/mutations'
 
 /** util */
+import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
 import { DATE_FORMAT } from '../../Common/commonFn'
-import { toast } from 'react-toastify'
 import { PAGE, PAGESIZE } from '../../lib/constants'
+import Channel, { StateProps } from '../../components/live/Channel'
 
 type Props = styleMode
 
@@ -64,29 +65,53 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
       key: 'title',
     },
     {
-      title: locale === 'ko' ? '진행자' : 'MC',
+      title: locale === 'ko' ? '주최자' : 'Host',
       dataIndex: 'hostName',
       key: 'hostName',
       responsive: ['md'],
     },
     {
-      title: locale === 'ko' ? '가격' : 'price',
+      title: locale === 'ko' ? '가격' : 'Price',
       dataIndex: 'paymentAmount',
       key: 'paymentAmount',
       responsive: ['md'],
     },
     {
-      title: locale === 'ko' ? '시작 예정일' : 'livePreviewDate',
+      title: locale === 'ko' ? '시작 예정일' : 'Live preview date',
       dataIndex: 'livePreviewDate',
       key: 'livePreviewDate',
+      responsive: ['md'],
     },
-
     {
-      title: locale === 'ko' ? '등록일' : 'createDate',
+      title: locale === 'ko' ? '등록일' : 'Created',
       dataIndex: 'createDate',
       key: 'createDate',
-      fixed: 'right',
       responsive: ['md'],
+    },
+    {
+      title: locale === 'ko' ? '채널' : 'Channel',
+      key: 'channel',
+      align: 'center',
+      render: (_, record) => {
+        return (
+          <Space size="middle">
+            <Button
+              type="primary"
+              role="button"
+              htmlType="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setDrawerProps((prev) => ({
+                  id: record._id,
+                  title: record.title,
+                  isVisible: !prev.isVisible,
+                }))
+              }}>
+              {locale === 'ko' ? '설정' : 'Set Up'}
+            </Button>
+          </Space>
+        )
+      },
     },
   ]
   const [
@@ -100,6 +125,9 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
     livePreviewDates: [],
     searchSelect: 'Title',
     searchText: '',
+  })
+  const [drawerProps, setDrawerProps] = useState<StateProps>({
+    isVisible: false,
   })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
     liveStatus: false,
@@ -670,6 +698,12 @@ const Lives: NextPage<Props> = ({ toggleStyle, theme }) => {
           </ManagementWrapper>
         </div>
       </MainWrapper>
+      <Channel
+        id={drawerProps.id}
+        title={drawerProps.title}
+        isVisible={drawerProps.isVisible}
+        onClose={(value) => setDrawerProps(value)}
+      />
     </Layout>
   )
 }

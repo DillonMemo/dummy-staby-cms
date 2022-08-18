@@ -18,9 +18,10 @@
 
 ### 22.07.25
 
-- [ ] Live refactoring
+- [x] Live refactoring
 - [ ] VOD refactoring
-- [ ] apply segmented components in edit live, vod 
+- [ ] apply segmented components in edit live 
+- [ ] apply segmented components in edit VOD 
 - [ ] apply progress bar
 
 #### 메모 및 계획
