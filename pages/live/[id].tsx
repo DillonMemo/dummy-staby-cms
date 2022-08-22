@@ -14,7 +14,6 @@ import {
   Segmented,
   Select,
   Skeleton,
-  Slider,
   Tooltip,
   Upload,
 } from 'antd'
@@ -90,7 +89,6 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const {
     getValues,
-    setValue,
     formState: { errors },
     control,
     handleSubmit,
@@ -205,7 +203,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
    */
   const onSubmit = () => {
     setLoading((prev) => ({ ...prev, isUploading: true }))
-    const { liveThumbnail, livePreviewDate } = getValues()
+    const { liveThumbnail } = getValues()
     const id = query.id as string
     if (!id)
       return toast.error(
@@ -214,21 +212,6 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
           theme: localStorage.theme || 'light',
           autoClose: 750,
           onClose: () => setLoading({ isUploading: false, isProcessing: false }),
-        }
-      )
-
-    if (moment(livePreviewDate) <= moment().endOf('hour'))
-      return toast.error(
-        locale === 'ko'
-          ? 'Live 시작 예정 시간이 현재시간이거나 이전시간 입니다'
-          : 'The scheduled time to start the live is the current time or the previous time',
-        {
-          theme: localStorage.theme || 'light',
-          autoClose: 750,
-          onClose: () => {
-            setValue('livePreviewDate', new Date())
-            setLoading({ isUploading: false, isProcessing: false })
-          },
         }
       )
 
@@ -894,6 +877,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                                 bordered={false}
                                 loading={isChannelsStatusLoading}
                                 disabled={isChannelsStatusLoading}
+                                value={null}
                                 onChange={onChangeChannel}
                                 style={{ width: '100%' }}>
                                 {liveChannelsData?.liveChannels.liveChannels
@@ -908,11 +892,12 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                                     <Select.Option
                                       key={`channel-${index}`}
                                       value={channel.channelId}
-                                      disabled={
-                                        liveInfo.findIndex(
-                                          (info) => info.linkPath === channel.channelId
-                                        ) !== -1
-                                      }>
+                                      // disabled={
+                                      //   liveInfo.findIndex(
+                                      //     (info) => info.linkPath === channel.channelId
+                                      //   ) !== -1
+                                      // }
+                                    >
                                       {channel.name}
                                     </Select.Option>
                                   ))}
@@ -980,78 +965,97 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
                       {shareInfo.map((info, index) => (
                         <Fragment key={index}>
                           <ShareInfoGrid>
-                            <Select
-                              value={info.memberId}
-                              onChange={(value) => {
-                                const { nickName, _id: memberId } = pick(
-                                  memberData?.findMembersByType.members.find(
-                                    (member) => member._id === value
-                                  ),
-                                  ['_id', 'nickName']
-                                )
-
-                                if (nickName && memberId) {
-                                  setShareInfo((prev) => [
-                                    ...prev.slice(0, index),
-                                    { ...prev[index], nickName, memberId },
-                                    ...prev.slice(index + 1, prev.length),
-                                  ])
-                                } else {
-                                  toast.error(
-                                    locale === 'ko'
-                                      ? '지분 회원 정보가 잘못 되었습니다'
-                                      : 'Undefined share member info',
-                                    {
-                                      theme: localStorage.theme || 'light',
-                                      autoClose: 750,
-                                    }
-                                  )
-                                }
-                              }}>
-                              {memberData?.findMembersByType.members.map((data, index) => (
-                                <Select.Option key={`member-${index}`} value={data._id}>
-                                  {data.nickName}
-                                </Select.Option>
-                              ))}
-                            </Select>
                             <div className="controller-content">
-                              <div>
-                                <Slider
-                                  defaultValue={info.priorityShare}
-                                  tipFormatter={(value) =>
-                                    value &&
-                                    `${locale === 'ko' ? '우선환수' : 'priority share'} : ${value}`
-                                  }
-                                  onChange={(value) =>
-                                    setShareInfo((prev) => [
-                                      ...prev.slice(0, index),
-                                      { ...prev[index], priorityShare: value },
-                                      ...prev.slice(index + 1, prev.length),
-                                    ])
-                                  }
-                                />
-                                <Slider
-                                  defaultValue={info.directShare}
-                                  tipFormatter={(value) =>
-                                    value &&
-                                    `${locale === 'ko' ? '직분배' : 'direct share'} : ${value}`
-                                  }
-                                  onChange={(value) =>
-                                    setShareInfo((prev) => [
-                                      ...prev.slice(0, index),
-                                      { ...prev[index], directShare: value },
-                                      ...prev.slice(index + 1, prev.length),
-                                    ])
-                                  }
-                                />
-                              </div>
                               {shareInfo.length > 1 && shareInfo.length - 1 === index && (
                                 <Button
                                   onClick={onDeleteShare(index)}
                                   icon={<DeleteOutlined style={{ fontSize: 16 }} />}
                                 />
                               )}
+                              <Select
+                                value={info.memberId}
+                                onChange={(value) => {
+                                  const { nickName, _id: memberId } = pick(
+                                    memberData?.findMembersByType.members.find(
+                                      (member) => member._id === value
+                                    ),
+                                    ['_id', 'nickName']
+                                  )
+                                  if (nickName && memberId) {
+                                    setShareInfo((prev) => [
+                                      ...prev.slice(0, index),
+                                      { ...prev[index], nickName, memberId },
+                                      ...prev.slice(index + 1, prev.length),
+                                    ])
+                                  } else {
+                                    toast.error(
+                                      locale === 'ko'
+                                        ? '지분 회원 정보가 잘못 되었습니다'
+                                        : 'Undefined share member info',
+                                      {
+                                        theme: localStorage.theme || 'light',
+                                        autoClose: 750,
+                                      }
+                                    )
+                                  }
+                                }}>
+                                {memberData?.findMembersByType.members.map((data, index) => (
+                                  <Select.Option key={`member-${index}`} value={data._id}>
+                                    {data.nickName}
+                                  </Select.Option>
+                                ))}
+                              </Select>
                             </div>
+                            <InputNumber
+                              min={0}
+                              max={100}
+                              defaultValue={info.priorityShare}
+                              onChange={(value: number) =>
+                                setShareInfo((prev) => [
+                                  ...prev.slice(0, index),
+                                  { ...prev[index], priorityShare: value },
+                                  ...prev.slice(index + 1, prev.length),
+                                ])
+                              }
+                              onKeyPress={(e) => {
+                                if (
+                                  e.key === '.' ||
+                                  e.key === 'e' ||
+                                  e.key === '+' ||
+                                  e.key === '-'
+                                ) {
+                                  e.preventDefault()
+                                  return false
+                                }
+                              }}
+                              addonBefore={locale === 'ko' ? '우선환수' : 'priority share'}
+                              addonAfter={`%`}
+                            />
+                            <InputNumber
+                              min={0}
+                              max={100}
+                              defaultValue={info.directShare}
+                              onChange={(value: number) =>
+                                setShareInfo((prev) => [
+                                  ...prev.slice(0, index),
+                                  { ...prev[index], directShare: value },
+                                  ...prev.slice(index + 1, prev.length),
+                                ])
+                              }
+                              onKeyPress={(e) => {
+                                if (
+                                  e.key === '.' ||
+                                  e.key === 'e' ||
+                                  e.key === '+' ||
+                                  e.key === '-'
+                                ) {
+                                  e.preventDefault()
+                                  return false
+                                }
+                              }}
+                              addonBefore={locale === 'ko' ? '직분배' : 'direct share'}
+                              addonAfter={`%`}
+                            />
                           </ShareInfoGrid>
                           {!info.memberId && (
                             <div className="form-message">

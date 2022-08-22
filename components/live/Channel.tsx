@@ -289,42 +289,52 @@ const Channel: React.FC<Props> = ({ id, title, isVisible, onClose }) => {
               </Tooltip>
             </Tool>
           )}
-          {liveInfo.map((info, index) => (
-            <Container key={`ch-${index}`} className="mt-half">
-              <div>
-                <Tooltip title={<small>{info.code}</small>} placement="left">
-                  <Badge
-                    className="channel-status no-title"
-                    {...(info.code === 'stopped'
-                      ? { status: 'error' }
-                      : info.code === 'playing'
-                      ? { status: 'processing' }
-                      : info.code === 'waiting'
-                      ? { status: 'success' }
-                      : { status: 'warning' })}
-                    style={{ cursor: 'help' }}
+          {liveInfo
+            .reduce((calc, compare) => {
+              if (calc.length > 0) {
+                return calc.findIndex((d) => d.linkPath === compare.linkPath) !== -1
+                  ? calc
+                  : [...calc, compare]
+              } else {
+                return [...calc, compare]
+              }
+            }, [] as EditLiveInfo[])
+            .map((info, index) => (
+              <Container key={`ch-${index}`} className="mt-half">
+                <div>
+                  <Tooltip title={<small>{info.code}</small>} placement="left">
+                    <Badge
+                      className="channel-status no-title"
+                      {...(info.code === 'stopped'
+                        ? { status: 'error' }
+                        : info.code === 'playing'
+                        ? { status: 'processing' }
+                        : info.code === 'waiting'
+                        ? { status: 'success' }
+                        : { status: 'warning' })}
+                      style={{ cursor: 'help' }}
+                    />
+                  </Tooltip>
+                </div>
+                <div>
+                  <small>CH {index + 1}</small>
+                </div>
+                <div>
+                  {
+                    liveChannelsData?.liveChannels.liveChannels?.find(
+                      (channel) => channel.channelId === info.linkPath
+                    )?.name
+                  }
+                </div>
+                <div>
+                  <Switch
+                    checked={info.checked}
+                    onChange={onChangeSwitch(index)}
+                    loading={info.loading}
                   />
-                </Tooltip>
-              </div>
-              <div>
-                <small>CH {index + 1}</small>
-              </div>
-              <div>
-                {
-                  liveChannelsData?.liveChannels.liveChannels?.find(
-                    (channel) => channel.channelId === info.linkPath
-                  )?.name
-                }
-              </div>
-              <div>
-                <Switch
-                  checked={info.checked}
-                  onChange={onChangeSwitch(index)}
-                  loading={info.loading}
-                />
-              </div>
-            </Container>
-          ))}
+                </div>
+              </Container>
+            ))}
         </>
       ) : (
         <div>
