@@ -103,7 +103,6 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
 
   const {
     getValues,
-    setValue,
     handleSubmit,
     formState: { errors },
     control,
@@ -201,22 +200,22 @@ const createLive: NextPage<Props> = ({ toggleStyle, theme }) => {
    */
   const onSubmit = () => {
     setLoading((prev) => ({ ...prev, isUploading: true }))
-    const { liveThumbnail, livePreviewDate } = getValues()
+    const { liveThumbnail } = getValues()
 
-    if (moment(livePreviewDate) <= moment().endOf('hour'))
-      return toast.error(
-        locale === 'ko'
-          ? 'Live 시작 예정 시간이 현재시간이거나 이전시간 입니다'
-          : 'The scheduled time to start the live is the current time or the previous time',
-        {
-          theme: localStorage.theme || 'light',
-          autoClose: 750,
-          onClose: () => {
-            setValue('livePreviewDate', new Date())
-            setLoading({ isUploading: false, isProcessing: false })
-          },
-        }
-      )
+    // if (moment(livePreviewDate) <= moment().endOf('hour'))
+    //   return toast.error(
+    //     locale === 'ko'
+    //       ? 'Live 시작 예정 시간이 현재시간이거나 이전시간 입니다'
+    //       : 'The scheduled time to start the live is the current time or the previous time',
+    //     {
+    //       theme: localStorage.theme || 'light',
+    //       autoClose: 750,
+    //       onClose: () => {
+    //         setValue('livePreviewDate', new Date())
+    //         setLoading({ isUploading: false, isProcessing: false })
+    //       },
+    //     }
+    //   )
     const [priorityShareSum, directShareSum] = [
       shareInfo.reduce(
         (prev, current) => (prev ? prev + current.priorityShare : 0 + current.priorityShare),
