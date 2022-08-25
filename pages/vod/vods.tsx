@@ -443,7 +443,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                         return {
                           onClick: () => {
                             router.push({
-                              pathname: '/vod/[id]',
+                              pathname: '/vod/backup/[id]',
                               query: {
                                 ...router.query,
                                 id: column && column._id ? column._id : '',

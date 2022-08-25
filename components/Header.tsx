@@ -276,7 +276,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/vod/createVod" locale={locale}>
+                      <Link href="/vod/backup/createVod" locale={locale}>
                         <a>
                           <PlusOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>

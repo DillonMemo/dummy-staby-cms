@@ -448,3 +448,22 @@ export const LIVE_CHANNELS = gql`
     }
   }
 `
+
+/**
+ * Live 전체 목록을 가져옵니다.
+ */
+export const GET_LIVES_QUERY = gql`
+  query GetLives {
+    getLives {
+      ok
+      error {
+        ko
+        en
+      }
+      lives {
+        _id
+        title
+      }
+    }
+  }
+`

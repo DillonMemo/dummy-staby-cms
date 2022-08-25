@@ -997,6 +997,10 @@ export const Form = styled.form`
       padding: 0;
       height: 1.5rem;
     }
+    .ant-select.ant-select-show-search .ant-select-selection-search {
+      display: inline-flex;
+      align-items: center;
+    }
 
     select,
     .input:not(.ant-input-disabled, .ant-input-affix-wrapper-disabled),

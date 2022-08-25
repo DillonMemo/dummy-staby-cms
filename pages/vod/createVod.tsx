@@ -1,37 +1,23 @@
+import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons'
+import { useQuery } from '@apollo/client'
+import { Button, Image, Input, InputNumber, Select, Skeleton, Tooltip, Upload } from 'antd'
 import { NextPage } from 'next'
-import { useRouter } from 'next/router'
-
-import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { Button, Input, InputNumber, Select } from 'antd'
-import { toast } from 'react-toastify'
-
 import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 
 /** components */
 import Layout from '../../components/Layout'
-import { Controller, useForm } from 'react-hook-form'
-import TextArea from 'rc-textarea'
-import { useEffect, useState } from 'react'
-import styled from 'styled-components'
-import { useLazyQuery, useMutation } from '@apollo/client'
-import { CREATE_VOD_MUTATION, LIVES_MUTATION } from '../../graphql/mutations'
-import {
-  CreateVodMutation,
-  CreateVodMutationVariables,
-  FindMembersByTypeQuery,
-  FindMembersByTypeQueryVariables,
-  LivesMutation,
-  LivesMutationVariables,
-  MemberType,
-  RatioType,
-} from '../../generated'
-import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../graphql/queries'
+import VodUploadContainer from '../../components/vod/VodUploadContainer'
+
+/** graphql */
+import { GetLivesQuery, GetLivesQueryVariables, RatioType } from '../../generated'
+import { GET_LIVES_QUERY } from '../../graphql/queries'
 
 /** utils */
-import { S3 } from '../../lib/awsClient'
-import * as mongoose from 'mongoose'
-import { liveImgCheckExtension, nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
-import Spinner from '../../components/Spinner'
+import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
+import { ShareInfo, SkeletonStyle } from '../live/createLive'
 
 type Props = styleMode
 
@@ -45,412 +31,162 @@ export interface VodCreateForm {
   liveId: string
 }
 
-export type ShareInfo = {
-  memberId: string
-  priorityShare: number
-  directShare: number
-  nickName: string
+export type ProgressType = {
+  progress: number
+  status: 'active' | 'success' | 'exception' | 'normal'
 }
 
-export type MainImgInfo = {
-  fileInfo: any
-  mainImg?: string
+export type ImgType = {
+  isVisible: boolean
+  src?: string
 }
-
-export type VodInfoArr = {
-  playingImg?: string
-  fileInfo: any
-}
-
-const ShareWrap = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
-`
 
 const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale, push } = useRouter()
-  const { Option } = Select
-  const [vodInfoArr, setVodInfoArr] = useState<Array<VodInfoArr>>([
-    { playingImg: '', fileInfo: '' },
-  ]) //링크, playing 이미지 관리
+  const { locale } = useRouter()
 
-  const [memberShareInfo, setMemberShareInfo] = useState<Array<ShareInfo>>([
-    { memberId: '', nickName: '', priorityShare: 0, directShare: 0 },
-  ]) //지분 관리
-  const [upLoading, setUploading] = useState(false) //스피너
-
-  const [createVod] = useMutation<CreateVodMutation, CreateVodMutationVariables>(
-    CREATE_VOD_MUTATION,
-    {
-      onError: (error) => {
-        toast.error(error.message, {
-          theme: localStorage.theme || 'light',
-        })
-      },
-    }
-  )
-
-  //지분 설정을 위한 멤버쿼리
-  const [getMember, { data: memberData }] = useLazyQuery<
-    FindMembersByTypeQuery,
-    FindMembersByTypeQueryVariables
-  >(FIND_MEMBERS_BY_TYPE_QUERY)
-
-  //연결된 live 를 위한 live query
-  const [getLives, { data: livesData }] = useMutation<LivesMutation, LivesMutationVariables>(
-    LIVES_MUTATION
-  )
-
-  const requiredText =
-    locale === 'ko' ? '위 항목은 필수 항목입니다.' : 'The above items are mandatory.'
+  const [progress, setProgress] = useState<ProgressType>({
+    progress: 0,
+    status: 'normal',
+  })
+  const [thumbnailImg, setThumbnailImg] = useState<ImgType>({
+    isVisible: false,
+  })
 
   const {
     getValues,
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<VodCreateForm>({
-    mode: 'onChange',
-  })
+  } = useForm<VodCreateForm>({ mode: 'onChange' })
 
-  //라이브 채널 추가 버튼
-  const onAddLive = (type: string) => {
-    if (type === 'live') {
-      const live = {
-        fileInfo: '',
-        playingImg: '',
-      }
-      if (vodInfoArr.length < 8) {
-        setVodInfoArr(() => vodInfoArr.concat(live))
-      }
-      return
-    }
+  const { data: liveData, loading: isLiveLoading } = useQuery<
+    GetLivesQuery,
+    GetLivesQueryVariables
+  >(GET_LIVES_QUERY)
 
-    if (type === 'member') {
-      const member = {
-        memberId: '',
-        nickName: '',
-        priorityShare: 0,
-        directShare: 0,
-      }
-      setMemberShareInfo(() => memberShareInfo.concat(member))
-
-      return
-    }
+  /**
+   * 최종 저장 버튼 이벤트 핸들러
+   */
+  const onSubmit = () => {
+    console.log('submit')
   }
-
-  const onSubmit = async () => {
-    setUploading(true)
-
-    try {
-      const { title, paymentAmount, content, liveId, vodRatioType } = getValues()
-      const vodLinkArr = [] //라이브 채널 링크 배열
-
-      //memberShareData 유효성 확인, 100이 되야한다.
-      if (!shareCheck(memberShareInfo, locale)) {
-        setUploading(false)
-        return
-      }
-
-      //메인 이미지 s3 업로드
-      //아이디 생성
-      const id = new mongoose.Types.ObjectId()
-      let mainImgFileName = '' //메인 썸네일
-
-      const nowDate = nowDateStr
-
-      //MainThumbnail upload
-      const mainImgInput: HTMLInputElement | null =
-        document.querySelector(`input[name=mainThumbnail]`)
-
-      const imgCheck = await liveImgCheckExtension(mainImgInput, id.toString(), locale, 'vod')
-
-      if (!imgCheck) {
-        setUploading(false)
-        return
-      } else {
-        mainImgFileName = `${imgCheck}`
-      }
-
-      //playImg upload
-      for (let i = 0; i < vodInfoArr.length; i++) {
-        //linkPathName
-        const vodUrlInput: HTMLInputElement | null = document.querySelector(
-          `input[name=vodFile_${i}]`
-        )
-        const introImgInput: HTMLInputElement | null = document.querySelector(
-          `input[name=playImgUrl_${i}]`
-        )
-
-        let introImageName = ''
-        let vodName = ''
-
-        if (vodUrlInput && vodUrlInput?.files && vodUrlInput?.files[0] instanceof File) {
-          //vod 및 이미지의 확장자 확인
-          if (!vodUrlInput.files[0].type.includes('mp4')) {
-            toast.error(
-              locale === 'ko' ? 'VOD의 확장자를 확인해주세요.' : 'Please check the VOD extension.',
-              {
-                theme: localStorage.theme || 'light',
-                onOpen: () => setUploading(false),
-              }
-            )
-            return
-          }
-
-          //vodName
-          vodName = `${
-            process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-          }/going/vod/${id}/${id}_${i + 1}_${nowDate}.mp4`
-
-          process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
-            (await S3.upload({
-              Bucket: process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME,
-              Key: vodName,
-              Body: vodUrlInput.files[0],
-              ACL: 'bucket-owner-read',
-            }).promise())
-
-          //이미지 확장자체크
-
-          let fileExtension = ''
-
-          if (introImgInput && introImgInput?.files && introImgInput?.files[0] instanceof File) {
-            if (
-              introImgInput.files[0].type.includes('jpg') ||
-              introImgInput.files[0].type.includes('png') ||
-              introImgInput.files[0].type.includes('jpeg')
-            ) {
-              //이미지 확장자 추출
-              fileExtension =
-                introImgInput.files[0].name.split('.')[
-                  introImgInput.files[0].name.split('.').length - 1
-                ]
-
-              //playingImgName
-              introImageName = `${
-                process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
-              }/going/vod/${id}/intro/${id}_intro_${i + 1}_${nowDate}.${fileExtension}`
-
-              process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-                (await S3.upload({
-                  Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-                  Key: introImageName,
-                  Body: introImgInput.files[0],
-                  ACL: 'bucket-owner-read',
-                }).promise())
-            } else {
-              toast.error(
-                locale === 'ko'
-                  ? '이미지의 확장자를 확인해주세요.'
-                  : 'Please check the Img extension.',
-                {
-                  theme: localStorage.theme || 'light',
-                  onOpen: () => setUploading(false),
-                }
-              )
-              return
-            }
-          } else {
-            toast.error(locale === 'ko' ? '이미지를 확인해 주세요.' : 'Please check the Img.', {
-              theme: localStorage.theme || 'light',
-              onOpen: () => setUploading(false),
-            })
-          }
-
-          introImageName = `${id}_intro_${i + 1}_${nowDate}.${fileExtension}`
-
-          vodName = `${id}_${i + 1}_${nowDate}.mp4`
-
-          vodLinkArr.push({
-            listingOrder: i + 1,
-            linkPath: vodName || '',
-            introImageName: introImageName,
-          })
-        }
-      }
-
-      const { data } = await createVod({
-        variables: {
-          createVodInput: {
-            _id: id.toString(),
-            mainImageName: mainImgFileName,
-            vodLinkInfo: vodLinkArr,
-            vodShareInfo: {
-              vodId: id.toString(),
-              memberShareInfo,
-            },
-            liveId,
-            content,
-            paymentAmount: parseFloat(paymentAmount.toString()),
-            title,
-            vodRatioType,
-          },
-        },
-      })
-      if (!data?.createVod.ok) {
-        const message = locale === 'ko' ? data?.createVod.error?.ko : data?.createVod.error?.en
-        toast.error(message, {
-          theme: localStorage.theme || 'light',
-          onOpen: () => setUploading(false),
-        })
-        throw new Error(message)
-      } else {
-        toast.success(locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed', {
-          theme: localStorage.theme || 'light',
-          autoClose: 750,
-          onClose: () => push('/vod/vods'),
-        })
-      }
-    } catch (error) {
-      setUploading(false)
-      console.error(error)
-    }
-  }
-
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        await getMember({
-          variables: {
-            membersByTypeInput: {
-              memberType: MemberType.Business,
-            },
-          },
-        })
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    fetch()
-  }, [])
-
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        await getLives({
-          variables: {
-            livesInput: {},
-          },
-        })
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    fetch()
-  }, [])
 
   return (
-    <>
-      {upLoading && <Spinner />}
-      <Layout toggleStyle={toggleStyle} theme={theme}>
-        <MainWrapper>
-          <div className="main-header">
-            <h2>{locale === 'ko' ? 'Vod 추가' : 'Live Create'}</h2>
-            <ol>
-              <li>
-                <Link href="/">
-                  <a>{locale === 'ko' ? '홈' : 'Home'}</a>
-                </Link>
-              </li>
-              <li>{locale === 'ko' ? 'Vod' : 'Vod'}</li>
-              <li>{locale === 'ko' ? 'Vod 추가' : 'Vod Create'}</li>
-            </ol>
-          </div>
-          <div className="main-content">
-            <Edit className="card">
-              <Form name="createLiveForm" onSubmit={handleSubmit(onSubmit)}>
-                <div className="form-item">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '제목' : 'Title'}</span>
-                    <Controller
-                      control={control}
-                      name="title"
-                      rules={{
-                        required: requiredText,
-                      }}
-                      render={({ field: { value, onChange } }) => (
-                        <Input
-                          className="input"
-                          placeholder="Please enter the title."
-                          value={value}
-                          onChange={onChange}
-                          maxLength={100}
-                        />
+    <Layout toggleStyle={toggleStyle} theme={theme}>
+      <MainWrapper>
+        <div className="main-header">
+          <h2>{locale === 'ko' ? 'Vod 추가' : 'Live Create'}</h2>
+          <ol>
+            <li>
+              <Link href="/" locale={locale}>
+                <a>{locale === 'ko' ? '홈' : 'Home'}</a>
+              </Link>
+            </li>
+            <li>
+              <Link href="/vod/vods" locale={locale}>
+                <a>{locale === 'ko' ? 'Vod' : 'Vod'}</a>
+              </Link>
+            </li>
+            <li>{locale === 'ko' ? 'Vod 추가' : 'Vod Create'}</li>
+          </ol>
+        </div>
+        <div className="main-content">
+          <Edit className="card">
+            {!isLiveLoading ? (
+              <Form name="createVodForm" onSubmit={handleSubmit(onSubmit)}>
+                <div className="form-grid col-4 gap-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '제목' : 'Title'}</span>
+                      <Controller
+                        control={control}
+                        name="title"
+                        rules={{
+                          required:
+                            locale === 'ko'
+                              ? '위 항목은 필수 항목 입니다'
+                              : 'This input is required',
+                        }}
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            className="input"
+                            placeholder={locale === 'ko' ? '제목 입력' : 'Enter the title'}
+                            value={value}
+                            onChange={onChange}
+                            maxLength={100}
+                          />
+                        )}
+                      />
+                      {errors.title?.message && (
+                        <div className="form-message">
+                          <span>{errors.title.message}</span>
+                        </div>
                       )}
-                    />
-                  </div>
-                  {errors.title?.message && (
-                    <div className="form-message">
-                      <span>{errors.title.message}</span>
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                <div className="form-item mt-half">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '가격' : 'Price'}</span>
-                    <Controller
-                      control={control}
-                      name="paymentAmount"
-                      rules={{
-                        required: requiredText,
-                        min: {
-                          value: 0,
-                          message:
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '가격' : 'Price'}</span>
+                      <Controller
+                        control={control}
+                        name="paymentAmount"
+                        rules={{
+                          required:
                             locale === 'ko'
-                              ? '0 ~ 65535까지 입력 가능합니다.'
-                              : 'You can enter from 0 to 65535.',
-                        },
-                        max: {
-                          value: 65535,
-                          message:
-                            locale === 'ko'
-                              ? '0 ~ 65535까지 입력 가능합니다.'
-                              : 'You can enter from 0 to 65535.',
-                        },
-                      }}
-                      render={({ field: { value, onChange } }) => (
-                        <InputNumber
-                          className="input"
-                          placeholder="Please enter the paymentAmount."
-                          value={value}
-                          max={65535}
-                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                          onKeyPress={(e) => {
-                            if (e.key === '.' || e.key === 'e' || e.key === '+' || e.key === '-') {
-                              e.preventDefault()
-                              return false
+                              ? '0 ~ 65535까지 필수 입력 입니다'
+                              : 'You can enter from 0 to 65535',
+                          min: {
+                            value: 0,
+                            message:
+                              locale === 'ko'
+                                ? '0 ~ 65535까지 입력 가능 합니다'
+                                : 'You can enter from 0 to 65535',
+                          },
+                          max: {
+                            value: 65535,
+                            message:
+                              locale === 'ko'
+                                ? '0 ~ 65535까지 입력 가능 합니다'
+                                : 'You can enter from 0 to 65535',
+                          },
+                        }}
+                        render={({ field: { value, onChange } }) => (
+                          <InputNumber
+                            className="input"
+                            placeholder={locale === 'ko' ? '가격 입력' : 'Enter the paymentAmount'}
+                            value={value}
+                            max={65535}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            onInput={
+                              (text) => text.replace(/[^0-9.]/g, '') /*.replace(/(\..*)\./g, '$1')*/
                             }
-                          }}
-                          onChange={onChange}
-                        />
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                      {errors.paymentAmount?.message && (
+                        <div className="form-message">
+                          <span>{errors.paymentAmount.message}</span>
+                        </div>
                       )}
-                    />
+                    </div>
                   </div>
 
-                  {errors.paymentAmount?.message && (
-                    <div className="form-message">
-                      <span>{errors.paymentAmount.message}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-item mt-half">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
-                    <Controller
-                      control={control}
-                      name="vodRatioType"
-                      rules={{
-                        required: requiredText,
-                      }}
-                      defaultValue={RatioType.Horizontal}
-                      render={({ field: { onChange, value } }) => (
-                        <>
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '비율' : 'Ratio'}</span>
+                      <Controller
+                        control={control}
+                        name="vodRatioType"
+                        rules={{
+                          required:
+                            locale === 'ko'
+                              ? '위 항목은 필수 항목 입니다'
+                              : 'This input is required',
+                        }}
+                        defaultValue={RatioType.Horizontal}
+                        render={({ field: { value, onChange } }) => (
                           <Select value={value} onChange={onChange}>
                             {Object.keys(RatioType).map((data, index) => (
                               <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
@@ -464,278 +200,196 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                               </Select.Option>
                             ))}
                           </Select>
-                        </>
-                      )}
-                    />
-                  </div>
-                  {errors.vodRatioType?.message && (
-                    <div className="form-message">
-                      <span>{errors.vodRatioType.message}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-item mt-half">
-                  <div className="form-group">
-                    <span>Main {locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
-                    <Controller
-                      control={control}
-                      name="mainThumbnail"
-                      rules={{
-                        required: requiredText,
-                      }}
-                      render={({ field: { onChange, value } }) => (
-                        <Input
-                          className="input"
-                          type="file"
-                          value={value}
-                          name="mainThumbnail"
-                          placeholder="Please upload img. only png or jpg"
-                          onChange={onChange}
-                        />
-                      )}
-                    />
-                  </div>
-
-                  {errors.mainThumbnail?.message && (
-                    <div className="form-message">
-                      <span>{errors.mainThumbnail.message}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-item mt-half">
-                  <div className="form-group">
-                    <span>
-                      Vod
-                      <span style={{ color: '#ada7a7' }}>
-                        {locale === 'ko'
-                          ? ' ※vod 최대 8개까지 추가할 수 있습니다. '
-                          : ' ※Up to eight live can be uploaded. '}
-                      </span>
-                    </span>
-                    {vodInfoArr.map((data, index) => {
-                      return (
-                        <div key={index} className="mt-15">
-                          <div>
-                            <em className="fontSize12 mt-half">Ch{index + 1}_Vod</em>
-                            {index >= 1 && (
-                              <Button
-                                className="deleteBtn"
-                                onClick={() => onDeleteBtn(index, setVodInfoArr, vodInfoArr)}>
-                                {locale === 'ko' ? '삭제' : 'Delete'}
-                              </Button>
-                            )}
-                          </div>
-                          <Input
-                            className="input"
-                            type={'file'}
-                            name={`vodFile_${index}`}
-                            accept=".mp4"
-                            placeholder="Please upload the video.(only mp4)"
-                          />
-                          <em className="fontSize12 mt-half">Ch{index + 1}_Img</em>
-
-                          <Input
-                            type="file"
-                            className="input mt-half"
-                            name={`playImgUrl_${index}`}
-                            placeholder="Please upload playingThumnail img. only png or jpg"
-                          />
+                        )}
+                      />
+                      {errors.vodRatioType?.message && (
+                        <div className="form-message">
+                          <span>{errors.vodRatioType.message}</span>
                         </div>
-                      )
-                    })}
-                    {vodInfoArr.length < 8 && (
-                      <Button className="thumbnailAddBtn" onClick={() => onAddLive('live')}>
-                        {locale === 'ko' ? '추가' : 'Add'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                <div className="form-item mt-half">
-                  <div className="form-group">
-                    <span>{locale === 'ko' ? '내용' : 'Content'}</span>
-                    <Controller
-                      control={control}
-                      name="content"
-                      rules={{
-                        required: requiredText,
-                      }}
-                      render={({ field: { value, onChange } }) => (
-                        <TextArea
-                          className="input ant-input"
-                          placeholder="Please upload content."
-                          maxLength={1000}
-                          value={value}
-                          onChange={onChange}
-                        />
                       )}
-                    />
-                  </div>
-                  {errors.content?.message && (
-                    <div className="form-message">
-                      <span>{errors.content.message}</span>
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                <div className="form-item mt-half">
-                  <div className="form-group">
-                    <span>Live</span>
-                    <Controller
-                      control={control}
-                      name="liveId"
-                      // rules={{
-                      //   required: requiredText,
-                      // }}
-                      render={({ field: { value, onChange } }) => (
-                        <>
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>
+                        Live&nbsp;
+                        <Tooltip
+                          title={
+                            <small>
+                              {locale === 'ko'
+                                ? '※ 이전 라이브에서 편집되어진 VOD일 경우.'
+                                : 'If the VOD was edited from the previous live.'}{' '}
+                            </small>
+                          }
+                          placement="right">
+                          <QuestionCircleOutlined style={{ cursor: 'help', fontSize: 12 }} />
+                        </Tooltip>
+                      </span>
+                      <Controller
+                        control={control}
+                        name="liveId"
+                        render={({ field: { value, onChange } }) => (
                           <Select
+                            allowClear
                             showSearch
+                            showArrow={false}
                             optionFilterProp="children"
                             value={value}
                             onChange={onChange}>
-                            {livesData?.lives.lives &&
-                              livesData?.lives.lives.map((data, i) => {
-                                return (
-                                  <Option key={i} value={data._id}>
-                                    {data.title}
-                                  </Option>
-                                )
-                              })}
+                            {liveData?.getLives.lives.map((live, index) => (
+                              <Select.Option key={`live-${index}`} value={live._id}>
+                                {live.title}
+                              </Select.Option>
+                            ))}
                           </Select>
-                        </>
-                      )}
-                    />
-                  </div>
-                  {/* {errors.liveId?.message && (
-                    <div className="form-message">
-                      <span>{errors.liveId.message}</span>
+                        )}
+                      />
                     </div>
-                  )} */}
-                </div>
-                <div className="form-item mt-half">
-                  <div className="form-group">
-                    {/* onChange 로직 변경, onChange 마다 리렌더링하게 되고있음.추후 로직 수정.*/}
-                    <span>{locale === 'ko' ? '지분 - 우선환수, 직분배' : 'Share'}</span>
-                    {memberShareInfo.map((data, index) => {
-                      return (
-                        <div key={index}>
-                          <div>
-                            <em className="fontSize12 mt-half">{index + 1}</em>
-                            {index >= 1 && (
-                              <Button
-                                className="deleteBtn"
-                                onClick={() =>
-                                  onDeleteBtn(index, setMemberShareInfo, memberShareInfo)
-                                }>
-                                {locale === 'ko' ? '삭제' : 'Delete'}
-                              </Button>
-                            )}
-                          </div>
-                          <ShareWrap>
-                            <Controller
-                              control={control}
-                              name="share"
-                              render={() => (
-                                <>
-                                  <Select
-                                    defaultValue={memberShareInfo[0].nickName}
-                                    value={memberShareInfo[index].nickName}
-                                    onChange={(value) =>
-                                      setMemberShareInfo(
-                                        memberShareInfo.map((data, i) => {
-                                          return i === index
-                                            ? {
-                                                ...data,
-                                                memberId: value.toString().split('/')[0],
-                                                nickName: value.toString().split('/')[1],
-                                              }
-                                            : data
-                                        })
-                                      )
-                                    }
-                                    className={`member_${index}`}>
-                                    {memberData?.findMembersByType.members.map((data, i) => {
-                                      return (
-                                        <Select.Option
-                                          value={data._id + '/' + data.nickName}
-                                          key={`type-${i}`}>
-                                          {data.nickName}
-                                        </Select.Option>
-                                      )
-                                    })}
-                                  </Select>
-                                  <Input
-                                    type="number"
-                                    className="input"
-                                    name={`priorityShare_${index}`}
-                                    placeholder="priorityShare"
-                                    value={memberShareInfo[index].priorityShare}
-                                    onChange={(e) =>
-                                      setMemberShareInfo(
-                                        memberShareInfo.map((data, i) => {
-                                          return i === index
-                                            ? { ...data, priorityShare: parseInt(e.target.value) }
-                                            : data
-                                        })
-                                      )
-                                    }
-                                  />
-                                  <Input
-                                    className="input"
-                                    type="number"
-                                    name={`directShare_${index}`}
-                                    placeholder="directShare"
-                                    value={memberShareInfo[index].directShare}
-                                    onChange={(e) =>
-                                      setMemberShareInfo(
-                                        memberShareInfo.map((data, i) => {
-                                          return i === index
-                                            ? { ...data, directShare: parseInt(e.target.value) }
-                                            : data
-                                        })
-                                      )
-                                    }
-                                  />
-                                </>
-                              )}
-                            />
-                          </ShareWrap>
-                        </div>
-                      )
-                    })}
-
-                    <Button className="thumbnailAddBtn" onClick={() => onAddLive('member')}>
-                      {locale === 'ko' ? '추가' : 'Add'}
-                    </Button>
                   </div>
                 </div>
-                <div className="form-item mt-half">
+
+                <div className="form-grid col-3 merge gap-1 mt-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '이미지' : 'Thumbnail'}</span>
+                      <Controller
+                        control={control}
+                        name="mainThumbnail"
+                        rules={{
+                          required:
+                            locale === 'ko'
+                              ? '위 항목은 필수 항목 입니다'
+                              : 'This input is required',
+                        }}
+                        render={({ field: { value, onChange } }) => (
+                          <>
+                            <Upload
+                              name="mainThumbnail"
+                              showUploadList={false}
+                              maxCount={1}
+                              accept=".jpg, .png, .jpeg"
+                              onChange={(target) => {
+                                if (target.file.originFileObj instanceof File) {
+                                  const src = URL.createObjectURL(target.file.originFileObj)
+
+                                  setThumbnailImg((prev) => ({ ...prev, src }))
+                                }
+                                return onChange(target)
+                              }}
+                              style={{ width: '100%' }}>
+                              <Button
+                                icon={<UploadOutlined />}
+                                className="mt-half"
+                                style={{ width: '100%' }}>
+                                {locale === 'ko' ? '파일 선택 (최대: 1)' : 'Select File (Max: 1)'}
+                              </Button>
+                            </Upload>
+                            {value && (value as any).fileList.length > 0 && (
+                              <>
+                                <Button
+                                  type="primary"
+                                  className="mt-half"
+                                  onClick={() =>
+                                    setThumbnailImg((prev) => ({ ...prev, isVisible: true }))
+                                  }>
+                                  {locale === 'ko' ? '이미지 미리보기' : 'Show image preview'}
+                                </Button>
+                                <Image
+                                  width={200}
+                                  style={{ display: 'none' }}
+                                  src={thumbnailImg.src}
+                                  preview={{
+                                    visible: thumbnailImg.isVisible,
+                                    src: thumbnailImg.src,
+                                    onVisibleChange: (bol) =>
+                                      setThumbnailImg((prev) => ({ ...prev, isVisible: bol })),
+                                  }}
+                                />
+                              </>
+                            )}
+                          </>
+                        )}
+                      />
+                      {errors.mainThumbnail?.message && (
+                        <div className="form-message">
+                          <span>{errors.mainThumbnail.message}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>
+                        VOD&nbsp;
+                        <Tooltip
+                          title={
+                            <small>
+                              {locale === 'ko'
+                                ? ' ※vod 최대 8개까지 추가할 수 있습니다. '
+                                : ' ※Up to eight live can be uploaded. '}
+                            </small>
+                          }
+                          placement="right">
+                          <QuestionCircleOutlined style={{ cursor: 'help', fontSize: 12 }} />
+                        </Tooltip>
+                      </span>
+                      <VodUploadContainer />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-item">
                   <div className="button-group">
-                    <Link href="/vod/vods">
+                    <Link href="/live/lives" locale={locale}>
                       <a>
                         <Button className="submit-button" type="primary" role="button">
-                          목록
+                          {locale === 'ko' ? '목록' : 'List'}
                         </Button>
                       </a>
                     </Link>
+
                     <Button
                       type="primary"
                       role="button"
                       htmlType="submit"
-                      className="submit-button ml-harf"
-                      disabled={Object.keys(errors).includes('paymentAmount')}>
-                      {locale === 'ko' ? '저장' : 'save'}
+                      className="submit-button"
+                      disabled={Object.keys(errors).length > 0}>
+                      {locale === 'ko' ? '저장' : 'Save'}
                     </Button>
                   </div>
                 </div>
               </Form>
-            </Edit>
-          </div>
-        </MainWrapper>
-      </Layout>
-    </>
+            ) : (
+              <Form>
+                <div className="form-grid col-4 gap-1">
+                  <Skeleton.Button size="large" active style={SkeletonStyle} />
+                  <Skeleton.Button size="large" active style={SkeletonStyle} />
+                  <Skeleton.Button size="large" active style={SkeletonStyle} />
+                  <Skeleton.Button size="large" active style={SkeletonStyle} />
+                </div>
+                <div className="form-grid col-3 merge gap-1 mt-1">
+                  <Skeleton.Button size="large" active style={SkeletonStyle} />
+                  <Skeleton.Button
+                    size="large"
+                    active
+                    style={{ ...SkeletonStyle, minHeight: '13rem' }}
+                  />
+                </div>
+                <div className="form-item">
+                  <div className="button-group">
+                    <Skeleton.Button size="large" active />
+                    <Skeleton.Button size="large" active />
+                  </div>
+                </div>
+              </Form>
+            )}
+          </Edit>
+        </div>
+      </MainWrapper>
+    </Layout>
   )
 }
+
 export default CreateVod

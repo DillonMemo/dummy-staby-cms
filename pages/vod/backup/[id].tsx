@@ -1,19 +1,19 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
-import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
+import { Edit, Form, MainWrapper, styleMode } from '../../../styles/styles'
 import { Button, Input, InputNumber, notification, Radio, Select } from 'antd'
 
 import Link from 'next/link'
 
 /** components */
-import Layout from '../../components/Layout'
+import Layout from '../../../components/Layout'
 import { Controller, useForm } from 'react-hook-form'
 import TextArea from 'rc-textarea'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useMutation, useQuery } from '@apollo/client'
-import { DELETE_VOD_MUTATION, EDIT_VOD_MUTATION, LIVES_MUTATION } from '../../graphql/mutations'
+import { DELETE_VOD_MUTATION, EDIT_VOD_MUTATION, LIVES_MUTATION } from '../../../graphql/mutations'
 import {
   DeleteVodMutation,
   DeleteVodMutationVariables,
@@ -31,16 +31,21 @@ import {
   TranscodeStatus,
   VodLinkInfo,
   VodStatus,
-} from '../../generated'
-import { FIND_MEMBERS_BY_TYPE_QUERY, VOD_QUERY } from '../../graphql/queries'
+} from '../../../generated'
+import { FIND_MEMBERS_BY_TYPE_QUERY, VOD_QUERY } from '../../../graphql/queries'
 
 /** utils */
-import { S3 } from '../../lib/awsClient'
-import { liveImgCheckExtension, nowDateStr, onDeleteBtn, shareCheck } from '../../Common/commonFn'
-import Spinner from '../../components/Spinner'
+import { S3 } from '../../../lib/awsClient'
+import {
+  liveImgCheckExtension,
+  nowDateStr,
+  onDeleteBtn,
+  shareCheck,
+} from '../../../Common/commonFn'
+import Spinner from '../../../components/Spinner'
 import { omit } from 'lodash'
 import { toast } from 'react-toastify'
-import ChangeFileInput from '../../components/ChangeFileInput'
+import ChangeFileInput from '../../../components/ChangeFileInput'
 import * as mongoose from 'mongoose'
 
 type Props = styleMode

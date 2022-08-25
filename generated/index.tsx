@@ -1405,6 +1405,7 @@ export type Query = {
   getContentsViewCount: GetContentsViewCountOutput;
   getDailyAccessor: GetDailyAccessorOutput;
   getInquiriesHistory: GetInquiriesHistoryOutput;
+  getLives: FindLiveByTypesOutput;
   getNewMembers: GetNewMembersOutput;
   getPayHistoryByOS: GetPayHistoryByOsOutput;
   getTotalMembers: GetTotalMembersOutput;
@@ -1987,6 +1988,11 @@ export type LiveChannelsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type LiveChannelsQuery = { __typename?: 'Query', liveChannels: { __typename?: 'LiveChannelsOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, liveChannels?: Array<{ __typename?: 'LiveChannel', name: string, channelId: string }> | null } };
+
+export type GetLivesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetLivesQuery = { __typename?: 'Query', getLives: { __typename?: 'FindLiveByTypesOutput', ok: boolean, error?: { __typename?: 'LangErrorMessage', ko: string, en: string } | null, lives: Array<{ __typename?: 'Live', _id: string, title: string }> } };
 
 
 export const LoginDocument = gql`
@@ -4459,3 +4465,45 @@ export function useLiveChannelsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
 export type LiveChannelsQueryHookResult = ReturnType<typeof useLiveChannelsQuery>;
 export type LiveChannelsLazyQueryHookResult = ReturnType<typeof useLiveChannelsLazyQuery>;
 export type LiveChannelsQueryResult = Apollo.QueryResult<LiveChannelsQuery, LiveChannelsQueryVariables>;
+export const GetLivesDocument = gql`
+    query GetLives {
+  getLives {
+    ok
+    error {
+      ko
+      en
+    }
+    lives {
+      _id
+      title
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLivesQuery__
+ *
+ * To run a query within a React component, call `useGetLivesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLivesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLivesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetLivesQuery(baseOptions?: Apollo.QueryHookOptions<GetLivesQuery, GetLivesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLivesQuery, GetLivesQueryVariables>(GetLivesDocument, options);
+      }
+export function useGetLivesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLivesQuery, GetLivesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLivesQuery, GetLivesQueryVariables>(GetLivesDocument, options);
+        }
+export type GetLivesQueryHookResult = ReturnType<typeof useGetLivesQuery>;
+export type GetLivesLazyQueryHookResult = ReturnType<typeof useGetLivesLazyQuery>;
+export type GetLivesQueryResult = Apollo.QueryResult<GetLivesQuery, GetLivesQueryVariables>;
