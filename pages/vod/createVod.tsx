@@ -1,19 +1,34 @@
-import { QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons'
+import { DeleteOutlined, QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons'
 import { useQuery } from '@apollo/client'
-import { Button, Image, Input, InputNumber, Select, Skeleton, Tooltip, Upload } from 'antd'
+import {
+  Button,
+  Image,
+  Input,
+  InputNumber,
+  List,
+  Progress,
+  Select,
+  Skeleton,
+  Tooltip,
+  Upload,
+} from 'antd'
+import mongoose from 'mongoose'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { nowDateStr } from '../../Common/commonFn'
 
 /** components */
 import Layout from '../../components/Layout'
+import LoadingOverlay from '../../components/LoadingOverlay'
 import VodUploadContainer from '../../components/vod/VodUploadContainer'
 
 /** graphql */
 import { GetLivesQuery, GetLivesQueryVariables, RatioType } from '../../generated'
 import { GET_LIVES_QUERY } from '../../graphql/queries'
+import { S3 } from '../../lib/awsClient'
 
 /** utils */
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
@@ -41,9 +56,18 @@ export type ImgType = {
   src?: string
 }
 
+export type VodInfo = {
+  video: File | string
+  image: File | string
+}
+
 const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const { locale } = useRouter()
 
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({
+    isUploading: false,
+    isProcessing: false,
+  })
   const [progress, setProgress] = useState<ProgressType>({
     progress: 0,
     status: 'normal',
@@ -51,6 +75,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   const [thumbnailImg, setThumbnailImg] = useState<ImgType>({
     isVisible: false,
   })
+  const [vodInfo, setVodInfo] = useState<VodInfo[]>([])
 
   const {
     getValues,
@@ -65,10 +90,65 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   >(GET_LIVES_QUERY)
 
   /**
+   * 자식 컴포넌트에서 추가 이벤트 발생시 부모의 상태 관리 이벤트 핸들러 입니다
+   * @param {File} video - 파일
+   * @param {File} image - 파일
+   */
+  const onVodChange = (video: VodInfo['video'], image: VodInfo['image']) =>
+    setVodInfo((prev) => [...prev, { video, image }])
+
+  /**
+   * VOD 삭제 버튼 클릭 이벤트 핸들러
+   * @param {number} index row index number
+   */
+  const onDeleteVod = (index: number) => () =>
+    setVodInfo((prev) => [...prev.slice(0, index), ...prev.slice(index + 1, prev.length)])
+
+  /**
    * 최종 저장 버튼 이벤트 핸들러
    */
   const onSubmit = () => {
-    console.log('submit')
+    setLoading((prev) => ({ ...prev, isUploading: true }))
+    const { mainThumbnail } = getValues()
+
+    const objectId = new mongoose.Types.ObjectId().toString()
+    /** File 업로드 영역 - 1 */
+    if ((mainThumbnail as any).file.originFileObj instanceof File) {
+      const file = (mainThumbnail as any).file.originFileObj as File
+      const fileExtension = file.name.split('.')[file.name.split('.').length - 1]
+      const fileName = `${objectId}_main_${nowDateStr}.${fileExtension}`
+      console.log(file)
+
+      process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+        S3.upload({
+          Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+          Key: `${
+            process.env.NODE_ENV === 'production' ? 'prod' : 'dev'
+          }/going/vod/${objectId}/main/${fileName}`,
+          Body: file,
+          ACL: 'public-read',
+        }).on('httpUploadProgress', (progress) => {
+          // do something...
+        })
+    }
+    /** File 업로드 영역 - 2 */
+    vodInfo.forEach((info, index) => {
+      if (info.video instanceof File && info.image instanceof File) {
+        const { video, image } = info
+        const [videoFileExtension, imageFileExtension] = [
+          video.name.split('.')[video.name.split('.').length - 1],
+          image.name.split('.')[image.name.split('.').length - 1],
+        ]
+        const [videoFileName, imageFileName] = [
+          `${objectId}_${index + 1}_${nowDateStr}.${videoFileExtension}`,
+          `${objectId}_intro_${index + 1}_${nowDateStr}.${imageFileExtension}`,
+        ]
+
+        console.log(videoFileExtension, imageFileExtension)
+      }
+    })
+
+    setTimeout(() => setLoading((prev) => ({ ...prev, isUploading: false })), 20000)
   }
 
   return (
@@ -131,6 +211,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       <Controller
                         control={control}
                         name="paymentAmount"
+                        defaultValue={0}
                         rules={{
                           required:
                             locale === 'ko'
@@ -335,7 +416,28 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                           <QuestionCircleOutlined style={{ cursor: 'help', fontSize: 12 }} />
                         </Tooltip>
                       </span>
-                      <VodUploadContainer />
+                      <VodUploadContainer vodInfo={vodInfo} onVodChange={onVodChange} />
+                      <List
+                        className="vodInfoList"
+                        locale={{
+                          emptyText: locale === 'ko' ? '추가된 파일이 없습니다' : 'No file data',
+                        }}
+                        dataSource={vodInfo}
+                        renderItem={(item, index) => (
+                          <List.Item>
+                            <Button
+                              onClick={onDeleteVod(index)}
+                              icon={<DeleteOutlined style={{ fontSize: 16 }} />}
+                            />
+                            <small>
+                              {item.video instanceof File ? item.video.name : item.video}
+                            </small>
+                            <small>
+                              {item.image instanceof File ? item.image.name : item.image}
+                            </small>
+                          </List.Item>
+                        )}
+                      />
                     </div>
                   </div>
                 </div>
@@ -374,7 +476,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                   <Skeleton.Button
                     size="large"
                     active
-                    style={{ ...SkeletonStyle, minHeight: '13rem' }}
+                    style={{ ...SkeletonStyle, minHeight: '15rem' }}
                   />
                 </div>
                 <div className="form-item">
@@ -388,6 +490,20 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
           </Edit>
         </div>
       </MainWrapper>
+      <LoadingOverlay states={loading}>
+        <div className="container">
+          {loading.isUploading && (
+            <div className="progress">
+              <Progress
+                type="circle"
+                percent={progress.progress}
+                size="small"
+                status={progress.status}
+              />
+            </div>
+          )}
+        </div>
+      </LoadingOverlay>
     </Layout>
   )
 }

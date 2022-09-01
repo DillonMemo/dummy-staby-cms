@@ -11,5 +11,6 @@ declare module 'styled-components' {
     border: string
     disable: string
     item: string
+    success: string
   }
 }

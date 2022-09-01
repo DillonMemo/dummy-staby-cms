@@ -659,6 +659,13 @@ export const GlobalStyles = createGlobalStyle`
       }
     }
 
+    .ant-progress {
+      .ant-progress-text {
+        font-size: 2rem;
+        color: #f1f1f1;
+      }
+    }
+
     textarea.ant-input {
       min-height:150px;
     }
@@ -1124,6 +1131,33 @@ export const Form = styled.form`
       min-width: 7.5rem;
       color: ${({ theme }) => theme.text};
       background-color: ${({ theme }) => theme.body};
+    }
+
+    .ant-list {
+      &.vodInfoList {
+        .ant-list-item {
+          color: ${({ theme }) => theme.text};
+          justify-content: space-evenly;
+          padding: 0;
+
+          > .ant-btn.ant-btn-icon-only {
+            flex: 0 2rem;
+          }
+
+          > small {
+            min-width: 10rem;
+            width: 10rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            ${md} {
+              min-width: 6rem;
+              width: 6rem;
+            }
+          }
+        }
+      }
     }
   }
 `

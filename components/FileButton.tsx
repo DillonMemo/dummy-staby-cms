@@ -1,35 +1,101 @@
 import { useEffect } from 'react'
 import styled, { keyframes } from 'styled-components'
+import { md } from '../styles/styles'
 
-type Props = React.HTMLProps<HTMLInputElement>
+interface Props extends React.HTMLProps<HTMLInputElement> {
+  paragraph: {
+    first: string
+    second: string
+    three?: string
+  }
+  single?: boolean
+}
+const duration = 3000
+const getPoint = (point: number[], i: number, a: number[][], smoothing: number) => {
+  const cp = (current: number[], previous: number[], next: number[], reverse: boolean) => {
+      const p = previous || current,
+        n = next || current,
+        o = {
+          length: Math.sqrt(Math.pow(n[0] - p[0], 2) + Math.pow(n[1] - p[1], 2)),
+          angle: Math.atan2(n[1] - p[1], n[0] - p[0]),
+        },
+        angle = o.angle + (reverse ? Math.PI : 0),
+        length = o.length * smoothing
+      return [current[0] + Math.cos(angle) * length, current[1] + Math.sin(angle) * length]
+    },
+    cps = cp(a[i - 1], a[i - 2], point, false),
+    cpe = cp(point, a[i - 1], a[i + 1], true)
+  return `C ${cps[0]},${cps[1]} ${cpe[0]},${cpe[1]} ${point[0]},${point[1]}`
+}
 
-const FileButton: React.FC<Props> = ({ id, className, name, accept }) => {
+export const getPath = (update: number, smoothing: number, pointsNew?: number[][]) => {
+  const points = pointsNew
+      ? pointsNew
+      : [
+          [4, 12],
+          [12, update],
+          [20, 12],
+        ],
+    d = points.reduce(
+      (acc, point, i, a) =>
+        i === 0 ? `M ${point[0]},${point[1]}` : `${acc} ${getPoint(point, i, a, smoothing)}`,
+      ''
+    )
+  return `<path d="${d}" />`
+}
+
+const FileButton: React.FC<Props> = ({
+  id,
+  className,
+  name,
+  accept,
+  paragraph,
+  onChange: onFileChange,
+  single = false,
+}) => {
   useEffect(() => {
     if (document) {
-      const node = document.querySelectorAll('label')
-
+      const node = document.querySelectorAll('label.fileLabel') as NodeListOf<HTMLLabelElement>
       node.forEach((label) => {
-        const duration = 3000,
-          svg = label.querySelector('svg')
-        debugger
-        console.log(label)
+        const svg = label.querySelector('svg'),
+          svgPath = new Proxy<{ y?: number; smoothing?: number }>(
+            {
+              y: undefined,
+              smoothing: undefined,
+            },
+            {
+              set(target, key: 'y' | 'smoothing', value) {
+                target[key] = value
+                if (target.y && typeof target.smoothing === 'number' && svg) {
+                  svg.innerHTML = getPath(target.y, target.smoothing)
+                }
+                return true
+              },
+              get(target, key: 'y' | 'smoothing') {
+                return target[key]
+              },
+            }
+          )
+        label.style.setProperty('--duration', `${duration}`)
+        svgPath.y = 20
+        svgPath.smoothing = 0
       })
     }
   }, [])
 
   return (
-    <FileComponent>
-      <label htmlFor={name} className={className}>
-        {className && className.includes('single') ? (
+    <FileComponent paragraph={paragraph}>
+      <label htmlFor={name} className={className + (single ? ' single' : '')}>
+        {single ? (
           <div>
             <svg viewBox="0 0 24 24"></svg>
           </div>
         ) : (
           <>
             <ul>
-              <li>Select File</li>
-              <li>Selecting</li>
-              <li>Open File</li>
+              <li>{paragraph.first}</li>
+              <li>{paragraph.second}</li>
+              {paragraph.three && <li>{paragraph.three}</li>}
             </ul>
             <div>
               <svg viewBox="0 0 24 24"></svg>
@@ -37,7 +103,36 @@ const FileButton: React.FC<Props> = ({ id, className, name, accept }) => {
           </>
         )}
       </label>
-      <input type="file" id={id} name={name} accept={accept} />
+      <input
+        type="file"
+        id={id}
+        name={name}
+        accept={accept}
+        onChange={(e) => {
+          e.preventDefault()
+          const target = e.target
+          const label = target.previousSibling as HTMLLabelElement
+
+          onFileChange && onFileChange(e)
+
+          if (label) {
+            const svg = label.querySelector('svg')
+
+            if (!label.classList.contains('loading')) {
+              label.classList.add('loading')
+
+              setTimeout(() => {
+                if (svg)
+                  svg.innerHTML = getPath(0, 0, [
+                    [3, 14],
+                    [8, 19],
+                    [21, 6],
+                  ])
+              }, duration / 2)
+            }
+          }
+        }}
+      />
     </FileComponent>
   )
 }
@@ -48,6 +143,12 @@ const text = keyframes`
     }
     95%, 100% {
         transform: translateY(-200%);
+    }
+    
+`
+const text_2 = keyframes`
+    95%, 100% {
+      transform: translateY(-100%);
     }
 `
 
@@ -118,35 +219,33 @@ const background = keyframes`
     }
 `
 
-const FileComponent = styled.div`
+const FileComponent = styled.div<Pick<Props, 'paragraph'>>`
   display: inline-flex;
 
+  ${md} {
+    width: 100%;
+  }
+
   label {
-    &.dark-single {
-      --background: none;
-      --rectangle: #242836;
-      --success: #4bc793;
+    ${md} {
+      width: 100%;
     }
-    &.white-single {
+    &.single {
       --background: none;
-      --rectangle: #f5f9ff;
-      --arrow: #275efe;
-      --success: #275efe;
+      --rectangle: ${({ theme }) => theme.body};
+      --arrow: ${({ theme }) => theme.success};
+      --success: ${({ theme }) => theme.success};
+      --text: ${({ theme }) => theme.text};
       --shadow: rgba(10, 22, 50, 0.1);
     }
-    &.dark {
-      --background: #242836;
-      --rectangle: #1c212e;
-      --arrow: #f5f9ff;
-      --text: #f5f9ff;
-      --success: #2f3545;
-    }
-    --background: #275efe;
-    --rectangle: #184fee;
-    --success: #4672f1;
-    --text: #fff;
-    --arrow: #fff;
-    --checkmark: #fff;
+
+    --background: ${({ theme }) => theme.body};
+    --background-success: ${({ theme }) => theme.success};
+    --rectangle: ${({ theme }) => theme.border};
+    --success: ${({ theme }) => theme.success};
+    --text: ${({ theme }) => theme.text};
+    --arrow: ${({ theme }) => theme.success};
+    --checkmark: ${({ theme }) => theme.text};
     --shadow: rgba(10, 22, 50, 0.24);
 
     cursor: pointer;
@@ -155,7 +254,7 @@ const FileComponent = styled.div`
     text-decoration: none;
     mask-image: -webkit-radial-gradient(white, black);
     background: var(--background);
-    border-radius: 0.5rem;
+    border-radius: 0.3rem;
     box-shadow: 0 2px 8px -1px var(--shadow);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 
@@ -165,18 +264,28 @@ const FileComponent = styled.div`
     }
 
     ul {
+      display: inline-flex;
+      align-items: center;
       margin: 0;
-      padding: 1rem 2.5rem;
+      /* padding: 0 2.5rem; */
       list-style: none;
       text-align: center;
       position: relative;
       backface-visibility: hidden;
-      font-size: 1rem;
+      font-size: 0.875rem;
       font-weight: 500;
-      line-height: 1.75rem;
       color: var(--text);
 
+      ${md} {
+        width: 100%;
+      }
+
       li {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        padding: 0 2.5rem;
+        white-space: nowrap;
+
         &:not(:first-child) {
           top: 1rem;
           left: 0;
@@ -185,20 +294,25 @@ const FileComponent = styled.div`
         }
 
         &:nth-child(2) {
-          top: 4.75rem;
+          top: 2.25rem;
         }
 
         &:nth-child(3) {
-          top: 8.5rem;
+          top: 4.25rem;
         }
       }
     }
 
     > div {
       position: relative;
-      width: 3.75rem;
-      height: 3.75rem;
+      width: 2rem;
+      height: 2rem;
       background: var(--rectangle);
+
+      ${md} {
+        min-width: 2rem;
+        min-height: 2rem;
+      }
 
       &:before,
       &:after {
@@ -217,8 +331,8 @@ const FileComponent = styled.div`
         background: var(--arrow);
       }
       &:after {
-        width: 3.75rem;
-        height: 3.75rem;
+        width: 2rem;
+        height: 2rem;
         transform-origin: 50% 0;
         border-radius: 0 0 80% 80%;
         background: var(--success);
@@ -228,6 +342,7 @@ const FileComponent = styled.div`
       }
 
       svg {
+        --duration: 3000;
         display: block;
         position: absolute;
         width: 1.25rem;
@@ -246,23 +361,23 @@ const FileComponent = styled.div`
 
     &.loading {
       ul {
-        animation: ${text} calc(var(--duration) * 1ms) linear forwards
-          calc(var(--duration) * 0.065ms);
+        animation: ${({ paragraph }) => (paragraph.three ? text : text_2)}
+          calc(var(--duration) * 0.5ms) linear forwards calc(var(--duration) * 0.065ms);
       }
 
       > div {
         &:before {
-          animation: ${line} calc(var(--duration) * 1ms) linear forwards
+          animation: ${line} calc(var(--duration) * 0.5ms) linear forwards
             calc(var(--duration) * 0.065ms);
         }
 
         &:after {
-          animation: ${background} calc(var(--duration) * 1ms) linear forwards
+          animation: ${background} calc(var(--duration) * 0.5ms) linear forwards
             calc(var(--duration) * 0.065ms);
         }
 
         svg {
-          animation: ${svg} calc(var(--duration) * 1ms) linear forwards
+          animation: ${svg} calc(var(--duration) * 0.5ms) linear forwards
             calc(var(--duration) * 0.065ms);
         }
       }

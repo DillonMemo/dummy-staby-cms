@@ -8,6 +8,7 @@ const lightTheme = {
   border: '#c8c8c8',
   disable: '#f5f5f5',
   item: '#fff',
+  success: '#00ff94',
 }
 const darkTheme = {
   mode: 'dark',
@@ -19,6 +20,7 @@ const darkTheme = {
   border: '#404656',
   disable: '#4f5872',
   item: '#3f51b5',
+  success: '#275efe',
 }
 
 const themes = {
