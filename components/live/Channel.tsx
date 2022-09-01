@@ -114,11 +114,21 @@ const Channel: React.FC<Props> = ({ id, title, isVisible, onClose }) => {
   const onChangeAllSwitch = useCallback(
     async (checked: boolean) => {
       try {
-        for (const info of liveInfo) {
+        const filterLiveInfo = liveInfo.reduce((calc, compare) => {
+          if (calc.length > 0) {
+            return calc.findIndex((d) => d.linkPath === compare.linkPath) !== -1
+              ? calc
+              : [...calc, compare]
+          } else {
+            return [...calc, compare]
+          }
+        }, [] as EditLiveInfo[])
+
+        for (const info of filterLiveInfo) {
           info.loading = true
         }
         const response: EditLiveInfo[] = await Promise.all(
-          liveInfo.map(async ({ listingOrder, linkPath, code, checked: infoChecked }) => {
+          filterLiveInfo.map(async ({ listingOrder, linkPath, code, checked: infoChecked }) => {
             if (typeof linkPath === 'string') {
               if (checked !== infoChecked) {
                 const { data } = await editChannel({
