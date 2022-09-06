@@ -4,17 +4,18 @@ import { md } from '../styles/styles'
 
 interface Props {
   states: { [key: string]: boolean }
+  direction?: 'row' | 'column'
   children: ReactNode
 }
-const LoadingOverlay: React.FC<Props> = ({ states, children }) => {
+const LoadingOverlay: React.FC<Props> = ({ states, direction = 'row', children }) => {
   return Object.values(states).findIndex((bol) => bol) !== -1 ? (
-    <Overlay>{children}</Overlay>
+    <Overlay direction={direction}>{children}</Overlay>
   ) : (
     <Fragment></Fragment>
   )
 }
 
-const Overlay = styled.div`
+const Overlay = styled.div<Pick<Props, 'direction'>>`
   position: fixed;
   top: 0;
   left: 0;
@@ -31,6 +32,29 @@ const Overlay = styled.div`
     align-items: center;
     justify-content: center;
 
+    flex-flow: ${({ direction }) => (direction === 'row' ? 'row nowrap' : 'column nowrap')};
+
+    small {
+      color: white;
+      text-align: left;
+      margin-top: 0.875rem;
+      line-height: 1;
+    }
+
+    .progress {
+      display: inline-flex;
+      flex-flow: column nowrap;
+      .ant-progress.ant-progress-line {
+        display: inherit;
+        width: ${({ direction }) => (direction === 'row' ? '12rem' : '12rem')};
+
+        .ant-progress-text {
+          font-size: 1rem;
+          line-height: 1.1;
+          text-align: center;
+        }
+      }
+    }
     .letter-holder {
       padding: 1rem;
       .letter {

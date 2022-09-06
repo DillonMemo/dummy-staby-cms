@@ -12,13 +12,15 @@ import {
   Tooltip,
   Upload,
 } from 'antd'
+import { delay, divide } from 'lodash'
 import mongoose from 'mongoose'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { nowDateStr } from '../../Common/commonFn'
+import { toast } from 'react-toastify'
+import { getError, nowDateStr } from '../../Common/commonFn'
 
 /** components */
 import Layout from '../../components/Layout'
@@ -68,10 +70,22 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     isUploading: false,
     isProcessing: false,
   })
-  const [progress, setProgress] = useState<ProgressType>({
+  const [thumbnailProgress, setThumbnailProgress] = useState<ProgressType>({
     progress: 0,
     status: 'normal',
   })
+  const [imageProgress, setImageProgress] = useState<ProgressType>({
+    progress: 0,
+    status: 'normal',
+  })
+  const [videoProgress, setVideoProgress] = useState<ProgressType>({
+    progress: 0,
+    status: 'normal',
+  })
+  // const [progress, setProgress] = useState<ProgressType>({
+  //   progress: 0,
+  //   status: 'active',
+  // })
   const [thumbnailImg, setThumbnailImg] = useState<ImgType>({
     isVisible: false,
   })
@@ -108,47 +122,247 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
    * 최종 저장 버튼 이벤트 핸들러
    */
   const onSubmit = () => {
-    setLoading((prev) => ({ ...prev, isUploading: true }))
-    const { mainThumbnail } = getValues()
+    try {
+      setLoading((prev) => ({ ...prev, isUploading: true }))
+      const { mainThumbnail } = getValues()
 
-    const objectId = new mongoose.Types.ObjectId().toString()
-    /** File 업로드 영역 - 1 */
-    if ((mainThumbnail as any).file.originFileObj instanceof File) {
-      const file = (mainThumbnail as any).file.originFileObj as File
-      const fileExtension = file.name.split('.')[file.name.split('.').length - 1]
-      const fileName = `${objectId}_main_${nowDateStr}.${fileExtension}`
-      console.log(file)
+      const objectId = new mongoose.Types.ObjectId().toString()
+      /** File 업로드 영역 - 1 */
+      if ((mainThumbnail as any).file.originFileObj instanceof File) {
+        const file = (mainThumbnail as any).file.originFileObj as File
+        const fileExtension = file.name.split('.')[file.name.split('.').length - 1]
+        const fileName = `${objectId}_main_${nowDateStr}.${fileExtension}`
 
-      process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
-        S3.upload({
-          Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-          Key: `${
-            process.env.NODE_ENV === 'production' ? 'prod' : 'dev'
-          }/going/vod/${objectId}/main/${fileName}`,
-          Body: file,
-          ACL: 'public-read',
-        }).on('httpUploadProgress', (progress) => {
-          // do something...
-        })
-    }
-    /** File 업로드 영역 - 2 */
-    vodInfo.forEach((info, index) => {
-      if (info.video instanceof File && info.image instanceof File) {
-        const { video, image } = info
-        const [videoFileExtension, imageFileExtension] = [
-          video.name.split('.')[video.name.split('.').length - 1],
-          image.name.split('.')[image.name.split('.').length - 1],
-        ]
-        const [videoFileName, imageFileName] = [
-          `${objectId}_${index + 1}_${nowDateStr}.${videoFileExtension}`,
-          `${objectId}_intro_${index + 1}_${nowDateStr}.${imageFileExtension}`,
-        ]
+        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+          S3.upload(
+            {
+              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+              Key: `${
+                process.env.NODE_ENV === 'production' ? 'prod' : 'dev'
+              }/going/vod/${objectId}/main/${fileName}`,
+              Body: file,
+              ACL: 'public-read',
+            },
+            (error) => {
+              if (error) {
+                return toast.error(
+                  locale === 'ko'
+                    ? `파일 업로드 오류: ${error}`
+                    : `There was an error uploading your file: ${error}`,
+                  {
+                    theme: localStorage.theme || 'light',
+                    autoClose: 750,
+                    onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+                  }
+                )
+              }
 
-        console.log(videoFileExtension, imageFileExtension)
+              return delay(() => {
+                onUploading(objectId)
+              }, 750)
+            }
+          ).on('httpUploadProgress', (progress) => {
+            const progressPercentage = Math.round((progress.loaded / progress.total) * 100)
+
+            if (progressPercentage < 100) {
+              setThumbnailProgress((prev) => ({
+                ...prev,
+                progress: progressPercentage,
+                status: 'active',
+              }))
+            } else if (progressPercentage === 100) {
+              setThumbnailProgress((prev) => ({
+                ...prev,
+                status: 'success',
+                progress: progressPercentage,
+              }))
+            }
+          })
       }
-    })
+    } catch (error) {
+      getError(error)
+    }
+  }
 
-    setTimeout(() => setLoading((prev) => ({ ...prev, isUploading: false })), 20000)
+  /** File 업로드 영역 - 2 */
+  const onUploading = async (objectId: string) => {
+    try {
+      let imageCount = 0,
+        videoCount = 0,
+        num = 0
+      for (const info of vodInfo) {
+        info.image instanceof File && imageCount++
+        info.video instanceof File && videoCount++
+      }
+
+      await Promise.all(
+        vodInfo.map(async (info, index) => {
+          if (info.image instanceof File) {
+            const image = info.image,
+              imageFileExtension = image.name.split('.')[image.name.split('.').length - 1],
+              imageFileName = `${objectId}_intro_${index + 1}_${nowDateStr}.${imageFileExtension}`
+
+            process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+              (await S3.upload({
+                Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+                Key: `${
+                  process.env.NODE_ENV === 'production' ? 'prod' : 'dev'
+                }/going/vod/${objectId}/intro/${imageFileName}`,
+                Body: image,
+                ACL: 'public-read',
+              })
+                .promise()
+                .then(() => {
+                  const percentage = Math.round(100 / imageCount)
+                  setImageProgress((prev) => {
+                    const calcPercentage = prev.progress + percentage
+                    if (calcPercentage < 95) {
+                      return { ...prev, progress: calcPercentage, status: 'active' }
+                    } else {
+                      return {
+                        ...prev,
+                        progress: calcPercentage + (100 - calcPercentage),
+                        status: 'success',
+                      }
+                    }
+                  })
+                })
+                .catch((error) =>
+                  toast.error(
+                    locale === 'ko'
+                      ? `VOD image 파일 업로드 오류: ${error}`
+                      : `There was an error uploading your VOD image file: ${error}`,
+                    {
+                      theme: localStorage.theme || 'light',
+                      autoClose: 750,
+                      onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+                    }
+                  )
+                ))
+          }
+        })
+      )
+
+      const response = await Promise.all(
+        vodInfo.map(async (info, index) => {
+          if (info.video instanceof File) {
+            const video = info.video,
+              videoFileExtension = video.name.split('.')[video.name.split('.').length - 1],
+              videoFileName = `${objectId}_${index + 1}_${nowDateStr}.${videoFileExtension}`
+
+            process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
+              S3.upload(
+                {
+                  Bucket: process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME,
+                  Key: `${
+                    process.env.NODE_ENV === 'production' ? 'prod' : 'dev'
+                  }/going/vod/${objectId}/${videoFileName}`,
+                  Body: video,
+                  ACL: 'bucket-owner-read',
+                },
+                (error, _) => {
+                  if (error) {
+                    return toast.error(
+                      locale === 'ko'
+                        ? `VOD video 파일 업로드 오류: ${error}`
+                        : `There was an error uploading your VOD video file: ${error}`,
+                      {
+                        theme: localStorage.theme || 'light',
+                        autoClose: 750,
+                        onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+                      }
+                    )
+                  }
+
+                  num = num + 1
+                  if (videoCount === num) {
+                    return delay(() => {
+                      setLoading({ isUploading: false, isProcessing: true })
+                      onMutation(objectId) // add filename
+                    }, 750)
+                  } else {
+                    return num
+                  }
+                }
+              ).on('httpUploadProgress', (progress_) => {
+                const progressPercentage = Math.round((progress_.loaded / progress_.total) * 100)
+                const quarterPercentage = Math.round(progressPercentage / videoCount)
+                const quarter = Math.round(100 / videoCount)
+                // console.log(progressPercentage, quarterPercentage, quarter)
+
+                if (progressPercentage < 100) {
+                  setVideoProgress((prev) => {
+                    if (prev.progress < quarterPercentage) {
+                      // console.log('1', num, quarterPercentage)
+                      return {
+                        ...prev,
+                        progress: num === 0 ? quarterPercentage : quarter * num + quarterPercentage,
+                        status: 'active',
+                      }
+                    } else if (prev.progress === quarter) {
+                      // console.log('2', prev.progress + 1)
+                      return {
+                        ...prev,
+                        progress: prev.progress + 1,
+                        status: 'active',
+                      }
+                    } else if (prev.progress > quarter) {
+                      // console.log('3', num, quarter * num + quarterPercentage, prev.progress)
+                      return {
+                        ...prev,
+                        progress:
+                          num === 0
+                            ? quarter + 1
+                            : prev.progress > quarter * num + quarterPercentage
+                            ? prev.progress
+                            : quarter * num + quarterPercentage,
+                        status: 'active',
+                      }
+                    } else {
+                      // console.log('4', prev.progress, quarter)
+                      return {
+                        ...prev,
+                      }
+                    }
+                  })
+                } else if (progressPercentage === 100) {
+                  if (videoCount % num === 1) {
+                    setVideoProgress((prev) => ({
+                      ...prev,
+                      progress: progressPercentage,
+                      status: 'success',
+                    }))
+                  } else if (num === 0 && vodInfo.length === 1) {
+                    // VOD를 한개만 업로드 할 경우 99% > 100%로 전환
+                    setVideoProgress((prev) => ({
+                      ...prev,
+                      progress: progressPercentage,
+                      status: 'success',
+                    }))
+                  } else {
+                    setVideoProgress((prev) => ({ ...prev }))
+                  }
+                }
+              })
+          }
+        })
+      )
+    } catch (error) {
+      getError(error)
+    }
+  }
+
+  const onMutation = async (_id: string) => {
+    try {
+      console.log('mutation', _id)
+
+      delay(() => {
+        setLoading({ isUploading: false, isProcessing: false })
+      }, 1000)
+    } catch (error) {
+      getError(error, true)
+      setLoading((prev) => ({ ...prev, isProcessing: false }))
+    }
   }
 
   return (
@@ -490,16 +704,51 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
           </Edit>
         </div>
       </MainWrapper>
-      <LoadingOverlay states={loading}>
+      <LoadingOverlay states={loading} direction="column">
         <div className="container">
           {loading.isUploading && (
-            <div className="progress">
-              <Progress
-                type="circle"
-                percent={progress.progress}
-                size="small"
-                status={progress.status}
-              />
+            <>
+              <div className="progress">
+                <small>Thumbnail</small>
+                <Progress
+                  type="line"
+                  percent={thumbnailProgress.progress}
+                  size="small"
+                  status={thumbnailProgress.status}
+                />
+              </div>
+              <div className="progress">
+                <small>VOD images</small>
+                <Progress
+                  type="line"
+                  percent={imageProgress.progress}
+                  size="small"
+                  status={imageProgress.status}
+                />
+              </div>
+              <div className="progress">
+                <small>VOD videos</small>
+                <Progress
+                  type="line"
+                  percent={videoProgress.progress}
+                  size="small"
+                  status={videoProgress.status}
+                />
+              </div>
+            </>
+          )}
+          {loading.isProcessing && (
+            <div className="letter-holder">
+              <div className="l-1 letter">L</div>
+              <div className="l-2 letter">o</div>
+              <div className="l-3 letter">a</div>
+              <div className="l-4 letter">d</div>
+              <div className="l-5 letter">i</div>
+              <div className="l-6 letter">n</div>
+              <div className="l-7 letter">g</div>
+              <div className="l-8 letter">.</div>
+              <div className="l-9 letter">.</div>
+              <div className="l-10 letter">.</div>
             </div>
           )}
         </div>
