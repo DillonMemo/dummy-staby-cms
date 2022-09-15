@@ -629,33 +629,44 @@ const NavigatorWrapper = styled.div`
           .status {
             display: inline-flex;
             justify-content: center;
-            .ant-badge-status-dot {
-              width: 0.75rem;
-              height: 0.75rem;
 
-              &:after {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                border: 1px solid;
-                border-radius: 50%;
-
-                content: '';
-              }
-              &.ant-badge-status-success:after {
-                border-color: #52c41a;
-                animation: ${statusIndicatorPulsePositive} 1s infinite ease-in-out !important;
-              }
-              &.ant-badge-status-error:after {
-                border-color: #ff4d4f;
-                animation: ${statusIndicatorPulseNegative} 1s infinite ease-in-out !important;
-              }
+            ${md} {
+              flex: 0;
             }
 
-            .ant-badge-status-text {
-              margin: 0;
+            .ant-badge {
+              ${md} {
+                flex: 0;
+                display: initial;
+              }
+              .ant-badge-status-dot {
+                width: 0.75rem;
+                height: 0.75rem;
+
+                &:after {
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 100%;
+                  border: 1px solid;
+                  border-radius: 50%;
+
+                  content: '';
+                }
+                &.ant-badge-status-success:after {
+                  border-color: #52c41a;
+                  animation: ${statusIndicatorPulsePositive} 1s infinite ease-in-out !important;
+                }
+                &.ant-badge-status-error:after {
+                  border-color: #ff4d4f;
+                  animation: ${statusIndicatorPulseNegative} 1s infinite ease-in-out !important;
+                }
+              }
+
+              .ant-badge-status-text {
+                margin: 0;
+              }
             }
           }
 
@@ -674,6 +685,11 @@ const NavigatorWrapper = styled.div`
             margin-left: 1.64rem;
 
             flex: 0 0 50%;
+
+            ${md} {
+              flex: 1;
+              margin: 0;
+            }
           }
         }
       }

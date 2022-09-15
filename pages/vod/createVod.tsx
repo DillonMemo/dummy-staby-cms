@@ -1,5 +1,10 @@
-import { DeleteOutlined, QuestionCircleOutlined, UploadOutlined } from '@ant-design/icons'
-import { useQuery } from '@apollo/client'
+import {
+  DeleteOutlined,
+  PlusOutlined,
+  QuestionCircleOutlined,
+  UploadOutlined,
+} from '@ant-design/icons'
+import { useMutation, useQuery } from '@apollo/client'
 import {
   Button,
   Image,
@@ -12,12 +17,12 @@ import {
   Tooltip,
   Upload,
 } from 'antd'
-import { delay, divide } from 'lodash'
+import { delay, pick } from 'lodash'
 import mongoose from 'mongoose'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { getError, nowDateStr } from '../../Common/commonFn'
@@ -28,13 +33,24 @@ import LoadingOverlay from '../../components/LoadingOverlay'
 import VodUploadContainer from '../../components/vod/VodUploadContainer'
 
 /** graphql */
-import { GetLivesQuery, GetLivesQueryVariables, RatioType } from '../../generated'
-import { GET_LIVES_QUERY } from '../../graphql/queries'
+import {
+  CreateVodMutation,
+  CreateVodMutationVariables,
+  FindMembersByTypeQuery,
+  FindMembersByTypeQueryVariables,
+  GetLivesQuery,
+  GetLivesQueryVariables,
+  MemberType,
+  RatioType,
+  VodLinkInfo,
+} from '../../generated'
+import { CREATE_VOD_MUTATION } from '../../graphql/mutations'
+import { FIND_MEMBERS_BY_TYPE_QUERY, GET_LIVES_QUERY } from '../../graphql/queries'
 import { S3 } from '../../lib/awsClient'
 
 /** utils */
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
-import { ShareInfo, SkeletonStyle } from '../live/createLive'
+import { ShareInfo, ShareInfoGrid, SkeletonStyle } from '../live/createLive'
 
 type Props = styleMode
 
@@ -64,7 +80,7 @@ export type VodInfo = {
 }
 
 const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
-  const { locale } = useRouter()
+  const { locale, push } = useRouter()
 
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({
     isUploading: false,
@@ -82,14 +98,13 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     progress: 0,
     status: 'normal',
   })
-  // const [progress, setProgress] = useState<ProgressType>({
-  //   progress: 0,
-  //   status: 'active',
-  // })
   const [thumbnailImg, setThumbnailImg] = useState<ImgType>({
     isVisible: false,
   })
   const [vodInfo, setVodInfo] = useState<VodInfo[]>([])
+  const [shareInfo, setShareInfo] = useState<ShareInfo[]>([
+    { memberId: '', nickName: '', priorityShare: 0, directShare: 100 },
+  ])
 
   const {
     getValues,
@@ -98,10 +113,35 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     control,
   } = useForm<VodCreateForm>({ mode: 'onChange' })
 
+  const { data: memberData, loading: isMemberLoading } = useQuery<
+    FindMembersByTypeQuery,
+    FindMembersByTypeQueryVariables
+  >(FIND_MEMBERS_BY_TYPE_QUERY, {
+    variables: {
+      membersByTypeInput: {
+        memberType: MemberType.Business,
+      },
+    },
+  })
+
   const { data: liveData, loading: isLiveLoading } = useQuery<
     GetLivesQuery,
     GetLivesQueryVariables
   >(GET_LIVES_QUERY)
+
+  const [createVod] = useMutation<CreateVodMutation, CreateVodMutationVariables>(
+    CREATE_VOD_MUTATION
+  )
+
+  /**
+   * 추가 버튼 클릭 이벤트 핸들러 입니다.
+   * @returns 추가 성공 여부를 반환
+   */
+  const onAddMember = () =>
+    setShareInfo((prev) => [
+      ...prev,
+      { memberId: '', nickName: '', priorityShare: 0, directShare: 100 },
+    ])
 
   /**
    * 자식 컴포넌트에서 추가 이벤트 발생시 부모의 상태 관리 이벤트 핸들러 입니다
@@ -119,12 +159,54 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     setVodInfo((prev) => [...prev.slice(0, index), ...prev.slice(index + 1, prev.length)])
 
   /**
+   * 지분 삭제 버튼 클릭 이벤트 핸들러 입니다.
+   * @param {number} index
+   * @returns 지분 삭제 성공 여부를 반환
+   */
+  const onDeleteShare = (index: number) => () =>
+    setShareInfo((prev) => [...prev.slice(0, index), ...prev.slice(index + 1, prev.length)])
+
+  /**
    * 최종 저장 버튼 이벤트 핸들러
    */
   const onSubmit = () => {
     try {
       setLoading((prev) => ({ ...prev, isUploading: true }))
       const { mainThumbnail } = getValues()
+
+      const [priorityShareSum, directShareSum] = [
+        shareInfo.reduce(
+          (prev, current) => (prev ? prev + current.priorityShare : 0 + current.priorityShare),
+          0
+        ),
+        shareInfo.reduce(
+          (prev, current) => (prev ? prev + current.directShare : 0 + current.directShare),
+          0
+        ),
+      ]
+
+      if (!(priorityShareSum === 100 || priorityShareSum === 0)) {
+        return toast.error(
+          locale === 'ko'
+            ? '우선환수 지분은 총합이 100 또는 0 이어야 합니다'
+            : 'Priority share sum is 100 or 0',
+          {
+            theme: localStorage.theme || 'light',
+            autoClose: 750,
+            onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+          }
+        )
+      }
+      if (directShareSum !== 100) {
+        return toast.error(
+          locale === 'ko' ? '직분배 지분은 총합이 100 이어야 합니다' : 'Direct share sum is 100',
+          {
+            theme: localStorage.theme || 'light',
+            autoClose: 750,
+            onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+          }
+        )
+      }
 
       const objectId = new mongoose.Types.ObjectId().toString()
       /** File 업로드 영역 - 1 */
@@ -158,7 +240,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               }
 
               return delay(() => {
-                onUploading(objectId)
+                onUploading(objectId, fileName)
               }, 750)
             }
           ).on('httpUploadProgress', (progress) => {
@@ -185,11 +267,13 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
   }
 
   /** File 업로드 영역 - 2 */
-  const onUploading = async (objectId: string) => {
+  const onUploading = async (objectId: string, thumbnailName: string) => {
     try {
       let imageCount = 0,
         videoCount = 0,
-        num = 0
+        num = 0,
+        imageInfo: string[] = [],
+        videoInfo: string[] = []
       for (const info of vodInfo) {
         info.image instanceof File && imageCount++
         info.video instanceof File && videoCount++
@@ -201,6 +285,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
             const image = info.image,
               imageFileExtension = image.name.split('.')[image.name.split('.').length - 1],
               imageFileName = `${objectId}_intro_${index + 1}_${nowDateStr}.${imageFileExtension}`
+            imageInfo = [...imageInfo, imageFileName]
 
             process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
               (await S3.upload({
@@ -243,12 +328,13 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         })
       )
 
-      const response = await Promise.all(
+      await Promise.all(
         vodInfo.map(async (info, index) => {
           if (info.video instanceof File) {
             const video = info.video,
               videoFileExtension = video.name.split('.')[video.name.split('.').length - 1],
               videoFileName = `${objectId}_${index + 1}_${nowDateStr}.${videoFileExtension}`
+            videoInfo = [...videoInfo, videoFileName]
 
             process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
               S3.upload(
@@ -278,7 +364,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                   if (videoCount === num) {
                     return delay(() => {
                       setLoading({ isUploading: false, isProcessing: true })
-                      onMutation(objectId) // add filename
+                      onMutation(objectId, thumbnailName, imageInfo, videoInfo) // add filename
                     }, 750)
                   } else {
                     return num
@@ -352,13 +438,63 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
     }
   }
 
-  const onMutation = async (_id: string) => {
+  const onMutation = async (
+    _id: string,
+    thumbnail: string,
+    imageInfo: string[],
+    videoInfo: string[]
+  ) => {
     try {
-      console.log('mutation', _id)
+      const vodLinkInfo: Pick<VodLinkInfo, 'listingOrder' | 'linkPath' | 'introImageName'>[] = []
+      if (imageInfo.length === videoInfo.length) {
+        for (let i = 0; i < imageInfo.length; i++) {
+          vodLinkInfo.push({
+            listingOrder: i + 1,
+            linkPath: videoInfo[i],
+            introImageName: imageInfo[i],
+          })
+        }
 
-      delay(() => {
-        setLoading({ isUploading: false, isProcessing: false })
-      }, 1000)
+        // result
+        const { liveId, content, paymentAmount, title, vodRatioType } = getValues()
+
+        const { data } = await createVod({
+          variables: {
+            createVodInput: {
+              _id,
+              mainImageName: thumbnail,
+              vodLinkInfo,
+              vodShareInfo: {
+                vodId: _id,
+                memberShareInfo: shareInfo,
+              },
+              ...(liveId && { liveId }),
+              content,
+              paymentAmount,
+              title,
+              vodRatioType,
+            },
+          },
+        })
+
+        if (!data?.createVod.ok) {
+          const message = locale === 'ko' ? data?.createVod.error?.ko : data?.createVod.error?.en
+          throw new Error(message)
+        } else {
+          setLoading({ isUploading: false, isProcessing: false })
+          toast.success(locale === 'ko' ? '추가가 완료 되었습니다.' : 'Has been completed', {
+            theme: localStorage.theme || 'light',
+            autoClose: 750,
+            onClose: () => push('/vod/vods'),
+          })
+        }
+      } else {
+        throw new Error(
+          locale === 'ko'
+            ? '선택된 이미지와 비디오의 비율이 일치 하지 않습니다'
+            : 'The ratio of the selected image to the video does not match'
+        )
+      }
     } catch (error) {
       getError(error, true)
       setLoading((prev) => ({ ...prev, isProcessing: false }))
@@ -386,7 +522,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         </div>
         <div className="main-content">
           <Edit className="card">
-            {!isLiveLoading ? (
+            {!isMemberLoading && !isLiveLoading ? (
               <Form name="createVodForm" onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-grid col-4 gap-1">
                   <div className="form-item">
@@ -656,6 +792,138 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                   </div>
                 </div>
 
+                <div className="form-grid col-3 merge gap-1 mt-1">
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '내용' : 'Content'}</span>
+                      <Controller
+                        control={control}
+                        name="content"
+                        render={({ field: { value, onChange } }) => (
+                          <Input.TextArea
+                            className="input"
+                            placeholder={locale === 'ko' ? '내용 입력' : 'Please enter content'}
+                            maxLength={1000}
+                            value={value}
+                            onChange={onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-item">
+                    <div className="form-group">
+                      <span>{locale === 'ko' ? '지분' : 'Share'}</span>
+                      <Button
+                        type="dashed"
+                        htmlType="button"
+                        onClick={onAddMember}
+                        style={{ width: '100%' }}>
+                        <PlusOutlined />
+                        {locale === 'ko' ? '추가' : 'Add'}
+                      </Button>
+                      {shareInfo.map((info, index) => (
+                        <Fragment key={index}>
+                          <ShareInfoGrid>
+                            <div className="controller-content">
+                              {shareInfo.length > 1 && shareInfo.length - 1 === index && (
+                                <Button
+                                  onClick={onDeleteShare(index)}
+                                  icon={<DeleteOutlined style={{ fontSize: 16 }} />}
+                                />
+                              )}
+                              <Select
+                                value={info.memberId}
+                                onChange={(value) => {
+                                  const { nickName, _id: memberId } = pick(
+                                    memberData?.findMembersByType.members.find(
+                                      (member) => member._id === value
+                                    ),
+                                    ['_id', 'nickName']
+                                  )
+                                  if (nickName && memberId) {
+                                    setShareInfo((prev) => [
+                                      ...prev.slice(0, index),
+                                      { ...prev[index], nickName, memberId },
+                                      ...prev.slice(index + 1, prev.length),
+                                    ])
+                                  } else {
+                                    toast.error(
+                                      locale === 'ko'
+                                        ? '지분 회원 정보가 잘못 되었습니다'
+                                        : 'Undefined share member info',
+                                      {
+                                        theme: localStorage.theme || 'light',
+                                        autoClose: 750,
+                                      }
+                                    )
+                                  }
+                                }}>
+                                {memberData?.findMembersByType.members.map((data, index) => (
+                                  <Select.Option key={`member-${index}`} value={data._id}>
+                                    {data.nickName}
+                                  </Select.Option>
+                                ))}
+                              </Select>
+                            </div>
+                            <InputNumber
+                              min={0}
+                              max={100}
+                              defaultValue={info.priorityShare}
+                              onChange={(value: number) =>
+                                setShareInfo((prev) => [
+                                  ...prev.slice(0, index),
+                                  { ...prev[index], priorityShare: value },
+                                  ...prev.slice(index + 1, prev.length),
+                                ])
+                              }
+                              onKeyPress={(e) => {
+                                if (
+                                  e.key === '.' ||
+                                  e.key === 'e' ||
+                                  e.key === '+' ||
+                                  e.key === '-'
+                                ) {
+                                  e.preventDefault()
+                                  return false
+                                }
+                              }}
+                              addonBefore={locale === 'ko' ? '우선환수' : 'priority share'}
+                              addonAfter={`%`}
+                            />
+                            <InputNumber
+                              min={0}
+                              max={100}
+                              defaultValue={info.directShare}
+                              onChange={(value: number) =>
+                                setShareInfo((prev) => [
+                                  ...prev.slice(0, index),
+                                  { ...prev[index], directShare: value },
+                                  ...prev.slice(index + 1, prev.length),
+                                ])
+                              }
+                              onKeyPress={(e) => {
+                                if (
+                                  e.key === '.' ||
+                                  e.key === 'e' ||
+                                  e.key === '+' ||
+                                  e.key === '-'
+                                ) {
+                                  e.preventDefault()
+                                  return false
+                                }
+                              }}
+                              addonBefore={locale === 'ko' ? '직분배' : 'direct share'}
+                              addonAfter={`%`}
+                            />
+                          </ShareInfoGrid>
+                        </Fragment>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="form-item">
                   <div className="button-group">
                     <Link href="/live/lives" locale={locale}>
@@ -671,7 +939,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       role="button"
                       htmlType="submit"
                       className="submit-button"
-                      disabled={Object.keys(errors).length > 0}>
+                      disabled={
+                        Object.keys(errors).length > 0 ||
+                        shareInfo.findIndex((info) => !info.memberId) !== -1 ||
+                        vodInfo.length < 1
+                      }>
                       {locale === 'ko' ? '저장' : 'Save'}
                     </Button>
                   </div>

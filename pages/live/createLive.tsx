@@ -1110,7 +1110,7 @@ export const LiveInfoGrid = styled.div`
 
 export const ShareInfoGrid = styled.div`
   display: grid;
-  grid-template-columns: 10rem 1fr 1fr auto;
+  grid-template-columns: 10rem 1fr 1fr;
   align-items: center;
   gap: 0.5rem;
 
