@@ -5,7 +5,6 @@ import styled, { keyframes } from 'styled-components'
 import { Badge, notification, Select, Skeleton, Space } from 'antd'
 import Icon, {
   ArrowRightOutlined,
-  DesktopOutlined,
   EllipsisOutlined,
   FileTextOutlined,
   LayoutOutlined,
@@ -230,16 +229,6 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                     <a>
                       <SettingOutlined className="icon" />
                       <span className="text">{locale === 'ko' ? '관리' : 'Management'}</span>
-                    </a>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link href="/member/monitor" locale={locale}>
-                    <a>
-                      <DesktopOutlined className="icon" />
-                      <span className="text">
-                        {locale === 'ko' ? '모니터링 계정' : 'Monitor Account'}
-                      </span>
                     </a>
                   </Link>
                 </li>

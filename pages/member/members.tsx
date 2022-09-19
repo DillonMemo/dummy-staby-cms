@@ -35,6 +35,7 @@ type Props = styleMode
 interface Filters {
   memberType: keyof typeof MemberType | 'All'
   memberStatus: keyof typeof MemberStatus | 'All'
+  monitorFlag: 'Active' | 'InActive'
 }
 /** filter 옵션 인터페이스를 상속 정의한 테이블 옵션 인터페이스 */
 interface Options extends Filters {
@@ -86,7 +87,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
     },
   ]
   const [
-    { page, pageSize, memberType, memberStatus, dates, searchSelect, searchText },
+    { page, pageSize, memberType, memberStatus, dates, searchSelect, searchText, monitorFlag },
     setFilterOptions,
   ] = useState<Options>({
     page: PAGE,
@@ -96,10 +97,12 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
     dates: [],
     searchSelect: 'Email',
     searchText: '',
+    monitorFlag: 'InActive',
   })
   const [visibleOptions, setVisibleOptions] = useState<Visible>({
     memberType: false,
     memberStatus: false,
+    monitorFlag: false,
   })
   const [members, { data: membersData, loading: membersLoading }] = useMutation<
     MembersMutation,
@@ -119,6 +122,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
             pageView: pageSize,
             memberType: memberType !== 'All' ? (memberType as MemberType) : undefined,
             memberStatus: memberStatus !== 'All' ? (memberStatus as MemberStatus) : undefined,
+            monitorFlag: monitorFlag === 'Active' ? true : false,
             ...(dates && dates.length > 0 && { dates }),
             ...(searchSelect === 'Email'
               ? { email: searchText }
@@ -154,6 +158,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               pageView: PAGESIZE,
               ...(key !== 'All' && { memberType: key as MemberType }),
               ...(memberStatus !== 'All' && { memberStatus: memberStatus as MemberStatus }),
+              monitorFlag: monitorFlag === 'Active' ? true : false,
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: searchText }
@@ -205,6 +210,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               pageView: PAGESIZE,
               ...(memberType !== 'All' && { memberType: memberType as MemberType }),
               ...(key !== 'All' && { memberStatus: key as MemberStatus }),
+              monitorFlag: monitorFlag === 'Active' ? true : false,
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: searchText }
@@ -229,6 +235,58 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                 page: PAGE,
                 pageSize: PAGESIZE,
                 memberStatus: key,
+              },
+            },
+            router.asPath,
+            { locale }
+          )
+        }
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  /**
+   * 모니터링 여부 드롭다운 메뉴 클릭 이벤트 핸들러 입니다.
+   * @param {MenuInfo} info Menu Click params
+   */
+  const onMonitorFlagMenuClick = async ({ key }: MenuInfo) => {
+    try {
+      if (monitorFlag !== key) {
+        const { data } = await members({
+          variables: {
+            membersInput: {
+              page: PAGE,
+              pageView: PAGESIZE,
+              ...(memberType !== 'All' && { memberType: memberType as MemberType }),
+              ...(memberStatus !== 'All' && { memberStatus: memberStatus as MemberStatus }),
+              monitorFlag: key === 'Active' ? true : false,
+              ...(dates && dates.length > 0 && { dates }),
+              ...(searchSelect === 'Email'
+                ? { email: searchText }
+                : searchSelect === 'NickName'
+                ? { nickName: searchText }
+                : {}),
+            },
+          },
+        })
+
+        if (data?.members.ok) {
+          setFilterOptions((prev) => ({
+            ...prev,
+            page: PAGE,
+            pageSize: PAGESIZE,
+            monitorFlag: key as 'Active' | 'InActive',
+          }))
+          router.push(
+            {
+              pathname: router.pathname,
+              query: {
+                ...router.query,
+                page: PAGE,
+                pageSize: PAGESIZE,
+                monitorFlag: key,
               },
             },
             router.asPath,
@@ -277,6 +335,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
             pageView: PAGESIZE,
             ...(memberType !== 'All' && { memberType: memberType as MemberType }),
             ...(memberStatus !== 'All' && { memberStatus: memberStatus as MemberStatus }),
+            monitorFlag: monitorFlag === 'Active' ? true : false,
             ...(value && value.length > 0 && { dates: value }),
             ...(searchSelect === 'Email'
               ? { email: searchText }
@@ -326,6 +385,7 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               pageView: PAGESIZE,
               ...(memberType !== 'All' && { memberType: memberType as MemberType }),
               ...(memberStatus !== 'All' && { memberStatus: memberStatus as MemberStatus }),
+              monitorFlag: monitorFlag === 'Active' ? true : false,
               ...(dates && dates.length > 0 && { dates }),
               ...(searchSelect === 'Email'
                 ? { email: value }
@@ -395,6 +455,8 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                 router.query.dates.length > 0 && {
                   dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
                 }),
+              monitorFlag:
+                router.query.monitorFlag && router.query.monitorFlag === 'Active' ? true : false,
             },
           },
         })
@@ -414,6 +476,9 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
               router.query.dates.length > 0 && {
                 dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
               }),
+            ...(router.query.monitorFlag && {
+              monitorFlag: router.query.monitorFlag as 'Active' | 'InActive',
+            }),
           }))
         }
       } catch (error) {
@@ -565,6 +630,39 @@ const Members: NextPage<Props> = ({ toggleStyle, theme }) => {
                             ? '탈퇴'
                             : memberStatus
                           : memberStatus}
+                        &nbsp;
+                        {membersLoading && <LoadingOutlined style={{ fontSize: '12px' }} />}
+                      </Button>
+                    </div>
+                  </Dropdown>
+                  <Dropdown
+                    overlay={
+                      <Menu
+                        onClick={onMonitorFlagMenuClick}
+                        items={[
+                          {
+                            key: 'Active',
+                            label: locale === 'ko' ? '활성' : 'Active',
+                          },
+                          {
+                            key: 'InActive',
+                            label: locale === 'ko' ? '비활성' : 'InActive',
+                          },
+                        ]}
+                      />
+                    }
+                    onVisibleChange={(visible) =>
+                      setVisibleOptions((prev) => ({ ...prev, monitorFlag: visible }))
+                    }
+                    visible={visibleOptions.monitorFlag}>
+                    <div className="dropdown">
+                      <span className="title">{locale === 'ko' ? '모니터링' : 'Monitor'}</span>
+                      <Button onClick={(e) => e.preventDefault()}>
+                        {locale === 'ko'
+                          ? monitorFlag === 'Active'
+                            ? '활성'
+                            : '비활성'
+                          : monitorFlag}
                         &nbsp;
                         {membersLoading && <LoadingOutlined style={{ fontSize: '12px' }} />}
                       </Button>
