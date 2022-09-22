@@ -1144,7 +1144,8 @@ export const Form = styled.form`
             flex: 0 2rem;
           }
 
-          > small {
+          > small,
+          div:not(.empty) {
             min-width: 10rem;
             width: 10rem;
             overflow: hidden;
@@ -1155,6 +1156,13 @@ export const Form = styled.form`
               min-width: 6rem;
               width: 6rem;
             }
+          }
+
+          div.empty {
+            &.isEdit {
+              margin: 0.5rem 0;
+            }
+            transition: margin 0.3s ease-out;
           }
         }
       }

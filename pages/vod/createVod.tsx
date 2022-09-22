@@ -774,7 +774,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                         }}
                         dataSource={vodInfo}
                         renderItem={(item, index) => (
-                          <List.Item>
+                          <List.Item key={`vod-list-${index}`}>
                             <Button
                               onClick={onDeleteVod(index)}
                               icon={<DeleteOutlined style={{ fontSize: 16 }} />}
@@ -926,7 +926,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
 
                 <div className="form-item">
                   <div className="button-group">
-                    <Link href="/live/lives" locale={locale}>
+                    <Link href="/vod/vods" locale={locale}>
                       <a>
                         <Button className="submit-button" type="primary" role="button">
                           {locale === 'ko' ? '목록' : 'List'}
