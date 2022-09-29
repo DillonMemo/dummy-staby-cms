@@ -250,7 +250,7 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
     if (typeof liveThumbnail === 'string') {
       setLoading({ isUploading: false, isProcessing: true })
       onMutation(id, liveThumbnail)
-    } else if ((liveThumbnail as any).file.originFileObj instanceof File) {
+    } else if ('file' in liveThumbnail) {
       const file = (liveThumbnail as any).file.originFileObj as File
       const fileExtension = file.name.split('.')[file.name.split('.').length - 1]
       const fileName = `${id}_main_${nowDateStr}.${fileExtension}`
@@ -270,8 +270,8 @@ const LiveDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
             if (error) {
               return toast.error(
                 locale === 'ko'
-                  ? `파일 업로드 오류: ${error}`
-                  : `There was an error uploading your file: ${error}`,
+                  ? `파일 업로드 오류: ${error.message}`
+                  : `There was an error uploading your file: ${error.message}`,
                 {
                   theme: localStorage.theme || 'light',
                   autoClose: 750,

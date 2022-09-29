@@ -229,8 +229,8 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
               if (error) {
                 return toast.error(
                   locale === 'ko'
-                    ? `파일 업로드 오류: ${error}`
-                    : `There was an error uploading your file: ${error}`,
+                    ? `파일 업로드 오류: ${error.message}`
+                    : `There was an error uploading your file: ${error.message}`,
                   {
                     theme: localStorage.theme || 'light',
                     autoClose: 750,

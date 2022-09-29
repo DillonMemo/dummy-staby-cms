@@ -21,14 +21,14 @@ import {
   Tooltip,
   Upload,
 } from 'antd'
-import { omit, pick } from 'lodash'
+import { delay, omit, pick } from 'lodash'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Fragment, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { getError } from '../../Common/commonFn'
+import { getError, nowDateStr } from '../../Common/commonFn'
 import FileButton from '../../components/FileButton'
 
 /** components */
@@ -53,6 +53,7 @@ import {
 } from '../../generated'
 import { EDIT_VOD_MUTATION } from '../../graphql/mutations'
 import { FIND_MEMBERS_BY_TYPE_QUERY, GET_LIVES_QUERY, VOD_QUERY } from '../../graphql/queries'
+import { S3 } from '../../lib/awsClient'
 
 /** utils */
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
@@ -101,7 +102,6 @@ const VodDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
   const {
     getValues,
     handleSubmit,
-    setValue,
     formState: { errors },
     control,
   } = useForm<VodEditForm>({
@@ -199,15 +199,363 @@ const VodDetail: NextPage<Props> = ({ toggleStyle, theme }) => {
    */
   const onSubmit = () => {
     try {
+      const id = query.id as string
+      if (!id) {
+        return toast.error(
+          locale === 'ko' ? 'VOD ID가 존재 하지 않습니다' : 'VOD ID dose not exist',
+          {
+            theme: localStorage.theme || 'light',
+            autoClose: 750,
+          }
+        )
+      }
+
+      const isEdit = vodInfo.findIndex((info) => info.isEdit)
+      if (isEdit !== -1) {
+        return toast.error(locale === 'ko' ? '수정 중 인 VOD가 존재합니다' : 'VOD is Modifying', {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+        })
+      }
+
       setLoading((prev) => ({ ...prev, isUploading: true }))
 
-      console.log('submit', getValues(), vodInfo, shareInfo)
+      const { mainThumbnail } = getValues()
 
-      setTimeout(() => {
-        setLoading((prev) => ({ ...prev, isUploading: false }))
-      }, 1000)
+      const [priorityShareSum, directShareSum] = [
+        shareInfo.reduce(
+          (prev, current) => (prev ? prev + current.priorityShare : 0 + current.priorityShare),
+          0
+        ),
+        shareInfo.reduce(
+          (prev, current) => (prev ? prev + current.directShare : 0 + current.directShare),
+          0
+        ),
+      ]
+
+      if (!(priorityShareSum === 100 || priorityShareSum === 0)) {
+        return toast.error(
+          locale === 'ko'
+            ? '우선환수 지분은 총합이 100 또는 0 이어야 합니다'
+            : 'Priority share sum is 100 or 0',
+          {
+            theme: localStorage.theme || 'light',
+            autoClose: 750,
+            onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+          }
+        )
+      }
+      if (directShareSum !== 100) {
+        return toast.error(
+          locale === 'ko' ? '직분배 지분은 총합이 100 이어야 합니다' : 'Direct share sum is 100',
+          {
+            theme: localStorage.theme || 'light',
+            autoClose: 750,
+            onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+          }
+        )
+      }
+
+      if (typeof mainThumbnail === 'string') {
+        setThumbnailProgress({
+          progress: 100,
+          status: 'success',
+        })
+        onUploading(id, mainThumbnail)
+      } else if ('file' in mainThumbnail) {
+        const file = (mainThumbnail as any).file.originFileObj as File
+        const fileExtension = file.name.split('.')[file.name.split('.').length - 1]
+        const fileName = `${id}_main_${nowDateStr}.${fileExtension}`
+
+        process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+          S3.upload(
+            {
+              Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+              Key: `${
+                process.env.NODE_ENV === 'production' ? 'prod' : 'dev'
+              }/going/vod/${id}/main/${fileName}`,
+              Body: file,
+              ACL: 'public-read',
+            },
+            (error) => {
+              if (error) {
+                return toast.error(
+                  locale === 'ko'
+                    ? `파일 업로드 오류: ${error.message}`
+                    : `There was an error uploading your file: ${error.message}`,
+                  {
+                    theme: localStorage.theme || 'light',
+                    autoClose: 750,
+                    onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+                  }
+                )
+              }
+
+              return delay(() => {
+                onUploading(id, fileName)
+              }, 750)
+            }
+          ).on('httpUploadProgress', (progress) => {
+            const progressPercentage = Math.round((progress.loaded / progress.total) * 100)
+
+            if (progressPercentage < 100) {
+              setThumbnailProgress((prev) => ({
+                ...prev,
+                progress: progressPercentage,
+                status: 'active',
+              }))
+            } else if (progressPercentage === 100) {
+              setThumbnailProgress((prev) => ({
+                ...prev,
+                progress: progressPercentage,
+                status: 'success',
+              }))
+            }
+          })
+      }
     } catch (error) {
       getError(error)
+    }
+  }
+
+  /** File 업로드 영역 - 2 */
+  const onUploading = async (objectId: string, thumbnailName: string) => {
+    try {
+      let imageCount = 0,
+        videoCount = 0,
+        num = 0,
+        imageInfo: string[] = [],
+        videoInfo: string[] = []
+
+      const vodLinkInfo: Pick<
+        VodLinkInfo,
+        'listingOrder' | 'linkPath' | 'introImageName' | 'transcodeStatus'
+      >[] = []
+
+      for (let i = 0; i < vodInfo.length; i++) {
+        vodInfo[i].image instanceof File && imageCount++
+        vodInfo[i].video instanceof File && videoCount++
+
+        vodLinkInfo.push({
+          listingOrder: i + 1,
+          linkPath: typeof vodInfo[i].video === 'string' ? (vodInfo[i].video as string) : '',
+          introImageName: typeof vodInfo[i].image === 'string' ? (vodInfo[i].image as string) : '',
+          transcodeStatus:
+            vodInfo[i].transcodeStatus === TranscodeStatus.Fail
+              ? TranscodeStatus.Wait
+              : vodInfo[i].transcodeStatus,
+        })
+      }
+
+      if (!imageCount) {
+        setImageProgress((prev) => ({
+          ...prev,
+          progress: 100,
+          status: 'success',
+        }))
+      } else {
+        await Promise.all(
+          vodInfo.map(async (info, index) => {
+            if (info.image instanceof File) {
+              const image = info.image,
+                imageFileExtension = image.name.split('.')[image.name.split('.').length - 1],
+                imageFileName = `${objectId}_intro_${index + 1}_${nowDateStr}.${imageFileExtension}`
+              imageInfo = [...imageInfo, imageFileName]
+
+              vodLinkInfo[index].introImageName = imageFileName
+
+              process.env.NEXT_PUBLIC_AWS_BUCKET_NAME &&
+                (await S3.upload({
+                  Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
+                  Key: `${
+                    process.env.NODE_ENV === 'production' ? 'prod' : 'dev'
+                  }/going/vod/${objectId}/intro/${imageFileName}`,
+                  Body: image,
+                  ACL: 'public-read',
+                })
+
+                  .promise()
+                  .then(() => {
+                    const percentage = Math.round(100 / imageCount)
+                    setImageProgress((prev) => {
+                      const calcPercentage = prev.progress + percentage
+                      if (calcPercentage < 95) {
+                        return { ...prev, progress: calcPercentage, status: 'active' }
+                      } else {
+                        return {
+                          ...prev,
+                          progress: calcPercentage + (100 - calcPercentage),
+                          status: 'success',
+                        }
+                      }
+                    })
+                  })
+                  .catch((error) =>
+                    toast.error(
+                      locale === 'ko'
+                        ? `VOD image 파일 업로드 오류: ${error}`
+                        : `There was an error uploading your VOD image file: ${error}`,
+                      {
+                        theme: localStorage.theme || 'light',
+                        autoClose: 750,
+                        onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+                      }
+                    )
+                  ))
+            }
+          })
+        )
+      }
+
+      if (!videoCount) {
+        setVideoProgress((prev) => ({
+          ...prev,
+          progress: 100,
+          status: 'success',
+        }))
+        onMutation(objectId, thumbnailName, vodLinkInfo) // add filename
+      } else {
+        await Promise.all(
+          vodInfo.map(async (info, index) => {
+            if (info.video instanceof File) {
+              const video = info.video,
+                videoFileExtension = video.name.split('.')[video.name.split('.').length - 1],
+                videoFileName = `${objectId}_${index + 1}_${nowDateStr}.${videoFileExtension}`
+              videoInfo = [...videoInfo, videoFileName]
+
+              vodLinkInfo[index].linkPath = videoFileName
+
+              process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME &&
+                S3.upload(
+                  {
+                    Bucket: process.env.NEXT_PUBLIC_AWS_VOD_BUCKET_NAME,
+                    Key: `${
+                      process.env.NODE_ENV === 'production' ? 'prod' : 'dev'
+                    }/going/vod/${objectId}/${videoFileName}`,
+                    Body: video,
+                    ACL: 'bucket-owner-read',
+                  },
+                  (error, _) => {
+                    if (error) {
+                      return toast.error(
+                        locale === 'ko'
+                          ? `VOD video 파일 업로드 오류: ${error}`
+                          : `There was an error uploading your VOD video file: ${error}`,
+                        {
+                          theme: localStorage.theme || 'light',
+                          autoClose: 750,
+                          onClose: () => setLoading({ isUploading: false, isProcessing: false }),
+                        }
+                      )
+                    }
+
+                    num = num + 1
+                    if (videoCount === num) {
+                      return delay(() => {
+                        setLoading({ isUploading: false, isProcessing: true })
+                        onMutation(objectId, thumbnailName, vodLinkInfo) // add filename
+                      }, 750)
+                    } else {
+                      return num
+                    }
+                  }
+                ).on('httpUploadProgress', (progress_) => {
+                  const progressPercentage = Math.round((progress_.loaded / progress_.total) * 100)
+                  const quarterPercentage = Math.round(progressPercentage / videoCount)
+                  const quarter = Math.round(100 / videoCount)
+
+                  if (progressPercentage < 100) {
+                    setVideoProgress((prev) => {
+                      if (prev.progress < quarterPercentage) {
+                        // console.log('1', num, quarterPercentage)
+                        return {
+                          ...prev,
+                          progress:
+                            num === 0 ? quarterPercentage : quarter * num + quarterPercentage,
+                          status: 'active',
+                        }
+                      } else if (prev.progress === quarter) {
+                        // console.log('2', prev.progress + 1)
+                        return {
+                          ...prev,
+                          progress: prev.progress + 1,
+                          status: 'active',
+                        }
+                      } else if (prev.progress > quarter) {
+                        // console.log('3', num, quarter * num + quarterPercentage, prev.progress)
+                        return {
+                          ...prev,
+                          progress:
+                            num === 0
+                              ? quarter + 1
+                              : prev.progress > quarter * num + quarterPercentage
+                              ? prev.progress
+                              : quarter * num + quarterPercentage,
+                          status: 'active',
+                        }
+                      } else {
+                        // console.log('4', prev.progress, quarter)
+                        return {
+                          ...prev,
+                        }
+                      }
+                    })
+                  }
+                })
+            }
+          })
+        )
+      }
+    } catch (error) {
+      getError(error)
+    }
+  }
+
+  const onMutation = async (
+    _id: string,
+    thumbnail: string,
+    vodLinkInfo: Pick<
+      VodLinkInfo,
+      'listingOrder' | 'linkPath' | 'introImageName' | 'transcodeStatus'
+    >[]
+  ) => {
+    try {
+      // result
+      const { liveId, content, paymentAmount, title, vodRatioType } = getValues()
+
+      const { data } = await editVod({
+        variables: {
+          editVodInput: {
+            _id,
+            mainImageName: thumbnail,
+            vodLinkInfo,
+            vodShareInfo: {
+              vodId: _id,
+              memberShareInfo: shareInfo,
+            },
+            ...(liveId && { liveId }),
+            content,
+            paymentAmount,
+            title,
+            vodRatioType,
+          },
+        },
+      })
+
+      if (!data?.editVod.ok) {
+        const message = locale === 'ko' ? data?.editVod.error?.ko : data?.editVod.error?.en
+        throw new Error(message)
+      } else {
+        setLoading({ isUploading: false, isProcessing: false })
+        toast.success(locale === 'ko' ? '추가가 완료 되었습니다' : 'Has been completed', {
+          theme: localStorage.theme || 'light',
+          autoClose: 750,
+          onClose: () => push('/vod/vods'),
+        })
+      }
+    } catch (error) {
+      getError(error, true)
+      setLoading((prev) => ({ ...prev, isProcessing: false }))
     }
   }
 
