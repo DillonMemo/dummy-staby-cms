@@ -19,12 +19,12 @@ import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
 
 /** graphql */
 import { useMutation } from '@apollo/client'
-import {
-  MembersMutation,
-  MembersMutationVariables,
-  MemberStatus,
-  MemberType,
-} from '../../generated'
+// import {
+//   MembersMutation,
+//   MembersMutationVariables,
+//   MemberStatus,
+//   MemberType,
+// } from '../../generated'
 import { MEMBERS_MUTATION } from '../../graphql/mutations'
 import RangePicker from '../../components/RangePicker'
 import { PAGE, PAGESIZE } from '../../lib/constants'

@@ -17,7 +17,7 @@ import Layout from '../../components/Layout'
 import RangePicker from '../../components/RangePicker'
 
 /** graphql */
-import { VodsMutation, VodsMutationVariables, VodStatus } from '../../generated'
+// import { VodsMutation, VodsMutationVariables, VodStatus } from '../../generated'
 import { useMutation } from '@apollo/client'
 import { VODS_MUTATION } from '../../graphql/mutations'
 
@@ -136,7 +136,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
             vodsInput: {
               page: PAGE,
               pageView: PAGESIZE,
-              ...(key !== 'All' && { vodStatus: key as VodStatus }),
+              // ...(key !== 'All' && { vodStatus: key as VodStatus }),
               title: searchText,
               ...(dates && dates.length > 0 && { dates }),
             },
@@ -179,7 +179,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
             vodsInput: {
               page: PAGE,
               pageView: PAGESIZE,
-              ...(vodStatus !== 'All' && { vodStatus: vodStatus as VodStatus }),
+              // ...(vodStatus !== 'All' && { vodStatus: vodStatus as VodStatus }),
               title: value,
               ...(dates && dates.length > 0 && { dates }),
             },
@@ -224,7 +224,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
           vodsInput: {
             page: PAGE,
             pageView: PAGESIZE,
-            ...(vodStatus !== 'All' && { vodStatus: vodStatus as VodStatus }),
+            // ...(vodStatus !== 'All' && { vodStatus: vodStatus as VodStatus }),
             title: searchText,
             ...(value && value.length > 0 && { dates: value }),
           },
@@ -283,8 +283,9 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
               page: +(router.query.page || page),
               pageView: +(router.query.pageSize || pageSize),
               ...(router.query.vodStatus &&
-                router.query.vodStatus !== 'All' && {
-                  vodStatus: router.query.vodStatus as VodStatus,
+                router.query.vodStatus !== 'All' &&
+                {
+                  // vodStatus: router.query.vodStatus as VodStatus,
                 }),
               ...(router.query.dates &&
                 router.query.dates.length > 0 && {
@@ -299,9 +300,10 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
             ...prev,
             page: +(router.query.page || prev.page),
             pageSize: +(router.query.pageSize || prev.pageSize),
-            ...(router.query.vodStatus && {
-              vodStatus: router.query.vodStatus as keyof typeof VodStatus,
-            }),
+            ...(router.query.vodStatus &&
+              {
+                // vodStatus: router.query.vodStatus as keyof typeof VodStatus,
+              }),
             ...(router.query.dates &&
               router.query.dates.length > 0 && {
                 dates: [moment(router.query.dates[0]), moment(router.query.dates[1])],
@@ -354,29 +356,29 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                     overlay={
                       <Menu
                         onClick={onVodStatusMenuClick}
-                        items={[
-                          { key: 'All', label: locale === 'ko' ? '전체' : 'All' },
-                          ...Object.keys(VodStatus).map((status) => {
-                            const statusValue =
-                              locale === 'ko'
-                                ? (status as VodStatus).toUpperCase() === VodStatus.Active
-                                  ? '판매중'
-                                  : (status as VodStatus).toUpperCase() === VodStatus.Available
-                                  ? '판매가능'
-                                  : (status as VodStatus).toUpperCase() === VodStatus.Delete
-                                  ? '삭제'
-                                  : (status as VodStatus).toUpperCase() === VodStatus.Fail
-                                  ? '실패'
-                                  : (status as VodStatus).toUpperCase() === VodStatus.Wait
-                                  ? '등록대기'
-                                  : status
-                                : status
-                            return {
-                              key: VodStatus[status as keyof typeof VodStatus],
-                              label: statusValue,
-                            }
-                          }),
-                        ]}
+                        // items={[
+                        //   { key: 'All', label: locale === 'ko' ? '전체' : 'All' },
+                        //   ...Object.keys(VodStatus).map((status) => {
+                        //     const statusValue =
+                        //       locale === 'ko'
+                        //         ? (status as VodStatus).toUpperCase() === VodStatus.Active
+                        //           ? '판매중'
+                        //           : (status as VodStatus).toUpperCase() === VodStatus.Available
+                        //           ? '판매가능'
+                        //           : (status as VodStatus).toUpperCase() === VodStatus.Delete
+                        //           ? '삭제'
+                        //           : (status as VodStatus).toUpperCase() === VodStatus.Fail
+                        //           ? '실패'
+                        //           : (status as VodStatus).toUpperCase() === VodStatus.Wait
+                        //           ? '등록대기'
+                        //           : status
+                        //         : status
+                        //     return {
+                        //       key: VodStatus[status as keyof typeof VodStatus],
+                        //       label: statusValue,
+                        //     }
+                        //   }),
+                        // ]}
                       />
                     }
                     onVisibleChange={(visible) =>
@@ -386,7 +388,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                     <div className="dropdown">
                       <span className="title">{locale === 'ko' ? '상태' : 'Status'}</span>
                       <Button onClick={(e) => e.preventDefault()}>
-                        {locale === 'ko'
+                        {/* {locale === 'ko'
                           ? vodStatus === 'All'
                             ? '전체'
                             : (vodStatus as VodStatus) === VodStatus.Active
@@ -400,7 +402,7 @@ const Vods: NextPage<Props> = ({ toggleStyle, theme }) => {
                             : (vodStatus as VodStatus) === VodStatus.Wait
                             ? '등록대기'
                             : vodStatus
-                          : vodStatus}
+                          : vodStatus} */}
                         &nbsp;
                         {vodsLoading && <LoadingOutlined style={{ fontSize: '12px' }} />}
                       </Button>

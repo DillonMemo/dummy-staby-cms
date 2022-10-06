@@ -1,16 +1,16 @@
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import {
-  EditMemberByIdMutation,
-  EditMemberByIdMutationVariables,
-  FindMemberByIdQuery,
-  FindMemberByIdQueryVariables,
-  MemberReportStatus,
-  MemberType,
-  SuspendMemberByIdMutation,
-  SuspendMemberByIdMutationVariables,
-} from '../../generated'
+// import {
+//   EditMemberByIdMutation,
+//   EditMemberByIdMutationVariables,
+//   FindMemberByIdQuery,
+//   FindMemberByIdQueryVariables,
+//   MemberReportStatus,
+//   MemberType,
+//   SuspendMemberByIdMutation,
+//   SuspendMemberByIdMutationVariables,
+// } from '../../generated'
 import { MEMBER_QUERY } from '../../graphql/queries'
 import { EDIT_MEMBER_BY_ID_MUTATION, SUSPEND_MEMBER_BY_ID_MUTATION } from '../../graphql/mutations'
 import { defaultPalette, Form, MainWrapper, styleMode } from '../../styles/styles'
@@ -37,7 +37,7 @@ export interface MemberEditForm {
   checkPassword: boolean
   password: string
   nickName: string
-  memberType: MemberType
+  // memberType: MemberType
   activities: string
   totalPoint: number
   paidPoint: number

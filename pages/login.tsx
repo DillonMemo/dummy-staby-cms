@@ -14,9 +14,9 @@ import { LOCALSTORAGE_TOKEN, TITLE } from '../lib/constants'
 import { authTokenVar, isLoggedInVar } from '../lib/apolloClient'
 
 /** graphql */
-import { useMutation } from '@apollo/client'
-import { LOGIN_MUTATION } from '../graphql/mutations'
-import { LoginMutation, LoginMutationVariables } from '../generated'
+// import { useMutation } from '@apollo/client'
+// import { LOGIN_MUTATION } from '../graphql/mutations'
+// import { LoginMutation, LoginMutationVariables } from '../generated'
 
 export interface ILoginForm {
   email: string
@@ -34,37 +34,48 @@ const Login: NextPage = () => {
   })
   const router = useRouter()
   const { locale } = router
-  const onCompleted = (data: LoginMutation) => {
-    const {
-      login: { ok, token },
-    } = data
+  // const onCompleted = (data: LoginMutation) => {
+  //   const {
+  //     login: { ok, token },
+  //   } = data
 
-    if (ok && token) {
-      localStorage.setItem(LOCALSTORAGE_TOKEN, token)
-      authTokenVar(token)
+  //   if (ok && token) {
+  //     localStorage.setItem(LOCALSTORAGE_TOKEN, token)
+  //     authTokenVar(token)
+  //     isLoggedInVar(true)
+  //     router.push('/', '/', { locale })
+  //   }
+  // }
+
+  // const [loginMutation, { data: loginMutationResult, loading }] = useMutation<
+  //   LoginMutation,
+  //   LoginMutationVariables
+  // >(LOGIN_MUTATION, {
+  //   onCompleted,
+  // })
+
+  // const onSubmit = () => {
+  //   if (!loading) {
+  //     const { email, password } = getValues()
+  //     loginMutation({
+  //       variables: {
+  //         loginInput: {
+  //           email,
+  //           password,
+  //         },
+  //       },
+  //     })
+  //   }
+  // }
+
+  // Dummy Handler
+  const onSubmit = () => {
+    const { email, password } = getValues()
+    if (email === 'dummy@test.com' && password === 'dummy') {
+      localStorage.setItem(LOCALSTORAGE_TOKEN, 'dummyToken')
+      authTokenVar('dummyToken')
       isLoggedInVar(true)
       router.push('/', '/', { locale })
-    }
-  }
-
-  const [loginMutation, { data: loginMutationResult, loading }] = useMutation<
-    LoginMutation,
-    LoginMutationVariables
-  >(LOGIN_MUTATION, {
-    onCompleted,
-  })
-
-  const onSubmit = () => {
-    if (!loading) {
-      const { email, password } = getValues()
-      loginMutation({
-        variables: {
-          loginInput: {
-            email,
-            password,
-          },
-        },
-      })
     }
   }
 
@@ -86,10 +97,11 @@ const Login: NextPage = () => {
         <div className="wrapper">
           <div className="container">
             <h2 style={{ marginBottom: '2.5rem' }}>Welcom to Staby CMS 👋</h2>
-            {/* <div style={{ marginBottom: '1.5rem' }}>
-              <p>ID : system@staby.co.kr</p>
-              <p>PW : 123123</p>
-            </div> */}
+            <h4>Dummy Site</h4>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <p>ID : dummy@test.com</p>
+              <p>PW : dummy</p>
+            </div>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="form-item">
                 <div className="form-group">
@@ -143,7 +155,7 @@ const Login: NextPage = () => {
                   disabled={!isValid}>
                   Sign In
                 </Button>
-                {loginMutationResult?.login.error && (
+                {/* {loginMutationResult?.login.error && (
                   <div className="form-message">
                     <span>
                       {locale === 'ko'
@@ -151,7 +163,7 @@ const Login: NextPage = () => {
                         : loginMutationResult.login.error.en}
                     </span>
                   </div>
-                )}
+                )} */}
               </div>
             </form>
           </div>

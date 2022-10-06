@@ -15,16 +15,16 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { CREATE_VOD_MUTATION, LIVES_MUTATION } from '../../../graphql/mutations'
-import {
-  CreateVodMutation,
-  CreateVodMutationVariables,
-  FindMembersByTypeQuery,
-  FindMembersByTypeQueryVariables,
-  LivesMutation,
-  LivesMutationVariables,
-  MemberType,
-  RatioType,
-} from '../../../generated'
+// import {
+//   CreateVodMutation,
+//   CreateVodMutationVariables,
+//   FindMembersByTypeQuery,
+//   FindMembersByTypeQueryVariables,
+//   LivesMutation,
+//   LivesMutationVariables,
+//   MemberType,
+//   RatioType,
+// } from '../../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY } from '../../../graphql/queries'
 
 /** utils */
@@ -43,7 +43,7 @@ type Props = styleMode
 export interface VodCreateForm {
   title: string
   paymentAmount: number
-  vodRatioType: RatioType
+  // vodRatioType: RatioType
   mainThumbnail: string
   content: string
   share: ShareInfo
@@ -453,11 +453,11 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                       rules={{
                         required: requiredText,
                       }}
-                      defaultValue={RatioType.Horizontal}
+                      // defaultValue={RatioType.Horizontal}
                       render={({ field: { onChange, value } }) => (
                         <>
                           <Select value={value} onChange={onChange}>
-                            {Object.keys(RatioType).map((data, index) => (
+                            {/* {Object.keys(RatioType).map((data, index) => (
                               <Select.Option value={data.toUpperCase()} key={`type-${index}`}>
                                 {locale === 'ko'
                                   ? data.toUpperCase() === RatioType.Horizontal
@@ -467,17 +467,17 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
                                     : data
                                   : data}
                               </Select.Option>
-                            ))}
+                            ))} */}
                           </Select>
                         </>
                       )}
                     />
                   </div>
-                  {errors.vodRatioType?.message && (
+                  {/* {errors.vodRatioType?.message && (
                     <div className="form-message">
                       <span>{errors.vodRatioType.message}</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="form-item mt-half">

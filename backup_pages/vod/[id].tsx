@@ -36,21 +36,21 @@ import Layout from '../../components/Layout'
 import LoadingOverlay from '../../components/LoadingOverlay'
 
 /** graphql */
-import {
-  EditVodMutation,
-  EditVodMutationVariables,
-  FindMembersByTypeQuery,
-  FindMembersByTypeQueryVariables,
-  FindVodByIdQuery,
-  FindVodByIdQueryVariables,
-  GetLivesQuery,
-  GetLivesQueryVariables,
-  MemberType,
-  RatioType,
-  TranscodeStatus,
-  VodLinkInfo,
-  VodStatus,
-} from '../../generated'
+// import {
+//   EditVodMutation,
+//   EditVodMutationVariables,
+//   FindMembersByTypeQuery,
+//   FindMembersByTypeQueryVariables,
+//   FindVodByIdQuery,
+//   FindVodByIdQueryVariables,
+//   GetLivesQuery,
+//   GetLivesQueryVariables,
+//   MemberType,
+//   RatioType,
+//   TranscodeStatus,
+//   VodLinkInfo,
+//   VodStatus,
+// } from '../../generated'
 import { EDIT_VOD_MUTATION } from '../../graphql/mutations'
 import { FIND_MEMBERS_BY_TYPE_QUERY, GET_LIVES_QUERY, VOD_QUERY } from '../../graphql/queries'
 import { S3 } from '../../lib/awsClient'

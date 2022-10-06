@@ -17,7 +17,7 @@ import RangePicker from '../../components/RangePicker'
 import { MainWrapper, ManagementWrapper, styleMode } from '../../styles/styles'
 
 /** graphql */
-import { NoticesMutation, NoticesMutationVariables } from '../../generated'
+// import { NoticesMutation, NoticesMutationVariables } from '../../generated'
 import { NOTICES_MUTATION } from '../../graphql/mutations'
 
 /** utils */

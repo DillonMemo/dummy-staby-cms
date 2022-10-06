@@ -18,12 +18,12 @@ import Layout from '../../components/Layout'
 import { defaultPalette, Form, MainWrapper, md, styleMode } from '../../styles/styles'
 
 /** graphql */
-import {
-  EditAccountMutation,
-  EditAccountMutationVariables,
-  MemberType,
-  MyQuery,
-} from '../../generated'
+// import {
+//   EditAccountMutation,
+//   EditAccountMutationVariables,
+//   MemberType,
+//   MyQuery,
+// } from '../../generated'
 import { MY_QUERY } from '../../graphql/queries'
 import { EDIT_ACCOUNT_MUTATION } from '../../graphql/mutations'
 

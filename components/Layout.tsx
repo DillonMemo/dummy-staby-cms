@@ -39,7 +39,7 @@ const Layout = ({
       Modal.info({
         title: locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login',
         okText: locale === 'ko' ? '로그인' : 'Login',
-        onOk: () => push('/login', 'login', { locale }),
+        // onOk: () => push('/login', 'login', { locale }),
       })
     }
   }, [])

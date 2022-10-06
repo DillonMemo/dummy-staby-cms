@@ -10,7 +10,7 @@ import { toast } from 'react-toastify'
 import { Edit, Form, MainWrapper, styleMode } from '../../styles/styles'
 
 /** components */
-import { CreateAccountMutation, CreateAccountMutationVariables, MemberType } from '../../generated'
+// import { CreateAccountMutation, CreateAccountMutationVariables, MemberType } from '../../generated'
 import Layout from '../../components/Layout'
 import { CREATE_ACCOUNT_MUTATION } from '../../graphql/mutations'
 import { useState } from 'react'

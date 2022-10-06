@@ -17,15 +17,15 @@ import { MainWrapper, ManagementWrapper, md, styleMode } from '../../styles/styl
 
 /** graphql */
 import { FIND_BOARD_BY_ID_QUERY } from '../../graphql/queries'
-import {
-  BoardStatus,
-  DeleteBoardMutation,
-  DeleteBoardMutationVariables,
-  EditNoticeMutation,
-  EditNoticeMutationVariables,
-  FindBoardByIdQuery,
-  FindBoardByIdQueryVariables,
-} from '../../generated'
+// import {
+//   BoardStatus,
+//   DeleteBoardMutation,
+//   DeleteBoardMutationVariables,
+//   EditNoticeMutation,
+//   EditNoticeMutationVariables,
+//   FindBoardByIdQuery,
+//   FindBoardByIdQueryVariables,
+// } from '../../generated'
 import { DELETE_BOARD_MUTATION, EDIT_NOTICE_MUTATION } from '../../graphql/mutations'
 import { omit } from 'lodash'
 

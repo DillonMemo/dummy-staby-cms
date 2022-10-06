@@ -1,11 +1,12 @@
-import { useQuery } from '@apollo/client'
 import { Skeleton } from 'antd'
+import { delay } from 'lodash'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { GetTotalMembersQuery, GetTotalMembersQueryVariables } from '../../generated'
-import { GET_TOTAL_MEMBERS } from '../../graphql/queries'
+// import { useQuery } from '@apollo/client'
+// import { GetTotalMembersQuery, GetTotalMembersQueryVariables } from '../../generated'
+// import { GET_TOTAL_MEMBERS } from '../../graphql/queries'
 
 const Odometer: React.ComponentType<any> = dynamic(import('react-odometerjs'), { ssr: false })
 
@@ -14,22 +15,35 @@ const TotalMemberCard: React.FC = () => {
   const [totalMemberValue, setTotalMemberValue] = useState<number>(0)
 
   /** total members query */
-  const { data: totalMembersData, loading: isLoading } = useQuery<
-    GetTotalMembersQuery,
-    GetTotalMembersQueryVariables
-  >(GET_TOTAL_MEMBERS)
+  // const { data: totalMembersData, loading: isLoading } = useQuery<
+  //   GetTotalMembersQuery,
+  //   GetTotalMembersQueryVariables
+  // >(GET_TOTAL_MEMBERS)
+  /** Dummy Handler */
+  const [isLoading, setIsLoading] = useState<{ members: boolean }>({ members: true })
 
+  // useEffect(() => {
+  //   if (totalMembersData) {
+  //     const timer = setTimeout(() => {
+  //       setTotalMemberValue(totalMembersData.getTotalMembers.count || 0)
+  //     }, 100)
+
+  //     return () => clearTimeout(timer)
+  //   }
+  // }, [isLoading])
+  /** Dummy Handler */
   useEffect(() => {
-    if (totalMembersData) {
+    delay(() => {
+      setIsLoading((prev) => ({ ...prev, members: false }))
       const timer = setTimeout(() => {
-        setTotalMemberValue(totalMembersData.getTotalMembers.count || 0)
+        setTotalMemberValue(1213)
       }, 100)
 
       return () => clearTimeout(timer)
-    }
-  }, [isLoading])
+    }, 1000)
+  }, [])
 
-  return isLoading ? (
+  return isLoading.members ? (
     <div style={{ gridColumn: '1 / span 2' }}>
       <Skeleton.Button active />
     </div>

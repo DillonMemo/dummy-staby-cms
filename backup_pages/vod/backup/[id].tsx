@@ -14,24 +14,24 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useMutation, useQuery } from '@apollo/client'
 import { DELETE_VOD_MUTATION, EDIT_VOD_MUTATION, LIVES_MUTATION } from '../../../graphql/mutations'
-import {
-  DeleteVodMutation,
-  DeleteVodMutationVariables,
-  EditVodMutation,
-  EditVodMutationVariables,
-  FindMembersByTypeQuery,
-  FindMembersByTypeQueryVariables,
-  FindVodByIdQuery,
-  FindVodByIdQueryVariables,
-  LivesMutation,
-  LivesMutationVariables,
-  MemberShareInfo,
-  MemberType,
-  RatioType,
-  TranscodeStatus,
-  VodLinkInfo,
-  VodStatus,
-} from '../../../generated'
+// import {
+//   DeleteVodMutation,
+//   DeleteVodMutationVariables,
+//   EditVodMutation,
+//   EditVodMutationVariables,
+//   FindMembersByTypeQuery,
+//   FindMembersByTypeQueryVariables,
+//   FindVodByIdQuery,
+//   FindVodByIdQueryVariables,
+//   LivesMutation,
+//   LivesMutationVariables,
+//   MemberShareInfo,
+//   MemberType,
+//   RatioType,
+//   TranscodeStatus,
+//   VodLinkInfo,
+//   VodStatus,
+// } from '../../../generated'
 import { FIND_MEMBERS_BY_TYPE_QUERY, VOD_QUERY } from '../../../graphql/queries'
 
 /** utils */
@@ -77,7 +77,7 @@ export type VodInfoArr = {
   linkPath: string
   introImageName: string
   listingOrder?: number
-  transcodeStatus: TranscodeStatus
+  // transcodeStatus: TranscodeStatus
 }
 
 const ShareWrap = styled.div`
@@ -96,7 +96,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
       fileInfo: '',
       linkPath: '',
       listingOrder: 0,
-      transcodeStatus: TranscodeStatus['Wait'],
+      // transcodeStatus: TranscodeStatus['Wait'],
     },
   ]) //링크, playing 이미지 관리
   const [mainImgInfo, setMainImgInfo] = useState<MainImgInfo>({ mainImg: '', fileInfo: '' }) //mainImg 관리
@@ -240,7 +240,7 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
         fileInfo: '',
         linkPath: '',
         listingOrder: 0,
-        transcodeStatus: TranscodeStatus['Wait'],
+        // transcodeStatus: TranscodeStatus['Wait'],
       }
       if (vodInfoArr.length < 8) {
         setVodInfoArr(() => vodInfoArr.concat(vod))
@@ -374,10 +374,10 @@ const CreateVod: NextPage<Props> = ({ toggleStyle, theme }) => {
             linkPath: vodName === '' ? vodInfoArr[i].linkPath : vodName,
             introImageName: introImageName === '' ? vodInfoArr[i].introImageName : introImageName,
             //실패시 wait로 변경
-            transcodeStatus:
-              vodInfoArr[i].transcodeStatus === 'FAIL'
-                ? TranscodeStatus['Wait' as keyof typeof TranscodeStatus]
-                : vodInfoArr[i].transcodeStatus,
+            // transcodeStatus:
+            //   vodInfoArr[i].transcodeStatus === 'FAIL'
+            //     ? TranscodeStatus['Wait' as keyof typeof TranscodeStatus]
+            //     : vodInfoArr[i].transcodeStatus,
           })
         }
       }

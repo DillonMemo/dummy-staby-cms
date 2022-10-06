@@ -10,20 +10,22 @@ import { Button, Dropdown, Menu, Modal, Pagination, Skeleton, Space, Table, Tabs
 import { ColumnsType } from 'antd/lib/table'
 
 /** apollo graphql */
-import {
-  ActiveHistoriesByMemberIdMutation,
-  ActiveHistoriesByMemberIdMutationVariables,
-  ActiveType,
-  CommentHistoriesByMemberIdMutation,
-  CommentHistoriesByMemberIdMutationVariables,
-  DeleteVodCommentMutation,
-  DeleteVodCommentMutationVariables,
-  Message,
-  PointHistoriesByMemberIdMutation,
-  PointHistoriesByMemberIdMutationVariables,
-  PointPayStatus,
-  ServiceType,
-} from '../../generated'
+// import {
+//   ActiveHistoriesByMemberIdMutation,
+//   ActiveHistoriesByMemberIdMutationVariables,
+//   ActiveType,
+//   CommentHistoriesByMemberIdMutation,
+//   CommentHistoriesByMemberIdMutationVariables,
+//   DeleteVodCommentMutation,
+//   DeleteVodCommentMutationVariables,
+//   ListSendBirdMessagesMutation,
+//   ListSendBirdMessagesMutationVariables,
+//   Message,
+//   PointHistoriesByMemberIdMutation,
+//   PointHistoriesByMemberIdMutationVariables,
+//   PointPayStatus,
+//   ServiceType,
+// } from '../../generated'
 import {
   ACTIVE_HISTORIES_BY_MEMBER_ID_MUTATION,
   COMMENT_HISTORIES_BY_MEMBER_ID_MUTATION,
@@ -38,8 +40,6 @@ import RangePicker from '../RangePicker'
 import { md } from '../../styles/styles'
 import { LoadingOutlined } from '@ant-design/icons'
 import { toast } from 'react-toastify'
-import { ListSendBirdMessagesMutation } from '../../generated'
-import { ListSendBirdMessagesMutationVariables } from '../../generated'
 import { omit } from 'lodash'
 
 /** filter 옵션 인터페이스 */

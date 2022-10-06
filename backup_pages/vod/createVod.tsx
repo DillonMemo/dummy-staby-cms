@@ -33,17 +33,17 @@ import LoadingOverlay from '../../components/LoadingOverlay'
 import VodUploadContainer from '../../components/vod/VodUploadContainer'
 
 /** graphql */
-import {
-  CreateVodMutation,
-  CreateVodMutationVariables,
-  FindMembersByTypeQuery,
-  FindMembersByTypeQueryVariables,
-  GetLivesQuery,
-  GetLivesQueryVariables,
-  MemberType,
-  RatioType,
-  VodLinkInfo,
-} from '../../generated'
+// import {
+//   CreateVodMutation,
+//   CreateVodMutationVariables,
+//   FindMembersByTypeQuery,
+//   FindMembersByTypeQueryVariables,
+//   GetLivesQuery,
+//   GetLivesQueryVariables,
+//   MemberType,
+//   RatioType,
+//   VodLinkInfo,
+// } from '../../generated'
 import { CREATE_VOD_MUTATION } from '../../graphql/mutations'
 import { FIND_MEMBERS_BY_TYPE_QUERY, GET_LIVES_QUERY } from '../../graphql/queries'
 import { S3 } from '../../lib/awsClient'

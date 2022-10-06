@@ -16,7 +16,7 @@ import WriteEditor from '../../components/write/WriteEditor'
 
 /** graphql */
 import { useMutation } from '@apollo/client'
-import { CreateNoticeMutation, CreateNoticeMutationVariables } from '../../generated'
+// import { CreateNoticeMutation, CreateNoticeMutationVariables } from '../../generated'
 import { CREATE_NOTICE_MUTATION } from '../../graphql/mutations'
 
 type Props = styleMode

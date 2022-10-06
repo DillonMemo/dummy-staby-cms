@@ -4,17 +4,17 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 
 /** graphql */
-import {
-  ChannelStatusMutation,
-  ChannelStatusMutationVariables,
-  EditChannelMutation,
-  EditChannelMutationVariables,
-  FindLiveByIdQuery,
-  FindLiveByIdQueryVariables,
-  LiveChannelsQuery,
-  LiveChannelsQueryVariables,
-  LiveLinkInfo,
-} from '../../generated'
+// import {
+//   ChannelStatusMutation,
+//   ChannelStatusMutationVariables,
+//   EditChannelMutation,
+//   EditChannelMutationVariables,
+//   FindLiveByIdQuery,
+//   FindLiveByIdQueryVariables,
+//   LiveChannelsQuery,
+//   LiveChannelsQueryVariables,
+//   LiveLinkInfo,
+// } from '../../generated'
 import { CHANNEL_STATUS_MUTATION, EDIT_CHANNEL_MUTATION } from '../../graphql/mutations'
 import { LIVE_CHANNELS, LIVE_QUERY } from '../../graphql/queries'
 

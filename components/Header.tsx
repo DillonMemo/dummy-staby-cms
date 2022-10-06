@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
-import { Badge, notification, Select, Skeleton, Space } from 'antd'
+import { Badge, /**notification,*/ Select, Skeleton, Space } from 'antd'
 import Icon, {
   ArrowRightOutlined,
   EllipsisOutlined,
@@ -16,8 +16,8 @@ import Icon, {
   UnorderedListOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import moment from 'moment'
-import { toast } from 'react-toastify'
+// import moment from 'moment'
+// import { toast } from 'react-toastify'
 
 /** components */
 import DarkModeToggle from './DarkModeToggle'
@@ -25,36 +25,39 @@ import Hamburger from './Hamburger'
 
 /** utils */
 import { EXPANDED_WIDTH, LOCALSTORAGE_TOKEN, WIDTH } from '../lib/constants'
-import { authTokenVar } from '../lib/apolloClient'
+// import { authTokenVar } from '../lib/apolloClient'
 
 /** styles */
 import { lg, md, styleMode } from '../styles/styles'
 
 /** graphql */
-import { useMutation, useQuery } from '@apollo/client'
-import { MY_QUERY } from '../graphql/queries'
-import { LogoutMutation, LogoutMutationVariables, MyQuery, MyQueryVariables } from '../generated'
-import { LOGOUT_MUTATION } from '../graphql/mutations'
+// import { useMutation, useQuery } from '@apollo/client'
+// import { MY_QUERY } from '../graphql/queries'
+// import { LogoutMutation, LogoutMutationVariables, MyQuery, MyQueryVariables } from '../generated'
+// import { LOGOUT_MUTATION } from '../graphql/mutations'
 import useNetworkStatus from '../hooks/useNetworkStatus'
+import { delay } from 'lodash'
 
 type Props = styleMode
 
 const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
-  const { locale, push, pathname, query, asPath } = useRouter()
+  const { locale, push, pathname /**query, asPath*/ } = useRouter()
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false)
   const { networkStatus } = useNetworkStatus()
   const hamburgerRef = React.useRef<HTMLDivElement>(null)
-  const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
-    fetchPolicy: 'network-only',
-    onError: (error) => {
-      toast.error(error.message, {
-        theme: localStorage.theme || 'light',
-        autoClose: 1000,
-        onClose: () => push('/login', '/login', { locale }),
-      })
-    },
-  })
-  const [logout] = useMutation<LogoutMutation, LogoutMutationVariables>(LOGOUT_MUTATION)
+  // const { loading, data } = useQuery<MyQuery, MyQueryVariables>(MY_QUERY, {
+  //   fetchPolicy: 'network-only',
+  //   onError: (error) => {
+  //     toast.error(error.message, {
+  //       theme: localStorage.theme || 'light',
+  //       autoClose: 1000,
+  //       onClose: () => push('/login', '/login', { locale }),
+  //     })
+  //   },
+  // })
+  /** Dummy handler */
+  const [isLoading, setIsLoading] = useState<{ my: boolean }>({ my: true })
+  // const [logout] = useMutation<LogoutMutation, LogoutMutationVariables>(LOGOUT_MUTATION)
   /** 텍스트 에디터 컴포넌트가 적용된 페이지는 서버사이드렌더링 이슈가 있어 다크모드스위치를 가려주어야 합니다. */
   const isHide = pathname.includes('/test')
 
@@ -121,20 +124,25 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
   /**
    * logout 클릭 이벤트 핸들러 입니다.
    */
-  const handleClickLogout = async () => {
-    try {
-      const { data } = await logout()
+  // const handleClickLogout = async () => {
+  //   try {
+  //     const { data } = await logout()
 
-      if (data?.logout.ok) {
-        localStorage.removeItem(LOCALSTORAGE_TOKEN)
-        push('/login', 'login', { locale })
-      }
-    } catch (error: any) {
-      notification.error({
-        message: error.message,
-      })
-      console.error(error)
-    }
+  //     if (data?.logout.ok) {
+  //       localStorage.removeItem(LOCALSTORAGE_TOKEN)
+  //       push('/login', 'login', { locale })
+  //     }
+  //   } catch (error: any) {
+  //     notification.error({
+  //       message: error.message,
+  //     })
+  //     console.error(error)
+  //   }
+  // }
+  /** Dummy Handler */
+  const handleClickLogout = () => {
+    localStorage.removeItem(LOCALSTORAGE_TOKEN)
+    push('/login', 'login', { locale })
   }
 
   useEffect(() => {
@@ -145,21 +153,28 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
     }
   }, [isNavOpen])
 
+  // useEffect(() => {
+  //   if (!loading) {
+  //     if (data) {
+  //       const localToken = authTokenVar() || localStorage.getItem(LOCALSTORAGE_TOKEN)
+  //       if (data.my.refreshToken !== localToken) {
+  //         localStorage.removeItem(LOCALSTORAGE_TOKEN)
+  //         toast.info(locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login', {
+  //           theme: localStorage.theme || 'light',
+  //           autoClose: 1000,
+  //           onClose: () => push('/login', '/login', { locale }),
+  //         })
+  //       }
+  //     }
+  //   }
+  // }, [data, loading])
+
+  /** Dummy handler */
   useEffect(() => {
-    if (!loading) {
-      if (data) {
-        const localToken = authTokenVar() || localStorage.getItem(LOCALSTORAGE_TOKEN)
-        if (data.my.refreshToken !== localToken) {
-          localStorage.removeItem(LOCALSTORAGE_TOKEN)
-          toast.info(locale === 'ko' ? '로그인이 필요합니다.' : 'You need to login', {
-            theme: localStorage.theme || 'light',
-            autoClose: 1000,
-            onClose: () => push('/login', '/login', { locale }),
-          })
-        }
-      }
-    }
-  }, [data, loading])
+    delay(() => {
+      setIsLoading((prev) => ({ ...prev, my: false }))
+    }, 1000)
+  }, [])
 
   return (
     <>
@@ -218,7 +233,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 </div>
               </ul>
             </li>
-            {(data?.my.memberType === 'SERVICE' || data?.my.memberType === 'SYSTEM') && (
+            {/* {(data?.my.memberType === 'SERVICE' || data?.my.memberType === 'SYSTEM') && (
               <ul className="menu-content">
                 <li className="nav-item-header">
                   <EllipsisOutlined className="icon" />
@@ -241,7 +256,32 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   </Link>
                 </li>
               </ul>
-            )}
+            )} */}
+            {/* Dummy handler */}
+            <ul className="menu-content">
+              <li className="nav-item-header">
+                <EllipsisOutlined className="icon" />
+                <span className="text">MEMBER</span>
+              </li>
+              <li className="nav-item">
+                {/* <Link href="/member/members" locale={locale}> */}
+                <Link href="#" locale={locale}>
+                  <a>
+                    <SettingOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '관리' : 'Management'}</span>
+                  </a>
+                </Link>
+              </li>
+              <li className="nav-item">
+                {/* <Link href="/member/createMember" locale={locale}> */}
+                <Link href="#" locale={locale}>
+                  <a>
+                    <PlusOutlined className="icon" />
+                    <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
+                  </a>
+                </Link>
+              </li>
+            </ul>
 
             <ul className="menu-content">
               <li className="nav-item-header">
@@ -257,7 +297,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      <Link href="/vod/vods" locale={locale}>
+                      {/* <Link href="/vod/vods" locale={locale}> */}
+                      <Link href="#" locale={locale}>
                         <a>
                           <LayoutOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
@@ -265,7 +306,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/vod/createVod" locale={locale}>
+                      {/* <Link href="/vod/createVod" locale={locale}> */}
+                      <Link href="#" locale={locale}>
                         <a>
                           <PlusOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
@@ -284,7 +326,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      <Link href="/live/lives" locale={locale}>
+                      {/* <Link href="/live/lives" locale={locale}> */}
+                      <Link href="#" locale={locale}>
                         <a>
                           <LayoutOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
@@ -292,7 +335,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/live/createLive">
+                      {/* <Link href="/live/createLive"> */}
+                      <Link href="#">
                         <a>
                           <PlusOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
@@ -311,7 +355,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      <Link href="/notice" locale={locale}>
+                      {/* <Link href="/notice" locale={locale}> */}
+                      <Link href="#" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '공지사항' : 'Notice'}</span>
@@ -319,7 +364,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/event" locale={locale}>
+                      {/* <Link href="/event" locale={locale}> */}
+                      <Link href="#" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '이벤트' : 'Event'}</span>
@@ -327,7 +373,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/faq" locale={locale}>
+                      {/* <Link href="/faq" locale={locale}> */}
+                      <Link href="#" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? 'FAQ' : 'FAQ'}</span>
@@ -335,7 +382,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/inquiry" locale={locale}>
+                      {/* <Link href="/inquiry" locale={locale}> */}
+                      <Link href="#" locale={locale}>
                         <a>
                           <ArrowRightOutlined className="icon" />
                           <span>{locale === 'ko' ? '문의' : 'Inquiry'}</span>
@@ -347,7 +395,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
               </li>
               {/* 콘텐츠 */}
               <li className="nav-item">
-                <Link href="/contents" locale={locale}>
+                {/* <Link href="/contents" locale={locale}> */}
+                <Link href="#" locale={locale}>
                   <a>
                     <UnorderedListOutlined className="icon" />
                     <span className="text">{locale === 'ko' ? '콘텐츠' : 'Contents'}</span>
@@ -363,7 +412,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <ul className="menu-content">
                   <div className="collapse">
                     <li className="nav-item">
-                      <Link href="/ad/ads" locale={locale}>
+                      {/* <Link href="/ad/ads" locale={locale}> */}
+                      <Link href="#" locale={locale}>
                         <a onClick={() => alert('준비중 입니다')}>
                           <SettingOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '관리' : 'Edit'}</span>
@@ -371,7 +421,8 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link href="/ad/createAd" locale={locale}>
+                      {/* <Link href="/ad/createAd" locale={locale}> */}
+                      <Link href="#" locale={locale}>
                         <a onClick={() => alert('준비중 입니다')}>
                           <PlusOutlined className="icon" />
                           <span className="text">{locale === 'ko' ? '추가' : 'Create'}</span>
@@ -434,7 +485,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
             <Hamburger />
           </div>
         </div>
-        {loading ? (
+        {isLoading.my ? (
           <Space className="header-group-end">
             <div className="header-item">
               <Skeleton.Button active size={'default'} shape="square" />
@@ -453,9 +504,9 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <CountrySelect
                   defaultValue={locale}
                   placeholder={'Select a country'}
-                  onChange={(value) =>
-                    push({ pathname, query }, asPath, { locale: value as string })
-                  }
+                  // onChange={(value) =>
+                  //   push({ pathname, query }, asPath, { locale: value as string })
+                  // }
                   bordered={false}
                   showArrow={false}>
                   <Select.Option value="ko">
@@ -485,7 +536,7 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                 <DarkModeToggle toggleStyle={toggleStyle} theme={theme} />
               </div>
             )}
-            <div className="header-item profile">
+            {/* <div className="header-item profile">
               <div
                 className="info"
                 onClick={() => push('/mypage/edit', '/mypage/edit', { locale })}>
@@ -503,6 +554,16 @@ const Header: React.FC<Props> = ({ toggleStyle, theme }) => {
                   }
                   alt="profile"
                 />
+              </div>
+            </div> */}
+            {/* Dummy handler */}
+            <div className="header-item profile">
+              <div className="info">
+                <span className="user-name">Dummy</span>
+                <span className="user-role">Member</span>
+              </div>
+              <div className="img">
+                <img src={'/static/img/none-profile.png'} alt="profile" />
               </div>
             </div>
           </div>

@@ -22,7 +22,7 @@ import ReactQuill from 'react-quill'
 import { Delta } from 'quill'
 
 /** Apollo */
-import { MyQuery } from '../../generated'
+// import { MyQuery } from '../../generated'
 import { MY_QUERY } from '../../graphql/queries'
 import { DATE_FORMAT } from '../../Common/commonFn'
 
