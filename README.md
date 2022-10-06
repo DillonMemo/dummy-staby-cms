@@ -31,5 +31,3 @@
   1. liveData의 liveInfo를 가져옴
   2. liveData의 liveInfo 프로퍼티중 linkPath를 TheO API (Get channel status)로 상태 확인
   3. on/off 여부와 linkPath, listingOrder를 liveInfo state에 set initialized
-
-add main branch
