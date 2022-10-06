@@ -1,7 +1,8 @@
 # Dummy Staby CMS
 
 로그인, 대쉬보드 화면만 정적으로 표현한 샘플 보기용 더미 사이트 입니다.
-그 외의 리소스틑 ./backup_pages로 위치 변경.
+
+*그 외의 리소스틑 ./backup_pages로 위치 변경.*
 
 
 ### Challenge
