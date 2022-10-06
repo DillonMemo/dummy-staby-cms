@@ -6,15 +6,6 @@ module.exports = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        destination: '/',
-        permanent: false,
-      },
-    ]
-  },
   reactStrictMode: false,
   i18n: {
     // ISO Language code -> http://www.lingoes.net/en/translator/langcode.htm
